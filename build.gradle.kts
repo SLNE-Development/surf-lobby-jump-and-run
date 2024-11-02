@@ -2,7 +2,7 @@ plugins {
     id("java")
 }
 
-group = "eu.cubicmc"
+group = "dev.slne"
 version = "1.0-SNAPSHOT"
 
 repositories {
