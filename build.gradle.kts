@@ -47,4 +47,6 @@ paper {
 
 tasks.shadowJar {
     archiveClassifier = ""
+
+    relocate("com.github.stefvanschie.inventoryframework", "dev.slne.surf.lobby.jar.inventoryframework")
 }
