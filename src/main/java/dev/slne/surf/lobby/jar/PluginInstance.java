@@ -1,14 +1,22 @@
 package dev.slne.surf.lobby.jar;
 
 import dev.slne.surf.lobby.jar.command.ParkourCommand;
+import dev.slne.surf.lobby.jar.util.PluginColor;
 import lombok.Getter;
 import lombok.experimental.Accessors;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.plugin.java.JavaPlugin;
 
 @Getter
 @Accessors(fluent = true)
 public class PluginInstance extends JavaPlugin {
   private JumpAndRunProvider jumpAndRunProvider;
+
+  @Getter
+  private static final Component prefix = Component.text(">> ").color(NamedTextColor.GRAY)
+      .append(Component.text("Hub").color(PluginColor.BLUE_LIGHT))
+      .append(Component.text(" | ").color(NamedTextColor.DARK_GRAY));
 
   @Override
   public void onEnable() {
