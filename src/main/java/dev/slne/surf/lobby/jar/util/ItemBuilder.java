@@ -24,6 +24,8 @@ import org.bukkit.potion.PotionEffectType;
 /**
  * The type Item builder.
  */
+
+@SuppressWarnings("unused")
 public class ItemBuilder {
 
   private final ItemStack itemStack;
@@ -109,9 +111,7 @@ public class ItemBuilder {
    * @return the custom model data
    */
   public ItemBuilder setCustomModelData(int amount) {
-    itemStack.editMeta(meta -> {
-      meta.setCustomModelData(amount);
-    });
+    itemStack.editMeta(meta -> meta.setCustomModelData(amount));
 
     return this;
   }
@@ -125,9 +125,7 @@ public class ItemBuilder {
    * @return the item builder
    */
   public ItemBuilder addEffect(PotionEffectType type, int duration, int amplifier) {
-    itemStack.editMeta(PotionMeta.class, meta -> {
-      meta.addCustomEffect(new PotionEffect(type, duration, amplifier), true);
-    });
+    itemStack.editMeta(PotionMeta.class, meta -> meta.addCustomEffect(new PotionEffect(type, duration, amplifier), true));
 
     return this;
   }
@@ -146,9 +144,7 @@ public class ItemBuilder {
       NamespacedKey key, PersistentDataType<T, V> type,
       V value
   ) {
-    itemStack.editMeta(meta -> {
-      meta.getPersistentDataContainer().set(key, type, value);
-    });
+    itemStack.editMeta(meta -> meta.getPersistentDataContainer().set(key, type, value));
 
     return this;
   }
@@ -160,9 +156,7 @@ public class ItemBuilder {
    * @return the name
    */
   public ItemBuilder setName(Component name) {
-    itemStack.editMeta(meta -> {
-      meta.displayName(name.decoration(TextDecoration.ITALIC, false));
-    });
+    itemStack.editMeta(meta -> meta.displayName(name.decoration(TextDecoration.ITALIC, false)));
 
     return this;
   }
@@ -174,9 +168,7 @@ public class ItemBuilder {
    * @return the name
    */
   public ItemBuilder setName(String name) {
-    itemStack.editMeta(meta -> {
-      meta.displayName(Component.text(name).decoration(TextDecoration.ITALIC, false));
-    });
+    itemStack.editMeta(meta -> meta.displayName(Component.text(name).decoration(TextDecoration.ITALIC, false)));
 
     return this;
   }
@@ -213,9 +205,7 @@ public class ItemBuilder {
    * @return the skull owner
    */
   public ItemBuilder setSkullOwner(String owner) {
-    itemStack.editMeta(SkullMeta.class, meta -> {
-      meta.setOwner(owner);
-    });
+    itemStack.editMeta(SkullMeta.class, meta -> meta.setOwner(owner));
 
     return this;
   }
@@ -228,9 +218,7 @@ public class ItemBuilder {
    * @return the item builder
    */
   public ItemBuilder addEnchantment(Enchantment enchantment, int level) {
-    itemStack.editMeta(meta -> {
-      meta.addEnchant(enchantment, level, true);
-    });
+    itemStack.editMeta(meta -> meta.addEnchant(enchantment, level, true));
 
     return this;
   }
@@ -242,9 +230,7 @@ public class ItemBuilder {
    * @return the unbreakable
    */
   public ItemBuilder setUnbreakable(boolean b) {
-    itemStack.editMeta(meta -> {
-      meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
-    });
+    itemStack.editMeta(meta -> meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE));
 
     return this;
   }
@@ -256,9 +242,7 @@ public class ItemBuilder {
    * @return the item builder
    */
   public ItemBuilder addItemFlag(ItemFlag flag) {
-    itemStack.editMeta(meta -> {
-      meta.addItemFlags(flag);
-    });
+    itemStack.editMeta(meta -> meta.addItemFlags(flag));
 
     return this;
   }
@@ -281,9 +265,7 @@ public class ItemBuilder {
    * @return the infinity durability
    */
   public ItemBuilder setInfinityDurability() {
-    itemStack.editMeta(Damageable.class, meta -> {
-      meta.setDamage(Short.MAX_VALUE);
-    });
+    itemStack.editMeta(Damageable.class, meta -> meta.setDamage(Short.MAX_VALUE));
 
     return this;
   }
@@ -295,12 +277,10 @@ public class ItemBuilder {
    * @return the lore
    */
   public ItemBuilder setLore(Component... lore) {
-    itemStack.editMeta(meta -> {
-      meta.lore(Arrays.asList(Arrays.stream(lore).map(component -> component.decoration(
-          TextDecoration.ITALIC,
-          false
-      )).toArray(Component[]::new)));
-    });
+    itemStack.editMeta(meta -> meta.lore(Arrays.asList(Arrays.stream(lore).map(component -> component.decoration(
+        TextDecoration.ITALIC,
+        false
+    )).toArray(Component[]::new))));
 
     return this;
   }
@@ -312,9 +292,7 @@ public class ItemBuilder {
    * @return the lore
    */
   public ItemBuilder setLore(List<Component> lore) {
-    itemStack.editMeta(meta -> {
-      meta.lore(lore);
-    });
+    itemStack.editMeta(meta -> meta.lore(lore));
 
     return this;
   }
