@@ -4,6 +4,7 @@ import dev.slne.surf.lobby.jar.config.PluginConfig;
 import dev.slne.surf.lobby.jar.util.PluginColor;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import it.unimi.dsi.fastutil.objects.ObjectList;
 import java.security.SecureRandom;
 import lombok.Getter;
 import lombok.Setter;
@@ -48,13 +49,14 @@ public class JumpAndRunProvider {
     int attempts = 0;
 
     Location playerLocation = player.getLocation();
-    Location forward = playerLocation.clone().add(playerLocation.add(jumpAndRun.getDifficulty(), 0, jumpAndRun.getDifficulty()).getDirection().setY(0).normalize().multiply(1));
-    Location diagonalLeft = playerLocation.clone().add(forward.clone().add(jumpAndRun.getDifficulty(), 0, jumpAndRun.getDifficulty()).getDirection().rotateAroundY(Math.toRadians(-45)));
-    Location diagonalRight = playerLocation.clone().add(forward.clone().add(jumpAndRun.getDifficulty(), 0, jumpAndRun.getDifficulty()).getDirection().rotateAroundY(Math.toRadians(45)));
-    Location[] allowedLocations = {forward, diagonalLeft, diagonalRight};
+    ObjectList<Location> locations = new ObjectArrayList<>();
+
+    locations.add(playerLocation.clone().add(playerLocation.add(jumpAndRun.getDifficulty(), 0, jumpAndRun.getDifficulty()).getDirection().setY(0).normalize().multiply(1)));
+    locations.add(playerLocation.clone().add(playerLocation.clone().add(jumpAndRun.getDifficulty(), 0, jumpAndRun.getDifficulty()).getDirection().setY(0).normalize().multiply(1).rotateAroundY(Math.toRadians(-45))));
+    locations.add(playerLocation.clone().add(playerLocation.clone().add(jumpAndRun.getDifficulty(), 0, jumpAndRun.getDifficulty()).getDirection().setY(0).normalize().multiply(1).rotateAroundY(Math.toRadians(45))));
 
     while (attempts < 8) {
-      Location blockLocation = allowedLocations[random.nextInt(allowedLocations.length)].clone();
+      Location blockLocation = locations.get(random.nextInt(locations.size()));
       int offsetY = random.nextInt(2) - 1;
 
       blockLocation.add(0, offsetY, 0);
