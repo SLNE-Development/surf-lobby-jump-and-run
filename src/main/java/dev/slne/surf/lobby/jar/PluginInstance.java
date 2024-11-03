@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.experimental.Accessors;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
 @Getter
@@ -23,6 +24,8 @@ public class PluginInstance extends JavaPlugin {
     this.jumpAndRunProvider = new JumpAndRunProvider();
 
     new ParkourCommand("parkour").register();
+
+    Bukkit.getPluginManager().registerEvents(new ParkourListener(), this);
   }
 
   public static PluginInstance instance(){

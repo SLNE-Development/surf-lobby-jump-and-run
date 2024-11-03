@@ -10,7 +10,7 @@ public class ParkourDebugGenerateCommand extends CommandAPICommand {
     super(commandName);
 
     executesPlayer((player, args) -> {
-      PluginInstance.instance().jumpAndRunProvider().generateBlock(player);
+      PluginInstance.instance().jumpAndRunProvider().start(player);
 
       player.sendMessage(PluginInstance.prefix().append(Component.text("Es wurde ein neuer Block generiert.")));
     });
