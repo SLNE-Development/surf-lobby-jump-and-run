@@ -7,7 +7,7 @@ public class PluginColor {
   public static final TextColor BLUE = TextColor.fromHexString("#40d1db");
   public static final TextColor BLUE_LIGHT = TextColor.fromHexString("#96cfe7");
   public static final TextColor BLUE_MID = TextColor.fromHexString("#4bb8f8");
-  public static final TextColor RED = TextColor.fromHexString("#e96319");
+  public static final TextColor RED = TextColor.fromHexString("#e92a25");
   public static final TextColor GOLD = TextColor.fromHexString("#fba24e");
   public static final TextColor LIGHT_GRAY = TextColor.fromHexString("#d3d3d3");
   public static final TextColor DARK_GRAY = TextColor.fromHexString("#a9a9a9");
