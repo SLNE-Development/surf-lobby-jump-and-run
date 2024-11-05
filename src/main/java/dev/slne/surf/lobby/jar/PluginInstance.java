@@ -16,7 +16,7 @@ public class PluginInstance extends JavaPlugin {
 
   @Getter
   private static final Component prefix = Component.text(">> ").color(NamedTextColor.GRAY)
-      .append(Component.text("Hub").color(PluginColor.BLUE_LIGHT))
+      .append(Component.text("Parkour").color(PluginColor.BLUE_LIGHT))
       .append(Component.text(" | ").color(NamedTextColor.DARK_GRAY));
 
   @Override

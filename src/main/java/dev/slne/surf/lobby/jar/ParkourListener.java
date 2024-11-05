@@ -19,11 +19,19 @@ public class ParkourListener implements Listener {
       return;
     }
 
-    if(jumps[1] == null){
+    if(player.getLocation().getY() < jumps[0].getLocation().getY() && player.getLocation().getY() < jumps[1].getLocation().getY()){
+      jumpAndRunProvider.remove(player);
+      return;
+    }
+
+    if (jumps[1] == null) {
       return;
     }
 
     if (block.equals(jumps[1])) {
+
+      jumps[1].setType(jumpAndRunProvider.blocks().get(player));
+
       this.jumpAndRunProvider.generate(player);
     }
   }

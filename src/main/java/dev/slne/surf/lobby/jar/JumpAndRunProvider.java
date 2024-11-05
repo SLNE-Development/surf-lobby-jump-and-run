@@ -23,13 +23,42 @@ public class JumpAndRunProvider {
   private final JumpAndRun jumpAndRun;
   private final SecureRandom random = new SecureRandom();
   private final Object2ObjectMap<Player, Block[]> latestJumps = new Object2ObjectOpenHashMap<>();
+  private final Object2ObjectMap<Player, Material> blocks = new Object2ObjectOpenHashMap<>();
 
   private static final Vector[] OFFSETS = {
-      new Vector(2, 0, 2),
-      new Vector(-2, 0, 2),
-      new Vector(3, 0, 1),
-      new Vector(1, 0, 3),
-      new Vector(-3, 0, 1)
+      new Vector(3, 0, 0),
+      new Vector(-3, 0, 0),
+      new Vector(0, 0, 3),
+      new Vector(0, 0, -3),
+      new Vector(3, 0, 0),
+      new Vector(-3, 0, 0),
+      new Vector(0, 0, 3),
+      new Vector(0, 0, -3),
+      new Vector(3, 0, 3),
+      new Vector(-3, 0, 3),
+      new Vector(3, 0, 3),
+      new Vector(-3, 0, 3),
+      new Vector(3, 0, 0),
+      new Vector(0, 0, 3),
+      new Vector(-3, 0, 0)
+  };
+
+  private static final Vector[] FALSE_OFFSETS = {
+      new Vector(-3, 0, -3),
+      new Vector(-3, 0, -1),
+      new Vector(-1, 0, -3),
+      new Vector(-3, 0, -3),
+      new Vector(-1, 0, -3),
+      new Vector(-3, 0, -3),
+      new Vector(-4, 0, -3),
+      new Vector(-3, 0, -4),
+      new Vector(-4, 0, -1),
+      new Vector(-1, 0, -4),
+      new Vector(3, 0, -3),
+      new Vector(-3, 0, 3),
+      new Vector(3, 0, -3),
+      new Vector(-3, 0, 3),
+      new Vector(-1, 0, -4)
   };
 
   public JumpAndRunProvider() {
@@ -40,7 +69,7 @@ public class JumpAndRunProvider {
         .posTwo(PluginConfig.getLocation("settings.pos2"))
         .difficulty(PluginConfig.config().getInt("settings.difficulty"))
         .players(new ObjectArrayList<>())
-        .materials(ObjectArrayList.of(Material.RED_CONCRETE, Material.RED_WOOL))
+        .materials(ObjectArrayList.of(Material.RED_CONCRETE, Material.BLUE_CONCRETE, Material.GREEN_CONCRETE, Material.YELLOW_CONCRETE))
         .latestBlocks(new Object2ObjectOpenHashMap<>())
         .build();
   }
@@ -54,22 +83,29 @@ public class JumpAndRunProvider {
 
   private void generateInitialJumps(Player player) {
     Location start = getRandomLocationInRegion(player.getWorld()).add(0, 1, 0);
-    Block[] jumps = this.getLatestJumps(player);
 
-    for (int i = 0; i < jumps.length; i++) {
-      Block block = start.getBlock();
+    Block block = start.getBlock();
+    Block next = start.clone().add(OFFSETS[random.nextInt(OFFSETS.length)]).getBlock();
+    Block next2 = next.getLocation().clone().add(OFFSETS[random.nextInt(OFFSETS.length)]).getBlock();
+    Material material = jumpAndRun.getMaterials().get(random.nextInt(jumpAndRun.getMaterials().size()));
 
-      block.setType(jumpAndRun.getMaterials().get(random.nextInt(jumpAndRun.getMaterials().size())));
-      latestJumps.get(player)[i] = block;
+    block.setType(material);
+    latestJumps.get(player)[0] = block;
 
-      if (i == 0) {
-        player.teleport(start.clone().add(0.5, 1, 0.5));
-      }
-    }
+    next.setType(Material.SEA_LANTERN);
+    latestJumps.get(player)[1] = next;
+
+    next2.setType(material);
+    latestJumps.get(player)[2] = next2;
+
+    player.teleport(block.getLocation().add(0.5, 1, 0.5));
+
+    blocks.put(player, material);
   }
 
   public void generate(Player player) {
     Block[] jumps = latestJumps.get(player);
+    Material material = blocks.get(player);
 
     if (jumps[0] != null) {
       jumps[0].setType(Material.AIR);
@@ -78,17 +114,31 @@ public class JumpAndRunProvider {
     jumps[0] = jumps[1];
     jumps[1] = jumps[2];
 
+    jumps[1].setType(Material.SEA_LANTERN);
+
     Location previous = (jumps[1] != null) ? jumps[1].getLocation() : getRandomLocationInRegion(player.getWorld()).add(0, 1, 0);
     int attempts = 0;
 
     while (attempts < OFFSETS.length) {
       Location location = previous.clone().add(OFFSETS[random.nextInt(OFFSETS.length)]);
-      if (this.isInRegion(location)) {
-        location.getBlock().setType(jumpAndRun.getMaterials().get(random.nextInt(jumpAndRun.getMaterials().size())));
+
+      if (this.isInRegion(location) && location.getBlock().getType() == Material.AIR) {
+        location.getBlock().setType(material);
         jumps[2] = location.getBlock();
         return;
       }
+
       attempts++;
+    }
+
+    for(Vector vector : FALSE_OFFSETS) {
+      Location location = previous.clone().add(vector);
+
+      if (this.isInRegion(location) && location.getBlock().getType() == Material.AIR) {
+        location.getBlock().setType(material);
+        jumps[2] = location.getBlock();
+        return;
+      }
     }
 
     player.sendMessage(PluginInstance.prefix().append(Component.text("Ein Fehler ist aufgetreten.")));
@@ -136,5 +186,11 @@ public class JumpAndRunProvider {
 
   public Block[] getLatestJumps(Player player) {
     return latestJumps.get(player);
+  }
+
+  public void remove(Player player){
+    for (Block block : this.getLatestJumps(player)){
+      block.setType(Material.AIR);
+    }
   }
 }
