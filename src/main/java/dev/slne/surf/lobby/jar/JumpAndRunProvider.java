@@ -62,16 +62,7 @@ public class JumpAndRunProvider {
   };
 
   public JumpAndRunProvider() {
-    this.jumpAndRun = JumpAndRun.builder()
-        .id("lobby-jar")
-        .displayName("Lobby Parkour")
-        .posOne(PluginConfig.getLocation("settings.pos1"))
-        .posTwo(PluginConfig.getLocation("settings.pos2"))
-        .difficulty(PluginConfig.config().getInt("settings.difficulty"))
-        .players(new ObjectArrayList<>())
-        .materials(ObjectArrayList.of(Material.RED_CONCRETE, Material.BLUE_CONCRETE, Material.GREEN_CONCRETE, Material.YELLOW_CONCRETE))
-        .latestBlocks(new Object2ObjectOpenHashMap<>())
-        .build();
+    this.jumpAndRun = PluginConfig.loadJumpAndRun();
   }
 
   public void start(Player player) {
@@ -189,8 +180,21 @@ public class JumpAndRunProvider {
   }
 
   public void remove(Player player){
+    if(this.getLatestJumps(player) == null){
+      return;
+    }
+
     for (Block block : this.getLatestJumps(player)){
       block.setType(Material.AIR);
+    }
+
+    this.latestJumps.remove(player);
+    player.teleport(jumpAndRun.getSpawn());
+  }
+
+  public void removeAll(){
+    for(Player player : blocks.keySet()){
+      this.remove(player);
     }
   }
 }

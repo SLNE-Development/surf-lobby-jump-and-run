@@ -1,11 +1,21 @@
 package dev.slne.surf.lobby.jar.config;
 
+import dev.slne.surf.lobby.jar.JumpAndRun;
+import dev.slne.surf.lobby.jar.JumpAndRunProvider;
 import dev.slne.surf.lobby.jar.PluginInstance;
+
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+
+import it.unimi.dsi.fastutil.objects.ObjectList;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 
 public class PluginConfig {
+  private static final JumpAndRunProvider provider = PluginInstance.instance().jumpAndRunProvider();
+
   public static FileConfiguration config() {
     return PluginInstance.instance().getConfig();
   }
@@ -14,28 +24,70 @@ public class PluginConfig {
     PluginInstance.instance().saveDefaultConfig();
   }
 
-  public static void saveLocationWithSaving(String path, Location location) {
-    config().set(path + ".world", location.getWorld());
-    config().set(path + ".x", location.getBlockX());
-    config().set(path + ".y", location.getBlockY());
-    config().set(path + ".z", location.getBlockZ());
+  public static void save(JumpAndRun jumpAndRun) {
+    FileConfiguration config = config();
+    ObjectList<String> materialNames = new ObjectArrayList<>();
+    String path = "settings.";
+
+    for (Material material : jumpAndRun.getMaterials()) {
+      materialNames.add(material.name());
+    }
+
+    config.set(path + "materials", materialNames);
+    config.set(path + "displayname", jumpAndRun.getDisplayName());
+
+    saveLocation(path + "posOne", jumpAndRun.getPosOne());
+    saveLocation(path + "posTwo", jumpAndRun.getPosTwo());
+    saveLocation(path + "spawn", jumpAndRun.getSpawn());
 
     PluginInstance.instance().saveConfig();
   }
 
+  public static JumpAndRun loadJumpAndRun() {
+    createConfig();
+
+    String path = "settings.";
+    Location posOne = getLocation(path + "posOne");
+    Location posTwo = getLocation(path + "posTwo");
+    Location spawn = getLocation(path + "spawn");
+    String displayName = config().getString(path + "displayname", "Parkour");
+    ObjectList<Material> materials = new ObjectArrayList<>();
+    ObjectList<String> materialNames = new ObjectArrayList<>(config().getStringList(path + "materials"));
+
+    if(materialNames.isEmpty()){
+      materialNames.add(Material.BLACKSTONE.toString());
+    }
+
+    for (String name : materialNames) {
+      materials.add(Material.valueOf(name));
+    }
+
+    return JumpAndRun.builder()
+        .displayName(displayName)
+        .posOne(posOne)
+        .posTwo(posTwo)
+        .spawn(spawn)
+        .players(new ObjectArrayList<>())
+        .materials(new ObjectArrayList<>(materials))
+        .latestBlocks(new Object2ObjectOpenHashMap<>())
+        .build();
+  }
+
   public static void saveLocation(String path, Location location) {
-    config().set(path + ".world", location.getWorld());
+    config().set(path + ".world", location.getWorld().getName());
     config().set(path + ".x", location.getBlockX());
     config().set(path + ".y", location.getBlockY());
     config().set(path + ".z", location.getBlockZ());
   }
 
   public static Location getLocation(String path) {
-    String world = config().getString(path + ".world", Bukkit.getWorlds().getFirst().getName());
-    int x = config().getInt(path + ".x", Bukkit.getWorlds().getFirst().getSpawnLocation().getBlockX());
-    int y = config().getInt(path + ".y", Bukkit.getWorlds().getFirst().getSpawnLocation().getBlockY());
-    int z = config().getInt(path + ".z", Bukkit.getWorlds().getFirst().getSpawnLocation().getBlockZ());
+    Location defaultLocation = Bukkit.getWorlds().getFirst().getSpawnLocation();
 
-    return new Location(Bukkit.getWorld(world), x, y, z);
+    String worldName = config().getString(path + ".world", defaultLocation.getWorld().getName());
+    int x = config().getInt(path + ".x", defaultLocation.getBlockX());
+    int y = config().getInt(path + ".y", defaultLocation.getBlockY());
+    int z = config().getInt(path + ".z", defaultLocation.getBlockZ());
+
+    return new Location(Bukkit.getWorld(worldName), x, y, z);
   }
 }
