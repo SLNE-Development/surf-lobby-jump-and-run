@@ -14,22 +14,21 @@ import org.bukkit.entity.Player;
 @Getter
 @Setter
 public class JumpAndRun {
-  private final String id;
   private final String displayName;
 
   private Location posOne;
   private Location posTwo;
+  private Location spawn;
 
-  private Integer difficulty;
   private final ObjectList<Player> players;
   private final ObjectList<Material> materials;
   private final Object2ObjectMap<Player, Block> latestBlocks;
 
   public void kick(Player player){
-
+    PluginInstance.instance().jumpAndRunProvider().remove(player);
   }
 
   public void join(Player player){
-
+    PluginInstance.instance().jumpAndRunProvider().start(player);
   }
 }
