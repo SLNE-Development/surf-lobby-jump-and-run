@@ -24,6 +24,8 @@ public class PluginInstance extends JavaPlugin {
   @Override
   public void onEnable() {
     this.jumpAndRunProvider = new JumpAndRunProvider();
+    this.jumpAndRunProvider.startActionbar();
+
     new ParkourCommand("parkour").register();
 
     Bukkit.getPluginManager().registerEvents(new ParkourListener(), this);
@@ -35,7 +37,8 @@ public class PluginInstance extends JavaPlugin {
     Database.closeConnection();
     PluginConfig.save(jumpAndRunProvider.jumpAndRun());
 
-    jumpAndRunProvider.removeAll();
+    this.jumpAndRunProvider.stopActionbar();
+    this.jumpAndRunProvider.removeAll();
   }
 
   public static PluginInstance instance(){

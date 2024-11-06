@@ -3,6 +3,7 @@ package dev.slne.surf.lobby.jar;
 import dev.slne.surf.lobby.jar.config.PluginConfig;
 
 import dev.slne.surf.lobby.jar.mysql.Database;
+import dev.slne.surf.lobby.jar.util.PluginColor;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 
@@ -18,6 +19,7 @@ import net.kyori.adventure.sound.Sound.Emitter;
 import net.kyori.adventure.sound.Sound.Source;
 import net.kyori.adventure.text.Component;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.FireworkEffect;
 import org.bukkit.Location;
@@ -27,6 +29,7 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Firework;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.meta.FireworkMeta;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
 import java.security.SecureRandom;
@@ -43,6 +46,8 @@ public class JumpAndRunProvider {
   private final Object2ObjectMap<Player, Integer> points = new Object2ObjectOpenHashMap<>();
   private final Object2ObjectMap<Player, Integer> currentPoints = new Object2ObjectOpenHashMap<>();
   private final Object2ObjectMap<Player, Integer> highScores = new Object2ObjectOpenHashMap<>();
+
+  private BukkitRunnable runnable;
 
   private static final Vector[] OFFSETS = {
       new Vector(3, 0, 0),
@@ -121,6 +126,24 @@ public class JumpAndRunProvider {
     player.teleport(block.getLocation().add(0.5, 1, 0.5));
 
     blocks.put(player, material);
+  }
+
+  public void startActionbar(){
+    runnable = new BukkitRunnable() {
+      @Override
+      public void run() {
+        jumpAndRun.getPlayers().forEach(player -> {
+          player.sendActionBar(Component.text(currentPoints.get(player)).color(PluginColor.BLUE_MID).append(Component.text(" Spr\u00FCnge").color(PluginColor.BLUE_DARK)));
+        });
+      }
+    };
+    runnable.runTaskTimerAsynchronously(PluginInstance.instance(), 0L, 20L);
+  }
+
+  public void stopActionbar(){
+    if(runnable != null && !runnable.isCancelled()){
+      runnable.cancel();
+    }
   }
 
   public void generate(Player player) {
