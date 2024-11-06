@@ -5,6 +5,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 
 public class ParkourListener implements Listener {
   private final JumpAndRunProvider jumpAndRunProvider = PluginInstance.instance().jumpAndRunProvider();
@@ -16,6 +17,10 @@ public class ParkourListener implements Listener {
     Block[] jumps = this.jumpAndRunProvider.getLatestJumps(player);
 
     if(jumps == null){
+      return;
+    }
+
+    if(jumps[0] == null || jumps[1] == null){
       return;
     }
 
@@ -32,7 +37,16 @@ public class ParkourListener implements Listener {
 
       jumps[1].setType(jumpAndRunProvider.blocks().get(player));
 
+      this.jumpAndRunProvider.addPoint(player);
+      this.jumpAndRunProvider.checkHighScore(player);
       this.jumpAndRunProvider.generate(player);
     }
+  }
+
+  @EventHandler
+  public void onQuit(PlayerQuitEvent event){
+    Player player = event.getPlayer();
+
+    jumpAndRunProvider.onQuit(player);
   }
 }
