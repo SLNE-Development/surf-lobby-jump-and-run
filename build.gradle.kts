@@ -25,6 +25,8 @@ dependencies {
     compileOnly ("dev.jorel:commandapi-bukkit-core:9.5.2")
 
     implementation ("com.github.stefvanschie.inventoryframework:IF:0.10.17")
+    implementation ("com.zaxxer:HikariCP:5.0.1")
+    implementation ("mysql:mysql-connector-java:8.0.33")
 }
 
 
