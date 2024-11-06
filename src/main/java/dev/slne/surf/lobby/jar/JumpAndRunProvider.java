@@ -8,7 +8,6 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectList;
-import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import lombok.Getter;
 import lombok.experimental.Accessors;
@@ -25,8 +24,6 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Firework;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.meta.FireworkMeta;
@@ -97,11 +94,11 @@ public class JumpAndRunProvider {
 
     this.generateInitialJumps(player);
 
-    CompletableFuture.supplyAsync(() -> Database.getHighScore(player.getUniqueId())).thenAccept(highScore -> {
-      highScores.put(player, highScore);
-          player.sendMessage(PluginInstance.prefix().append(Component.text(String.format("Versuche deinen Highscore von %s zu brechen!", highScore))));
-        });
+    this.queryHighScore(player).thenAccept(highScore -> {
+      player.sendMessage(PluginInstance.prefix().append(Component.text(String.format("Versuche deinen Highscore von %s zu brechen!", highScore))));
+    });
   }
+
 
 
   private void generateInitialJumps(Player player) {
@@ -253,60 +250,53 @@ public class JumpAndRunProvider {
     }
   }
 
-  public void queryCurrentPoints(Player player) {
-    currentPoints.computeIfAbsent(player, p -> {
-      currentPoints.put((Player) p, 0);
-      return 0;
-    });
+  public CompletableFuture<Integer> queryPoints(Player player) {
+    if (points.containsKey(player)) {
+      return CompletableFuture.completedFuture(points.get(player));
+    } else {
+      return CompletableFuture.supplyAsync(() -> {
+        Integer pointsValue = Database.getPoints(player.getUniqueId());
+
+        points.put(player, pointsValue);
+        return pointsValue;
+      });
+    }
   }
 
-  public void queryPoints(Player player) {
-    points.computeIfAbsent(player, p -> {
-      loadPoints((Player) p);
-      return null;
-    });
-  }
+  public CompletableFuture<Integer> queryHighScore(Player player) {
+    if (highScores.containsKey(player)) {
+      return CompletableFuture.completedFuture(highScores.get(player));
+    } else {
+      return CompletableFuture.supplyAsync(() -> {
+        Integer highScore = Database.getHighScore(player.getUniqueId());
 
-  public void queryHighScore(Player player) {
-    highScores.computeIfAbsent(player, p -> {
-      loadHighScore((Player) p);
-      return null;
-    });
-  }
-
-
-  public void loadPoints(Player player) {
-    CompletableFuture.supplyAsync(() -> Database.getPoints(player.getUniqueId())).thenAccept(pointsValue -> points.put(player, pointsValue));
+        highScores.put(player, highScore);
+        return highScore;
+      });
+    }
   }
 
   public void savePoints(Player player) {
-    Integer playerPoints = points.get(player);
+    this.queryPoints(player).thenAccept(points -> {
+      if (points == null) {
+        return;
+      }
 
-    if (playerPoints == null) {
-      return;
-    }
-
-    CompletableFuture.runAsync(() -> Database.savePoints(player.getUniqueId(), playerPoints)).thenRun(() -> points.remove(player));
-  }
-
-  public void loadHighScore(Player player) {
-    CompletableFuture.supplyAsync(() -> Database.getHighScore(player.getUniqueId())).thenAccept(highScore -> highScores.put(player, highScore));
+      CompletableFuture.runAsync(() -> Database.savePoints(player.getUniqueId(), points)).thenRun(() -> this.points.remove(player));
+    });
   }
 
   public void saveHighScore(Player player) {
-    Integer highScore = highScores.get(player);
+    this.queryHighScore(player).thenAccept(highScore -> {
+      if (highScore == null) {
+        return;
+      }
 
-    if (highScore == null) {
-      return;
-    }
-
-    CompletableFuture.runAsync(() -> Database.saveHighScore(player.getUniqueId(), highScore)).thenRun(() -> highScores.remove(player));
+      CompletableFuture.runAsync(() -> Database.saveHighScore(player.getUniqueId(), highScore)).thenRun(() -> this.highScores.remove(player));
+    });
   }
 
   public void addPoint(Player player) {
-    this.queryPoints(player);
-    this.queryCurrentPoints(player);
-
     points.compute(player, (p, pts) -> pts == null ? 1 : pts + 1);
     currentPoints.compute(player, (p, curPts) -> curPts == null ? 1 : curPts + 1);
 
@@ -314,36 +304,44 @@ public class JumpAndRunProvider {
   }
 
   public void checkHighScore(Player player) {
-    this.queryHighScore(player);
-
     Integer currentScore = currentPoints.get(player);
-    Integer highScore = highScores.get(player);
 
-    if (currentScore != null && (highScore == null || currentScore > highScore)) {
-      awaitingHighScores.add(player);
-    }
+    this.queryHighScore(player).thenAccept(highScore -> {
+      if (currentScore != null && (highScore == null || currentScore > highScore)) {
+        awaitingHighScores.add(player);
+      }
+    });
   }
+
 
   public void setHighScore(Player player) {
-    this.awaitingHighScores().remove(player);
-    this.highScores().put(player, this.currentPoints().get(player));
+    Integer currentScore = currentPoints.get(player);
 
-    player.sendMessage(PluginInstance.prefix().append(Component.text(String.format("Du hast deinen aktuell Highscore gebrochen! Dein neuer Highscore ist %s!", this.highScores().get(player)))));
-    player.playSound(Sound.sound(Key.key("item.totem.use"), Source.MASTER, 100f, 1f), Emitter.self());
+    this.queryHighScore(player).thenAccept(highScore -> {
+      if (currentScore != null && (highScore == null || currentScore > highScore)) {
+        awaitingHighScores.remove(player);
+        highScores.put(player, currentScore);
 
-    Firework firework = player.getWorld().spawn(player.getLocation(), Firework.class);
-    FireworkMeta meta = firework.getFireworkMeta();
-    FireworkEffect effect = FireworkEffect.builder()
-        .withFade(Color.fromRGB(187, 214, 223), Color.fromRGB(217, 242, 246), Color.fromRGB(180, 220, 231), Color.fromRGB(200, 224, 232))
-        .withColor(Color.fromRGB(187, 214, 223), Color.fromRGB(217, 242, 246), Color.fromRGB(180, 220, 231), Color.fromRGB(200, 224, 232))
-        .trail(true)
-        .build();
+        player.sendMessage(PluginInstance.prefix().append(
+            Component.text(String.format("Du hast deinen Highscore gebrochen! Dein neuer Highscore ist %s!", currentScore))));
+        player.playSound(Sound.sound(Key.key("item.totem.use"), Source.MASTER, 100f, 1f), Emitter.self());
 
-    meta.setPower(2);
-    meta.clearEffects();
-    meta.addEffect(effect);
-    firework.setFireworkMeta(meta);
+        Firework firework = player.getWorld().spawn(player.getLocation(), Firework.class);
+        FireworkMeta meta = firework.getFireworkMeta();
+        FireworkEffect effect = FireworkEffect.builder()
+            .withFade(Color.fromRGB(187, 214, 223), Color.fromRGB(217, 242, 246), Color.fromRGB(180, 220, 231), Color.fromRGB(200, 224, 232))
+            .withColor(Color.fromRGB(187, 214, 223), Color.fromRGB(217, 242, 246), Color.fromRGB(180, 220, 231), Color.fromRGB(200, 224, 232))
+            .trail(true)
+            .build();
+
+        meta.setPower(2);
+        meta.clearEffects();
+        meta.addEffect(effect);
+        firework.setFireworkMeta(meta);
+      }
+    });
   }
+
 
   public void onQuit(Player player) {
     this.saveHighScore(player);
