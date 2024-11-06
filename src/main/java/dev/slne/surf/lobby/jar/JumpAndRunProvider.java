@@ -9,6 +9,9 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectList;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalUnit;
 import java.util.concurrent.CompletableFuture;
 import lombok.Getter;
 import lombok.experimental.Accessors;
@@ -19,6 +22,8 @@ import net.kyori.adventure.sound.Sound.Emitter;
 import net.kyori.adventure.sound.Sound.Source;
 import net.kyori.adventure.text.Component;
 
+import net.kyori.adventure.title.Title;
+import net.kyori.adventure.title.Title.Times;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.FireworkEffect;
@@ -133,7 +138,7 @@ public class JumpAndRunProvider {
       @Override
       public void run() {
         jumpAndRun.getPlayers().forEach(player -> {
-          player.sendActionBar(Component.text(currentPoints.get(player)).color(PluginColor.BLUE_MID).append(Component.text(" Spr\u00FCnge").color(PluginColor.BLUE_DARK)));
+          player.sendActionBar(Component.text(currentPoints.get(player)).color(PluginColor.BLUE_MID).append(Component.text(" Spr\u00FCnge").color(PluginColor.DARK_GRAY)));
         });
       }
     };
@@ -349,6 +354,9 @@ public class JumpAndRunProvider {
             Component.text(String.format("Du hast deinen Highscore gebrochen! Dein neuer Highscore ist %s!", currentScore))));
         player.playSound(Sound.sound(Key.key("item.totem.use"), Source.MASTER, 100f, 1f), Emitter.self());
 
+        player.showTitle(Title.title(Component.text("Rekord!").color(PluginColor.BLUE_MID), Component.text("Du hast einen neuen persönlichen Rekord aufgestellt.").color(PluginColor.DARK_GRAY), Times.times(
+            Duration.of(1, ChronoUnit.SECONDS), Duration.of(2, ChronoUnit.SECONDS), Duration.of(1, ChronoUnit.SECONDS))));
+
         Firework firework = player.getWorld().spawn(player.getLocation(), Firework.class);
         FireworkMeta meta = firework.getFireworkMeta();
         FireworkEffect effect = FireworkEffect.builder()
@@ -361,6 +369,7 @@ public class JumpAndRunProvider {
         meta.clearEffects();
         meta.addEffect(effect);
         firework.setFireworkMeta(meta);
+        firework.detonate();
       }
     });
   }
