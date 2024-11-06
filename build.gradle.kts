@@ -27,6 +27,7 @@ dependencies {
     implementation ("com.github.stefvanschie.inventoryframework:IF:0.10.17")
     implementation ("com.zaxxer:HikariCP:5.0.1")
     implementation ("mysql:mysql-connector-java:8.0.33")
+    implementation("com.github.ben-manes.caffeine:caffeine:3.1.8")
 }
 
 
