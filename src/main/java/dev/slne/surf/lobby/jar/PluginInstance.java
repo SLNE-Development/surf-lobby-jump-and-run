@@ -2,6 +2,7 @@ package dev.slne.surf.lobby.jar;
 
 import dev.slne.surf.lobby.jar.command.ParkourCommand;
 import dev.slne.surf.lobby.jar.config.PluginConfig;
+import dev.slne.surf.lobby.jar.mysql.Database;
 import dev.slne.surf.lobby.jar.util.PluginColor;
 import lombok.Getter;
 import lombok.experimental.Accessors;
@@ -23,14 +24,15 @@ public class PluginInstance extends JavaPlugin {
   @Override
   public void onEnable() {
     this.jumpAndRunProvider = new JumpAndRunProvider();
-
     new ParkourCommand("parkour").register();
 
     Bukkit.getPluginManager().registerEvents(new ParkourListener(), this);
+    Database.createConnection();
   }
 
   @Override
   public void onDisable() {
+    Database.closeConnection();
     PluginConfig.save(jumpAndRunProvider.jumpAndRun());
 
     jumpAndRunProvider.removeAll();
