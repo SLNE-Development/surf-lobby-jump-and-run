@@ -1,17 +1,35 @@
 package dev.slne.surf.lobby.jar;
 
 import dev.slne.surf.lobby.jar.config.PluginConfig;
+
+import dev.slne.surf.lobby.jar.mysql.Database;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import it.unimi.dsi.fastutil.objects.ObjectList;
+import java.util.Random;
+import java.util.concurrent.CompletableFuture;
 import lombok.Getter;
 import lombok.experimental.Accessors;
+
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.sound.Sound;
+import net.kyori.adventure.sound.Sound.Emitter;
+import net.kyori.adventure.sound.Sound.Source;
 import net.kyori.adventure.text.Component;
+
+import org.bukkit.Color;
+import org.bukkit.FireworkEffect;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Firework;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.util.Vector;
 
 import java.security.SecureRandom;
@@ -22,8 +40,12 @@ public class JumpAndRunProvider {
 
   private final JumpAndRun jumpAndRun;
   private final SecureRandom random = new SecureRandom();
+  private final ObjectList<Player> awaitingHighScores = new ObjectArrayList<>();
   private final Object2ObjectMap<Player, Block[]> latestJumps = new Object2ObjectOpenHashMap<>();
   private final Object2ObjectMap<Player, Material> blocks = new Object2ObjectOpenHashMap<>();
+  private final Object2ObjectMap<Player, Integer> points = new Object2ObjectOpenHashMap<>();
+  private final Object2ObjectMap<Player, Integer> currentPoints = new Object2ObjectOpenHashMap<>();
+  private final Object2ObjectMap<Player, Integer> highScores = new Object2ObjectOpenHashMap<>();
 
   private static final Vector[] OFFSETS = {
       new Vector(3, 0, 0),
@@ -67,10 +89,20 @@ public class JumpAndRunProvider {
 
   public void start(Player player) {
     Block[] jumps = new Block[3];
-    latestJumps.put(player, jumps);
+
+    this.latestJumps.put(player, jumps);
+    this.jumpAndRun.getPlayers().add(player);
+    this.currentPoints.put(player, 0);
+    this.awaitingHighScores.remove(player);
 
     this.generateInitialJumps(player);
+
+    CompletableFuture.supplyAsync(() -> Database.getHighScore(player.getUniqueId())).thenAccept(highScore -> {
+      highScores.put(player, highScore);
+          player.sendMessage(PluginInstance.prefix().append(Component.text(String.format("Versuche deinen Highscore von %s zu brechen!", highScore))));
+        });
   }
+
 
   private void generateInitialJumps(Player player) {
     Location start = getRandomLocationInRegion(player.getWorld()).add(0, 1, 0);
@@ -146,12 +178,28 @@ public class JumpAndRunProvider {
     int minZ = Math.min(posOne.getBlockZ(), posTwo.getBlockZ());
     int maxZ = Math.max(posOne.getBlockZ(), posTwo.getBlockZ());
 
+    int widthX = maxX - minX;
+    int heightY = maxY - minY;
+    int widthZ = maxZ - minZ;
+
+    if (widthX <= 20 || heightY <= 20 || widthZ <= 20) {
+      throw new IllegalStateException("Die Region ist zu klein, sie muss mindestens 20 Blöcke groß sein!");
+    }
+
+    minX += 10;
+    maxX -= 10;
+
+    minZ += 10;
+    maxZ -= 10;
+
     int x = random.nextInt(maxX - minX + 1) + minX;
     int y = random.nextInt(maxY - minY + 1) + minY;
     int z = random.nextInt(maxZ - minZ + 1) + minZ;
 
     return new Location(world, x, y, z);
   }
+
+
 
   public boolean isInRegion(Location location) {
     Location posOne = jumpAndRun.getPosOne();
@@ -179,16 +227,23 @@ public class JumpAndRunProvider {
     return latestJumps.get(player);
   }
 
-  public void remove(Player player){
+  public void remove(Player player) {
     if(this.getLatestJumps(player) == null){
       return;
     }
 
-    for (Block block : this.getLatestJumps(player)){
+    for (Block block : this.getLatestJumps(player)) {
       block.setType(Material.AIR);
     }
 
+    if(this.awaitingHighScores.contains(player)){
+      this.setHighScore(player);
+    }
+
+    this.currentPoints.remove(player);
     this.latestJumps.remove(player);
+    this.jumpAndRun.getPlayers().remove(player);
+
     player.teleport(jumpAndRun.getSpawn());
   }
 
@@ -196,5 +251,114 @@ public class JumpAndRunProvider {
     for(Player player : blocks.keySet()){
       this.remove(player);
     }
+  }
+
+  public void queryCurrentPoints(Player player) {
+    currentPoints.computeIfAbsent(player, p -> {
+      currentPoints.put((Player) p, 0);
+      return 0;
+    });
+  }
+
+  public void queryPoints(Player player) {
+    points.computeIfAbsent(player, p -> {
+      loadPoints((Player) p);
+      return null;
+    });
+  }
+
+  public void queryHighScore(Player player) {
+    highScores.computeIfAbsent(player, p -> {
+      loadHighScore((Player) p);
+      return null;
+    });
+  }
+
+
+  public void loadPoints(Player player) {
+    CompletableFuture.supplyAsync(() -> Database.getPoints(player.getUniqueId())).thenAccept(pointsValue -> points.put(player, pointsValue));
+  }
+
+  public void savePoints(Player player) {
+    Integer playerPoints = points.get(player);
+
+    if (playerPoints == null) {
+      return;
+    }
+
+    CompletableFuture.runAsync(() -> Database.savePoints(player.getUniqueId(), playerPoints)).thenRun(() -> points.remove(player));
+  }
+
+  public void loadHighScore(Player player) {
+    CompletableFuture.supplyAsync(() -> Database.getHighScore(player.getUniqueId())).thenAccept(highScore -> highScores.put(player, highScore));
+  }
+
+  public void saveHighScore(Player player) {
+    Integer highScore = highScores.get(player);
+
+    if (highScore == null) {
+      return;
+    }
+
+    CompletableFuture.runAsync(() -> Database.saveHighScore(player.getUniqueId(), highScore)).thenRun(() -> highScores.remove(player));
+  }
+
+  public void addPoint(Player player) {
+    this.queryPoints(player);
+    this.queryCurrentPoints(player);
+
+    points.compute(player, (p, pts) -> pts == null ? 1 : pts + 1);
+    currentPoints.compute(player, (p, curPts) -> curPts == null ? 1 : curPts + 1);
+
+    player.playSound(Sound.sound(Key.key("block.note_block.bit"), Source.MASTER, 100f, 0), Emitter.self());
+  }
+
+  public void checkHighScore(Player player) {
+    this.queryHighScore(player);
+
+    Integer currentScore = currentPoints.get(player);
+    Integer highScore = highScores.get(player);
+
+    if (currentScore != null && (highScore == null || currentScore > highScore)) {
+      awaitingHighScores.add(player);
+    }
+  }
+
+  public void setHighScore(Player player) {
+    this.awaitingHighScores().remove(player);
+    this.highScores().put(player, this.currentPoints().get(player));
+
+    player.sendMessage(PluginInstance.prefix().append(Component.text(String.format("Du hast deinen aktuell Highscore gebrochen! Dein neuer Highscore ist %s!", this.highScores().get(player)))));
+    player.playSound(Sound.sound(Key.key("item.totem.use"), Source.MASTER, 100f, 1f), Emitter.self());
+
+    Firework firework = player.getWorld().spawn(player.getLocation(), Firework.class);
+    FireworkMeta meta = firework.getFireworkMeta();
+    FireworkEffect effect = FireworkEffect.builder()
+        .withFade(Color.fromRGB(187, 214, 223), Color.fromRGB(217, 242, 246), Color.fromRGB(180, 220, 231), Color.fromRGB(200, 224, 232))
+        .withColor(Color.fromRGB(187, 214, 223), Color.fromRGB(217, 242, 246), Color.fromRGB(180, 220, 231), Color.fromRGB(200, 224, 232))
+        .trail(true)
+        .build();
+
+    meta.setPower(2);
+    meta.clearEffects();
+    meta.addEffect(effect);
+    firework.setFireworkMeta(meta);
+  }
+
+  public void onQuit(Player player) {
+    this.saveHighScore(player);
+    this.savePoints(player);
+
+    this.currentPoints.remove(player);
+    this.awaitingHighScores.remove(player);
+
+
+    if(this.isJumping(player)){
+      this.remove(player);
+    }
+  }
+
+  public boolean isJumping(Player player) {
+    return this.jumpAndRun.getPlayers().contains(player);
   }
 }
