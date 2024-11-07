@@ -4,6 +4,11 @@ mysql:
   url: eineURL
 
 settings:
+  start:
+    world: world
+    x: 0
+    y: 100
+    z: 0
   posOne:
     world: world
     x: -143

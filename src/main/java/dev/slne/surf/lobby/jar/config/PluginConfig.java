@@ -39,6 +39,7 @@ public class PluginConfig {
     saveLocation(path + "posOne", jumpAndRun.getPosOne());
     saveLocation(path + "posTwo", jumpAndRun.getPosTwo());
     saveLocation(path + "spawn", jumpAndRun.getSpawn());
+    saveLocation(path + "start", jumpAndRun.getStart());
 
     PluginInstance.instance().saveConfig();
   }
@@ -50,6 +51,7 @@ public class PluginConfig {
     Location posOne = getLocation(path + "posOne");
     Location posTwo = getLocation(path + "posTwo");
     Location spawn = getLocation(path + "spawn");
+    Location start = getLocation(path + "start");
     String displayName = config().getString(path + "displayname", "Parkour");
     ObjectList<Material> materials = new ObjectArrayList<>();
     ObjectList<String> materialNames = new ObjectArrayList<>(config().getStringList(path + "materials"));
@@ -67,6 +69,7 @@ public class PluginConfig {
         .posOne(posOne)
         .posTwo(posTwo)
         .spawn(spawn)
+        .start(start)
         .players(new ObjectArrayList<>())
         .materials(new ObjectArrayList<>(materials))
         .latestBlocks(new Object2ObjectOpenHashMap<>())

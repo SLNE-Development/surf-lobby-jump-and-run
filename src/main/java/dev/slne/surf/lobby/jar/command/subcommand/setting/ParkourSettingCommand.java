@@ -11,6 +11,7 @@ public class ParkourSettingCommand extends CommandAPICommand {
 
     withSubcommand(new ParkourSettingAreaCommand("setArea"));
     withSubcommand(new ParkourSettingSpawnCommand("setSpawn"));
+    withSubcommand(new ParkourSettingStartCommand("setStart"));
     withSubcommand(new ParkourSettingMaterialListCommand("listMaterials"));
     withSubcommand(new ParkourSettingMaterialRemoveCommand("removeMaterial"));
     withSubcommand(new ParkourSettingMaterialAddCommand("addMaterial"));
