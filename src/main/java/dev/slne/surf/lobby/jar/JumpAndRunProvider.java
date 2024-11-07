@@ -14,6 +14,7 @@ import it.unimi.dsi.fastutil.objects.ObjectList;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalUnit;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import lombok.Getter;
 import lombok.experimental.Accessors;
@@ -52,11 +53,11 @@ public class JumpAndRunProvider {
   private final Object2ObjectMap<Player, Material> blocks = new Object2ObjectOpenHashMap<>();
   private final Object2ObjectMap<Player, Integer> currentPoints = new Object2ObjectOpenHashMap<>();
 
-  private final AsyncCache<Player, Integer> points = Caffeine.newBuilder()
-      .buildAsync((player) -> Database.getPoints(player.getUniqueId()));
+  private final AsyncCache<UUID, Integer> points = Caffeine.newBuilder()
+      .buildAsync(Database::getPoints);
 
-  private final AsyncCache<Player, Integer> highScores = Caffeine.newBuilder()
-      .buildAsync((player) -> Database.getPoints(player.getUniqueId()));
+  private final AsyncCache<UUID, Integer> highScores = Caffeine.newBuilder()
+      .buildAsync(Database::getPoints);
 
   private BukkitRunnable runnable;
 
@@ -110,7 +111,7 @@ public class JumpAndRunProvider {
 
     this.generateInitialJumps(player);
 
-    this.queryHighScore(player).thenAccept(highScore -> {
+    this.queryHighScore(player.getUniqueId()).thenAccept(highScore -> {
       if(highScore == null){
         player.sendMessage(PluginInstance.prefix().append(Component.text("Du bist nun im Parkour. Springe so weit wie möglich, um einen Highscore aufzustellen!")));
         return;
@@ -284,50 +285,62 @@ public class JumpAndRunProvider {
   }
 
   public void removeAll() {
-    for(Player player : blocks.keySet()){
+    for(Player player : jumpAndRun.getPlayers()){
       this.remove(player);
     }
   }
 
   public void saveAll() {
-    for (Player player : Bukkit.getOnlinePlayers()) {
-      this.savePoints(player);
-      this.saveHighScore(player);
+    ObjectList<CompletableFuture<Void>> futures = new ObjectArrayList<>();
+
+    for (UUID player : points.synchronous().asMap().keySet()) {
+      CompletableFuture<Void> future = savePoints(player);
+      futures.add(future);
     }
+
+    for (UUID player : highScores.synchronous().asMap().keySet()) {
+      CompletableFuture<Void> future = saveHighScore(player);
+      futures.add(future);
+    }
+    CompletableFuture<Void> allSaves = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
+
+    allSaves.join();
+    this.removeAll();
   }
 
-  public CompletableFuture<Integer> queryPoints(Player player) {
-    return points.get(player, p -> Database.getPoints(p.getUniqueId()));
+  public CompletableFuture<Integer> queryPoints(UUID player) {
+    return points.get(player, Database::getPoints);
   }
 
-  public CompletableFuture<Integer> queryHighScore(Player player) {
-    return highScores.get(player, p -> Database.getHighScore(p.getUniqueId()));
+  public CompletableFuture<Integer> queryHighScore(UUID player) {
+    return highScores.get(player, Database::getHighScore);
   }
 
-  public void savePoints(Player player) {
-    this.queryPoints(player).thenAccept(points -> {
+  public CompletableFuture<Void> savePoints(UUID player) {
+    return this.queryPoints(player).thenCompose(points -> {
       if (points == null) {
-        return;
+        return CompletableFuture.completedFuture(null);
       }
 
-      CompletableFuture.runAsync(() -> Database.savePoints(player.getUniqueId(), points)).thenRun(() -> this.points.synchronous().invalidate(player));
+      return CompletableFuture.runAsync(() -> Database.savePoints(player, points)).thenRun(() -> this.points.synchronous().invalidate(player));
     });
   }
 
-  public void saveHighScore(Player player) {
-    this.queryHighScore(player).thenAccept(highScore -> {
+  public CompletableFuture<Void> saveHighScore(UUID player) {
+    return this.queryHighScore(player).thenCompose(highScore -> {
       if (highScore == null) {
-        return;
+        return CompletableFuture.completedFuture(null);
       }
 
-      CompletableFuture.runAsync(() -> Database.saveHighScore(player.getUniqueId(), highScore)).thenRun(() -> this.highScores.synchronous().invalidate(player));
+      return CompletableFuture.runAsync(() -> Database.saveHighScore(player, highScore)).thenRun(() -> this.highScores.synchronous().invalidate(player));
     });
   }
+
 
   public void addPoint(Player player) {
-    points.get(player, p -> Database.getPoints(p.getUniqueId())).thenAccept(points -> {
+    points.get(player.getUniqueId(), Database::getPoints).thenAccept(points -> {
       int newPoints = (points == null) ? 1 : points + 1;
-      this.points.synchronous().put(player, newPoints);
+      this.points.synchronous().put(player.getUniqueId(), newPoints);
     });
 
     currentPoints.compute(player, (p, curPts) -> curPts == null ? 1 : curPts + 1);
@@ -338,7 +351,7 @@ public class JumpAndRunProvider {
   public void checkHighScore(Player player) {
     Integer currentScore = currentPoints.get(player);
 
-    this.queryHighScore(player).thenAccept(highScore -> {
+    this.queryHighScore(player.getUniqueId()).thenAccept(highScore -> {
       if (currentScore != null && (highScore == null || currentScore > highScore)) {
         awaitingHighScores.add(player);
       }
@@ -349,10 +362,10 @@ public class JumpAndRunProvider {
   public void setHighScore(Player player) {
     Integer currentScore = currentPoints.get(player);
 
-    this.queryHighScore(player).thenAccept(highScore -> {
+    this.queryHighScore(player.getUniqueId()).thenAccept(highScore -> {
       if (currentScore != null && (highScore == null || currentScore > highScore)) {
         awaitingHighScores.remove(player);
-        highScores.synchronous().put(player, currentScore);
+        highScores.synchronous().put(player.getUniqueId(), currentScore);
 
         player.sendMessage(PluginInstance.prefix().append(
             Component.text(String.format("Du hast deinen Highscore gebrochen! Dein neuer Highscore ist %s!", currentScore))));
@@ -382,8 +395,8 @@ public class JumpAndRunProvider {
 
 
   public void onQuit(Player player) {
-    this.saveHighScore(player);
-    this.savePoints(player);
+    this.saveHighScore(player.getUniqueId());
+    this.savePoints(player.getUniqueId());
 
     this.currentPoints.remove(player);
     this.awaitingHighScores.remove(player);

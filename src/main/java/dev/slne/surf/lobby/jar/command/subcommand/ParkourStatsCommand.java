@@ -20,8 +20,8 @@ public class ParkourStatsCommand extends CommandAPICommand {
     executesPlayer((player, args) -> {
       Player target = args.getUnchecked("target");
 
-      provider.queryHighScore(target).thenAccept(highScore -> {
-        provider.queryPoints(target).thenAccept(points -> {
+      provider.queryHighScore(target.getUniqueId()).thenAccept(highScore -> {
+        provider.queryPoints(target.getUniqueId()).thenAccept(points -> {
           if(points == null || highScore == null){
             player.sendMessage(Component.text("Aktuell sind keine Statistiken verfügbar...", PluginColor.RED));
             return;
