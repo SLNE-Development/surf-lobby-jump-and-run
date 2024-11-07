@@ -1,5 +1,7 @@
 package dev.slne.surf.lobby.jar;
 
+import com.github.benmanes.caffeine.cache.AsyncCache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import dev.slne.surf.lobby.jar.config.PluginConfig;
 
 import dev.slne.surf.lobby.jar.mysql.Database;
@@ -48,9 +50,13 @@ public class JumpAndRunProvider {
   private final ObjectList<Player> awaitingHighScores = new ObjectArrayList<>();
   private final Object2ObjectMap<Player, Block[]> latestJumps = new Object2ObjectOpenHashMap<>();
   private final Object2ObjectMap<Player, Material> blocks = new Object2ObjectOpenHashMap<>();
-  private final Object2ObjectMap<Player, Integer> points = new Object2ObjectOpenHashMap<>();
   private final Object2ObjectMap<Player, Integer> currentPoints = new Object2ObjectOpenHashMap<>();
-  private final Object2ObjectMap<Player, Integer> highScores = new Object2ObjectOpenHashMap<>();
+
+  private final AsyncCache<Player, Integer> points = Caffeine.newBuilder()
+      .buildAsync((player) -> Database.getPoints(player.getUniqueId()));
+
+  private final AsyncCache<Player, Integer> highScores = Caffeine.newBuilder()
+      .buildAsync((player) -> Database.getPoints(player.getUniqueId()));
 
   private BukkitRunnable runnable;
 
@@ -279,29 +285,11 @@ public class JumpAndRunProvider {
   }
 
   public CompletableFuture<Integer> queryPoints(Player player) {
-    if (points.containsKey(player)) {
-      return CompletableFuture.completedFuture(points.get(player));
-    } else {
-      return CompletableFuture.supplyAsync(() -> {
-        Integer pointsValue = Database.getPoints(player.getUniqueId());
-
-        points.put(player, pointsValue);
-        return pointsValue;
-      });
-    }
+    return points.get(player, p -> Database.getPoints(p.getUniqueId()));
   }
 
   public CompletableFuture<Integer> queryHighScore(Player player) {
-    if (highScores.containsKey(player)) {
-      return CompletableFuture.completedFuture(highScores.get(player));
-    } else {
-      return CompletableFuture.supplyAsync(() -> {
-        Integer highScore = Database.getHighScore(player.getUniqueId());
-
-        highScores.put(player, highScore);
-        return highScore;
-      });
-    }
+    return highScores.get(player, p -> Database.getHighScore(p.getUniqueId()));
   }
 
   public void savePoints(Player player) {
@@ -310,7 +298,7 @@ public class JumpAndRunProvider {
         return;
       }
 
-      CompletableFuture.runAsync(() -> Database.savePoints(player.getUniqueId(), points)).thenRun(() -> this.points.remove(player));
+      CompletableFuture.runAsync(() -> Database.savePoints(player.getUniqueId(), points)).thenRun(() -> this.points.synchronous().invalidate(player));
     });
   }
 
@@ -320,12 +308,16 @@ public class JumpAndRunProvider {
         return;
       }
 
-      CompletableFuture.runAsync(() -> Database.saveHighScore(player.getUniqueId(), highScore)).thenRun(() -> this.highScores.remove(player));
+      CompletableFuture.runAsync(() -> Database.saveHighScore(player.getUniqueId(), highScore)).thenRun(() -> this.highScores.synchronous().invalidate(player));
     });
   }
 
   public void addPoint(Player player) {
-    points.compute(player, (p, pts) -> pts == null ? 1 : pts + 1);
+    points.get(player, p -> Database.getPoints(p.getUniqueId())).thenAccept(points -> {
+      int newPoints = (points == null) ? 1 : points + 1;
+      this.points.synchronous().put(player, newPoints);
+    });
+
     currentPoints.compute(player, (p, curPts) -> curPts == null ? 1 : curPts + 1);
 
     player.playSound(Sound.sound(Key.key("block.note_block.bit"), Source.MASTER, 100f, 0), Emitter.self());
@@ -348,7 +340,7 @@ public class JumpAndRunProvider {
     this.queryHighScore(player).thenAccept(highScore -> {
       if (currentScore != null && (highScore == null || currentScore > highScore)) {
         awaitingHighScores.remove(player);
-        highScores.put(player, currentScore);
+        highScores.synchronous().put(player, currentScore);
 
         player.sendMessage(PluginInstance.prefix().append(
             Component.text(String.format("Du hast deinen Highscore gebrochen! Dein neuer Highscore ist %s!", currentScore))));
