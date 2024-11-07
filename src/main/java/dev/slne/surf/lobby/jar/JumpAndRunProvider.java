@@ -111,7 +111,7 @@ public class JumpAndRunProvider {
     this.generateInitialJumps(player);
 
     this.queryHighScore(player).thenAccept(highScore -> {
-      player.sendMessage(PluginInstance.prefix().append(Component.text(String.format("Versuche deinen Highscore von %s zu brechen!", highScore))));
+      player.sendMessage(PluginInstance.prefix().append(Component.text(String.format("Du bist nun im Parkour. Springe so weit wie möglich, versuche deinen Highscore von %s zu brechen!", highScore))));
     });
   }
 
@@ -195,7 +195,7 @@ public class JumpAndRunProvider {
       }
     }
 
-    player.sendMessage(PluginInstance.prefix().append(Component.text("Ein Fehler ist aufgetreten.")));
+    player.sendMessage(PluginInstance.prefix().append(Component.text("Ein Fehler ist aufgetreten. Sollte dieser Fehler häufiger auftreten, melde dies bitte in einem Bugreport Ticket!").color(PluginColor.RED)));
   }
 
   private Location getRandomLocationInRegion(World world) {

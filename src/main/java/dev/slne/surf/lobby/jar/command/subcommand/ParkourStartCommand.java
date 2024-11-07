@@ -12,8 +12,6 @@ public class ParkourStartCommand extends CommandAPICommand {
 
     executesPlayer((player, args) -> {
       PluginInstance.instance().jumpAndRunProvider().start(player);
-
-      player.sendMessage(PluginInstance.prefix().append(Component.text("Du bist nun im Parkour. Springe so weit wie möglich!")));
     });
   }
 }
