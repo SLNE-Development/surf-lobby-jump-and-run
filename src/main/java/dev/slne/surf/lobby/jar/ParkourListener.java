@@ -16,6 +16,11 @@ public class ParkourListener implements Listener {
     Player player = event.getPlayer();
     Block[] jumps = this.jumpAndRunProvider.getLatestJumps(player);
 
+    if(event.getTo().getBlock().getLocation().equals(jumpAndRunProvider.jumpAndRun().getStart().getBlock().getLocation())){
+      jumpAndRunProvider.start(player);
+      return;
+    }
+
     if(jumps == null){
       return;
     }
