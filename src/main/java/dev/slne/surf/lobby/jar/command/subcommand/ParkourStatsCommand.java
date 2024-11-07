@@ -15,10 +15,17 @@ public class ParkourStatsCommand extends CommandAPICommand {
   public ParkourStatsCommand(String commandName) {
     super(commandName);
 
-    withArguments(new PlayerArgument("target"));
+    withArguments(new PlayerArgument("target").setOptional(true));
 
     executesPlayer((player, args) -> {
-      Player target = args.getUnchecked("target");
+      Player t = args.getUnchecked("target");
+      Player target;
+
+      if(t == null){
+        target = player;
+      }else {
+        target = t;
+      }
 
       provider.queryHighScore(target.getUniqueId()).thenAccept(highScore -> {
         provider.queryPoints(target.getUniqueId()).thenAccept(points -> {

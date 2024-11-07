@@ -1,6 +1,7 @@
 package dev.slne.surf.lobby.jar;
 
 import dev.slne.surf.lobby.jar.command.ParkourCommand;
+import dev.slne.surf.lobby.jar.command.subcommand.ParkourStatsCommand;
 import dev.slne.surf.lobby.jar.config.PluginConfig;
 import dev.slne.surf.lobby.jar.mysql.Database;
 import dev.slne.surf.lobby.jar.util.PluginColor;
@@ -27,6 +28,7 @@ public class PluginInstance extends JavaPlugin {
     this.jumpAndRunProvider.startActionbar();
 
     new ParkourCommand("parkour").register();
+    new ParkourStatsCommand("stats").register();
 
     Bukkit.getPluginManager().registerEvents(new ParkourListener(), this);
     Database.createConnection();
