@@ -111,6 +111,11 @@ public class JumpAndRunProvider {
     this.generateInitialJumps(player);
 
     this.queryHighScore(player).thenAccept(highScore -> {
+      if(highScore == null){
+        player.sendMessage(PluginInstance.prefix().append(Component.text("Du bist nun im Parkour. Springe so weit wie möglich, um einen Highscore aufzustellen!")));
+        return;
+      }
+
       player.sendMessage(PluginInstance.prefix().append(Component.text(String.format("Du bist nun im Parkour. Springe so weit wie möglich, versuche deinen Highscore von %s zu brechen!", highScore))));
     });
   }
@@ -278,9 +283,16 @@ public class JumpAndRunProvider {
     player.teleport(jumpAndRun.getSpawn());
   }
 
-  public void removeAll(){
+  public void removeAll() {
     for(Player player : blocks.keySet()){
       this.remove(player);
+    }
+  }
+
+  public void saveAll() {
+    for (Player player : Bukkit.getOnlinePlayers()) {
+      this.savePoints(player);
+      this.saveHighScore(player);
     }
   }
 
@@ -349,6 +361,7 @@ public class JumpAndRunProvider {
         player.showTitle(Title.title(Component.text("Rekord!").color(PluginColor.BLUE_MID), Component.text("Du hast einen neuen persönlichen Rekord aufgestellt.").color(PluginColor.DARK_GRAY), Times.times(
             Duration.of(1, ChronoUnit.SECONDS), Duration.of(2, ChronoUnit.SECONDS), Duration.of(1, ChronoUnit.SECONDS))));
 
+        /*
         Firework firework = player.getWorld().spawn(player.getLocation(), Firework.class);
         FireworkMeta meta = firework.getFireworkMeta();
         FireworkEffect effect = FireworkEffect.builder()
@@ -362,6 +375,7 @@ public class JumpAndRunProvider {
         meta.addEffect(effect);
         firework.setFireworkMeta(meta);
         firework.detonate();
+        */
       }
     });
   }

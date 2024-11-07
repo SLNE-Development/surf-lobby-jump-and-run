@@ -22,6 +22,11 @@ public class ParkourStatsCommand extends CommandAPICommand {
 
       provider.queryHighScore(target).thenAccept(highScore -> {
         provider.queryPoints(target).thenAccept(points -> {
+          if(points == null || highScore == null){
+            player.sendMessage(Component.text("Aktuell sind keine Statistiken verfügbar...", PluginColor.RED));
+            return;
+          }
+
           player.sendMessage(createStatisticMessage(points.toString(), highScore.toString(), provider.isJumping(target) ? provider.currentPoints().get(player).toString() : "Kein laufender Parkour", target.getName()));
         });
       });
