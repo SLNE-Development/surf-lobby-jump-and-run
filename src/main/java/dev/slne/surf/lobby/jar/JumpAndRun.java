@@ -19,6 +19,7 @@ public class JumpAndRun {
   private Location posOne;
   private Location posTwo;
   private Location spawn;
+  private Location start;
 
   private final ObjectList<Player> players;
   private final ObjectList<Material> materials;
