@@ -6,11 +6,11 @@ import dev.slne.surf.lobby.jar.JumpAndRunProvider;
 import dev.slne.surf.lobby.jar.PluginInstance;
 import dev.slne.surf.lobby.jar.util.PluginColor;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.entity.Player;
 
 public class ParkourStatsCommand extends CommandAPICommand {
   private final JumpAndRunProvider provider = PluginInstance.instance().jumpAndRunProvider();
-  private final Component prefix = Component.text(">> ").color(PluginColor.DARK_GRAY);
 
   public ParkourStatsCommand(String commandName) {
     super(commandName);
@@ -22,15 +22,70 @@ public class ParkourStatsCommand extends CommandAPICommand {
 
       provider.queryHighScore(target).thenAccept(highScore -> {
         provider.queryPoints(target).thenAccept(points -> {
-          player.sendMessage(prefix.append(Component.text("Statistiken von " + target.getName()).color(PluginColor.BLUE_MID)).append(Component.newline())
-              .append(prefix.append(Component.text(" "))).append(Component.newline())
-              .append(prefix.append(Component.text("Gesamtsprünge: ").color(PluginColor.DARK_GRAY).append(Component.text(points.toString()).color(PluginColor.GOLD)))).append(Component.newline())
-              .append(prefix.append(Component.text("Aktueller Highscore: ").color(PluginColor.DARK_GRAY).append(Component.text(highScore.toString()).color(PluginColor.GOLD)))).append(Component.newline())
-              .append(prefix.append(Component.text(" "))).append(Component.newline())
-              .append(prefix.append(Component.text("Aktuelle Sprünge: ").color(PluginColor.DARK_GRAY).append(Component.text(provider.isJumping(target) ? provider.currentPoints().get(player).toString() : "/").color(PluginColor.GOLD))))
-          );
+          player.sendMessage(createStatisticMessage(points.toString(), highScore.toString(), provider.isJumping(target) ? provider.currentPoints().get(player).toString() : "Kein laufender Parkour", target.getName()));
         });
       });
     });
+  }
+
+  public static Component createStatisticMessage(String points, String highScore, String current, String player) {
+    return Component.text(">> ", PluginColor.DARK_GRAY)
+        .append(Component.text("Parkour ", PluginColor.BLUE))
+        .append(Component.text("| ",PluginColor.DARK_GRAY))
+        .append(Component.text("-------------", PluginColor.LIGHT_GRAY))
+        .append(Component.text("STATISTIK", PluginColor.BLUE_LIGHT).decorate(TextDecoration.BOLD))
+        .append(Component.text("-------------", PluginColor.LIGHT_GRAY))
+        .append(Component.newline())
+        .append(Component.text(">> ",PluginColor.DARK_GRAY))
+        .append(Component.text("Parkour ", PluginColor.BLUE))
+        .append(Component.text("|",PluginColor.DARK_GRAY))
+        .append(Component.newline())
+        .append(Component.text(">> ",PluginColor.DARK_GRAY))
+        .append(Component.text("Parkour ", PluginColor.BLUE))
+        .append(Component.text("| ",PluginColor.DARK_GRAY))
+        .append(Component.text("Seit Aufzeichnung:", PluginColor.DARK_GRAY))
+        .append(Component.newline())
+        .append(Component.text(">> ",PluginColor.DARK_GRAY))
+        .append(Component.text("Parkour ", PluginColor.BLUE))
+        .append(Component.text("|",PluginColor.DARK_GRAY))
+        .append(Component.newline())
+        .append(Component.text(">> ",PluginColor.DARK_GRAY))
+        .append(Component.text("Parkour ", PluginColor.BLUE))
+        .append(Component.text("|    ",PluginColor.DARK_GRAY))
+        .append(Component.text("Sprünge: ", PluginColor.BLUE_MID))
+        .append(Component.text(points, PluginColor.GOLD))
+        .append(Component.newline())
+        .append(Component.text(">> ",PluginColor.DARK_GRAY))
+        .append(Component.text("Parkour ", PluginColor.BLUE))
+        .append(Component.text("|    ",PluginColor.DARK_GRAY))
+        .append(Component.text("Rekord: ", PluginColor.BLUE_MID))
+        .append(Component.text(highScore, PluginColor.GOLD))
+        .append(Component.newline())
+        .append(Component.text(">> ",PluginColor.DARK_GRAY))
+        .append(Component.text("Parkour ", PluginColor.BLUE))
+        .append(Component.text("|",PluginColor.DARK_GRAY))
+        .append(Component.newline())
+        .append(Component.text(">> ",PluginColor.DARK_GRAY))
+        .append(Component.text("Parkour ", PluginColor.BLUE))
+        .append(Component.text("| Laufender Parkour:",PluginColor.DARK_GRAY))
+        .append(Component.newline())
+        .append(Component.text(">> ",PluginColor.DARK_GRAY))
+        .append(Component.text("Parkour ", PluginColor.BLUE))
+        .append(Component.text("|",PluginColor.DARK_GRAY))
+        .append(Component.newline())
+        .append(Component.text(">> ",PluginColor.DARK_GRAY))
+        .append(Component.text("Parkour ", PluginColor.BLUE))
+        .append(Component.text("|    ",PluginColor.DARK_GRAY))
+        .append(Component.text("Sprünge: ", PluginColor.BLUE_MID))
+        .append(Component.text(current, PluginColor.GOLD))
+        .append(Component.newline())
+        .append(Component.text(">> ",PluginColor.DARK_GRAY))
+        .append(Component.text("Parkour ", PluginColor.BLUE))
+        .append(Component.text("|",PluginColor.DARK_GRAY))
+        .append(Component.newline())
+        .append(Component.text(">> ",PluginColor.DARK_GRAY))
+        .append(Component.text("Parkour ", PluginColor.BLUE))
+        .append(Component.text("| ",PluginColor.DARK_GRAY))
+        .append(Component.text("-----------------------------------", PluginColor.LIGHT_GRAY));
   }
 }
