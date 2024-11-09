@@ -4,9 +4,11 @@ import dev.slne.surf.lobby.jar.command.ParkourCommand;
 import dev.slne.surf.lobby.jar.command.subcommand.ParkourStatsCommand;
 import dev.slne.surf.lobby.jar.config.PluginConfig;
 import dev.slne.surf.lobby.jar.mysql.Database;
+import dev.slne.surf.lobby.jar.papi.ParkourPlaceholderExtension;
 import dev.slne.surf.lobby.jar.util.PluginColor;
 import lombok.Getter;
 import lombok.experimental.Accessors;
+import me.clip.placeholderapi.PlaceholderAPIPlugin;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
@@ -27,6 +29,8 @@ public class PluginInstance extends JavaPlugin {
     this.jumpAndRunProvider = new JumpAndRunProvider();
     this.jumpAndRunProvider.startActionbar();
 
+    this.handlePlaceholderAPI();
+
     new ParkourCommand("parkour").register();
     new ParkourStatsCommand("stats").register();
 
@@ -45,5 +49,11 @@ public class PluginInstance extends JavaPlugin {
 
   public static PluginInstance instance() {
     return getPlugin(PluginInstance.class);
+  }
+
+  private void handlePlaceholderAPI(){
+    if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
+      new ParkourPlaceholderExtension().register();
+    }
   }
 }

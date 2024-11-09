@@ -2,8 +2,11 @@ package dev.slne.surf.lobby.jar.mysql;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import dev.slne.surf.lobby.jar.PluginInstance;
 import dev.slne.surf.lobby.jar.config.PluginConfig;
 
+import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -12,7 +15,6 @@ import java.util.UUID;
 import org.bukkit.Bukkit;
 
 public class Database {
-
   private static HikariDataSource dataSource;
 
   public static void createConnection() {
@@ -25,6 +27,7 @@ public class Database {
     config.addDataSourceProperty("prepStmtCacheSize", "250");
     config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
     config.setMaximumPoolSize(10);
+    config.setMaxLifetime(600000);
 
     dataSource = new HikariDataSource(config);
     createTable();
@@ -181,5 +184,51 @@ public class Database {
     } catch (SQLException e) {
       Bukkit.getConsoleSender().sendMessage(e.getMessage());
     }
+  }
+
+  public static Object2ObjectMap<UUID, Integer> getHighScores() {
+    Object2ObjectMap<UUID, Integer> highScores = new Object2ObjectOpenHashMap<>();
+    String query = "SELECT uuid, high_score FROM jumpandrun";
+
+    PluginInstance.instance().jumpAndRunProvider().saveAll();
+
+    try (Connection connection = dataSource.getConnection(); PreparedStatement statement = connection.prepareStatement(query);
+        ResultSet result = statement.executeQuery()) {
+
+      while (result.next()) {
+        UUID uuid = UUID.fromString(result.getString("uuid"));
+        Integer highScore = result.getInt("high_score");
+
+        highScores.put(uuid, highScore);
+      }
+
+    } catch (SQLException e) {
+      Bukkit.getConsoleSender().sendMessage(e.getMessage());
+    }
+
+    return highScores;
+  }
+
+  public static Object2ObjectMap<UUID, Integer> getPoints() {
+    Object2ObjectMap<UUID, Integer> points = new Object2ObjectOpenHashMap<>();
+    String query = "SELECT uuid, points FROM jumpandrun";
+
+    PluginInstance.instance().jumpAndRunProvider().saveAll();
+
+    try (Connection connection = dataSource.getConnection(); PreparedStatement statement = connection.prepareStatement(query);
+        ResultSet result = statement.executeQuery()) {
+
+      while (result.next()) {
+        UUID uuid = UUID.fromString(result.getString("uuid"));
+        Integer point = result.getInt("points");
+
+        points.put(uuid, point);
+      }
+
+    } catch (SQLException e) {
+      Bukkit.getConsoleSender().sendMessage(e.getMessage());
+    }
+
+    return points;
   }
 }
