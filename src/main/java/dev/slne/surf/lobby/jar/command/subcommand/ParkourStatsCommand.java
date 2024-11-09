@@ -21,26 +21,28 @@ public class ParkourStatsCommand extends CommandAPICommand {
       Player t = args.getUnchecked("target");
       Player target;
 
-      if(t == null){
+      if(t == null) {
         target = player;
-      }else {
+      } else {
         target = t;
       }
 
       provider.queryHighScore(target.getUniqueId()).thenAccept(highScore -> {
         provider.queryPoints(target.getUniqueId()).thenAccept(points -> {
-          if(points == null || highScore == null){
-            player.sendMessage(Component.text("Aktuell sind keine Statistiken verfügbar...", PluginColor.RED));
-            return;
-          }
+          provider.queryTrys(target.getUniqueId()).thenAccept(trys -> {
+            if(points == null || highScore == null){
+              player.sendMessage(Component.text("Aktuell sind keine Statistiken verfügbar... (Rejoin?)", PluginColor.RED));
+              return;
+            }
 
-          player.sendMessage(createStatisticMessage(points.toString(), highScore.toString(), provider.isJumping(target) ? provider.currentPoints().get(player).toString() : "Kein laufender Parkour", target.getName()));
+            player.sendMessage(createStatisticMessage(points.toString(), highScore.toString(), provider.isJumping(target) ? provider.currentPoints().get(player).toString() : "Kein laufender Parkour", trys.toString()));
+          });
         });
       });
     });
   }
 
-  public static Component createStatisticMessage(String points, String highScore, String current, String player) {
+  public static Component createStatisticMessage(String points, String highScore, String current, String trys) {
     return Component.text(">> ", PluginColor.DARK_GRAY)
         .append(Component.text("Parkour ", PluginColor.BLUE))
         .append(Component.text("| ",PluginColor.DARK_GRAY))
@@ -72,6 +74,12 @@ public class ParkourStatsCommand extends CommandAPICommand {
         .append(Component.text("|    ",PluginColor.DARK_GRAY))
         .append(Component.text("Rekord: ", PluginColor.BLUE_MID))
         .append(Component.text(highScore, PluginColor.GOLD))
+        .append(Component.newline())
+        .append(Component.text(">> ",PluginColor.DARK_GRAY))
+        .append(Component.text("Parkour ", PluginColor.BLUE))
+        .append(Component.text("|    ",PluginColor.DARK_GRAY))
+        .append(Component.text("Versuche: ", PluginColor.BLUE_MID))
+        .append(Component.text(trys , PluginColor.GOLD))
         .append(Component.newline())
         .append(Component.text(">> ",PluginColor.DARK_GRAY))
         .append(Component.text("Parkour ", PluginColor.BLUE))

@@ -2,20 +2,21 @@ package dev.slne.surf.lobby.jar;
 
 import com.github.benmanes.caffeine.cache.AsyncCache;
 import com.github.benmanes.caffeine.cache.Caffeine;
-import dev.slne.surf.lobby.jar.config.PluginConfig;
 
+import dev.slne.surf.lobby.jar.config.PluginConfig;
 import dev.slne.surf.lobby.jar.mysql.Database;
 import dev.slne.surf.lobby.jar.util.PluginColor;
+
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectList;
+
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalUnit;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+
 import lombok.Getter;
 import lombok.experimental.Accessors;
 
@@ -27,16 +28,11 @@ import net.kyori.adventure.text.Component;
 
 import net.kyori.adventure.title.Title;
 import net.kyori.adventure.title.Title.Times;
-import org.bukkit.Bukkit;
-import org.bukkit.Color;
-import org.bukkit.FireworkEffect;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
-import org.bukkit.entity.Firework;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
@@ -57,9 +53,32 @@ public class JumpAndRunProvider {
       .buildAsync(Database::getPoints);
 
   private final AsyncCache<UUID, Integer> highScores = Caffeine.newBuilder()
-      .buildAsync(Database::getPoints);
+      .buildAsync(Database::getHighScore);
+
+  private final AsyncCache<UUID, Integer> trys = Caffeine.newBuilder()
+      .buildAsync(Database::getTrys);
+
+  private final AsyncCache<UUID, Boolean> sounds = Caffeine.newBuilder()
+      .buildAsync(Database::getSound);
 
   private BukkitRunnable runnable;
+
+  /*
+  private static final Vector[] OFFSETS = {
+      new Vector(3, 0, 3),
+      new Vector(-3, 0, 3),
+      new Vector(3, 0, -3),
+      new Vector(-3, 0, -3),
+      new Vector(3, 0, 0),
+      new Vector(-3, 0, 0),
+      new Vector(0, 0, 3),
+      new Vector(0, 0, -3),
+      new Vector(4, 0, 0),
+      new Vector(-4, 0, 0),
+      new Vector(0, 0, 4),
+      new Vector(0, 0, -4)
+  };
+   */
 
   private static final Vector[] OFFSETS = {
       new Vector(3, 0, 0),
@@ -79,29 +98,14 @@ public class JumpAndRunProvider {
       new Vector(-3, 0, 0)
   };
 
-  private static final Vector[] FALSE_OFFSETS = {
-      new Vector(-3, 0, -3),
-      new Vector(-3, 0, -1),
-      new Vector(-1, 0, -3),
-      new Vector(-3, 0, -3),
-      new Vector(-1, 0, -3),
-      new Vector(-3, 0, -3),
-      new Vector(-4, 0, -3),
-      new Vector(-3, 0, -4),
-      new Vector(-4, 0, -1),
-      new Vector(-1, 0, -4),
-      new Vector(3, 0, -3),
-      new Vector(-3, 0, 3),
-      new Vector(3, 0, -3),
-      new Vector(-3, 0, 3),
-      new Vector(-1, 0, -4)
-  };
 
   public JumpAndRunProvider() {
     this.jumpAndRun = PluginConfig.loadJumpAndRun();
   }
 
   public void start(Player player) {
+    this.remove(player);
+
     Block[] jumps = new Block[3];
 
     this.latestJumps.put(player, jumps);
@@ -109,6 +113,7 @@ public class JumpAndRunProvider {
     this.currentPoints.put(player, 0);
     this.awaitingHighScores.remove(player);
 
+    this.addTry(player);
     this.generateInitialJumps(player);
 
     this.queryHighScore(player.getUniqueId()).thenAccept(highScore -> {
@@ -125,10 +130,11 @@ public class JumpAndRunProvider {
 
   private void generateInitialJumps(Player player) {
     Location start = getRandomLocationInRegion(player.getWorld()).add(0, 1, 0);
-
     Block block = start.getBlock();
-    Block next = start.clone().add(OFFSETS[random.nextInt(OFFSETS.length)]).getBlock();
-    Block next2 = next.getLocation().clone().add(OFFSETS[random.nextInt(OFFSETS.length)]).getBlock();
+
+    Block next = getValidBlock(start, player);
+    Block next2 = getValidBlock(next.getLocation(), player);
+
     Material material = jumpAndRun.getMaterials().get(random.nextInt(jumpAndRun.getMaterials().size()));
 
     block.setType(material);
@@ -141,9 +147,10 @@ public class JumpAndRunProvider {
     latestJumps.get(player)[2] = next2;
 
     player.teleport(block.getLocation().add(0.5, 1, 0.5));
-
     blocks.put(player, material);
   }
+
+
 
   public void startActionbar(){
     runnable = new BukkitRunnable() {
@@ -176,33 +183,81 @@ public class JumpAndRunProvider {
 
     jumps[1].setType(Material.SEA_LANTERN);
 
-    Location previous = (jumps[1] != null) ? jumps[1].getLocation() : getRandomLocationInRegion(player.getWorld()).add(0, 1, 0);
+    Block nextJump = getValidBlock(jumps[1].getLocation(), player);
+    nextJump.setType(material);
+    jumps[2] = nextJump;
+  }
+
+  private Block getValidBlock(Location previousLocation, Player player) {
+    int maxAttempts = OFFSETS.length * 2;
     int attempts = 0;
 
-    while (attempts < OFFSETS.length) {
-      Location location = previous.clone().add(OFFSETS[random.nextInt(OFFSETS.length)]);
+    while (attempts < maxAttempts) {
+      int heightOffset = random.nextInt(3) - 1;
+      Vector offset = OFFSETS[random.nextInt(OFFSETS.length)];
+      Location nextLocation = previousLocation.clone().add(offset).add(0, heightOffset, 0);
 
-      if (this.isInRegion(location) && location.getBlock().getType() == Material.AIR) {
-        location.getBlock().setType(material);
-        jumps[2] = location.getBlock();
-        return;
+      if (!this.isInRegion(nextLocation)) {
+        attempts++;
+        continue;
       }
 
-      attempts++;
-    }
-
-    for(Vector vector : FALSE_OFFSETS) {
-      Location location = previous.clone().add(vector);
-
-      if (this.isInRegion(location) && location.getBlock().getType() == Material.AIR) {
-        location.getBlock().setType(material);
-        jumps[2] = location.getBlock();
-        return;
+      if (nextLocation.getBlock().getType() != Material.AIR ||
+          nextLocation.clone().add(0, 1, 0).getBlock().getType() != Material.AIR ||
+          nextLocation.clone().add(0, 2, 0).getBlock().getType() != Material.AIR) {
+        attempts++;
+        continue;
       }
+
+      /* Above the Jump */
+
+      if (latestJumps.get(player)[0] != null && latestJumps.get(player)[0].getLocation().clone().add(0, 1, 0).equals(nextLocation)) {
+        attempts++;
+        continue;
+      }
+      if (latestJumps.get(player)[1] != null && latestJumps.get(player)[1].getLocation().clone().add(0, 1, 0).equals(nextLocation)) {
+        attempts++;
+        continue;
+      }
+      if (latestJumps.get(player)[2] != null && latestJumps.get(player)[2].getLocation().clone().add(0, 1, 0).equals(nextLocation)) {
+        attempts++;
+        continue;
+      }
+
+      /* 2 Blocks above the Jump */
+
+      if (latestJumps.get(player)[0] != null && latestJumps.get(player)[0].getLocation().clone().add(0, 2, 0).equals(nextLocation)) {
+        attempts++;
+        continue;
+      }
+      if (latestJumps.get(player)[1] != null && latestJumps.get(player)[1].getLocation().clone().add(0, 2, 0).equals(nextLocation)) {
+        attempts++;
+        continue;
+      }
+      if (latestJumps.get(player)[2] != null && latestJumps.get(player)[2].getLocation().clone().add(0, 2, 0).equals(nextLocation)) {
+        attempts++;
+        continue;
+      }
+
+      if (Math.abs(nextLocation.getY() - previousLocation.getY()) > 1) {
+        attempts++;
+        continue;
+      }
+
+      if (nextLocation.equals(player.getLocation()) || nextLocation.equals(player.getLocation().clone().add(0, 1, 0))) {
+        attempts++;
+        continue;
+      }
+
+      return nextLocation.getBlock();
     }
 
-    player.sendMessage(PluginInstance.prefix().append(Component.text("Ein Fehler ist aufgetreten. Sollte dieser Fehler häufiger auftreten, melde dies bitte in einem Bugreport Ticket!").color(PluginColor.RED)));
+    player.sendMessage("using extra");
+    return previousLocation.clone().add(OFFSETS[0]).getBlock();
   }
+
+
+
 
   private Location getRandomLocationInRegion(World world) {
     Location posOne = jumpAndRun.getPosOne();
@@ -298,14 +353,33 @@ public class JumpAndRunProvider {
       futures.add(future);
     }
 
+    for (UUID player : sounds.synchronous().asMap().keySet()) {
+      CompletableFuture<Void> future = saveSound(player);
+      futures.add(future);
+    }
+
     for (UUID player : highScores.synchronous().asMap().keySet()) {
       CompletableFuture<Void> future = saveHighScore(player);
       futures.add(future);
     }
+
+    for (UUID player : trys.synchronous().asMap().keySet()) {
+      CompletableFuture<Void> future = saveTrys(player);
+      futures.add(future);
+    }
+
     CompletableFuture<Void> allSaves = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
 
     allSaves.join();
     this.removeAll();
+  }
+
+  public CompletableFuture<Integer> queryTrys(UUID player) {
+    return trys.get(player, Database::getTrys);
+  }
+
+  public CompletableFuture<Boolean> querySound(UUID player) {
+    return sounds.get(player, Database::getSound);
   }
 
   public CompletableFuture<Integer> queryPoints(UUID player) {
@@ -314,6 +388,20 @@ public class JumpAndRunProvider {
 
   public CompletableFuture<Integer> queryHighScore(UUID player) {
     return highScores.get(player, Database::getHighScore);
+  }
+
+  public CompletableFuture<Void> saveSound(UUID player) {
+    return this.querySound(player).thenCompose(sound -> CompletableFuture.runAsync(() -> Database.saveSound(player, sound)).thenRun(() -> this.sounds.synchronous().invalidate(player)));
+  }
+
+  public CompletableFuture<Void> saveTrys(UUID player) {
+    return this.queryTrys(player).thenCompose(points -> {
+      if (points == null) {
+        return CompletableFuture.completedFuture(null);
+      }
+
+      return CompletableFuture.runAsync(() -> Database.saveTrys(player, points)).thenRun(() -> this.trys.synchronous().invalidate(player));
+    });
   }
 
   public CompletableFuture<Void> savePoints(UUID player) {
@@ -336,6 +424,10 @@ public class JumpAndRunProvider {
     });
   }
 
+  public void setSound(Player player, Boolean value) {
+    this.sounds.synchronous().put(player.getUniqueId(), value);
+  }
+
 
   public void addPoint(Player player) {
     points.get(player.getUniqueId(), Database::getPoints).thenAccept(points -> {
@@ -345,7 +437,18 @@ public class JumpAndRunProvider {
 
     currentPoints.compute(player, (p, curPts) -> curPts == null ? 1 : curPts + 1);
 
-    player.playSound(Sound.sound(Key.key("block.note_block.bit"), Source.MASTER, 100f, 0), Emitter.self());
+    this.querySound(player.getUniqueId()).thenAccept(sound -> {
+      if(!sound){
+        player.playSound(Sound.sound(Key.key("entity.experience_orb.pickup"), Source.MASTER, 100f, 1), Emitter.self());
+      }
+    });
+  }
+
+  public void addTry(Player player) {
+    this.queryTrys(player.getUniqueId()).thenAccept(trys -> {
+      int newTrys = (trys == null) ? 1 : trys + 1;
+      this.trys.synchronous().put(player.getUniqueId(), newTrys);
+    });
   }
 
   public void checkHighScore(Player player) {
@@ -367,28 +470,16 @@ public class JumpAndRunProvider {
         awaitingHighScores.remove(player);
         highScores.synchronous().put(player.getUniqueId(), currentScore);
 
-        player.sendMessage(PluginInstance.prefix().append(
-            Component.text(String.format("Du hast deinen Highscore gebrochen! Dein neuer Highscore ist %s!", currentScore))));
-        player.playSound(Sound.sound(Key.key("item.totem.use"), Source.MASTER, 100f, 1f), Emitter.self());
+        player.sendMessage(PluginInstance.prefix().append(Component.text(String.format("Du hast deinen Highscore gebrochen! Dein neuer Highscore ist %s!", currentScore))));
+
+        this.querySound(player.getUniqueId()).thenAccept(sound -> {
+          if(!sound){
+            player.playSound(Sound.sound(Key.key("item.totem.use"), Source.MASTER, 100f, 1f), Emitter.self());
+          }
+        });
 
         player.showTitle(Title.title(Component.text("Rekord!").color(PluginColor.BLUE_MID), Component.text("Du hast einen neuen persönlichen Rekord aufgestellt.").color(PluginColor.DARK_GRAY), Times.times(
             Duration.of(1, ChronoUnit.SECONDS), Duration.of(2, ChronoUnit.SECONDS), Duration.of(1, ChronoUnit.SECONDS))));
-
-        /*
-        Firework firework = player.getWorld().spawn(player.getLocation(), Firework.class);
-        FireworkMeta meta = firework.getFireworkMeta();
-        FireworkEffect effect = FireworkEffect.builder()
-            .withFade(Color.fromRGB(187, 214, 223), Color.fromRGB(217, 242, 246), Color.fromRGB(180, 220, 231), Color.fromRGB(200, 224, 232))
-            .withColor(Color.fromRGB(187, 214, 223), Color.fromRGB(217, 242, 246), Color.fromRGB(180, 220, 231), Color.fromRGB(200, 224, 232))
-            .trail(true)
-            .build();
-
-        meta.setPower(2);
-        meta.clearEffects();
-        meta.addEffect(effect);
-        firework.setFireworkMeta(meta);
-        firework.detonate();
-        */
       }
     });
   }
@@ -397,12 +488,13 @@ public class JumpAndRunProvider {
   public void onQuit(Player player) {
     this.saveHighScore(player.getUniqueId());
     this.savePoints(player.getUniqueId());
+    this.saveTrys(player.getUniqueId());
 
     this.currentPoints.remove(player);
     this.awaitingHighScores.remove(player);
 
 
-    if(this.isJumping(player)){
+    if(this.isJumping(player)) {
       this.remove(player);
     }
   }

@@ -43,7 +43,7 @@ public class PluginInstance extends JavaPlugin {
     PluginConfig.save(jumpAndRunProvider.jumpAndRun());
   }
 
-  public static PluginInstance instance(){
+  public static PluginInstance instance() {
     return getPlugin(PluginInstance.class);
   }
 }

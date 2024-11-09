@@ -32,14 +32,15 @@ public class Database {
 
   private static void createTable() {
     String query = """
-            CREATE TABLE IF NOT EXISTS players (
+            CREATE TABLE IF NOT EXISTS jumpandrun (
                 uuid VARCHAR(36) NOT NULL PRIMARY KEY,
                 points INT DEFAULT 0,
+                trys INT DEFAULT 0,
+                sound TINYINT(1) DEFAULT TRUE,
                 high_score INT DEFAULT 0
             )""";
 
-    try (Connection connection = dataSource.getConnection();
-        PreparedStatement statement = connection.prepareStatement(query)) {
+    try (Connection connection = dataSource.getConnection(); PreparedStatement statement = connection.prepareStatement(query)) {
       statement.executeUpdate();
     } catch (SQLException e) {
       Bukkit.getConsoleSender().sendMessage(e.getMessage());
@@ -52,9 +53,28 @@ public class Database {
     }
   }
 
+  public static Integer getTrys(UUID uuid) {
+    Integer trys = null;
+    String query = "SELECT trys FROM jumpandrun WHERE uuid = ?";
+
+    try (Connection connection = dataSource.getConnection();
+        PreparedStatement statement = connection.prepareStatement(query)) {
+      statement.setString(1, uuid.toString());
+      ResultSet result = statement.executeQuery();
+
+      if (result.next()) {
+        trys = result.getInt("trys");
+      }
+    } catch (SQLException e) {
+      Bukkit.getConsoleSender().sendMessage(e.getMessage());
+    }
+
+    return trys;
+  }
+
   public static Integer getPoints(UUID uuid) {
     Integer points = null;
-    String query = "SELECT points FROM players WHERE uuid = ?";
+    String query = "SELECT points FROM jumpandrun WHERE uuid = ?";
 
     try (Connection connection = dataSource.getConnection();
         PreparedStatement statement = connection.prepareStatement(query)) {
@@ -73,7 +93,7 @@ public class Database {
 
   public static Integer getHighScore(UUID uuid) {
     Integer highScore = null;
-    String query = "SELECT high_score FROM players WHERE uuid = ?";
+    String query = "SELECT high_score FROM jumpandrun WHERE uuid = ?";
 
     try (Connection connection = dataSource.getConnection();
         PreparedStatement statement = connection.prepareStatement(query)) {
@@ -90,8 +110,39 @@ public class Database {
     return highScore;
   }
 
+  public static Boolean getSound(UUID uuid) {
+    String query = "SELECT sound FROM jumpandrun WHERE uuid = ?";
+
+    try (Connection connection = dataSource.getConnection(); PreparedStatement statement = connection.prepareStatement(query)) {
+      statement.setString(1, uuid.toString());
+      ResultSet result = statement.executeQuery();
+
+      if (result.next()) {
+        return result.getBoolean("sound");
+      }
+    } catch (SQLException e) {
+      Bukkit.getConsoleSender().sendMessage(e.getMessage());
+    }
+
+    return null;
+  }
+
+  public static void saveSound(UUID uuid, Boolean value) {
+    String query = "INSERT INTO jumpandrun (uuid, sound) VALUES (?, ?) ON DUPLICATE KEY UPDATE sound = ?";
+
+    try (Connection connection = dataSource.getConnection();
+        PreparedStatement statement = connection.prepareStatement(query)) {
+      statement.setString(1, uuid.toString());
+      statement.setBoolean(2, value);
+      statement.setBoolean(3, value);
+      statement.executeUpdate();
+    } catch (SQLException e) {
+      Bukkit.getConsoleSender().sendMessage(e.getMessage());
+    }
+  }
+
   public static void savePoints(UUID uuid, Integer points) {
-    String query = "INSERT INTO players (uuid, points) VALUES (?, ?) ON DUPLICATE KEY UPDATE points = ?";
+    String query = "INSERT INTO jumpandrun (uuid, points) VALUES (?, ?) ON DUPLICATE KEY UPDATE points = ?";
 
     try (Connection connection = dataSource.getConnection();
         PreparedStatement statement = connection.prepareStatement(query)) {
@@ -104,8 +155,22 @@ public class Database {
     }
   }
 
+  public static void saveTrys(UUID uuid, Integer trys) {
+    String query = "INSERT INTO jumpandrun (uuid, trys) VALUES (?, ?) ON DUPLICATE KEY UPDATE trys = ?";
+
+    try (Connection connection = dataSource.getConnection();
+        PreparedStatement statement = connection.prepareStatement(query)) {
+      statement.setString(1, uuid.toString());
+      statement.setInt(2, trys);
+      statement.setInt(3, trys);
+      statement.executeUpdate();
+    } catch (SQLException e) {
+      Bukkit.getConsoleSender().sendMessage(e.getMessage());
+    }
+  }
+
   public static void saveHighScore(UUID uuid, Integer highScore) {
-    String query = "INSERT INTO players (uuid, high_score) VALUES (?, ?) ON DUPLICATE KEY UPDATE high_score = ?";
+    String query = "INSERT INTO jumpandrun (uuid, high_score) VALUES (?, ?) ON DUPLICATE KEY UPDATE high_score = ?";
 
     try (Connection connection = dataSource.getConnection();
         PreparedStatement statement = connection.prepareStatement(query)) {
