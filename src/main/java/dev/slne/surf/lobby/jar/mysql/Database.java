@@ -2,16 +2,20 @@ package dev.slne.surf.lobby.jar.mysql;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+
 import dev.slne.surf.lobby.jar.PluginInstance;
 import dev.slne.surf.lobby.jar.config.PluginConfig;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+
 import java.util.UUID;
+
 import org.bukkit.Bukkit;
 
 public class Database {
@@ -19,6 +23,7 @@ public class Database {
 
   public static void createConnection() {
     HikariConfig config = new HikariConfig();
+
     config.setJdbcUrl(PluginConfig.config().getString("mysql.url"));
     config.setUsername(PluginConfig.config().getString("mysql.user"));
     config.setPassword(PluginConfig.config().getString("mysql.password"));

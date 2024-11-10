@@ -6,11 +6,13 @@ import dev.slne.surf.lobby.jar.config.PluginConfig;
 import dev.slne.surf.lobby.jar.mysql.Database;
 import dev.slne.surf.lobby.jar.papi.ParkourPlaceholderExtension;
 import dev.slne.surf.lobby.jar.util.PluginColor;
+
 import lombok.Getter;
 import lombok.experimental.Accessors;
-import me.clip.placeholderapi.PlaceholderAPIPlugin;
+
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 

@@ -1,6 +1,7 @@
 package dev.slne.surf.lobby.jar;
 
 import com.github.benmanes.caffeine.cache.AsyncCache;
+import com.github.benmanes.caffeine.cache.AsyncLoadingCache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 
 import dev.slne.surf.lobby.jar.config.PluginConfig;
@@ -49,16 +50,16 @@ public class JumpAndRunProvider {
   private final Object2ObjectMap<Player, Material> blocks = new Object2ObjectOpenHashMap<>();
   private final Object2ObjectMap<Player, Integer> currentPoints = new Object2ObjectOpenHashMap<>();
 
-  private final AsyncCache<UUID, Integer> points = Caffeine.newBuilder()
+  private final AsyncLoadingCache<UUID, Integer> points = Caffeine.newBuilder()
       .buildAsync(Database::getPoints);
 
-  private final AsyncCache<UUID, Integer> highScores = Caffeine.newBuilder()
+  private final AsyncLoadingCache<UUID, Integer> highScores = Caffeine.newBuilder()
       .buildAsync(Database::getHighScore);
 
-  private final AsyncCache<UUID, Integer> trys = Caffeine.newBuilder()
+  private final AsyncLoadingCache<UUID, Integer> trys = Caffeine.newBuilder()
       .buildAsync(Database::getTrys);
 
-  private final AsyncCache<UUID, Boolean> sounds = Caffeine.newBuilder()
+  private final AsyncLoadingCache<UUID, Boolean> sounds = Caffeine.newBuilder()
       .buildAsync(Database::getSound);
 
   private BukkitRunnable runnable;
@@ -375,19 +376,19 @@ public class JumpAndRunProvider {
   }
 
   public CompletableFuture<Integer> queryTrys(UUID player) {
-    return trys.get(player, Database::getTrys);
+    return trys.get(player);
   }
 
   public CompletableFuture<Boolean> querySound(UUID player) {
-    return sounds.get(player, Database::getSound);
+    return sounds.get(player);
   }
 
   public CompletableFuture<Integer> queryPoints(UUID player) {
-    return points.get(player, Database::getPoints);
+    return points.get(player);
   }
 
   public CompletableFuture<Integer> queryHighScore(UUID player) {
-    return highScores.get(player, Database::getHighScore);
+    return highScores.get(player);
   }
 
   public CompletableFuture<Void> saveSound(UUID player) {
@@ -430,7 +431,7 @@ public class JumpAndRunProvider {
 
 
   public void addPoint(Player player) {
-    points.get(player.getUniqueId(), Database::getPoints).thenAccept(points -> {
+    points.get(player.getUniqueId()).thenAccept(points -> {
       int newPoints = (points == null) ? 1 : points + 1;
       this.points.synchronous().put(player.getUniqueId(), newPoints);
     });
