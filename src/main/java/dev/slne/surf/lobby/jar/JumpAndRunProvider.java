@@ -133,16 +133,17 @@ public class JumpAndRunProvider {
     Location start = getRandomLocationInRegion(player.getWorld()).add(0, 1, 0);
     Block block = start.getBlock();
 
-    Block next = getValidBlock(start, player);
-    Block next2 = getValidBlock(next.getLocation(), player);
-
     Material material = jumpAndRun.getMaterials().get(random.nextInt(jumpAndRun.getMaterials().size()));
 
     block.setType(material);
     latestJumps.get(player)[0] = block;
 
+    Block next = this.getValidBlock(start, player);
+
     next.setType(Material.SEA_LANTERN);
     latestJumps.get(player)[1] = next;
+
+    Block next2 = this.getValidBlock(next.getLocation(), player);
 
     next2.setType(material);
     latestJumps.get(player)[2] = next2;

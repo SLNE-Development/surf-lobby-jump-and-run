@@ -130,9 +130,10 @@ public class Database {
       }
     } catch (SQLException e) {
       Bukkit.getConsoleSender().sendMessage(e.getMessage());
+      return true;
     }
 
-    return null;
+    return true;
   }
 
   public static void saveSound(UUID uuid, Boolean value) {
