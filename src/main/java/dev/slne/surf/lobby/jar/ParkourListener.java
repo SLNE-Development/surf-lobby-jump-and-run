@@ -16,7 +16,7 @@ public class ParkourListener implements Listener {
     Player player = event.getPlayer();
     Block[] jumps = this.jumpAndRunProvider.getLatestJumps(player);
 
-    if(event.getTo().getBlock().getLocation().equals(jumpAndRunProvider.jumpAndRun().getStart().getBlock().getLocation())){
+    if(event.getTo().getBlock().getLocation().equals(jumpAndRunProvider.jumpAndRun().getStart().getBlock().getLocation())) {
       jumpAndRunProvider.start(player);
       return;
     }
@@ -29,7 +29,7 @@ public class ParkourListener implements Listener {
       return;
     }
 
-    if(player.getLocation().getY() < jumps[0].getLocation().getY() && player.getLocation().getY() < jumps[1].getLocation().getY()){
+    if(player.getLocation().getY() < jumps[0].getLocation().getY() && player.getLocation().getY() < jumps[1].getLocation().getY()) {
       jumpAndRunProvider.remove(player);
       return;
     }
