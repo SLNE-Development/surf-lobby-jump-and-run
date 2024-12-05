@@ -152,8 +152,6 @@ public class JumpAndRunProvider {
     blocks.put(player, material);
   }
 
-
-
   public void startActionbar(){
     runnable = new BukkitRunnable() {
       @Override
