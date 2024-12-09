@@ -19,14 +19,7 @@ public class ParkourStatsCommand extends CommandAPICommand {
     withOptionalArguments(new PlayerArgument("target"));
 
     executesPlayer((player, args) -> {
-      Player t = args.getUnchecked("target");
-      Player target;
-
-      if(t == null) {
-        target = player;
-      } else {
-        target = t;
-      }
+      Player target = args.getOrDefaultUnchecked("target", player);
 
       provider.queryHighScore(target.getUniqueId()).thenAccept(highScore -> {
         provider.queryPoints(target.getUniqueId()).thenAccept(points -> {
