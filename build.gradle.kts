@@ -68,6 +68,11 @@ java {
 tasks {
     runServer {
         minecraftVersion("1.21.1")
+
+        downloadPlugins {
+            hangar("CommandAPI", "9.7.0")
+            hangar("PlaceholderAPI", "2.11.6")
+        }
     }
     shadowJar {
         archiveClassifier = ""
