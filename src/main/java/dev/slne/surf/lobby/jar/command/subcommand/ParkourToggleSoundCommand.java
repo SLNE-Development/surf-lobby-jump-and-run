@@ -12,6 +12,7 @@ public class ParkourToggleSoundCommand extends CommandAPICommand {
 
   public ParkourToggleSoundCommand(String commandName) {
     super(commandName);
+    withPermission("jumpandrun.command.toggle");
 
     executesPlayer((player, args) -> {
       provider.querySound(player.getUniqueId()).thenAccept(sound -> {

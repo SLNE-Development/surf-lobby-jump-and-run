@@ -13,6 +13,7 @@ public class ParkourSettingMaterialListCommand extends CommandAPICommand {
 
   public ParkourSettingMaterialListCommand(String commandName) {
     super(commandName);
+    withPermission("jumpandrun.command.setting.listmaterial");
 
     executesPlayer((player, args) -> {
       StringBuilder message = new StringBuilder("Materialien im Jump And Run: <gray>(<yellow>" + provider.jumpAndRun().getMaterials().size() + "<gray>) <white>");

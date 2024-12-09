@@ -12,7 +12,7 @@ public class ParkourCommand extends CommandAPICommand {
   public ParkourCommand(String commandName) {
     super(commandName);
 
-    withPermission("surf.lobby.jar.jumpandrun.command");
+    withPermission("jumpandrun.command");
 
     withSubcommand(new ParkourSettingCommand("setting"));
     withSubcommand(new ParkourStartCommand("start"));

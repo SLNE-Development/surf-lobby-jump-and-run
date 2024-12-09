@@ -11,6 +11,8 @@ public class ParkourSettingAreaCommand extends CommandAPICommand {
   public ParkourSettingAreaCommand(String commandName) {
     super(commandName);
 
+    withPermission("jumpandrun.command.setting.area");
+
     withArguments(new LocationArgument("pos1"));
     withArguments(new LocationArgument("pos2"));
 

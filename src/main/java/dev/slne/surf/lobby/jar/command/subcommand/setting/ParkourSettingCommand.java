@@ -7,7 +7,7 @@ public class ParkourSettingCommand extends CommandAPICommand {
   public ParkourSettingCommand(String commandName) {
     super(commandName);
 
-    withPermission("surf.lobby.jar.jumpandrun.command.setting");
+    withPermission("jumpandrun.command.setting");
 
     withSubcommand(new ParkourSettingAreaCommand("setArea"));
     withSubcommand(new ParkourSettingSpawnCommand("setSpawn"));

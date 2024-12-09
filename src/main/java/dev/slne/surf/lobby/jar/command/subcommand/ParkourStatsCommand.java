@@ -14,6 +14,7 @@ public class ParkourStatsCommand extends CommandAPICommand {
 
   public ParkourStatsCommand(String commandName) {
     super(commandName);
+    withPermission("jumpandrun.command.stats");
 
     withArguments(new PlayerArgument("target").setOptional(true));
 

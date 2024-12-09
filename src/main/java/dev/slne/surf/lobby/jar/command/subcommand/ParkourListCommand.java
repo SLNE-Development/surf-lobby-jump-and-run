@@ -12,6 +12,8 @@ public class ParkourListCommand extends CommandAPICommand {
   public ParkourListCommand(String commandName) {
     super(commandName);
 
+    withPermission("jumpandrun.command.list");
+
     executesPlayer((player, args) -> {
       StringBuilder message = new StringBuilder(provider.jumpAndRun().getPlayers().isEmpty() ? "Aktuell sind <yellow> keine Spieler<white> im Jump And Run." : "Aktuell sind <yellow>" + provider.jumpAndRun().getPlayers().size() + " Spieler<white> im Jump And Run: ");
       int current = 0;

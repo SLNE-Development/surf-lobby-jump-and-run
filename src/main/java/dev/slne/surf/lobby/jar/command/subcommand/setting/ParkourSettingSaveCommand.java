@@ -12,6 +12,8 @@ public class ParkourSettingSaveCommand extends CommandAPICommand {
   public ParkourSettingSaveCommand(String commandName) {
     super(commandName);
 
+    withPermission("jumpandrun.command.setting.save");
+
     executesPlayer((player, args) -> {
       PluginConfig.save(PluginInstance.instance().jumpAndRunProvider().jumpAndRun());
 

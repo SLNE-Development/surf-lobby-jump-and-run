@@ -18,6 +18,7 @@ public class ParkourSettingMaterialRemoveCommand extends CommandAPICommand {
 
   public ParkourSettingMaterialRemoveCommand(String commandName) {
     super(commandName);
+    withPermission("jumpandrun.command.setting.removematerial");
 
     withArguments(new StringArgument("material").replaceSuggestions(ArgumentSuggestions.strings(Arrays.stream(Material.values()).map(Material::name).collect(Collectors.toList()))));
 

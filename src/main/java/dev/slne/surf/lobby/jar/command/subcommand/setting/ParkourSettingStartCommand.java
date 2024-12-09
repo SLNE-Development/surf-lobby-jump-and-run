@@ -11,6 +11,8 @@ public class ParkourSettingStartCommand extends CommandAPICommand {
   public ParkourSettingStartCommand(String commandName) {
     super(commandName);
 
+    withPermission("jumpandrun.command.setting.setStart");
+
     withArguments(new LocationArgument("pos"));
 
     executesPlayer((player, args) -> {

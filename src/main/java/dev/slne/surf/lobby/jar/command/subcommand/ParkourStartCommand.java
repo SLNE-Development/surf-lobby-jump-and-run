@@ -9,6 +9,8 @@ public class ParkourStartCommand extends CommandAPICommand {
   public ParkourStartCommand(String commandName) {
     super(commandName);
 
+    withPermission("jumpandrun.command.start");
+
     executesPlayer((player, args) -> {
       PluginInstance.instance().jumpAndRunProvider().start(player);
     });

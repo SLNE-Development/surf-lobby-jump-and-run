@@ -13,6 +13,8 @@ public class ParkourSettingSpawnCommand extends CommandAPICommand {
 
     withArguments(new LocationArgument("pos"));
 
+    withPermission("jumpandrun.command.setting.setSpawn");
+
     executesPlayer((player, args) -> {
       Location pos = args.getUnchecked("pos");
 
