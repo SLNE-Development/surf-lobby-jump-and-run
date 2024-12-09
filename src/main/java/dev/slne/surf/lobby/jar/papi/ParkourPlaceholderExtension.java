@@ -117,7 +117,7 @@ public class ParkourPlaceholderExtension extends PlaceholderExpansion {
     return points
         .entrySet()
         .stream()
-        .sorted((entry1, entry2) -> entry2.getValue().compareTo(entry1.getValue()))
+        .sorted(Comparator.comparingInt(Entry::getValue))
         .map(Entry::getKey)
         .collect(Collectors.toCollection(ObjectArrayList::new));
   }
