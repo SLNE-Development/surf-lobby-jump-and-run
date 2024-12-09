@@ -3,7 +3,8 @@ package dev.slne.surf.lobby.jar.command.subcommand;
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.slne.surf.lobby.jar.JumpAndRunProvider;
 import dev.slne.surf.lobby.jar.PluginInstance;
-import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.entity.Player;
 
 public class ParkourListCommand extends CommandAPICommand {
@@ -15,20 +16,40 @@ public class ParkourListCommand extends CommandAPICommand {
     withPermission("jumpandrun.command.list");
 
     executesPlayer((player, args) -> {
-      StringBuilder message = new StringBuilder(provider.jumpAndRun().getPlayers().isEmpty() ? "Aktuell sind <yellow> keine Spieler<white> im Jump And Run." : "Aktuell sind <yellow>" + provider.jumpAndRun().getPlayers().size() + " Spieler<white> im Jump And Run: ");
-      int current = 0;
+      int playerCount = provider.jumpAndRun().getPlayers().size();
 
-      for(Player target : provider.jumpAndRun().getPlayers()){
-        current ++;
-
-        if(current == provider.jumpAndRun().getPlayers().size()){
-          message.append("<white>").append(target.getName()).append(" <gray>(").append("<yellow>").append(provider.currentPoints().get(target)).append("<gray>)");
-        }else{
-          message.append("<white>").append(target.getName()).append(" <gray>(").append("<yellow>").append(provider.currentPoints().get(target)).append("<gray>), ");
-        }
+      if (playerCount == 0) {
+        player.sendMessage(PluginInstance.prefix()
+            .append(Component.text("Aktuell sind ", NamedTextColor.GRAY)
+            .append(Component.text("keine Spieler", NamedTextColor.YELLOW))
+            .append(Component.text(" im Jump And Run.", NamedTextColor.WHITE)))
+        );
+        return;
       }
 
-      player.sendMessage(PluginInstance.prefix().append(MiniMessage.miniMessage().deserialize(message.toString())));
+      Component header = Component.text("Aktuell sind ", NamedTextColor.GRAY)
+          .append(Component.text(playerCount + " Spieler", NamedTextColor.YELLOW))
+          .append(Component.text(" im Jump And Run: ", NamedTextColor.WHITE));
+
+      Component playerList = Component.empty();
+      int current = 0;
+
+      for (Player target : provider.jumpAndRun().getPlayers()) {
+        current++;
+
+        Component playerComponent = Component.text(target.getName(), NamedTextColor.WHITE)
+            .append(Component.text(" (", NamedTextColor.GRAY))
+            .append(Component.text(provider.currentPoints().get(target), NamedTextColor.YELLOW))
+            .append(Component.text(")", NamedTextColor.GRAY));
+
+        if (current < playerCount) {
+          playerComponent = playerComponent.append(Component.text(", ", NamedTextColor.GRAY));
+        }
+
+        playerList = playerList.append(playerComponent);
+      }
+
+      player.sendMessage(PluginInstance.prefix().append(header.append(playerList)));
     });
   }
 }

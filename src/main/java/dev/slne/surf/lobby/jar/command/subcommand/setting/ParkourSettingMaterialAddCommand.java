@@ -19,6 +19,7 @@ public class ParkourSettingMaterialAddCommand extends CommandAPICommand {
     super(commandName);
 
     withPermission("jumpandrun.command.setting.addmaterial");
+
     withArguments(new StringArgument("material").replaceSuggestions(ArgumentSuggestions.strings(Arrays.stream(Material.values()).map(Material::name).collect(Collectors.toList()))));
 
     executesPlayer((player, args) -> {
