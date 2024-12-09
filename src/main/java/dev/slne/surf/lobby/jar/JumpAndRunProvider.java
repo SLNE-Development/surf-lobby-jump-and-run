@@ -483,7 +483,7 @@ public class JumpAndRunProvider {
 
         this.querySound(player.getUniqueId()).thenAccept(sound -> {
           if(!sound){
-            player.playSound(Sound.sound(Key.key("item.totem.use"), Source.MASTER, 100f, 1f), Emitter.self());
+            player.playSound(Sound.sound(org.bukkit.Sound.ITEM_TOTEM_USE, Source.MASTER, 100f, 1f), Emitter.self());
           }
         });
 
