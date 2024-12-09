@@ -487,8 +487,8 @@ public class JumpAndRunProvider {
           }
         });
 
-        player.showTitle(Title.title(Component.text("Rekord!").color(PluginColor.BLUE_MID), Component.text("Du hast einen neuen persönlichen Rekord aufgestellt.").color(PluginColor.DARK_GRAY), Times.times(
-            Duration.of(1, ChronoUnit.SECONDS), Duration.of(2, ChronoUnit.SECONDS), Duration.of(1, ChronoUnit.SECONDS))));
+        player.showTitle(Title.title(Component.text("Rekord!", PluginColor.BLUE_MID), Component.text("Du hast einen neuen persönlichen Rekord aufgestellt.", PluginColor.DARK_GRAY), Times.times(
+            Duration.ofSeconds(1), Duration.ofSeconds(2), Duration.ofSeconds(1))));
       }
     });
   }
