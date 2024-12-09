@@ -5,6 +5,7 @@ plugins {
     id("net.minecrell.plugin-yml.paper") version "0.6.0"
     id("com.gradleup.shadow") version "8.3.0"
     id ("io.freefair.lombok") version "8.10"
+    id("xyz.jpenilla.run-paper") version "2.3.1"
 }
 
 group = "dev.slne"
@@ -57,6 +58,10 @@ paper {
             required = false
         }
     }
+}
+
+tasks.runServer {
+    minecraftVersion("1.21.1")
 }
 
 tasks.shadowJar {
