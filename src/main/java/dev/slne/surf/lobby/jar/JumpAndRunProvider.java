@@ -160,7 +160,8 @@ public class JumpAndRunProvider {
       @Override
       public void run() {
         jumpAndRun.getPlayers().forEach(player -> {
-          player.sendActionBar(Component.text(currentPoints.get(player)).color(PluginColor.BLUE_MID).append(Component.text(" Spr\u00FCnge").color(PluginColor.DARK_GRAY)));
+          player.sendActionBar(Component.text(currentPoints.get(player), PluginColor.BLUE_MID)
+              .append(Component.text(" Spr\u00FCnge", PluginColor.DARK_GRAY)));
         });
       }
     };
