@@ -1,7 +1,6 @@
 package dev.slne.surf.lobby.jar.config;
 
 import dev.slne.surf.lobby.jar.JumpAndRun;
-import dev.slne.surf.lobby.jar.JumpAndRunProvider;
 import dev.slne.surf.lobby.jar.PluginInstance;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
@@ -14,8 +13,6 @@ import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 
 public class PluginConfig {
-  private static final JumpAndRunProvider provider = PluginInstance.instance().jumpAndRunProvider();
-
   public static FileConfiguration config() {
     return PluginInstance.instance().getConfig();
   }
@@ -27,7 +24,7 @@ public class PluginConfig {
   public static void save(JumpAndRun jumpAndRun) {
     FileConfiguration config = config();
     ObjectList<String> materialNames = new ObjectArrayList<>();
-    String path = "settings.";
+    String path = "settings.arena";
 
     for (Material material : jumpAndRun.getMaterials()) {
       materialNames.add(material.name());
@@ -47,7 +44,7 @@ public class PluginConfig {
   public static JumpAndRun loadJumpAndRun() {
     createConfig();
 
-    String path = "settings.";
+    String path = "settings.arena";
     Location posOne = getLocation(path + "posOne");
     Location posTwo = getLocation(path + "posTwo");
     Location spawn = getLocation(path + "spawn");
