@@ -12,6 +12,8 @@ public class ParkourListener implements Listener {
 
   @EventHandler
   public void onMove(PlayerMoveEvent event) {
+    if (!event.hasChangedPosition()) return;
+
     Block block = event.getTo().clone().subtract(0, 1, 0).getBlock();
     Player player = event.getPlayer();
     Block[] jumps = this.jumpAndRunProvider.getLatestJumps(player);
