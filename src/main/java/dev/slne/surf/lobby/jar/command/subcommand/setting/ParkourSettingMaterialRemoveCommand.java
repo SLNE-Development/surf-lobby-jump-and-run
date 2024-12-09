@@ -7,6 +7,7 @@ import dev.jorel.commandapi.arguments.StringArgument;
 
 import dev.slne.surf.lobby.jar.PluginInstance;
 
+import dev.slne.surf.lobby.jar.command.argument.MaterialArgument;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
@@ -19,11 +20,10 @@ public class ParkourSettingMaterialRemoveCommand extends CommandAPICommand {
   public ParkourSettingMaterialRemoveCommand(String commandName) {
     super(commandName);
     withPermission("jumpandrun.command.setting.removematerial");
-
-    withArguments(new StringArgument("material").replaceSuggestions(ArgumentSuggestions.strings(Arrays.stream(Material.values()).map(Material::name).collect(Collectors.toList()))));
+    withArguments(MaterialArgument.argument("material"));
 
     executesPlayer((player, args) -> {
-      Material material = Material.getMaterial(args.getUnchecked("material"));
+      Material material = args.getUnchecked("material");
 
       if(material == null){
         throw CommandAPI.failWithString("Das Material wurde nicht gefunden.");
