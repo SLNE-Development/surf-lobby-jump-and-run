@@ -448,7 +448,7 @@ public class JumpAndRunProvider {
 
     this.querySound(player.getUniqueId()).thenAccept(sound -> {
       if(!sound){
-        player.playSound(Sound.sound(Key.key("entity.experience_orb.pickup"), Source.MASTER, 100f, 1), Emitter.self());
+        player.playSound(Sound.sound(org.bukkit.Sound.ENTITY_EXPERIENCE_ORB_PICKUP, Source.MASTER, 100f, 1), Emitter.self());
       }
     });
   }
