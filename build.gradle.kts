@@ -19,6 +19,8 @@ repositories {
 
     maven ("https://repo.codemc.org/repository/maven-public/")
     maven ("https://repo.extendedclip.com/content/repositories/placeholderapi/")
+
+    maven ("https://maven.enginehub.org/repo/")
 }
 
 dependencies {
@@ -30,6 +32,7 @@ dependencies {
     implementation ("com.zaxxer:HikariCP:5.0.1")
     implementation ("mysql:mysql-connector-java:8.0.33")
     implementation("com.github.ben-manes.caffeine:caffeine:3.1.8")
+    implementation ("com.sk89q.worldedit:worldedit-bukkit:7.2.0-SNAPSHOT")
 }
 
 

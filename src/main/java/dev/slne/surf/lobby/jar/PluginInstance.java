@@ -1,5 +1,6 @@
 package dev.slne.surf.lobby.jar;
 
+import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import dev.slne.surf.lobby.jar.command.ParkourCommand;
 import dev.slne.surf.lobby.jar.command.subcommand.ParkourStatsCommand;
 import dev.slne.surf.lobby.jar.config.PluginConfig;
@@ -20,6 +21,9 @@ import org.bukkit.plugin.java.JavaPlugin;
 @Accessors(fluent = true)
 public class PluginInstance extends JavaPlugin {
   private JumpAndRunProvider jumpAndRunProvider;
+  private WorldEditPlugin worldEditPlugin;
+  private Boolean worldedit;
+
 
   @Getter
   private static final Component prefix = Component.text(">> ").color(NamedTextColor.GRAY)
@@ -32,6 +36,7 @@ public class PluginInstance extends JavaPlugin {
     this.jumpAndRunProvider.startActionbar();
 
     this.handlePlaceholderAPI();
+    this.handeWorldEdit();
 
     new ParkourCommand("parkour").register();
     new ParkourStatsCommand("stats").register();
@@ -57,5 +62,9 @@ public class PluginInstance extends JavaPlugin {
     if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
       new ParkourPlaceholderExtension().register();
     }
+  }
+
+  private void handeWorldEdit(){
+    this.worldedit = Bukkit.getPluginManager().isPluginEnabled("WorldEdit");
   }
 }
