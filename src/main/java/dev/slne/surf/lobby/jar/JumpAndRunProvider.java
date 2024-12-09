@@ -124,6 +124,9 @@ public class JumpAndRunProvider {
       }
 
       player.sendMessage(PluginInstance.prefix().append(Component.text(String.format("Du bist nun im Parkour. Springe so weit wie möglich, versuche deinen Highscore von %s zu brechen!", highScore))));
+    }).exceptionally(throwable -> {
+      // TODO: Handle exception
+      return null;
     });
   }
 
