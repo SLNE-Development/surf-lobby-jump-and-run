@@ -48,7 +48,7 @@ public class PluginInstance extends JavaPlugin {
   @Override
   public void onDisable() {
     this.jumpAndRunProvider.stopActionbar();
-    this.jumpAndRunProvider.saveAll();
+    this.jumpAndRunProvider.saveAll().join();
 
     Database.closeConnection();
     PluginConfig.save(jumpAndRunProvider.jumpAndRun());

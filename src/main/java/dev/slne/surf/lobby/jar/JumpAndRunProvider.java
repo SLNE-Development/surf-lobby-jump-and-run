@@ -21,12 +21,14 @@ import java.util.concurrent.CompletableFuture;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 
+import lombok.extern.flogger.Flogger;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.sound.Sound.Emitter;
 import net.kyori.adventure.sound.Sound.Source;
 import net.kyori.adventure.text.Component;
 
+import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import net.kyori.adventure.title.Title;
 import net.kyori.adventure.title.Title.Times;
 import org.bukkit.Location;
@@ -41,7 +43,10 @@ import java.security.SecureRandom;
 
 @Getter
 @Accessors(fluent = true)
+@Flogger
 public class JumpAndRunProvider {
+
+  private static final ComponentLogger logger = ComponentLogger.logger();
 
   private final JumpAndRun jumpAndRun;
   private final SecureRandom random = new SecureRandom();
@@ -347,7 +352,7 @@ public class JumpAndRunProvider {
     }
   }
 
-  public void saveAll() {
+  public CompletableFuture<Void> saveAll() {
     ObjectList<CompletableFuture<Void>> futures = new ObjectArrayList<>();
 
     for (UUID player : points.synchronous().asMap().keySet()) {
@@ -372,8 +377,10 @@ public class JumpAndRunProvider {
 
     CompletableFuture<Void> allSaves = CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new));
 
-    allSaves.join();
-    this.removeAll();
+    return allSaves.thenRun(this::removeAll).exceptionally(throwable -> {
+      logger.error("An error occurred while saving all data", throwable);
+      return null;
+    });
   }
 
   public CompletableFuture<Integer> queryTrys(UUID player) {
