@@ -370,7 +370,7 @@ public class JumpAndRunProvider {
       futures.add(future);
     }
 
-    CompletableFuture<Void> allSaves = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
+    CompletableFuture<Void> allSaves = CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new));
 
     allSaves.join();
     this.removeAll();
