@@ -8,6 +8,7 @@ import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.world.World;
 import dev.jorel.commandapi.CommandAPICommand;
+import dev.slne.surf.lobby.jar.JumpAndRun;
 import dev.slne.surf.lobby.jar.PluginInstance;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
