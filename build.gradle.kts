@@ -24,15 +24,16 @@ repositories {
 }
 
 dependencies {
-    compileOnly("io.papermc.paper:paper-api:1.21.1-R0.1-SNAPSHOT")
+    compileOnly ("io.papermc.paper:paper-api:1.21.1-R0.1-SNAPSHOT")
     compileOnly ("dev.jorel:commandapi-bukkit-core:9.5.2")
     compileOnly ("me.clip:placeholderapi:2.11.6")
 
     implementation ("com.github.stefvanschie.inventoryframework:IF:0.10.17")
     implementation ("com.zaxxer:HikariCP:5.0.1")
     implementation ("mysql:mysql-connector-java:8.0.33")
-    implementation("com.github.ben-manes.caffeine:caffeine:3.1.8")
+    implementation ("com.github.ben-manes.caffeine:caffeine:3.1.8")
     implementation ("com.sk89q.worldedit:worldedit-bukkit:7.2.0-SNAPSHOT")
+    implementation ("org.javalite:activejdbc:3.5-j11")
 }
 
 

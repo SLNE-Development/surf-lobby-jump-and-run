@@ -1,41 +1,30 @@
 package dev.slne.surf.lobby.jar.mysql;
 
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
-
-import dev.slne.surf.lobby.jar.PluginInstance;
 import dev.slne.surf.lobby.jar.config.PluginConfig;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import org.javalite.activejdbc.Base;
+import org.javalite.activejdbc.Model;
+import org.bukkit.Bukkit;
 
 import java.util.UUID;
 
-import org.bukkit.Bukkit;
-
 public class Database {
-  private static HikariDataSource dataSource;
 
   public static void createConnection() {
-    HikariConfig config = new HikariConfig();
+    try {
+      String url = PluginConfig.config().getString("mysql.url");
+      String user = PluginConfig.config().getString("mysql.user");
+      String password = PluginConfig.config().getString("mysql.password");
 
-    config.setJdbcUrl(PluginConfig.config().getString("mysql.url"));
-    config.setUsername(PluginConfig.config().getString("mysql.user"));
-    config.setPassword(PluginConfig.config().getString("mysql.password"));
+      Base.open("com.mysql.jdbc.Driver", url, user, password);
 
-    config.addDataSourceProperty("cachePrepStmts", "true");
-    config.addDataSourceProperty("prepStmtCacheSize", "250");
-    config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
-    config.setMaximumPoolSize(10);
-    config.setMaxLifetime(600000);
-
-    dataSource = new HikariDataSource(config);
-    createTable();
+      createTable();
+    } catch (Exception e) {
+      Bukkit.getConsoleSender().sendMessage( e.getMessage());
+    }
   }
 
   private static void createTable() {
@@ -48,32 +37,29 @@ public class Database {
                 high_score INT DEFAULT 0
             )""";
 
-    try (Connection connection = dataSource.getConnection(); PreparedStatement statement = connection.prepareStatement(query)) {
-      statement.executeUpdate();
-    } catch (SQLException e) {
+    try {
+      Base.exec(query);
+    } catch (Exception e) {
       Bukkit.getConsoleSender().sendMessage(e.getMessage());
     }
   }
 
   public static void closeConnection() {
-    if (dataSource != null && !dataSource.isClosed()) {
-      dataSource.close();
+    if (Base.hasConnection()) {
+      Base.close();
     }
   }
 
   public static Integer getTrys(UUID uuid) {
     Integer trys = null;
-    String query = "SELECT trys FROM jumpandrun WHERE uuid = ?";
 
-    try (Connection connection = dataSource.getConnection();
-        PreparedStatement statement = connection.prepareStatement(query)) {
-      statement.setString(1, uuid.toString());
-      ResultSet result = statement.executeQuery();
-
-      if (result.next()) {
-        trys = result.getInt("trys");
+    try {
+      Model result = JumpAndRunModel.findFirst("uuid = ?", uuid.toString());
+      if (result != null) {
+        trys = result.getInteger("trys");
       }
-    } catch (SQLException e) {
+
+    } catch (Exception e) {
       Bukkit.getConsoleSender().sendMessage(e.getMessage());
     }
 
@@ -82,17 +68,14 @@ public class Database {
 
   public static Integer getPoints(UUID uuid) {
     Integer points = null;
-    String query = "SELECT points FROM jumpandrun WHERE uuid = ?";
 
-    try (Connection connection = dataSource.getConnection();
-        PreparedStatement statement = connection.prepareStatement(query)) {
-      statement.setString(1, uuid.toString());
-      ResultSet result = statement.executeQuery();
-
-      if (result.next()) {
-        points = result.getInt("points");
+    try {
+      Model result = JumpAndRunModel.findFirst("uuid = ?", uuid.toString());
+      if (result != null) {
+        points = result.getInteger("points");
       }
-    } catch (SQLException e) {
+
+    } catch (Exception e) {
       Bukkit.getConsoleSender().sendMessage(e.getMessage());
     }
 
@@ -101,17 +84,14 @@ public class Database {
 
   public static Integer getHighScore(UUID uuid) {
     Integer highScore = null;
-    String query = "SELECT high_score FROM jumpandrun WHERE uuid = ?";
 
-    try (Connection connection = dataSource.getConnection();
-        PreparedStatement statement = connection.prepareStatement(query)) {
-      statement.setString(1, uuid.toString());
-      ResultSet result = statement.executeQuery();
-
-      if (result.next()) {
-        highScore = result.getInt("high_score");
+    try {
+      Model result = JumpAndRunModel.findFirst("uuid = ?", uuid.toString());
+      if (result != null) {
+        highScore = result.getInteger("high_score");
       }
-    } catch (SQLException e) {
+
+    } catch (Exception e) {
       Bukkit.getConsoleSender().sendMessage(e.getMessage());
     }
 
@@ -119,122 +99,109 @@ public class Database {
   }
 
   public static Boolean getSound(UUID uuid) {
-    String query = "SELECT sound FROM jumpandrun WHERE uuid = ?";
+    Boolean sound = true;
 
-    try (Connection connection = dataSource.getConnection(); PreparedStatement statement = connection.prepareStatement(query)) {
-      statement.setString(1, uuid.toString());
-      ResultSet result = statement.executeQuery();
-
-      if (result.next()) {
-        return result.getBoolean("sound");
+    try {
+      Model result = JumpAndRunModel.findFirst("uuid = ?", uuid.toString());
+      if (result != null) {
+        sound = result.getBoolean("sound");
       }
-    } catch (SQLException e) {
+
+    } catch (Exception e) {
       Bukkit.getConsoleSender().sendMessage(e.getMessage());
-      return true;
     }
 
-    return true;
+    return sound;
   }
 
   public static void saveSound(UUID uuid, Boolean value) {
-    String query = "INSERT INTO jumpandrun (uuid, sound) VALUES (?, ?) ON DUPLICATE KEY UPDATE sound = ?";
+    try {
+      Model model = JumpAndRunModel.findFirst("uuid = ?", uuid.toString());
+      if (model == null) {
+        model = new JumpAndRunModel();
+        model.set("uuid", uuid.toString());
+      }
 
-    try (Connection connection = dataSource.getConnection();
-        PreparedStatement statement = connection.prepareStatement(query)) {
-      statement.setString(1, uuid.toString());
-      statement.setBoolean(2, value);
-      statement.setBoolean(3, value);
-      statement.executeUpdate();
-    } catch (SQLException e) {
+      model.set("sound", value);
+      model.saveIt();
+    } catch (Exception e) {
       Bukkit.getConsoleSender().sendMessage(e.getMessage());
     }
   }
 
   public static void savePoints(UUID uuid, Integer points) {
-    String query = "INSERT INTO jumpandrun (uuid, points) VALUES (?, ?) ON DUPLICATE KEY UPDATE points = ?";
+    try {
+      Model model = JumpAndRunModel.findFirst("uuid = ?", uuid.toString());
+      if (model == null) {
+        model = new JumpAndRunModel();
+        model.set("uuid", uuid.toString());
+      }
 
-    try (Connection connection = dataSource.getConnection();
-        PreparedStatement statement = connection.prepareStatement(query)) {
-      statement.setString(1, uuid.toString());
-      statement.setInt(2, points);
-      statement.setInt(3, points);
-      statement.executeUpdate();
-    } catch (SQLException e) {
+      model.set("points", points);
+      model.saveIt();
+    } catch (Exception e) {
       Bukkit.getConsoleSender().sendMessage(e.getMessage());
     }
   }
 
   public static void saveTrys(UUID uuid, Integer trys) {
-    String query = "INSERT INTO jumpandrun (uuid, trys) VALUES (?, ?) ON DUPLICATE KEY UPDATE trys = ?";
+    try {
+      Model model = JumpAndRunModel.findFirst("uuid = ?", uuid.toString());
+      if (model == null) {
+        model = new JumpAndRunModel();
+        model.set("uuid", uuid.toString());
+      }
 
-    try (Connection connection = dataSource.getConnection();
-        PreparedStatement statement = connection.prepareStatement(query)) {
-      statement.setString(1, uuid.toString());
-      statement.setInt(2, trys);
-      statement.setInt(3, trys);
-      statement.executeUpdate();
-    } catch (SQLException e) {
+      model.set("trys", trys);
+      model.saveIt();
+    } catch (Exception e) {
       Bukkit.getConsoleSender().sendMessage(e.getMessage());
     }
   }
 
   public static void saveHighScore(UUID uuid, Integer highScore) {
-    String query = "INSERT INTO jumpandrun (uuid, high_score) VALUES (?, ?) ON DUPLICATE KEY UPDATE high_score = ?";
+    try {
+      Model model = JumpAndRunModel.findFirst("uuid = ?", uuid.toString());
+      if (model == null) {
+        model = new JumpAndRunModel();
+        model.set("uuid", uuid.toString());
+      }
 
-    try (Connection connection = dataSource.getConnection();
-        PreparedStatement statement = connection.prepareStatement(query)) {
-      statement.setString(1, uuid.toString());
-      statement.setInt(2, highScore);
-      statement.setInt(3, highScore);
-      statement.executeUpdate();
-    } catch (SQLException e) {
+      model.set("high_score", highScore);
+      model.saveIt();
+    } catch (Exception e) {
       Bukkit.getConsoleSender().sendMessage(e.getMessage());
     }
   }
 
   public static Object2ObjectMap<UUID, Integer> getHighScores() {
     Object2ObjectMap<UUID, Integer> highScores = new Object2ObjectOpenHashMap<>();
-    String query = "SELECT uuid, high_score FROM jumpandrun";
 
-    PluginInstance.instance().jumpAndRunProvider().saveAll();
-
-    try (Connection connection = dataSource.getConnection(); PreparedStatement statement = connection.prepareStatement(query);
-        ResultSet result = statement.executeQuery()) {
-
-      while (result.next()) {
-        UUID uuid = UUID.fromString(result.getString("uuid"));
-        Integer highScore = result.getInt("high_score");
-
-        highScores.put(uuid, highScore);
+    try {
+      for (Model result : JumpAndRunModel.findAll()) {
+        highScores.put(UUID.fromString(result.getString("uuid")), result.getInteger("high_score"));
       }
 
-    } catch (SQLException e) {
+    } catch (Exception e) {
       Bukkit.getConsoleSender().sendMessage(e.getMessage());
     }
-
     return highScores;
   }
 
   public static Object2ObjectMap<UUID, Integer> getPoints() {
     Object2ObjectMap<UUID, Integer> points = new Object2ObjectOpenHashMap<>();
-    String query = "SELECT uuid, points FROM jumpandrun";
-
-    PluginInstance.instance().jumpAndRunProvider().saveAll();
-
-    try (Connection connection = dataSource.getConnection(); PreparedStatement statement = connection.prepareStatement(query);
-        ResultSet result = statement.executeQuery()) {
-
-      while (result.next()) {
-        UUID uuid = UUID.fromString(result.getString("uuid"));
-        Integer point = result.getInt("points");
-
-        points.put(uuid, point);
+    try {
+      for (Model result : JumpAndRunModel.findAll()) {
+        points.put(UUID.fromString(result.getString("uuid")), result.getInteger("points"));
       }
 
-    } catch (SQLException e) {
+    } catch (Exception e) {
       Bukkit.getConsoleSender().sendMessage(e.getMessage());
     }
-
     return points;
   }
+}
+
+class JumpAndRunModel extends Model {
+  public JumpAndRunModel() {}
 }
