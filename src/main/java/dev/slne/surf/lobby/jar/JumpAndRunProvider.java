@@ -151,7 +151,7 @@ public class JumpAndRunProvider {
     next2.setType(material);
     latestJumps.get(player)[2] = next2;
 
-    player.teleport(block.getLocation().add(0.5, 1, 0.5));
+    player.teleportAsync(block.getLocation().add(0.5, 1, 0.5));
     blocks.put(player, material);
   }
 
