@@ -16,7 +16,7 @@ public class ParkourStatsCommand extends CommandAPICommand {
     super(commandName);
     withPermission("jumpandrun.command.stats");
 
-    withArguments(new PlayerArgument("target").setOptional(true));
+    withOptionalArguments(new PlayerArgument("target"));
 
     executesPlayer((player, args) -> {
       Player t = args.getUnchecked("target");
