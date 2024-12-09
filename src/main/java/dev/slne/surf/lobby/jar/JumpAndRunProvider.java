@@ -251,8 +251,6 @@ public class JumpAndRunProvider {
 
       return nextLocation.getBlock();
     }
-
-    player.sendMessage("using extra");
     return previousLocation.clone().add(OFFSETS[0]).getBlock();
   }
 
