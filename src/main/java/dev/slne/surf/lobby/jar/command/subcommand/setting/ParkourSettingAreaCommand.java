@@ -42,8 +42,9 @@ public class ParkourSettingAreaCommand extends CommandAPICommand {
         BlockVector3 pos1 = region.getMinimumPoint();
         BlockVector3 pos2 = region.getMaximumPoint();
 
-        PluginInstance.instance().jumpAndRunProvider().jumpAndRun().setPosOne(new Location(player.getWorld(), pos1.getX(), pos1.getY(), pos1.getZ()));
-        PluginInstance.instance().jumpAndRunProvider().jumpAndRun().setPosTwo(new Location(player.getWorld(), pos2.getX(), pos2.getY(), pos2.getZ()));
+        JumpAndRun jumpAndRun = PluginInstance.instance().jumpAndRunProvider().jumpAndRun();
+        jumpAndRun.setPosOne(new Location(player.getWorld(), pos1.getX(), pos1.getY(), pos1.getZ()));
+        jumpAndRun.setPosTwo(new Location(player.getWorld(), pos2.getX(), pos2.getY(), pos2.getZ()));
 
         player.sendMessage(PluginInstance.prefix().append(Component.text("Du hast die Arena erfolgreich neu definiert.")));
 
