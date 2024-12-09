@@ -22,7 +22,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class PluginInstance extends JavaPlugin {
   private JumpAndRunProvider jumpAndRunProvider;
   private WorldEditPlugin worldEditPlugin;
-  private Boolean worldedit;
+  private boolean worldedit;
 
 
   @Getter
