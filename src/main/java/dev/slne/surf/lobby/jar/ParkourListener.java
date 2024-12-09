@@ -1,6 +1,8 @@
 package dev.slne.surf.lobby.jar;
 
+import org.bukkit.Location;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -8,30 +10,38 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 public class ParkourListener implements Listener {
-  private final JumpAndRunProvider jumpAndRunProvider = PluginInstance.instance().jumpAndRunProvider();
+
+  private final JumpAndRunProvider jumpAndRunProvider = PluginInstance.instance()
+      .jumpAndRunProvider();
 
   @EventHandler
   public void onMove(PlayerMoveEvent event) {
-    if (!event.hasChangedPosition()) return;
+    if (!event.hasChangedPosition()) {
+      return;
+    }
 
-    Block block = event.getTo().clone().subtract(0, 1, 0).getBlock();
+    Block toBlock = event.getTo().getBlock();
+    Block block = toBlock.getRelative(BlockFace.DOWN);
     Player player = event.getPlayer();
     Block[] jumps = this.jumpAndRunProvider.getLatestJumps(player);
 
-    if(event.getTo().getBlock().getLocation().equals(jumpAndRunProvider.jumpAndRun().getStart().getBlock().getLocation())) {
+    if (toBlock.getLocation()
+        .equals(jumpAndRunProvider.jumpAndRun().getStart().getBlock().getLocation())) {
       jumpAndRunProvider.start(player);
       return;
     }
 
-    if(jumps == null){
+    if (jumps == null) {
       return;
     }
 
-    if(jumps[0] == null || jumps[1] == null){
+    if (jumps.length < 2 || jumps[0] == null || jumps[1] == null) {
       return;
     }
 
-    if(player.getLocation().getY() < jumps[0].getLocation().getY() && player.getLocation().getY() < jumps[1].getLocation().getY()) {
+    Location playerLocation = player.getLocation();
+    if (playerLocation.getY() < jumps[0].getLocation().getY()
+        && playerLocation.getY() < jumps[1].getLocation().getY()) {
       jumpAndRunProvider.remove(player);
       return;
     }
@@ -51,7 +61,7 @@ public class ParkourListener implements Listener {
   }
 
   @EventHandler
-  public void onQuit(PlayerQuitEvent event){
+  public void onQuit(PlayerQuitEvent event) {
     Player player = event.getPlayer();
 
     jumpAndRunProvider.onQuit(player);
