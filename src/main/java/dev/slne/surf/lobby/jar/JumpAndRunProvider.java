@@ -1,6 +1,5 @@
 package dev.slne.surf.lobby.jar;
 
-import com.github.benmanes.caffeine.cache.AsyncCache;
 import com.github.benmanes.caffeine.cache.AsyncLoadingCache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 
@@ -41,7 +40,6 @@ import java.security.SecureRandom;
 
 @Getter
 @Accessors(fluent = true)
-@Flogger
 public class JumpAndRunProvider {
 
   private static final ComponentLogger logger = ComponentLogger.logger();
