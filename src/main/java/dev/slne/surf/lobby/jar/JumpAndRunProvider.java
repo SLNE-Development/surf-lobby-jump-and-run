@@ -14,7 +14,6 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectList;
 
 import java.time.Duration;
-import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
@@ -22,7 +21,6 @@ import lombok.Getter;
 import lombok.experimental.Accessors;
 
 import lombok.extern.flogger.Flogger;
-import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.sound.Sound.Emitter;
 import net.kyori.adventure.sound.Sound.Source;
@@ -130,7 +128,7 @@ public class JumpAndRunProvider {
 
       player.sendMessage(PluginInstance.prefix().append(Component.text(String.format("Du bist nun im Parkour. Springe so weit wie möglich, versuche deinen Highscore von %s zu brechen!", highScore))));
     }).exceptionally(throwable -> {
-      // TODO: Handle exception
+      logger.error("An error occurred starting jump and run.", throwable);
       return null;
     });
   }
