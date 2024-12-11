@@ -6,10 +6,10 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 
 import org.javalite.activejdbc.Base;
-import org.javalite.activejdbc.Model;
 import org.bukkit.Bukkit;
 
 import java.util.UUID;
+import org.javalite.activejdbc.Model;
 
 public class Database {
 
@@ -54,7 +54,7 @@ public class Database {
     Integer trys = null;
 
     try {
-      Model result = JumpAndRunModel.findFirst("uuid = ?", uuid.toString());
+      JumpAndRunModel result = JumpAndRunModel.findFirst("uuid = ?", uuid.toString());
       if (result != null) {
         trys = result.getInteger("trys");
       }
@@ -70,7 +70,7 @@ public class Database {
     Integer points = null;
 
     try {
-      Model result = JumpAndRunModel.findFirst("uuid = ?", uuid.toString());
+      JumpAndRunModel result = JumpAndRunModel.findFirst("uuid = ?", uuid.toString());
       if (result != null) {
         points = result.getInteger("points");
       }
@@ -86,7 +86,7 @@ public class Database {
     Integer highScore = null;
 
     try {
-      Model result = JumpAndRunModel.findFirst("uuid = ?", uuid.toString());
+      JumpAndRunModel result = JumpAndRunModel.findFirst("uuid = ?", uuid.toString());
       if (result != null) {
         highScore = result.getInteger("high_score");
       }
@@ -102,7 +102,7 @@ public class Database {
     Boolean sound = true;
 
     try {
-      Model result = JumpAndRunModel.findFirst("uuid = ?", uuid.toString());
+      JumpAndRunModel result = JumpAndRunModel.findFirst("uuid = ?", uuid.toString());
       if (result != null) {
         sound = result.getBoolean("sound");
       }
@@ -116,7 +116,7 @@ public class Database {
 
   public static void saveSound(UUID uuid, Boolean value) {
     try {
-      Model model = JumpAndRunModel.findFirst("uuid = ?", uuid.toString());
+      JumpAndRunModel model = JumpAndRunModel.findFirst("uuid = ?", uuid.toString());
       if (model == null) {
         model = new JumpAndRunModel();
         model.set("uuid", uuid.toString());
@@ -131,7 +131,7 @@ public class Database {
 
   public static void savePoints(UUID uuid, Integer points) {
     try {
-      Model model = JumpAndRunModel.findFirst("uuid = ?", uuid.toString());
+      JumpAndRunModel model = JumpAndRunModel.findFirst("uuid = ?", uuid.toString());
       if (model == null) {
         model = new JumpAndRunModel();
         model.set("uuid", uuid.toString());
@@ -146,7 +146,7 @@ public class Database {
 
   public static void saveTrys(UUID uuid, Integer trys) {
     try {
-      Model model = JumpAndRunModel.findFirst("uuid = ?", uuid.toString());
+      JumpAndRunModel model = JumpAndRunModel.findFirst("uuid = ?", uuid.toString());
       if (model == null) {
         model = new JumpAndRunModel();
         model.set("uuid", uuid.toString());
@@ -161,7 +161,7 @@ public class Database {
 
   public static void saveHighScore(UUID uuid, Integer highScore) {
     try {
-      Model model = JumpAndRunModel.findFirst("uuid = ?", uuid.toString());
+      JumpAndRunModel model = JumpAndRunModel.findFirst("uuid = ?", uuid.toString());
       if (model == null) {
         model = new JumpAndRunModel();
         model.set("uuid", uuid.toString());
