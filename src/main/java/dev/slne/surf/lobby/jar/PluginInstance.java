@@ -1,5 +1,6 @@
 package dev.slne.surf.lobby.jar;
 
+import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import dev.slne.surf.lobby.jar.command.ParkourCommand;
 import dev.slne.surf.lobby.jar.command.subcommand.ParkourStatsCommand;
@@ -21,7 +22,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 @Accessors(fluent = true)
 public class PluginInstance extends JavaPlugin {
   private JumpAndRunProvider jumpAndRunProvider;
-  private WorldEditPlugin worldEditPlugin;
+  private WorldEditPlugin worldEditInstance;
   private boolean worldedit;
 
 
@@ -66,5 +67,6 @@ public class PluginInstance extends JavaPlugin {
 
   private void handeWorldEdit(){
     this.worldedit = Bukkit.getPluginManager().isPluginEnabled("WorldEdit");
+    this.worldEditInstance = (WorldEditPlugin) Bukkit.getPluginManager().getPlugin("WorldEdit");
   }
 }

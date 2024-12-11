@@ -2,17 +2,15 @@ package dev.slne.surf.lobby.jar.command.subcommand.setting;
 
 import com.sk89q.worldedit.IncompleteRegionException;
 import com.sk89q.worldedit.LocalSession;
+import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
-import com.sk89q.worldedit.internal.annotation.Selection;
 import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.regions.Region;
-import com.sk89q.worldedit.world.World;
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.slne.surf.lobby.jar.JumpAndRun;
 import dev.slne.surf.lobby.jar.PluginInstance;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
-import org.bukkit.entity.Player;
 
 public class ParkourSettingAreaCommand extends CommandAPICommand {
 
@@ -28,7 +26,7 @@ public class ParkourSettingAreaCommand extends CommandAPICommand {
         return;
       }
 
-      WorldEditPlugin worldEditPlugin = PluginInstance.instance().worldEditPlugin();
+      WorldEditPlugin worldEditPlugin = PluginInstance.instance().worldEditInstance();
 
       if (worldEditPlugin == null) {
         player.sendMessage(PluginInstance.prefix().append(Component.text("WorldEdit ist nicht verfügbar!")));
