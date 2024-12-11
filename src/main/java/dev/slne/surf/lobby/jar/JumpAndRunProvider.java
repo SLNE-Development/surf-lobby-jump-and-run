@@ -41,7 +41,6 @@ import java.security.SecureRandom;
 @Getter
 @Accessors(fluent = true)
 public class JumpAndRunProvider {
-
   private static final ComponentLogger logger = ComponentLogger.logger();
 
   private final JumpAndRun jumpAndRun;
