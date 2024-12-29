@@ -30,20 +30,23 @@ dependencies {
     compileOnly("com.sk89q.worldedit:worldedit-bukkit:7.2.0-SNAPSHOT")
 
     implementation("com.github.stefvanschie.inventoryframework:IF:0.10.17")
-    implementation("com.zaxxer:HikariCP:5.0.1")
-    implementation("mysql:mysql-connector-java:8.0.33")
-    implementation("com.github.ben-manes.caffeine:caffeine:3.1.8")
-    implementation("org.javalite:activejdbc:3.5-j11")
+    paperLibrary("com.zaxxer:HikariCP:5.0.1")
+    paperLibrary("mysql:mysql-connector-java:8.0.33")
+    paperLibrary("com.github.ben-manes.caffeine:caffeine:3.1.8")
+    paperLibrary("org.javalite:activejdbc:3.5-j11")
 }
 
 
 paper {
     name = "SurfLobbyJumpAndRun"
     main = "dev.slne.surf.lobby.jar.PluginInstance"
+    loader = "dev.slne.surf.lobby.jar.PluginLibrariesLoader"
     apiVersion = "1.21"
     authors = listOf("TheBjoRedCraft", "SLNE Development")
     prefix = "SurfLobbyJumpAndRun"
     version = "1.21.1-1.0.0-SNAPSHOT"
+
+    generateLibrariesJson = true
 
 
     serverDependencies {
@@ -53,6 +56,11 @@ paper {
         }
 
         register("PlaceholderAPI") {
+            load = PaperPluginDescription.RelativeLoadOrder.BEFORE
+            required = false
+        }
+
+        register("WorldEdit") {
             load = PaperPluginDescription.RelativeLoadOrder.BEFORE
             required = false
         }
