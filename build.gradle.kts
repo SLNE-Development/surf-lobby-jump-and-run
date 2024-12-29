@@ -62,7 +62,7 @@ paper {
 
         register("WorldEdit") {
             load = PaperPluginDescription.RelativeLoadOrder.BEFORE
-            required = false
+            required = true
         }
     }
 }
