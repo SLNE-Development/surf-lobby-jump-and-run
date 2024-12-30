@@ -22,10 +22,10 @@ public class ParkourToggleSoundCommand extends CommandAPICommand {
 
         if (sound) {
           provider.setSound(player, false);
-          player.sendMessage(PluginInstance.prefix().append(Component.text("Sounds sind nun für dich deaktiviert.", PluginColor.GOLD)));
+          player.sendMessage(PluginInstance.prefix().append(Component.text("Sounds sind nun für dich aktiviert.", PluginColor.GOLD)));
         } else {
           provider.setSound(player, true);
-          player.sendMessage(PluginInstance.prefix().append(Component.text("Sounds sind nun für dich aktiviert.", PluginColor.GOLD)));
+          player.sendMessage(PluginInstance.prefix().append(Component.text("Sounds sind nun für dich deaktiviert.", PluginColor.GOLD)));
         }
 
       });
