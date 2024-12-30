@@ -1,18 +1,19 @@
 package dev.slne.surf.lobby.jar;
 
+import java.util.Arrays;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 public class ParkourListener implements Listener {
 
-  private final JumpAndRunProvider jumpAndRunProvider = PluginInstance.instance()
-      .jumpAndRunProvider();
+  private final JumpAndRunProvider jumpAndRunProvider = PluginInstance.instance().jumpAndRunProvider();
 
   @EventHandler
   public void onMove(PlayerMoveEvent event) {
@@ -40,8 +41,7 @@ public class ParkourListener implements Listener {
     }
 
     Location playerLocation = player.getLocation();
-    if (playerLocation.getY() < jumps[0].getLocation().getY()
-        && playerLocation.getY() < jumps[1].getLocation().getY()) {
+    if (playerLocation.getY() < jumps[0].getLocation().getY() && playerLocation.getY() < jumps[1].getLocation().getY()) {
       jumpAndRunProvider.remove(player);
       return;
     }
@@ -58,6 +58,28 @@ public class ParkourListener implements Listener {
       this.jumpAndRunProvider.checkHighScore(player);
       this.jumpAndRunProvider.generate(player);
     }
+  }
+
+  @EventHandler
+  public void onInteract(PlayerInteractEvent event) {
+    Player player = event.getPlayer();
+    Block block = event.getClickedBlock();
+
+    if (block == null) {
+      return;
+    }
+
+    Block[] jumps = PluginInstance.instance().jumpAndRunProvider().getLatestJumps(player);
+
+    if(jumps == null) {
+      return;
+    }
+
+    if(Arrays.stream(jumps).filter(block::equals).findFirst().isEmpty()) {
+      return;
+    }
+
+    event.setCancelled(true);
   }
 
   @EventHandler

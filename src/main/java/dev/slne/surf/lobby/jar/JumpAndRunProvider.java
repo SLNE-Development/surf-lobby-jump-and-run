@@ -28,10 +28,12 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import net.kyori.adventure.title.Title;
 import net.kyori.adventure.title.Title.Times;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
@@ -63,23 +65,6 @@ public class JumpAndRunProvider {
       .buildAsync(Database::getSound);
 
   private BukkitRunnable runnable;
-
-  /*
-  private static final Vector[] OFFSETS = {
-      new Vector(3, 0, 3),
-      new Vector(-3, 0, 3),
-      new Vector(3, 0, -3),
-      new Vector(-3, 0, -3),
-      new Vector(3, 0, 0),
-      new Vector(-3, 0, 0),
-      new Vector(0, 0, 3),
-      new Vector(0, 0, -3),
-      new Vector(4, 0, 0),
-      new Vector(-4, 0, 0),
-      new Vector(0, 0, 4),
-      new Vector(0, 0, -4)
-  };
-   */
 
   private static final Vector[] OFFSETS = {
       new Vector(3, 0, 0),
@@ -133,22 +118,27 @@ public class JumpAndRunProvider {
 
 
   private void generateInitialJumps(Player player) {
-    Location start = getRandomLocationInRegion(player.getWorld()).add(0, 1, 0);
-    Block block = start.getBlock();
+    Location randomLocation = this.getRandomLocationInRegion(player.getWorld());
 
+    if(randomLocation == null) {
+      return;
+    }
+
+    Location start = randomLocation.add(0, 1, 0);
+    Block block = start.getBlock();
     Material material = jumpAndRun.getMaterials().get(random.nextInt(jumpAndRun.getMaterials().size()));
 
-    block.setType(material);
+    player.sendBlockChange(block.getLocation(), material.createBlockData());
     latestJumps.get(player)[0] = block;
 
     Block next = this.getValidBlock(start, player);
 
-    next.setType(Material.SEA_LANTERN);
+    player.sendBlockChange(next.getLocation(), Material.SEA_LANTERN.createBlockData());
     latestJumps.get(player)[1] = next;
 
     Block next2 = this.getValidBlock(next.getLocation(), player);
 
-    next2.setType(material);
+    player.sendBlockChange(next2.getLocation(), material.createBlockData());
     latestJumps.get(player)[2] = next2;
 
     player.teleportAsync(block.getLocation().add(0.5, 1, 0.5));
@@ -179,16 +169,16 @@ public class JumpAndRunProvider {
     Material material = blocks.get(player);
 
     if (jumps[0] != null) {
-      jumps[0].setType(Material.AIR);
+      player.sendBlockChange(jumps[0].getLocation(), Material.AIR.createBlockData());
     }
 
     jumps[0] = jumps[1];
     jumps[1] = jumps[2];
 
-    jumps[1].setType(Material.SEA_LANTERN);
+    player.sendBlockChange(jumps[1].getLocation(), Material.SEA_LANTERN.createBlockData());
 
     Block nextJump = getValidBlock(jumps[1].getLocation(), player);
-    nextJump.setType(material);
+    player.sendBlockChange(nextJump.getLocation(), material.createBlockData());
     jumps[2] = nextJump;
   }
 
@@ -277,7 +267,8 @@ public class JumpAndRunProvider {
     int widthZ = maxZ - minZ;
 
     if (widthX <= 20 || heightY <= 20 || widthZ <= 20) {
-      throw new IllegalStateException("Die Region ist zu klein, sie muss mindestens 20 Blöcke groß sein!");
+      Bukkit.getConsoleSender().sendMessage("Die Jump and Run Region ist zu klein.");
+      return null;
     }
 
     minX += 10;
@@ -322,15 +313,19 @@ public class JumpAndRunProvider {
   }
 
   public void remove(Player player) {
-    if(this.getLatestJumps(player) == null){
+    if (this.getLatestJumps(player) == null) {
       return;
     }
 
     for (Block block : this.getLatestJumps(player)) {
-      block.setType(Material.AIR);
+      if(block == null) {
+        continue;
+      }
+
+      player.sendBlockChange(block.getLocation(), Material.AIR.createBlockData());
     }
 
-    if(this.awaitingHighScores.contains(player)){
+    if (this.awaitingHighScores.contains(player)) {
       this.setHighScore(player);
     }
 
