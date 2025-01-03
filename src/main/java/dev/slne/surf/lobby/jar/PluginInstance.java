@@ -1,10 +1,11 @@
 package dev.slne.surf.lobby.jar;
 
-import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import dev.slne.surf.lobby.jar.command.ParkourCommand;
 import dev.slne.surf.lobby.jar.command.subcommand.ParkourStatsCommand;
 import dev.slne.surf.lobby.jar.config.PluginConfig;
+import dev.slne.surf.lobby.jar.listener.ParkourListener;
+import dev.slne.surf.lobby.jar.listener.PlayerKickListener;
 import dev.slne.surf.lobby.jar.mysql.Database;
 import dev.slne.surf.lobby.jar.papi.ParkourPlaceholderExtension;
 import dev.slne.surf.lobby.jar.util.PluginColor;
@@ -43,6 +44,7 @@ public class PluginInstance extends JavaPlugin {
     new ParkourStatsCommand("stats").register();
 
     Bukkit.getPluginManager().registerEvents(new ParkourListener(), this);
+    Bukkit.getPluginManager().registerEvents(new PlayerKickListener(), this);
     Database.createConnection();
   }
 
