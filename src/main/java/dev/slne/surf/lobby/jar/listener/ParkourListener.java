@@ -1,5 +1,7 @@
-package dev.slne.surf.lobby.jar;
+package dev.slne.surf.lobby.jar.listener;
 
+import dev.slne.surf.lobby.jar.JumpAndRunProvider;
+import dev.slne.surf.lobby.jar.PluginInstance;
 import java.util.Arrays;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
@@ -65,21 +67,17 @@ public class ParkourListener implements Listener {
     Player player = event.getPlayer();
     Block block = event.getClickedBlock();
 
-    if (block == null) {
-      return;
+    if(block == null) {
+
     }
 
     Block[] jumps = PluginInstance.instance().jumpAndRunProvider().getLatestJumps(player);
 
-    if(jumps == null) {
-      return;
+    for (Block jump : jumps) {
+      if(jump.getLocation().equals(block.getLocation())) {
+        player.sendBlockChange(jump.getLocation(), jump.getBlockData());
+      }
     }
-
-    if(Arrays.stream(jumps).filter(block::equals).findFirst().isEmpty()) {
-      return;
-    }
-
-    event.setCancelled(true);
   }
 
   @EventHandler
