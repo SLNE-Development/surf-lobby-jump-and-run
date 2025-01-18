@@ -2,6 +2,7 @@ package dev.slne.surf.lobby.jar.listener
 
 import dev.slne.surf.lobby.jar.JumpAndRunService
 import dev.slne.surf.lobby.jar.PluginInstance
+import org.bukkit.Location
 import org.bukkit.block.Block
 import org.bukkit.block.BlockFace
 import org.bukkit.event.EventHandler
@@ -21,8 +22,9 @@ class ParkourListener : Listener {
         val block = toBlock.getRelative(BlockFace.DOWN)
         val player = event.player
         val jumps = JumpAndRunService.getLatestJumps(player)
+        val startLocation: Location = JumpAndRunService.jumpAndRun.start ?: return
 
-        if (toBlock.location == JumpAndRunService.jumpAndRun.start!!.block.location) {
+        if (toBlock.location == startLocation.block.location) {
             JumpAndRunService.start(player)
             return
         }
@@ -31,10 +33,17 @@ class ParkourListener : Listener {
             return
         }
 
+        if (jumps[0] == null || jumps[1] == null) {
+            return
+        }
+
+        val jump1: Block = jumps[0] ?: return
+        val jump2: Block = jumps[1] ?: return
+
 
 
         val playerLocation = player.location
-        if (playerLocation.y < jumps[0].location.y && playerLocation.y < jumps[1].location.y) {
+        if (playerLocation.y < jump1.location.y && playerLocation.y < jump2.location.y) {
             JumpAndRunService.remove(player)
             return
         }
@@ -42,7 +51,7 @@ class ParkourListener : Listener {
         if (block == jumps[1]) {
             val material = JumpAndRunService.blocks[player] ?: return
 
-            jumps[1].type = material
+            jump2.type = material
 
             JumpAndRunService.addPoint(player)
             JumpAndRunService.checkHighScore(player)
@@ -55,9 +64,13 @@ class ParkourListener : Listener {
         val player = event.player
         val location = event.interactionPoint ?: return
 
-        val jumps: Array<Block> = JumpAndRunService.getLatestJumps(player)
+        val jumps: Array<Block?> = JumpAndRunService.getLatestJumps(player)
 
         for (jump in jumps) {
+            if (jump == null) {
+                continue
+            }
+
             if (jump.location == location) {
                 player.sendBlockChange(jump.location, jump.blockData)
             }
