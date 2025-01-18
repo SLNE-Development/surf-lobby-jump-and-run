@@ -1,5 +1,7 @@
 package dev.slne.surf.lobby.jar
 
+import com.github.shynixn.mccoroutine.bukkit.SuspendingJavaPlugin
+import com.github.shynixn.mccoroutine.bukkit.SuspendingPlugin
 import com.sk89q.worldedit.bukkit.WorldEditPlugin
 import dev.slne.surf.lobby.jar.command.ParkourCommand
 import dev.slne.surf.lobby.jar.command.subcommand.ParkourStatsCommand
@@ -19,12 +21,12 @@ import org.bukkit.plugin.java.JavaPlugin
 
 @Getter
 @Accessors(fluent = true)
-class PluginInstance : JavaPlugin() {
+class PluginInstance : SuspendingJavaPlugin() {
     var worldEditInstance: WorldEditPlugin? = null
     var worldedit = false
 
 
-    override fun onEnable() {
+    override suspend fun onEnableAsync() {
         JumpAndRunService.startActionbar()
 
         this.handlePlaceholderAPI()
@@ -38,7 +40,7 @@ class PluginInstance : JavaPlugin() {
         Database.createConnection()
     }
 
-    override fun onDisable() {
+    override suspend fun onDisableAsync() {
         JumpAndRunService.stopActionbar()
       JumpAndRunService.saveAll().join()
 

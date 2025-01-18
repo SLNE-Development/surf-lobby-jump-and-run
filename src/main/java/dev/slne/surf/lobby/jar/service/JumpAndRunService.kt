@@ -68,7 +68,7 @@ object JumpAndRunService {
 
     private var runnable: BukkitRunnable? = null
 
-    fun start(player: Player) {
+    suspend fun start(player: Player) {
         remove(player)
 
         val jumps = arrayOfNulls<Block>(3)
@@ -300,7 +300,7 @@ object JumpAndRunService {
         return latestJumps[player] ?: return arrayOf()
     }
 
-    fun remove(player: Player) {
+    suspend fun remove(player: Player) {
         if (getLatestJumps(player).isEmpty()) {
             return
         }
@@ -322,13 +322,13 @@ object JumpAndRunService {
         player.teleportAsync(jumpAndRun.spawn ?: return)
     }
 
-    private fun removeAll() {
+    private suspend fun removeAll() {
         for (player in jumpAndRun.players) {
             remove(player)
         }
     }
 
-    fun saveAll(): CompletableFuture<Void?> {
+    suspend fun saveAll(): CompletableFuture<Void?> {
         val futures: ObjectList<CompletableFuture<Void>> = ObjectArrayList()
 
         for (player in points.synchronous().asMap().keys) {
@@ -353,7 +353,7 @@ object JumpAndRunService {
 
        val allSaves = CompletableFuture.allOf(*futures.toTypedArray())
 
-        return allSaves.thenRun { removeAll() }.exceptionally { throwable: Throwable? ->
+        return allSaves.thenRun { this.removeAll() }.exceptionally { throwable: Throwable? ->
             logger.error(
                 "An error occurred while saving all data",
                 throwable
@@ -362,23 +362,23 @@ object JumpAndRunService {
         }
     }
 
-    fun queryTrys(player: UUID): CompletableFuture<Int?> {
+    suspend fun queryTrys(player: UUID): CompletableFuture<Int?> {
         return trys[player]
     }
 
-    fun querySound(player: UUID): CompletableFuture<Boolean?> {
+    suspend fun querySound(player: UUID): CompletableFuture<Boolean?> {
         return sounds[player]
     }
 
-    fun queryPoints(player: UUID): CompletableFuture<Int?> {
+    suspend fun queryPoints(player: UUID): CompletableFuture<Int?> {
         return points[player]
     }
 
-    fun queryHighScore(player: UUID): CompletableFuture<Int?> {
+    suspend fun queryHighScore(player: UUID): CompletableFuture<Int?> {
         return highScores[player]
     }
 
-    fun saveSound(player: UUID): CompletableFuture<Void> {
+    suspend fun saveSound(player: UUID): CompletableFuture<Void> {
         return querySound(player).thenCompose { sound: Boolean? ->
             CompletableFuture.runAsync {
                 Database.saveSound(
@@ -389,7 +389,7 @@ object JumpAndRunService {
         }
     }
 
-    fun saveTrys(player: UUID): CompletableFuture<Void> {
+    suspend fun saveTrys(player: UUID): CompletableFuture<Void> {
         return queryTrys(player).thenCompose { points: Int? ->
             if (points == null) {
                 return@thenCompose CompletableFuture.completedFuture<Void?>(
@@ -404,7 +404,7 @@ object JumpAndRunService {
         }
     }
 
-    fun savePoints(player: UUID): CompletableFuture<Void> {
+    suspend fun savePoints(player: UUID): CompletableFuture<Void> {
         return queryPoints(player).thenCompose { points: Int? ->
             if (points == null) {
                 return@thenCompose CompletableFuture.completedFuture<Void?>(
@@ -419,7 +419,7 @@ object JumpAndRunService {
         }
     }
 
-    fun saveHighScore(player: UUID): CompletableFuture<Void> {
+    suspend fun saveHighScore(player: UUID): CompletableFuture<Void> {
         return queryHighScore(player).thenCompose { highScore: Int? ->
             if (highScore == null) {
                 return@thenCompose CompletableFuture.completedFuture<Void?>(
@@ -440,7 +440,7 @@ object JumpAndRunService {
     }
 
 
-    fun addPoint(player: Player) {
+    suspend fun addPoint(player: Player) {
         points[player.uniqueId].thenAccept { points: Int? ->
             val newPoints = if (points == null) 1 else points + 1
             JumpAndRunService.points.synchronous().put(player.uniqueId, newPoints)
@@ -466,14 +466,14 @@ object JumpAndRunService {
         }
     }
 
-    fun addTry(player: Player) {
+    suspend fun addTry(player: Player) {
         queryTrys(player.uniqueId).thenAccept { trys: Int? ->
             val newTrys = if (trys == null) 1 else trys + 1
             JumpAndRunService.trys.synchronous().put(player.uniqueId, newTrys)
         }
     }
 
-    fun checkHighScore(player: Player) {
+    suspend fun checkHighScore(player: Player) {
         val currentScore = currentPoints[player]
 
         queryHighScore(player.uniqueId).thenAccept { highScore: Int? ->
@@ -484,7 +484,7 @@ object JumpAndRunService {
     }
 
 
-    fun setHighScore(player: Player) {
+    suspend fun setHighScore(player: Player) {
         val currentScore = currentPoints[player]
 
         queryHighScore(player.uniqueId).thenAccept { highScore: Int? ->
@@ -494,8 +494,7 @@ object JumpAndRunService {
 
                 player.sendMessage(PluginInstance.prefix.append(Component.text(String.format("Du hast deinen Highscore gebrochen! Dein neuer Highscore ist %s!", currentScore))))
 
-                querySound(player.uniqueId)
-                    .thenAccept { sound: Boolean? ->
+                querySound(player.uniqueId).thenAccept { sound: Boolean? ->
 
                         if (sound == null) {
                             return@thenAccept
@@ -532,7 +531,7 @@ object JumpAndRunService {
     }
 
 
-    fun onQuit(player: Player) {
+    suspend fun onQuit(player: Player) {
         saveHighScore(player.uniqueId)
         savePoints(player.uniqueId)
         saveTrys(player.uniqueId)
