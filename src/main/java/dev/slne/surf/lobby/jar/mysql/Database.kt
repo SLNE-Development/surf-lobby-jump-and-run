@@ -167,10 +167,8 @@ object Database {
         }
     }
 
-    val highScores: Object2ObjectMap<UUID, Int>
-        get() {
-            val highScores: Object2ObjectMap<UUID, Int> =
-                Object2ObjectOpenHashMap()
+    val highScores: Object2ObjectMap<UUID, Int> get() {
+            val highScores: Object2ObjectMap<UUID, Int> = Object2ObjectOpenHashMap()
 
             try {
                 for (result in Model.findAll<Model>()) {
@@ -183,16 +181,15 @@ object Database {
             return highScores
         }
 
-    val points: Object2ObjectMap<UUID, Int>
-        get() {
-            val points: Object2ObjectMap<UUID, Int> =
-                Object2ObjectOpenHashMap()
+    val points: Object2ObjectMap<UUID, Int> get() {
+            val points: Object2ObjectMap<UUID, Int> = Object2ObjectOpenHashMap()
+
             try {
                 for (result in Model.findAll<Model>()) {
                     points[UUID.fromString(result.getString("uuid"))] = result.getInteger("points")
                 }
             } catch (e: Exception) {
-                Bukkit.getConsoleSender().sendMessage(e.message!!)
+                Bukkit.getConsoleSender().sendMessage(e.message ?: this.javaClass.toString())
             }
             return points
         }
