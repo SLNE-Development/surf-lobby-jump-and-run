@@ -8,6 +8,7 @@ plugins {
     id("io.freefair.lombok") version "8.11"
     id("xyz.jpenilla.run-paper") version "2.3.1"
     id("de.schablinski.activejdbc-gradle-plugin") version "2.0.1"
+    kotlin("jvm")
 }
 
 group = "dev.slne"
@@ -38,6 +39,7 @@ dependencies {
     paperLibrary("org.javalite:activejdbc:3.5-j11")
 
     compileOnly(files("libs/VulcanAPI.jar"))
+    implementation(kotlin("stdlib-jdk8"))
 }
 
 paper {

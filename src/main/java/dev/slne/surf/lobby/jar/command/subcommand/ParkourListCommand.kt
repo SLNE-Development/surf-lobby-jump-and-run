@@ -1,55 +1,58 @@
-package dev.slne.surf.lobby.jar.command.subcommand;
+package dev.slne.surf.lobby.jar.command.subcommand
 
-import dev.jorel.commandapi.CommandAPICommand;
-import dev.slne.surf.lobby.jar.JumpAndRunProvider;
-import dev.slne.surf.lobby.jar.PluginInstance;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-import org.bukkit.entity.Player;
+import dev.jorel.commandapi.CommandAPICommand
+import dev.jorel.commandapi.executors.CommandArguments
+import dev.jorel.commandapi.executors.PlayerCommandExecutor
+import dev.slne.surf.lobby.jar.JumpAndRunService
+import dev.slne.surf.lobby.jar.PluginInstance
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.NamedTextColor
+import org.bukkit.entity.Player
 
-public class ParkourListCommand extends CommandAPICommand {
-  private final JumpAndRunProvider provider = PluginInstance.instance().jumpAndRunProvider();
+class ParkourListCommand(commandName: String) : CommandAPICommand(commandName) {
+    private val provider: JumpAndRunService? =
+        PluginInstance.Companion.instance().jumpAndRunProvider()
 
-  public ParkourListCommand(String commandName) {
-    super(commandName);
+    init {
+        withPermission("jumpandrun.command.list")
 
-    withPermission("jumpandrun.command.list");
+        executesPlayer(PlayerCommandExecutor { player: Player, args: CommandArguments? ->
+            val playerCount = provider!!.jumpAndRun().players.size
+            if (playerCount == 0) {
+                player.sendMessage(
+                    PluginInstance.prefix()
+                        .append(
+                            Component.text("Aktuell sind ", NamedTextColor.GRAY)
+                                .append(Component.text("keine Spieler", NamedTextColor.YELLOW))
+                                .append(Component.text(" im Jump And Run.", NamedTextColor.WHITE))
+                        )
+                )
+                return@executesPlayer
+            }
 
-    executesPlayer((player, args) -> {
-      int playerCount = provider.jumpAndRun().getPlayers().size();
+            val header: Component = Component.text("Aktuell sind ", NamedTextColor.GRAY)
+                .append(Component.text("$playerCount Spieler", NamedTextColor.YELLOW))
+                .append(Component.text(" im Jump And Run: ", NamedTextColor.WHITE))
 
-      if (playerCount == 0) {
-        player.sendMessage(PluginInstance.prefix()
-            .append(Component.text("Aktuell sind ", NamedTextColor.GRAY)
-            .append(Component.text("keine Spieler", NamedTextColor.YELLOW))
-            .append(Component.text(" im Jump And Run.", NamedTextColor.WHITE)))
-        );
-        return;
-      }
+            var playerList: Component = Component.empty()
+            var current = 0
 
-      Component header = Component.text("Aktuell sind ", NamedTextColor.GRAY)
-          .append(Component.text(playerCount + " Spieler", NamedTextColor.YELLOW))
-          .append(Component.text(" im Jump And Run: ", NamedTextColor.WHITE));
+            for (target in provider.jumpAndRun().players) {
+                current++
 
-      Component playerList = Component.empty();
-      int current = 0;
+                var playerComponent: Component = Component.text(target.name, NamedTextColor.WHITE)
+                    .append(Component.text(" (", NamedTextColor.GRAY))
+                    .append(Component.text(provider.currentPoints()[target], NamedTextColor.YELLOW))
+                    .append(Component.text(")", NamedTextColor.GRAY))
 
-      for (Player target : provider.jumpAndRun().getPlayers()) {
-        current++;
+                if (current < playerCount) {
+                    playerComponent =
+                        playerComponent.append(Component.text(", ", NamedTextColor.GRAY))
+                }
 
-        Component playerComponent = Component.text(target.getName(), NamedTextColor.WHITE)
-            .append(Component.text(" (", NamedTextColor.GRAY))
-            .append(Component.text(provider.currentPoints().get(target), NamedTextColor.YELLOW))
-            .append(Component.text(")", NamedTextColor.GRAY));
-
-        if (current < playerCount) {
-          playerComponent = playerComponent.append(Component.text(", ", NamedTextColor.GRAY));
-        }
-
-        playerList = playerList.append(playerComponent);
-      }
-
-      player.sendMessage(PluginInstance.prefix().append(header.append(playerList)));
-    });
-  }
+                playerList = playerList.append(playerComponent)
+            }
+            player.sendMessage(PluginInstance.prefix().append(header.append(playerList)))
+        })
+    }
 }

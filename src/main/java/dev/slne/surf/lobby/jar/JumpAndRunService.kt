@@ -1,504 +1,575 @@
-package dev.slne.surf.lobby.jar;
+package dev.slne.surf.lobby.jar
 
-import com.github.benmanes.caffeine.cache.AsyncLoadingCache;
-import com.github.benmanes.caffeine.cache.Caffeine;
-
-import dev.slne.surf.lobby.jar.config.PluginConfig;
-import dev.slne.surf.lobby.jar.mysql.Database;
-import dev.slne.surf.lobby.jar.util.PluginColor;
-
-import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import it.unimi.dsi.fastutil.objects.ObjectList;
-
-import java.time.Duration;
-import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-
-import lombok.Getter;
-import lombok.experimental.Accessors;
-
-import lombok.extern.flogger.Flogger;
-import net.kyori.adventure.sound.Sound;
-import net.kyori.adventure.sound.Sound.Emitter;
-import net.kyori.adventure.sound.Sound.Source;
-import net.kyori.adventure.text.Component;
-
-import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
-import net.kyori.adventure.title.Title;
-import net.kyori.adventure.title.Title.Times;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.World;
-import org.bukkit.block.Block;
-import org.bukkit.block.data.BlockData;
-import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.util.Vector;
-
-import java.security.SecureRandom;
+import com.github.benmanes.caffeine.cache.AsyncLoadingCache
+import com.github.benmanes.caffeine.cache.CacheLoader
+import com.github.benmanes.caffeine.cache.Caffeine
+import dev.slne.surf.lobby.jar.config.PluginConfig
+import dev.slne.surf.lobby.jar.mysql.Database
+import dev.slne.surf.lobby.jar.util.PluginColor
+import it.unimi.dsi.fastutil.objects.Object2ObjectMap
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap
+import it.unimi.dsi.fastutil.objects.ObjectArrayList
+import it.unimi.dsi.fastutil.objects.ObjectList
+import lombok.Getter
+import lombok.experimental.Accessors
+import net.kyori.adventure.sound.Sound
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.logger.slf4j.ComponentLogger
+import net.kyori.adventure.title.Title
+import org.bukkit.*
+import org.bukkit.block.Block
+import org.bukkit.entity.Player
+import org.bukkit.scheduler.BukkitRunnable
+import org.bukkit.util.Vector
+import java.security.SecureRandom
+import java.time.Duration
+import java.util.*
+import java.util.concurrent.CompletableFuture
+import java.util.function.Consumer
+import kotlin.math.abs
+import kotlin.math.max
+import kotlin.math.min
 
 @Getter
 @Accessors(fluent = true)
-public class JumpAndRunProvider {
-  private static final ComponentLogger logger = ComponentLogger.logger();
+object JumpAndRunService {
+    val jumpAndRun: JumpAndRun = PluginConfig.loadJumpAndRun()
+    private val random = SecureRandom()
+    private val awaitingHighScores: ObjectList<Player> = ObjectArrayList()
+    private val latestJumps: Object2ObjectMap<Player, Array<Block?>> = Object2ObjectOpenHashMap()
+    val blocks: Object2ObjectMap<Player, Material> = Object2ObjectOpenHashMap()
+    val currentPoints: Object2ObjectMap<Player, Int> = Object2ObjectOpenHashMap()
 
-  private final JumpAndRun jumpAndRun;
-  private final SecureRandom random = new SecureRandom();
-  private final ObjectList<Player> awaitingHighScores = new ObjectArrayList<>();
-  private final Object2ObjectMap<Player, Block[]> latestJumps = new Object2ObjectOpenHashMap<>();
-  private final Object2ObjectMap<Player, Material> blocks = new Object2ObjectOpenHashMap<>();
-  private final Object2ObjectMap<Player, Integer> currentPoints = new Object2ObjectOpenHashMap<>();
+    private val points: AsyncLoadingCache<UUID, Int?> = Caffeine.newBuilder()
+        .buildAsync(CacheLoader { obj: UUID -> Database.getPoints(obj) })
 
-  private final AsyncLoadingCache<UUID, Integer> points = Caffeine.newBuilder()
-      .buildAsync(Database::getPoints);
+    private val highScores: AsyncLoadingCache<UUID, Int?> = Caffeine.newBuilder()
+        .buildAsync { obj: UUID -> Database.getHighScore(obj) }
 
-  private final AsyncLoadingCache<UUID, Integer> highScores = Caffeine.newBuilder()
-      .buildAsync(Database::getHighScore);
+    private val trys: AsyncLoadingCache<UUID, Int?> = Caffeine.newBuilder()
+        .buildAsync { obj: UUID -> Database.getTrys(obj) }
 
-  private final AsyncLoadingCache<UUID, Integer> trys = Caffeine.newBuilder()
-      .buildAsync(Database::getTrys);
+    private val sounds: AsyncLoadingCache<UUID, Boolean?> = Caffeine.newBuilder()
+        .buildAsync { obj: UUID -> Database.getSound(obj) }
 
-  private final AsyncLoadingCache<UUID, Boolean> sounds = Caffeine.newBuilder()
-      .buildAsync(Database::getSound);
+    private var runnable: BukkitRunnable? = null
 
-  private BukkitRunnable runnable;
+    fun start(player: Player) {
+        this.remove(player)
 
-  private static final Vector[] OFFSETS = {
-      new Vector(3, 0, 0),
-      new Vector(-3, 0, 0),
-      new Vector(0, 0, 3),
-      new Vector(0, 0, -3),
-      new Vector(3, 0, 0),
-      new Vector(-3, 0, 0),
-      new Vector(0, 0, 3),
-      new Vector(0, 0, -3),
-      new Vector(3, 0, 3),
-      new Vector(-3, 0, 3),
-      new Vector(3, 0, 3),
-      new Vector(-3, 0, 3),
-      new Vector(3, 0, 0),
-      new Vector(0, 0, 3),
-      new Vector(-3, 0, 0)
-  };
+        val jumps = arrayOfNulls<Block>(3)
 
+        latestJumps[player] = jumps
+        jumpAndRun.getPlayers().add(player)
+        currentPoints[player] = 0
+        awaitingHighScores.remove(player)
 
-  public JumpAndRunProvider() {
-    this.jumpAndRun = PluginConfig.loadJumpAndRun();
-  }
+        this.addTry(player)
+        this.generateInitialJumps(player)
 
-  public void start(Player player) {
-    this.remove(player);
-
-    Block[] jumps = new Block[3];
-
-    this.latestJumps.put(player, jumps);
-    this.jumpAndRun.getPlayers().add(player);
-    this.currentPoints.put(player, 0);
-    this.awaitingHighScores.remove(player);
-
-    this.addTry(player);
-    this.generateInitialJumps(player);
-
-    this.queryHighScore(player.getUniqueId()).thenAccept(highScore -> {
-      if(highScore == null){
-        player.sendMessage(PluginInstance.prefix().append(Component.text("Du bist nun im Parkour. Springe so weit wie möglich, um einen Highscore aufzustellen!")));
-        return;
-      }
-
-      player.sendMessage(PluginInstance.prefix().append(Component.text(String.format("Du bist nun im Parkour. Springe so weit wie möglich, versuche deinen Highscore von %s zu brechen!", highScore))));
-    }).exceptionally(throwable -> {
-      logger.error("An error occurred starting jump and run.", throwable);
-      return null;
-    });
-  }
-
-
-
-  private void generateInitialJumps(Player player) {
-    Location randomLocation = this.getRandomLocationInRegion(player.getWorld());
-
-    if(randomLocation == null) {
-      return;
+        queryHighScore(player.uniqueId).thenAccept { highScore: Int? ->
+            if (highScore == null) {
+                player.sendMessage(
+                    PluginInstance.prefix()
+                        .append(Component.text("Du bist nun im Parkour. Springe so weit wie möglich, um einen Highscore aufzustellen!"))
+                )
+                return@thenAccept
+            }
+            player.sendMessage(
+                PluginInstance.prefix().append(
+                    Component.text(
+                        String.format(
+                            "Du bist nun im Parkour. Springe so weit wie möglich, versuche deinen Highscore von %s zu brechen!",
+                            highScore
+                        )
+                    )
+                )
+            )
+        }.exceptionally { throwable: Throwable? ->
+            logger.error(
+                "An error occurred starting jump and run.",
+                throwable
+            )
+            null
+        }
     }
 
-    Location start = randomLocation.add(0, 1, 0);
-    Block block = start.getBlock();
-    Material material = jumpAndRun.getMaterials().get(random.nextInt(jumpAndRun.getMaterials().size()));
 
-    player.sendBlockChange(block.getLocation(), material.createBlockData());
-    latestJumps.get(player)[0] = block;
+    private fun generateInitialJumps(player: Player) {
+        val randomLocation = this.getRandomLocationInRegion(player.world) ?: return
 
-    Block next = this.getValidBlock(start, player);
+        val start = randomLocation.add(0.0, 1.0, 0.0)
+        val block = start.block
+        val material = jumpAndRun.getMaterials()[random.nextInt(jumpAndRun.getMaterials().size)]
 
-    player.sendBlockChange(next.getLocation(), Material.SEA_LANTERN.createBlockData());
-    latestJumps.get(player)[1] = next;
+        player.sendBlockChange(block.location, material.createBlockData())
+        latestJumps[player]!![0] = block
 
-    Block next2 = this.getValidBlock(next.getLocation(), player);
+        val next = this.getValidBlock(start, player)
 
-    player.sendBlockChange(next2.getLocation(), material.createBlockData());
-    latestJumps.get(player)[2] = next2;
+        player.sendBlockChange(next.location, Material.SEA_LANTERN.createBlockData())
+        latestJumps[player]!![1] = next
 
-    player.teleportAsync(block.getLocation().add(0.5, 1, 0.5));
-    blocks.put(player, material);
-  }
+        val next2 = this.getValidBlock(next.location, player)
 
-  public void startActionbar(){
-    runnable = new BukkitRunnable() {
-      @Override
-      public void run() {
-        jumpAndRun.getPlayers().forEach(player -> {
-          player.sendActionBar(Component.text(currentPoints.get(player), PluginColor.BLUE_MID)
-              .append(Component.text(" Spr\u00FCnge", PluginColor.DARK_GRAY)));
-        });
-      }
-    };
-    runnable.runTaskTimerAsynchronously(PluginInstance.instance(), 0L, 20L);
-  }
+        player.sendBlockChange(next2.location, material.createBlockData())
+        latestJumps[player]!![2] = next2
 
-  public void stopActionbar(){
-    if(runnable != null && !runnable.isCancelled()){
-      runnable.cancel();
-    }
-  }
-
-  public void generate(Player player) {
-    Block[] jumps = latestJumps.get(player);
-    Material material = blocks.get(player);
-
-    if (jumps[0] != null) {
-      player.sendBlockChange(jumps[0].getLocation(), Material.AIR.createBlockData());
+        player.teleportAsync(block.location.add(0.5, 1.0, 0.5))
+        blocks[player] = material
     }
 
-    jumps[0] = jumps[1];
-    jumps[1] = jumps[2];
-
-    player.sendBlockChange(jumps[1].getLocation(), Material.SEA_LANTERN.createBlockData());
-
-    Block nextJump = getValidBlock(jumps[1].getLocation(), player);
-    player.sendBlockChange(nextJump.getLocation(), material.createBlockData());
-    jumps[2] = nextJump;
-  }
-
-  private Block getValidBlock(Location previousLocation, Player player) {
-    int maxAttempts = OFFSETS.length * 2;
-    int attempts = 0;
-
-    while (attempts < maxAttempts) {
-      int heightOffset = random.nextInt(3) - 1;
-      Vector offset = OFFSETS[random.nextInt(OFFSETS.length)];
-      Location nextLocation = previousLocation.clone().add(offset).add(0, heightOffset, 0);
-
-      if (!this.isInRegion(nextLocation)) {
-        attempts++;
-        continue;
-      }
-
-      if (nextLocation.getBlock().getType() != Material.AIR ||
-          nextLocation.clone().add(0, 1, 0).getBlock().getType() != Material.AIR ||
-          nextLocation.clone().add(0, 2, 0).getBlock().getType() != Material.AIR) {
-        attempts++;
-        continue;
-      }
-
-      /* Above the Jump */
-
-      if (latestJumps.get(player)[0] != null && latestJumps.get(player)[0].getLocation().clone().add(0, 1, 0).equals(nextLocation)) {
-        attempts++;
-        continue;
-      }
-      if (latestJumps.get(player)[1] != null && latestJumps.get(player)[1].getLocation().clone().add(0, 1, 0).equals(nextLocation)) {
-        attempts++;
-        continue;
-      }
-      if (latestJumps.get(player)[2] != null && latestJumps.get(player)[2].getLocation().clone().add(0, 1, 0).equals(nextLocation)) {
-        attempts++;
-        continue;
-      }
-
-      /* 2 Blocks above the Jump */
-
-      if (latestJumps.get(player)[0] != null && latestJumps.get(player)[0].getLocation().clone().add(0, 2, 0).equals(nextLocation)) {
-        attempts++;
-        continue;
-      }
-      if (latestJumps.get(player)[1] != null && latestJumps.get(player)[1].getLocation().clone().add(0, 2, 0).equals(nextLocation)) {
-        attempts++;
-        continue;
-      }
-      if (latestJumps.get(player)[2] != null && latestJumps.get(player)[2].getLocation().clone().add(0, 2, 0).equals(nextLocation)) {
-        attempts++;
-        continue;
-      }
-
-      if (Math.abs(nextLocation.getY() - previousLocation.getY()) > 1) {
-        attempts++;
-        continue;
-      }
-
-      if (nextLocation.equals(player.getLocation()) || nextLocation.equals(player.getLocation().clone().add(0, 1, 0))) {
-        attempts++;
-        continue;
-      }
-
-      return nextLocation.getBlock();
-    }
-    return previousLocation.clone().add(OFFSETS[0]).getBlock();
-  }
-
-
-
-
-  private Location getRandomLocationInRegion(World world) {
-    Location posOne = jumpAndRun.getPosOne();
-    Location posTwo = jumpAndRun.getPosTwo();
-
-    int minX = Math.min(posOne.getBlockX(), posTwo.getBlockX());
-    int maxX = Math.max(posOne.getBlockX(), posTwo.getBlockX());
-    int minY = Math.min(posOne.getBlockY(), posTwo.getBlockY());
-    int maxY = Math.max(posOne.getBlockY(), posTwo.getBlockY());
-    int minZ = Math.min(posOne.getBlockZ(), posTwo.getBlockZ());
-    int maxZ = Math.max(posOne.getBlockZ(), posTwo.getBlockZ());
-
-    int widthX = maxX - minX;
-    int heightY = maxY - minY;
-    int widthZ = maxZ - minZ;
-
-    if (widthX <= 20 || heightY <= 20 || widthZ <= 20) {
-      Bukkit.getConsoleSender().sendMessage("Die Jump and Run Region ist zu klein.");
-      return null;
+    fun startActionbar() {
+        runnable = object : BukkitRunnable() {
+            override fun run() {
+                jumpAndRun.getPlayers().forEach(Consumer { player: Player ->
+                    player.sendActionBar(
+                        Component.text(
+                            currentPoints[player]!!, PluginColor.BLUE_MID
+                        )
+                            .append(Component.text(" Spr\u00FCnge", PluginColor.DARK_GRAY))
+                    )
+                })
+            }
+        }
+        runnable.runTaskTimerAsynchronously(PluginInstance.Companion.instance(), 0L, 20L)
     }
 
-    minX += 10;
-    maxX -= 10;
-
-    minZ += 10;
-    maxZ -= 10;
-
-    int x = random.nextInt(maxX - minX + 1) + minX;
-    int y = random.nextInt(maxY - minY + 1) + minY;
-    int z = random.nextInt(maxZ - minZ + 1) + minZ;
-
-    return new Location(world, x, y, z);
-  }
-
-
-
-  public boolean isInRegion(Location location) {
-    Location posOne = jumpAndRun.getPosOne();
-    Location posTwo = jumpAndRun.getPosTwo();
-
-    if (location.getWorld() != null && posOne.getWorld() != null && posTwo.getWorld() != null) {
-      if (!location.getWorld().equals(posOne.getWorld()) || !location.getWorld().equals(posTwo.getWorld())) {
-        return false;
-      }
+    fun stopActionbar() {
+        if (runnable != null && !runnable!!.isCancelled) {
+            runnable!!.cancel()
+        }
     }
 
-    int minX = Math.min(posOne.getBlockX(), posTwo.getBlockX());
-    int maxX = Math.max(posOne.getBlockX(), posTwo.getBlockX());
-    int minY = Math.min(posOne.getBlockY(), posTwo.getBlockY());
-    int maxY = Math.max(posOne.getBlockY(), posTwo.getBlockY());
-    int minZ = Math.min(posOne.getBlockZ(), posTwo.getBlockZ());
-    int maxZ = Math.max(posOne.getBlockZ(), posTwo.getBlockZ());
+    fun generate(player: Player) {
+        val jumps = latestJumps[player]!!
+        val material = blocks[player]!!
 
-    return location.getBlockX() >= minX && location.getBlockX() <= maxX &&
-        location.getBlockY() >= minY && location.getBlockY() <= maxY &&
-        location.getBlockZ() >= minZ && location.getBlockZ() <= maxZ;
-  }
+        if (jumps[0] != null) {
+            player.sendBlockChange(jumps[0]!!.location, Material.AIR.createBlockData())
+        }
 
-  public Block[] getLatestJumps(Player player) {
-    return latestJumps.get(player);
-  }
+        jumps[0] = jumps[1]
+        jumps[1] = jumps[2]
 
-  public void remove(Player player) {
-    if (this.getLatestJumps(player) == null) {
-      return;
+        player.sendBlockChange(jumps[1]!!.location, Material.SEA_LANTERN.createBlockData())
+
+        val nextJump = getValidBlock(jumps[1]!!.location, player)
+        player.sendBlockChange(nextJump.location, material.createBlockData())
+        jumps[2] = nextJump
     }
 
-    for (Block block : this.getLatestJumps(player)) {
-      if(block == null) {
-        continue;
-      }
+    private fun getValidBlock(previousLocation: Location, player: Player): Block {
+        val maxAttempts = OFFSETS.size * 2
+        var attempts = 0
 
-      player.sendBlockChange(block.getLocation(), Material.AIR.createBlockData());
+        while (attempts < maxAttempts) {
+            val heightOffset = random.nextInt(3) - 1
+            val offset = OFFSETS[random.nextInt(OFFSETS.size)]
+            val nextLocation =
+                previousLocation.clone().add(offset).add(0.0, heightOffset.toDouble(), 0.0)
+
+            if (!this.isInRegion(nextLocation)) {
+                attempts++
+                continue
+            }
+
+            if (nextLocation.block.type != Material.AIR || nextLocation.clone()
+                    .add(0.0, 1.0, 0.0).block.type != Material.AIR || nextLocation.clone()
+                    .add(0.0, 2.0, 0.0).block.type != Material.AIR
+            ) {
+                attempts++
+                continue
+            }
+
+            /* Above the Jump */
+            if (latestJumps[player]!![0] != null && latestJumps[player]!![0]!!.location.clone()
+                    .add(0.0, 1.0, 0.0) == nextLocation
+            ) {
+                attempts++
+                continue
+            }
+            if (latestJumps[player]!![1] != null && latestJumps[player]!![1]!!.location.clone()
+                    .add(0.0, 1.0, 0.0) == nextLocation
+            ) {
+                attempts++
+                continue
+            }
+            if (latestJumps[player]!![2] != null && latestJumps[player]!![2]!!.location.clone()
+                    .add(0.0, 1.0, 0.0) == nextLocation
+            ) {
+                attempts++
+                continue
+            }
+
+            /* 2 Blocks above the Jump */
+            if (latestJumps[player]!![0] != null && latestJumps[player]!![0]!!.location.clone()
+                    .add(0.0, 2.0, 0.0) == nextLocation
+            ) {
+                attempts++
+                continue
+            }
+            if (latestJumps[player]!![1] != null && latestJumps[player]!![1]!!.location.clone()
+                    .add(0.0, 2.0, 0.0) == nextLocation
+            ) {
+                attempts++
+                continue
+            }
+            if (latestJumps[player]!![2] != null && latestJumps[player]!![2]!!.location.clone()
+                    .add(0.0, 2.0, 0.0) == nextLocation
+            ) {
+                attempts++
+                continue
+            }
+
+            if (abs(nextLocation.y - previousLocation.y) > 1) {
+                attempts++
+                continue
+            }
+
+            if (nextLocation == player.location || nextLocation == player.location.clone()
+                    .add(0.0, 1.0, 0.0)
+            ) {
+                attempts++
+                continue
+            }
+
+            return nextLocation.block
+        }
+        return previousLocation.clone().add(OFFSETS[0]).block
     }
 
-    if (this.awaitingHighScores.contains(player)) {
-      this.setHighScore(player);
+
+    private fun getRandomLocationInRegion(world: World): Location? {
+        val posOne = jumpAndRun.getPosOne()
+        val posTwo = jumpAndRun.getPosTwo()
+
+        var minX = min(posOne.blockX.toDouble(), posTwo.blockX.toDouble()).toInt()
+        var maxX = max(posOne.blockX.toDouble(), posTwo.blockX.toDouble()).toInt()
+        val minY = min(posOne.blockY.toDouble(), posTwo.blockY.toDouble()).toInt()
+        val maxY = max(posOne.blockY.toDouble(), posTwo.blockY.toDouble()).toInt()
+        var minZ = min(posOne.blockZ.toDouble(), posTwo.blockZ.toDouble()).toInt()
+        var maxZ = max(posOne.blockZ.toDouble(), posTwo.blockZ.toDouble()).toInt()
+
+        val widthX = maxX - minX
+        val heightY = maxY - minY
+        val widthZ = maxZ - minZ
+
+        if (widthX <= 20 || heightY <= 20 || widthZ <= 20) {
+            Bukkit.getConsoleSender().sendMessage("Die Jump and Run Region ist zu klein.")
+            return null
+        }
+
+        minX += 10
+        maxX -= 10
+
+        minZ += 10
+        maxZ -= 10
+
+        val x = random.nextInt(maxX - minX + 1) + minX
+        val y = random.nextInt(maxY - minY + 1) + minY
+        val z = random.nextInt(maxZ - minZ + 1) + minZ
+
+        return Location(world, x.toDouble(), y.toDouble(), z.toDouble())
     }
 
-    this.currentPoints.remove(player);
-    this.latestJumps.remove(player);
-    this.jumpAndRun.getPlayers().remove(player);
 
-    player.teleportAsync(jumpAndRun.getSpawn());
-  }
+    fun isInRegion(location: Location): Boolean {
+        val posOne = jumpAndRun.getPosOne()
+        val posTwo = jumpAndRun.getPosTwo()
 
-  public void removeAll() {
-    for(Player player : jumpAndRun.getPlayers()){
-      this.remove(player);
-    }
-  }
+        if (location.world != null && posOne.world != null && posTwo.world != null) {
+            if (location.world != posOne.world || location.world != posTwo.world) {
+                return false
+            }
+        }
 
-  public CompletableFuture<Void> saveAll() {
-    ObjectList<CompletableFuture<Void>> futures = new ObjectArrayList<>();
+        val minX = min(posOne.blockX.toDouble(), posTwo.blockX.toDouble()).toInt()
+        val maxX = max(posOne.blockX.toDouble(), posTwo.blockX.toDouble()).toInt()
+        val minY = min(posOne.blockY.toDouble(), posTwo.blockY.toDouble()).toInt()
+        val maxY = max(posOne.blockY.toDouble(), posTwo.blockY.toDouble()).toInt()
+        val minZ = min(posOne.blockZ.toDouble(), posTwo.blockZ.toDouble()).toInt()
+        val maxZ = max(posOne.blockZ.toDouble(), posTwo.blockZ.toDouble()).toInt()
 
-    for (UUID player : points.synchronous().asMap().keySet()) {
-      CompletableFuture<Void> future = savePoints(player);
-      futures.add(future);
-    }
-
-    for (UUID player : sounds.synchronous().asMap().keySet()) {
-      CompletableFuture<Void> future = saveSound(player);
-      futures.add(future);
+        return location.blockX >= minX && location.blockX <= maxX && location.blockY >= minY && location.blockY <= maxY && location.blockZ >= minZ && location.blockZ <= maxZ
     }
 
-    for (UUID player : highScores.synchronous().asMap().keySet()) {
-      CompletableFuture<Void> future = saveHighScore(player);
-      futures.add(future);
+    fun getLatestJumps(player: Player): Array<Block?>? {
+        return latestJumps[player]
     }
 
-    for (UUID player : trys.synchronous().asMap().keySet()) {
-      CompletableFuture<Void> future = saveTrys(player);
-      futures.add(future);
+    fun remove(player: Player) {
+        if (this.getLatestJumps(player) == null) {
+            return
+        }
+
+        for (block in getLatestJumps(player)!!) {
+            if (block == null) {
+                continue
+            }
+
+            player.sendBlockChange(block.location, Material.AIR.createBlockData())
+        }
+
+        if (awaitingHighScores.contains(player)) {
+            this.setHighScore(player)
+        }
+
+        currentPoints.remove(player)
+        latestJumps.remove(player)
+        jumpAndRun.getPlayers().remove(player)
+
+        player.teleportAsync(jumpAndRun.getSpawn())
     }
 
-    CompletableFuture<Void> allSaves = CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new));
-
-    return allSaves.thenRun(this::removeAll).exceptionally(throwable -> {
-      logger.error("An error occurred while saving all data", throwable);
-      return null;
-    });
-  }
-
-  public CompletableFuture<Integer> queryTrys(UUID player) {
-    return trys.get(player);
-  }
-
-  public CompletableFuture<Boolean> querySound(UUID player) {
-    return sounds.get(player);
-  }
-
-  public CompletableFuture<Integer> queryPoints(UUID player) {
-    return points.get(player);
-  }
-
-  public CompletableFuture<Integer> queryHighScore(UUID player) {
-    return highScores.get(player);
-  }
-
-  public CompletableFuture<Void> saveSound(UUID player) {
-    return this.querySound(player).thenCompose(sound -> CompletableFuture.runAsync(() -> Database.saveSound(player, sound)).thenRun(() -> this.sounds.synchronous().invalidate(player)));
-  }
-
-  public CompletableFuture<Void> saveTrys(UUID player) {
-    return this.queryTrys(player).thenCompose(points -> {
-      if (points == null) {
-        return CompletableFuture.completedFuture(null);
-      }
-
-      return CompletableFuture.runAsync(() -> Database.saveTrys(player, points)).thenRun(() -> this.trys.synchronous().invalidate(player));
-    });
-  }
-
-  public CompletableFuture<Void> savePoints(UUID player) {
-    return this.queryPoints(player).thenCompose(points -> {
-      if (points == null) {
-        return CompletableFuture.completedFuture(null);
-      }
-
-      return CompletableFuture.runAsync(() -> Database.savePoints(player, points)).thenRun(() -> this.points.synchronous().invalidate(player));
-    });
-  }
-
-  public CompletableFuture<Void> saveHighScore(UUID player) {
-    return this.queryHighScore(player).thenCompose(highScore -> {
-      if (highScore == null) {
-        return CompletableFuture.completedFuture(null);
-      }
-
-      return CompletableFuture.runAsync(() -> Database.saveHighScore(player, highScore)).thenRun(() -> this.highScores.synchronous().invalidate(player));
-    });
-  }
-
-  public void setSound(Player player, Boolean value) {
-    this.sounds.synchronous().put(player.getUniqueId(), value);
-  }
-
-
-  public void addPoint(Player player) {
-    points.get(player.getUniqueId()).thenAccept(points -> {
-      int newPoints = (points == null) ? 1 : points + 1;
-      this.points.synchronous().put(player.getUniqueId(), newPoints);
-    });
-
-    currentPoints.compute(player, (p, curPts) -> curPts == null ? 1 : curPts + 1);
-
-    this.querySound(player.getUniqueId()).thenAccept(sound -> {
-      if(!sound){
-        player.playSound(Sound.sound(org.bukkit.Sound.ENTITY_EXPERIENCE_ORB_PICKUP, Source.MASTER, 100f, 1), Emitter.self());
-      }
-    });
-  }
-
-  public void addTry(Player player) {
-    this.queryTrys(player.getUniqueId()).thenAccept(trys -> {
-      int newTrys = (trys == null) ? 1 : trys + 1;
-      this.trys.synchronous().put(player.getUniqueId(), newTrys);
-    });
-  }
-
-  public void checkHighScore(Player player) {
-    Integer currentScore = currentPoints.get(player);
-
-    this.queryHighScore(player.getUniqueId()).thenAccept(highScore -> {
-      if (currentScore != null && (highScore == null || currentScore > highScore)) {
-        awaitingHighScores.add(player);
-      }
-    });
-  }
-
-
-  public void setHighScore(Player player) {
-    Integer currentScore = currentPoints.get(player);
-
-    this.queryHighScore(player.getUniqueId()).thenAccept(highScore -> {
-      if (currentScore != null && (highScore == null || currentScore > highScore)) {
-        awaitingHighScores.remove(player);
-        highScores.synchronous().put(player.getUniqueId(), currentScore);
-
-        player.sendMessage(PluginInstance.prefix().append(Component.text(String.format("Du hast deinen Highscore gebrochen! Dein neuer Highscore ist %s!", currentScore))));
-
-        this.querySound(player.getUniqueId()).thenAccept(sound -> {
-          if(!sound){
-            player.playSound(Sound.sound(org.bukkit.Sound.ITEM_TOTEM_USE, Source.MASTER, 100f, 1f), Emitter.self());
-          }
-        });
-
-        player.showTitle(Title.title(Component.text("Rekord!", PluginColor.BLUE_MID), Component.text("Du hast einen neuen persönlichen Rekord aufgestellt.", PluginColor.DARK_GRAY), Times.times(
-            Duration.ofSeconds(1), Duration.ofSeconds(2), Duration.ofSeconds(1))));
-      }
-    });
-  }
-
-
-  public void onQuit(Player player) {
-    this.saveHighScore(player.getUniqueId());
-    this.savePoints(player.getUniqueId());
-    this.saveTrys(player.getUniqueId());
-
-    this.currentPoints.remove(player);
-    this.awaitingHighScores.remove(player);
-
-
-    if(this.isJumping(player)) {
-      this.remove(player);
+    fun removeAll() {
+        for (player in jumpAndRun.getPlayers()) {
+            this.remove(player)
+        }
     }
-  }
 
-  public boolean isJumping(Player player) {
-    return this.jumpAndRun.getPlayers().contains(player);
-  }
+    fun saveAll(): CompletableFuture<Void?> {
+        val futures: ObjectList<CompletableFuture<Void>> = ObjectArrayList()
+
+        for (player in points.synchronous().asMap().keys) {
+            val future = savePoints(player)
+            futures.add(future)
+        }
+
+        for (player in sounds.synchronous().asMap().keys) {
+            val future = saveSound(player)
+            futures.add(future)
+        }
+
+        for (player in highScores.synchronous().asMap().keys) {
+            val future = saveHighScore(player)
+            futures.add(future)
+        }
+
+        for (player in trys.synchronous().asMap().keys) {
+            val future = saveTrys(player)
+            futures.add(future)
+        }
+
+        val allSaves =
+            CompletableFuture.allOf(*futures.toArray<CompletableFuture<*>> { _Dummy_.__Array__() })
+
+        return allSaves.thenRun { this.removeAll() }.exceptionally { throwable: Throwable? ->
+            logger.error(
+                "An error occurred while saving all data",
+                throwable
+            )
+            null
+        }
+    }
+
+    fun queryTrys(player: UUID): CompletableFuture<Int?> {
+        return trys[player]
+    }
+
+    fun querySound(player: UUID): CompletableFuture<Boolean?> {
+        return sounds[player]
+    }
+
+    fun queryPoints(player: UUID): CompletableFuture<Int?> {
+        return points[player]
+    }
+
+    fun queryHighScore(player: UUID): CompletableFuture<Int?> {
+        return highScores[player]
+    }
+
+    fun saveSound(player: UUID): CompletableFuture<Void> {
+        return querySound(player).thenCompose { sound: Boolean? ->
+            CompletableFuture.runAsync {
+                Database.saveSound(
+                    player,
+                    sound
+                )
+            }.thenRun { sounds.synchronous().invalidate(player) }
+        }
+    }
+
+    fun saveTrys(player: UUID): CompletableFuture<Void> {
+        return queryTrys(player).thenCompose { points: Int? ->
+            if (points == null) {
+                return@thenCompose CompletableFuture.completedFuture<Void?>(
+                    null
+                )
+            }
+            CompletableFuture.runAsync { Database.saveTrys(player, points) }
+                .thenRun {
+                    trys.synchronous()
+                        .invalidate(player)
+                }
+        }
+    }
+
+    fun savePoints(player: UUID): CompletableFuture<Void> {
+        return queryPoints(player).thenCompose { points: Int? ->
+            if (points == null) {
+                return@thenCompose CompletableFuture.completedFuture<Void?>(
+                    null
+                )
+            }
+            CompletableFuture.runAsync { Database.savePoints(player, points) }
+                .thenRun {
+                    this.points.synchronous()
+                        .invalidate(player)
+                }
+        }
+    }
+
+    fun saveHighScore(player: UUID): CompletableFuture<Void> {
+        return queryHighScore(player).thenCompose { highScore: Int? ->
+            if (highScore == null) {
+                return@thenCompose CompletableFuture.completedFuture<Void?>(
+                    null
+                )
+            }
+            CompletableFuture.runAsync {
+                Database.saveHighScore(
+                    player,
+                    highScore
+                )
+            }.thenRun { highScores.synchronous().invalidate(player) }
+        }
+    }
+
+    fun setSound(player: Player, value: Boolean?) {
+        sounds.synchronous().put(player.uniqueId, value)
+    }
+
+
+    fun addPoint(player: Player) {
+        points[player.uniqueId].thenAccept { points: Int? ->
+            val newPoints = if (points == null) 1 else points + 1
+            this.points.synchronous().put(player.uniqueId, newPoints)
+        }
+
+        currentPoints.compute(player) { p: Player?, curPts: Int? -> if (curPts == null) 1 else curPts + 1 }
+
+        querySound(player.uniqueId).thenAccept { sound: Boolean? ->
+            if (!sound!!) {
+                player.playSound(
+                    Sound.sound(
+                        org.bukkit.Sound.ENTITY_EXPERIENCE_ORB_PICKUP,
+                        Sound.Source.MASTER,
+                        100f,
+                        1f
+                    ), Sound.Emitter.self()
+                )
+            }
+        }
+    }
+
+    fun addTry(player: Player) {
+        queryTrys(player.uniqueId).thenAccept { trys: Int? ->
+            val newTrys = if (trys == null) 1 else trys + 1
+            this.trys.synchronous().put(player.uniqueId, newTrys)
+        }
+    }
+
+    fun checkHighScore(player: Player) {
+        val currentScore = currentPoints[player]
+
+        queryHighScore(player.uniqueId).thenAccept { highScore: Int? ->
+            if (currentScore != null && (highScore == null || currentScore > highScore)) {
+                awaitingHighScores.add(player)
+            }
+        }
+    }
+
+
+    fun setHighScore(player: Player) {
+        val currentScore = currentPoints[player]
+
+        queryHighScore(player.uniqueId).thenAccept { highScore: Int? ->
+            if (currentScore != null && (highScore == null || currentScore > highScore)) {
+                awaitingHighScores.remove(player)
+                highScores.synchronous().put(player.uniqueId, currentScore)
+
+                player.sendMessage(
+                    PluginInstance.prefix().append(
+                        Component.text(
+                            String.format(
+                                "Du hast deinen Highscore gebrochen! Dein neuer Highscore ist %s!",
+                                currentScore
+                            )
+                        )
+                    )
+                )
+
+                querySound(player.uniqueId)
+                    .thenAccept { sound: Boolean? ->
+                        if (!sound!!) {
+                            player.playSound(
+                                Sound.sound(
+                                    org.bukkit.Sound.ITEM_TOTEM_USE,
+                                    Sound.Source.MASTER,
+                                    100f,
+                                    1f
+                                ), Sound.Emitter.self()
+                            )
+                        }
+                    }
+
+                player.showTitle(
+                    Title.title(
+                        Component.text("Rekord!", PluginColor.BLUE_MID),
+                        Component.text(
+                            "Du hast einen neuen persönlichen Rekord aufgestellt.",
+                            PluginColor.DARK_GRAY
+                        ),
+                        Title.Times.times(
+                            Duration.ofSeconds(1),
+                            Duration.ofSeconds(2),
+                            Duration.ofSeconds(1)
+                        )
+                    )
+                )
+            }
+        }
+    }
+
+
+    fun onQuit(player: Player) {
+        this.saveHighScore(player.uniqueId)
+        this.savePoints(player.uniqueId)
+        this.saveTrys(player.uniqueId)
+
+        currentPoints.remove(player)
+        awaitingHighScores.remove(player)
+
+
+        if (this.isJumping(player)) {
+            this.remove(player)
+        }
+    }
+
+    fun isJumping(player: Player?): Boolean {
+        return jumpAndRun.getPlayers().contains(player)
+    }
+
+    companion object {
+        private val logger = ComponentLogger.logger()
+
+        private val OFFSETS = arrayOf(
+            Vector(3, 0, 0),
+            Vector(-3, 0, 0),
+            Vector(0, 0, 3),
+            Vector(0, 0, -3),
+            Vector(3, 0, 0),
+            Vector(-3, 0, 0),
+            Vector(0, 0, 3),
+            Vector(0, 0, -3),
+            Vector(3, 0, 3),
+            Vector(-3, 0, 3),
+            Vector(3, 0, 3),
+            Vector(-3, 0, 3),
+            Vector(3, 0, 0),
+            Vector(0, 0, 3),
+            Vector(-3, 0, 0)
+        )
+    }
 }

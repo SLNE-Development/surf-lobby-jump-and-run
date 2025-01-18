@@ -1,125 +1,126 @@
-package dev.slne.surf.lobby.jar.papi;
+package dev.slne.surf.lobby.jar.papi
 
-import dev.slne.surf.lobby.jar.mysql.Database;
-import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import it.unimi.dsi.fastutil.objects.ObjectList;
-import java.util.Comparator;
-import java.util.Map.Entry;
-import java.util.UUID;
-import java.util.stream.Collectors;
-import me.clip.placeholderapi.expansion.PlaceholderExpansion;
-import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import dev.slne.surf.lobby.jar.mysql.Database
+import it.unimi.dsi.fastutil.objects.ObjectArrayList
+import it.unimi.dsi.fastutil.objects.ObjectList
+import me.clip.placeholderapi.expansion.PlaceholderExpansion
+import org.bukkit.Bukkit
+import org.bukkit.OfflinePlayer
+import java.util.*
+import java.util.function.Supplier
+import java.util.stream.Collectors
 
-public class ParkourPlaceholderExtension extends PlaceholderExpansion {
-
-  @Override
-  public @NotNull String getIdentifier() {
-    return "surf-lobby-parkour";
-  }
-
-  @Override
-  public @NotNull String getAuthor() {
-    return "SLNE Development, TheBjoRedCraft";
-  }
-
-  @Override
-  public @NotNull String getVersion() {
-    return "1.0.0";
-  }
-
-  @Override
-  public @Nullable String onRequest(OfflinePlayer player, @NotNull String params) {
-    String[] parts = params.split("_");
-
-    if (parts.length < 3) {
-      return null;
+class ParkourPlaceholderExtension : PlaceholderExpansion() {
+    override fun getIdentifier(): String {
+        return "surf-lobby-parkour"
     }
 
-    String category = parts[0];
-    int place;
-
-    try {
-      place = Integer.parseInt(parts[1]);
-    } catch (NumberFormatException e) {
-      return null;
+    override fun getAuthor(): String {
+        return "SLNE Development, TheBjoRedCraft"
     }
 
-    if (category.equals("highscore")) {
-      if (params.endsWith("name")) {
-        return getName(place, getSortedHighScores());
-      } else if (params.endsWith("value")) {
-        return String.valueOf(getHighScore(place));
-      }
-    } else if (category.equals("points")) {
-      if (params.endsWith("name")) {
-        return getName(place, getSortedPoints());
-      } else if (params.endsWith("value")) {
-        return String.valueOf(getPoints(place));
-      }
+    override fun getVersion(): String {
+        return "1.0.0"
     }
 
-    return null;
-  }
+    override fun onRequest(player: OfflinePlayer, params: String): String? {
+        val parts = params.split("_".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
 
-  private String getName(int place, ObjectList<UUID> sortedPlayers) {
-    if (place <= 0 || place > sortedPlayers.size()) {
-      return "/";
+        if (parts.size < 3) {
+            return null
+        }
+
+        val category = parts[0]
+        val place: Int
+
+        try {
+            place = parts[1].toInt()
+        } catch (e: NumberFormatException) {
+            return null
+        }
+
+        if (category == "highscore") {
+            if (params.endsWith("name")) {
+                return getName(place, sortedHighScores)
+            } else if (params.endsWith("value")) {
+                return getHighScore(place).toString()
+            }
+        } else if (category == "points") {
+            if (params.endsWith("name")) {
+                return getName(place, sortedPoints)
+            } else if (params.endsWith("value")) {
+                return getPoints(place).toString()
+            }
+        }
+
+        return null
     }
 
-    UUID uuid = sortedPlayers.get(place - 1);
-    return getName(uuid);
-  }
+    private fun getName(place: Int, sortedPlayers: ObjectList<UUID>): String? {
+        if (place <= 0 || place > sortedPlayers.size) {
+            return "/"
+        }
 
-  private int getHighScore(int place) {
-    ObjectList<UUID> sortedPlayers = getSortedHighScores();
-
-    if (place <= 0 || place > sortedPlayers.size()) {
-      return -1;
+        val uuid = sortedPlayers[place - 1]
+        return getName(uuid)
     }
 
-    UUID uuid = sortedPlayers.get(place - 1);
-    return Database.getHighScore(uuid);
-  }
+    private fun getHighScore(place: Int): Int {
+        val sortedPlayers =
+            sortedHighScores
 
-  private int getPoints(int place) {
-    ObjectList<UUID> sortedPlayers = getSortedPoints();
+        if (place <= 0 || place > sortedPlayers.size) {
+            return -1
+        }
 
-    if (place <= 0 || place > sortedPlayers.size()) {
-      return -1;
+        val uuid = sortedPlayers[place - 1]
+        return Database.getHighScore(uuid)!!
     }
 
-    UUID uuid = sortedPlayers.get(place - 1);
-    return Database.getPoints(uuid);
-  }
+    private fun getPoints(place: Int): Int {
+        val sortedPlayers =
+            sortedPoints
 
-  private String getName(UUID uuid) {
-    OfflinePlayer player = Bukkit.getOfflinePlayer(uuid);
-    return player.getName() != null ? player.getName() : "Unknown";
-  }
+        if (place <= 0 || place > sortedPlayers.size) {
+            return -1
+        }
 
-  private ObjectList<UUID> getSortedHighScores() {
-    Object2ObjectMap<UUID, Integer> highScores = Database.getHighScores();
+        val uuid = sortedPlayers[place - 1]
+        return Database.getPoints(uuid)!!
+    }
 
-    return highScores
-        .entrySet()
-        .stream()
-        .sorted(Comparator.comparingInt(Entry::getValue))
-        .map(Entry::getKey)
-        .collect(Collectors.toCollection(ObjectArrayList::new));
-  }
+    private fun getName(uuid: UUID): String? {
+        val player = Bukkit.getOfflinePlayer(uuid)
+        return if (player.name != null) player.name else "Unknown"
+    }
 
-  private ObjectList<UUID> getSortedPoints() {
-    Object2ObjectMap<UUID, Integer> points = Database.getPoints();
+    private val sortedHighScores: ObjectList<UUID>
+        get() {
+            val highScores = Database.getHighScores()
 
-    return points
-        .entrySet()
-        .stream()
-        .sorted(Comparator.comparingInt(Entry::getValue))
-        .map(Entry::getKey)
-        .collect(Collectors.toCollection(ObjectArrayList::new));
-  }
+            return highScores
+                .entries
+                .stream()
+                .sorted(Comparator.comparingInt<Map.Entry<UUID?, Int?>> { obj: Map.Entry<UUID?, Int?> -> obj.value!! })
+                .map<UUID?> { obj: Map.Entry<UUID?, Int?> -> obj.key }
+                .collect(
+                    Collectors.toCollection<UUID?, ObjectArrayList<UUID>>(
+                        Supplier<ObjectArrayList<UUID>> { ObjectArrayList() })
+                )
+        }
+
+    private val sortedPoints: ObjectList<UUID>
+        get() {
+            val points = Database.getPoints()
+
+            return points
+                .entries
+                .stream()
+                .sorted(Comparator.comparingInt<Map.Entry<UUID?, Int?>> { obj: Map.Entry<UUID?, Int?> -> obj.value!! })
+                .map<UUID?> { obj: Map.Entry<UUID?, Int?> -> obj.key }
+                .collect(
+                    Collectors.toCollection<UUID?, ObjectArrayList<UUID>>(
+                        Supplier<ObjectArrayList<UUID>> { ObjectArrayList() })
+                )
+        }
 }

@@ -1,89 +1,85 @@
-package dev.slne.surf.lobby.jar.listener;
+package dev.slne.surf.lobby.jar.listener
 
-import dev.slne.surf.lobby.jar.JumpAndRunProvider;
-import dev.slne.surf.lobby.jar.PluginInstance;
-import java.util.Arrays;
-import org.bukkit.Location;
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
-import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerMoveEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
+import dev.slne.surf.lobby.jar.JumpAndRunService
+import dev.slne.surf.lobby.jar.PluginInstance
+import org.bukkit.block.Block
+import org.bukkit.block.BlockFace
+import org.bukkit.event.EventHandler
+import org.bukkit.event.Listener
+import org.bukkit.event.player.PlayerInteractEvent
+import org.bukkit.event.player.PlayerMoveEvent
+import org.bukkit.event.player.PlayerQuitEvent
 
-public class ParkourListener implements Listener {
+class ParkourListener : Listener {
+    private val jumpAndRunProvider: JumpAndRunService? =
+        PluginInstance.Companion.instance().jumpAndRunProvider()
 
-  private final JumpAndRunProvider jumpAndRunProvider = PluginInstance.instance().jumpAndRunProvider();
+    @EventHandler
+    fun onMove(event: PlayerMoveEvent) {
+        if (!event.hasChangedPosition()) {
+            return
+        }
 
-  @EventHandler
-  public void onMove(PlayerMoveEvent event) {
-    if (!event.hasChangedPosition()) {
-      return;
+        val toBlock = event.to.block
+        val block = toBlock.getRelative(BlockFace.DOWN)
+        val player = event.player
+        val jumps = jumpAndRunProvider!!.getLatestJumps(player)
+
+        if (toBlock.location
+            == jumpAndRunProvider.jumpAndRun().start.block.location
+        ) {
+            jumpAndRunProvider.start(player)
+            return
+        }
+
+        if (jumps == null) {
+            return
+        }
+
+        if (jumps.size < 2 || jumps[0] == null || jumps[1] == null) {
+            return
+        }
+
+        val playerLocation = player.location
+        if (playerLocation.y < jumps[0]!!.location.y && playerLocation.y < jumps[1]!!
+                .location.y
+        ) {
+            jumpAndRunProvider.remove(player)
+            return
+        }
+
+        if (jumps[1] == null) {
+            return
+        }
+
+        if (block == jumps[1]) {
+            jumps[1]!!.setType(jumpAndRunProvider.blocks()[player])
+
+            jumpAndRunProvider.addPoint(player)
+            jumpAndRunProvider.checkHighScore(player)
+            jumpAndRunProvider.generate(player)
+        }
     }
 
-    Block toBlock = event.getTo().getBlock();
-    Block block = toBlock.getRelative(BlockFace.DOWN);
-    Player player = event.getPlayer();
-    Block[] jumps = this.jumpAndRunProvider.getLatestJumps(player);
+    @EventHandler
+    fun onInteract(event: PlayerInteractEvent) {
+        val player = event.player
+        val location = event.interactionPoint ?: return
 
-    if (toBlock.getLocation()
-        .equals(jumpAndRunProvider.jumpAndRun().getStart().getBlock().getLocation())) {
-      jumpAndRunProvider.start(player);
-      return;
+        val jumps: Array<Block> =
+            PluginInstance.Companion.instance().jumpAndRunProvider().getLatestJumps(player)
+
+        for (jump in jumps) {
+            if (jump.location == location) {
+                player.sendBlockChange(jump.location, jump.blockData)
+            }
+        }
     }
 
-    if (jumps == null) {
-      return;
+    @EventHandler
+    fun onQuit(event: PlayerQuitEvent) {
+        val player = event.player
+
+        jumpAndRunProvider!!.onQuit(player)
     }
-
-    if (jumps.length < 2 || jumps[0] == null || jumps[1] == null) {
-      return;
-    }
-
-    Location playerLocation = player.getLocation();
-    if (playerLocation.getY() < jumps[0].getLocation().getY() && playerLocation.getY() < jumps[1].getLocation().getY()) {
-      jumpAndRunProvider.remove(player);
-      return;
-    }
-
-    if (jumps[1] == null) {
-      return;
-    }
-
-    if (block.equals(jumps[1])) {
-
-      jumps[1].setType(jumpAndRunProvider.blocks().get(player));
-
-      this.jumpAndRunProvider.addPoint(player);
-      this.jumpAndRunProvider.checkHighScore(player);
-      this.jumpAndRunProvider.generate(player);
-    }
-  }
-
-  @EventHandler
-  public void onInteract(PlayerInteractEvent event) {
-    Player player = event.getPlayer();
-    Location location = event.getInteractionPoint();
-
-    if(location == null) {
-      return;
-    }
-
-    Block[] jumps = PluginInstance.instance().jumpAndRunProvider().getLatestJumps(player);
-
-    for (Block jump : jumps) {
-      if(jump.getLocation().equals(location)) {
-        player.sendBlockChange(jump.getLocation(), jump.getBlockData());
-      }
-    }
-  }
-
-  @EventHandler
-  public void onQuit(PlayerQuitEvent event) {
-    Player player = event.getPlayer();
-
-    jumpAndRunProvider.onQuit(player);
-  }
 }

@@ -1,18 +1,17 @@
-package dev.slne.surf.lobby.jar.command.subcommand;
+package dev.slne.surf.lobby.jar.command.subcommand
 
-import dev.jorel.commandapi.CommandAPICommand;
+import dev.jorel.commandapi.CommandAPICommand
+import dev.jorel.commandapi.executors.CommandArguments
+import dev.jorel.commandapi.executors.PlayerCommandExecutor
+import dev.slne.surf.lobby.jar.PluginInstance
+import org.bukkit.entity.Player
 
-import dev.slne.surf.lobby.jar.PluginInstance;
+class ParkourStartCommand(commandName: String) : CommandAPICommand(commandName) {
+    init {
+        withPermission("jumpandrun.command.start")
 
-public class ParkourStartCommand extends CommandAPICommand {
-
-  public ParkourStartCommand(String commandName) {
-    super(commandName);
-
-    withPermission("jumpandrun.command.start");
-
-    executesPlayer((player, args) -> {
-      PluginInstance.instance().jumpAndRunProvider().start(player);
-    });
-  }
+        executesPlayer(PlayerCommandExecutor { player: Player?, args: CommandArguments? ->
+            PluginInstance.Companion.instance().jumpAndRunProvider().start(player)
+        })
+    }
 }

@@ -1,207 +1,201 @@
-package dev.slne.surf.lobby.jar.mysql;
+package dev.slne.surf.lobby.jar.mysql
 
-import dev.slne.surf.lobby.jar.config.PluginConfig;
+import dev.slne.surf.lobby.jar.config.PluginConfig
+import it.unimi.dsi.fastutil.objects.Object2ObjectMap
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap
+import org.bukkit.Bukkit
+import org.javalite.activejdbc.Base
+import org.javalite.activejdbc.Model
+import java.util.*
 
-import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+object Database {
+    fun createConnection() {
+        try {
+            val url = PluginConfig.config().getString("mysql.url")
+            val user = PluginConfig.config().getString("mysql.user")
+            val password = PluginConfig.config().getString("mysql.password")
 
-import org.javalite.activejdbc.Base;
-import org.bukkit.Bukkit;
+            Base.open("com.mysql.jdbc.Driver", url, user, password)
 
-import java.util.UUID;
-import org.javalite.activejdbc.Model;
-
-public class Database {
-
-  public static void createConnection() {
-    try {
-      String url = PluginConfig.config().getString("mysql.url");
-      String user = PluginConfig.config().getString("mysql.user");
-      String password = PluginConfig.config().getString("mysql.password");
-
-      Base.open("com.mysql.jdbc.Driver", url, user, password);
-
-      createTable();
-    } catch (Exception e) {
-      Bukkit.getConsoleSender().sendMessage( e.getMessage());
+            createTable()
+        } catch (e: Exception) {
+            Bukkit.getConsoleSender().sendMessage(e.message!!)
+        }
     }
-  }
 
-  private static void createTable() {
-    String query = """
+    private fun createTable() {
+        val query = """
             CREATE TABLE IF NOT EXISTS jumpandrun (
                 uuid VARCHAR(36) NOT NULL PRIMARY KEY,
                 points INT DEFAULT 0,
                 trys INT DEFAULT 0,
                 sound TINYINT(1) DEFAULT TRUE,
                 high_score INT DEFAULT 0
-            )""";
+            )
+            """.trimIndent()
 
-    try {
-      Base.exec(query);
-    } catch (Exception e) {
-      Bukkit.getConsoleSender().sendMessage(e.getMessage());
-    }
-  }
-
-  public static void closeConnection() {
-    if (Base.hasConnection()) {
-      Base.close();
-    }
-  }
-
-  public static Integer getTrys(UUID uuid) {
-    Integer trys = null;
-
-    try {
-      JumpAndRunModel result = JumpAndRunModel.findFirst("uuid = ?", uuid.toString());
-      if (result != null) {
-        trys = result.getInteger("trys");
-      }
-
-    } catch (Exception e) {
-      Bukkit.getConsoleSender().sendMessage(e.getMessage());
+        try {
+            Base.exec(query)
+        } catch (e: Exception) {
+            Bukkit.getConsoleSender().sendMessage(e.message!!)
+        }
     }
 
-    return trys;
-  }
-
-  public static Integer getPoints(UUID uuid) {
-    Integer points = null;
-
-    try {
-      JumpAndRunModel result = JumpAndRunModel.findFirst("uuid = ?", uuid.toString());
-      if (result != null) {
-        points = result.getInteger("points");
-      }
-
-    } catch (Exception e) {
-      Bukkit.getConsoleSender().sendMessage(e.getMessage());
+    fun closeConnection() {
+        if (Base.hasConnection()) {
+            Base.close()
+        }
     }
 
-    return points;
-  }
+    fun getTrys(uuid: UUID): Int? {
+        var trys: Int? = null
 
-  public static Integer getHighScore(UUID uuid) {
-    Integer highScore = null;
+        try {
+            val result = Model.findFirst<JumpAndRunModel>("uuid = ?", uuid.toString())
+            if (result != null) {
+                trys = result.getInteger("trys")
+            }
+        } catch (e: Exception) {
+            Bukkit.getConsoleSender().sendMessage(e.message!!)
+        }
 
-    try {
-      JumpAndRunModel result = JumpAndRunModel.findFirst("uuid = ?", uuid.toString());
-      if (result != null) {
-        highScore = result.getInteger("high_score");
-      }
-
-    } catch (Exception e) {
-      Bukkit.getConsoleSender().sendMessage(e.getMessage());
+        return trys
     }
 
-    return highScore;
-  }
+    fun getPoints(uuid: UUID): Int? {
+        var points: Int? = null
 
-  public static Boolean getSound(UUID uuid) {
-    Boolean sound = true;
+        try {
+            val result = Model.findFirst<JumpAndRunModel>("uuid = ?", uuid.toString())
+            if (result != null) {
+                points = result.getInteger("points")
+            }
+        } catch (e: Exception) {
+            Bukkit.getConsoleSender().sendMessage(e.message!!)
+        }
 
-    try {
-      JumpAndRunModel result = JumpAndRunModel.findFirst("uuid = ?", uuid.toString());
-      if (result != null) {
-        sound = result.getBoolean("sound");
-      }
-
-    } catch (Exception e) {
-      Bukkit.getConsoleSender().sendMessage(e.getMessage());
+        return points
     }
 
-    return sound;
-  }
+    fun getHighScore(uuid: UUID): Int? {
+        var highScore: Int? = null
 
-  public static void saveSound(UUID uuid, Boolean value) {
-    try {
-      JumpAndRunModel model = JumpAndRunModel.findFirst("uuid = ?", uuid.toString());
-      if (model == null) {
-        model = new JumpAndRunModel();
-        model.set("uuid", uuid.toString());
-      }
+        try {
+            val result = Model.findFirst<JumpAndRunModel>("uuid = ?", uuid.toString())
+            if (result != null) {
+                highScore = result.getInteger("high_score")
+            }
+        } catch (e: Exception) {
+            Bukkit.getConsoleSender().sendMessage(e.message!!)
+        }
 
-      model.set("sound", value);
-      model.saveIt();
-    } catch (Exception e) {
-      Bukkit.getConsoleSender().sendMessage(e.getMessage());
+        return highScore
     }
-  }
 
-  public static void savePoints(UUID uuid, Integer points) {
-    try {
-      JumpAndRunModel model = JumpAndRunModel.findFirst("uuid = ?", uuid.toString());
-      if (model == null) {
-        model = new JumpAndRunModel();
-        model.set("uuid", uuid.toString());
-      }
+    fun getSound(uuid: UUID): Boolean {
+        var sound = true
 
-      model.set("points", points);
-      model.saveIt();
-    } catch (Exception e) {
-      Bukkit.getConsoleSender().sendMessage(e.getMessage());
+        try {
+            val result = Model.findFirst<JumpAndRunModel>("uuid = ?", uuid.toString())
+            if (result != null) {
+                sound = result.getBoolean("sound")
+            }
+        } catch (e: Exception) {
+            Bukkit.getConsoleSender().sendMessage(e.message!!)
+        }
+
+        return sound
     }
-  }
 
-  public static void saveTrys(UUID uuid, Integer trys) {
-    try {
-      JumpAndRunModel model = JumpAndRunModel.findFirst("uuid = ?", uuid.toString());
-      if (model == null) {
-        model = new JumpAndRunModel();
-        model.set("uuid", uuid.toString());
-      }
+    fun saveSound(uuid: UUID, value: Boolean?) {
+        try {
+            var model = Model.findFirst<JumpAndRunModel>("uuid = ?", uuid.toString())
+            if (model == null) {
+                model = JumpAndRunModel()
+                model.set<Model>("uuid", uuid.toString())
+            }
 
-      model.set("trys", trys);
-      model.saveIt();
-    } catch (Exception e) {
-      Bukkit.getConsoleSender().sendMessage(e.getMessage());
+            model.set<Model>("sound", value)
+            model.saveIt()
+        } catch (e: Exception) {
+            Bukkit.getConsoleSender().sendMessage(e.message!!)
+        }
     }
-  }
 
-  public static void saveHighScore(UUID uuid, Integer highScore) {
-    try {
-      JumpAndRunModel model = JumpAndRunModel.findFirst("uuid = ?", uuid.toString());
-      if (model == null) {
-        model = new JumpAndRunModel();
-        model.set("uuid", uuid.toString());
-      }
+    fun savePoints(uuid: UUID, points: Int?) {
+        try {
+            var model = Model.findFirst<JumpAndRunModel>("uuid = ?", uuid.toString())
+            if (model == null) {
+                model = JumpAndRunModel()
+                model.set<Model>("uuid", uuid.toString())
+            }
 
-      model.set("high_score", highScore);
-      model.saveIt();
-    } catch (Exception e) {
-      Bukkit.getConsoleSender().sendMessage(e.getMessage());
+            model.set<Model>("points", points)
+            model.saveIt()
+        } catch (e: Exception) {
+            Bukkit.getConsoleSender().sendMessage(e.message!!)
+        }
     }
-  }
 
-  public static Object2ObjectMap<UUID, Integer> getHighScores() {
-    Object2ObjectMap<UUID, Integer> highScores = new Object2ObjectOpenHashMap<>();
+    fun saveTrys(uuid: UUID, trys: Int?) {
+        try {
+            var model = Model.findFirst<JumpAndRunModel>("uuid = ?", uuid.toString())
+            if (model == null) {
+                model = JumpAndRunModel()
+                model.set<Model>("uuid", uuid.toString())
+            }
 
-    try {
-      for (Model result : JumpAndRunModel.findAll()) {
-        highScores.put(UUID.fromString(result.getString("uuid")), result.getInteger("high_score"));
-      }
-
-    } catch (Exception e) {
-      Bukkit.getConsoleSender().sendMessage(e.getMessage());
+            model.set<Model>("trys", trys)
+            model.saveIt()
+        } catch (e: Exception) {
+            Bukkit.getConsoleSender().sendMessage(e.message!!)
+        }
     }
-    return highScores;
-  }
 
-  public static Object2ObjectMap<UUID, Integer> getPoints() {
-    Object2ObjectMap<UUID, Integer> points = new Object2ObjectOpenHashMap<>();
-    try {
-      for (Model result : JumpAndRunModel.findAll()) {
-        points.put(UUID.fromString(result.getString("uuid")), result.getInteger("points"));
-      }
+    fun saveHighScore(uuid: UUID, highScore: Int?) {
+        try {
+            var model = Model.findFirst<JumpAndRunModel>("uuid = ?", uuid.toString())
+            if (model == null) {
+                model = JumpAndRunModel()
+                model.set<Model>("uuid", uuid.toString())
+            }
 
-    } catch (Exception e) {
-      Bukkit.getConsoleSender().sendMessage(e.getMessage());
+            model.set<Model>("high_score", highScore)
+            model.saveIt()
+        } catch (e: Exception) {
+            Bukkit.getConsoleSender().sendMessage(e.message!!)
+        }
     }
-    return points;
-  }
+
+    val highScores: Object2ObjectMap<UUID, Int>
+        get() {
+            val highScores: Object2ObjectMap<UUID, Int> =
+                Object2ObjectOpenHashMap()
+
+            try {
+                for (result in Model.findAll<Model>()) {
+                    highScores[UUID.fromString(result.getString("uuid"))] =
+                        result.getInteger("high_score")
+                }
+            } catch (e: Exception) {
+                Bukkit.getConsoleSender().sendMessage(e.message!!)
+            }
+            return highScores
+        }
+
+    val points: Object2ObjectMap<UUID, Int>
+        get() {
+            val points: Object2ObjectMap<UUID, Int> =
+                Object2ObjectOpenHashMap()
+            try {
+                for (result in Model.findAll<Model>()) {
+                    points[UUID.fromString(result.getString("uuid"))] = result.getInteger("points")
+                }
+            } catch (e: Exception) {
+                Bukkit.getConsoleSender().sendMessage(e.message!!)
+            }
+            return points
+        }
 }
 
-class JumpAndRunModel extends Model {
-  public JumpAndRunModel() {}
-}
+internal class JumpAndRunModel : Model()

@@ -1,35 +1,35 @@
-package dev.slne.surf.lobby.jar;
+package dev.slne.surf.lobby.jar
 
-import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
-import it.unimi.dsi.fastutil.objects.ObjectList;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.block.Block;
-import org.bukkit.entity.Player;
+import it.unimi.dsi.fastutil.objects.Object2ObjectMap
+import it.unimi.dsi.fastutil.objects.ObjectList
+import lombok.Builder
+import lombok.Getter
+import lombok.Setter
+import org.bukkit.Location
+import org.bukkit.Material
+import org.bukkit.block.Block
+import org.bukkit.entity.Player
 
 @Builder
 @Getter
 @Setter
-public class JumpAndRun {
-  private final String displayName;
+class JumpAndRun {
+    private val displayName: String? = null
 
-  private Location posOne;
-  private Location posTwo;
-  private Location spawn;
-  private Location start;
+    private val posOne: Location? = null
+    private val posTwo: Location? = null
+    private val spawn: Location? = null
+    private val start: Location? = null
 
-  private final ObjectList<Player> players;
-  private final ObjectList<Material> materials;
-  private final Object2ObjectMap<Player, Block> latestBlocks;
+    private val players: ObjectList<Player>? = null
+    private val materials: ObjectList<Material>? = null
+    private val latestBlocks: Object2ObjectMap<Player, Block>? = null
 
-  public void kick(Player player){
-    PluginInstance.instance().jumpAndRunProvider().remove(player);
-  }
+    fun kick(player: Player?) {
+        PluginInstance.Companion.instance().jumpAndRunProvider().remove(player)
+    }
 
-  public void join(Player player){
-    PluginInstance.instance().jumpAndRunProvider().start(player);
-  }
+    fun join(player: Player?) {
+        PluginInstance.Companion.instance().jumpAndRunProvider().start(player)
+    }
 }

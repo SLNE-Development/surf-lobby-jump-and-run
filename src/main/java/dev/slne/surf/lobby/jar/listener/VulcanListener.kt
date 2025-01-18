@@ -1,27 +1,27 @@
-package dev.slne.surf.lobby.jar.listener;
+package dev.slne.surf.lobby.jar.listener
 
-import dev.slne.surf.lobby.jar.PluginInstance;
-import me.frep.vulcan.api.event.VulcanGhostBlockEvent;
-import org.bukkit.block.Block;
-import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
+import dev.slne.surf.lobby.jar.PluginInstance
+import me.frep.vulcan.api.event.VulcanGhostBlockEvent
+import org.bukkit.entity.Player
+import org.bukkit.event.EventHandler
+import org.bukkit.event.Listener
 
-public class VulcanListener implements Listener {
-  @EventHandler
-  public void onPlayerGhostBlock(VulcanGhostBlockEvent event) {
-    if(this.isStandingOnJumpBlock(event.getPlayer())) {
-      event.setCancelled(true);
-    }
-  }
-
-  private boolean isStandingOnJumpBlock(Player player) {
-    for (Block latestJump : PluginInstance.instance().jumpAndRunProvider().getLatestJumps(player)) {
-      if(latestJump.equals(player.getLocation().clone().add(0, -1, 0).getBlock())) {
-        return true;
-      }
+class VulcanListener : Listener {
+    @EventHandler
+    fun onPlayerGhostBlock(event: VulcanGhostBlockEvent) {
+        if (this.isStandingOnJumpBlock(event.player)) {
+            event.isCancelled = true
+        }
     }
 
-    return false;
-  }
+    private fun isStandingOnJumpBlock(player: Player): Boolean {
+        for (latestJump in PluginInstance.Companion.instance().jumpAndRunProvider()
+            .getLatestJumps(player)) {
+            if (latestJump == player.location.clone().add(0.0, -1.0, 0.0).block) {
+                return true
+            }
+        }
+
+        return false
+    }
 }
