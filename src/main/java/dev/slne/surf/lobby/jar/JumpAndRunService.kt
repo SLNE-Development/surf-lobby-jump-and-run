@@ -1,7 +1,6 @@
 package dev.slne.surf.lobby.jar
 
 import com.github.benmanes.caffeine.cache.AsyncLoadingCache
-import com.github.benmanes.caffeine.cache.CacheLoader
 import com.github.benmanes.caffeine.cache.Caffeine
 import dev.slne.surf.lobby.jar.config.PluginConfig
 import dev.slne.surf.lobby.jar.mysql.Database
@@ -123,7 +122,7 @@ object JumpAndRunService {
         runnable = object : BukkitRunnable() {
             override fun run() {
                 jumpAndRun.players.forEach(Consumer { player: Player ->
-                    player.sendActionBar(Component.text(currentPoints[player]!!, PluginColor.BLUE_MID).append(Component.text(" Spr\u00FCnge", PluginColor.DARK_GRAY)))
+                    player.sendActionBar(Component.text(currentPoints[player] ?: -1, PluginColor.BLUE_MID).append(Component.text(" Spr\u00FCnge", PluginColor.DARK_GRAY)))
                 })
             }
         }
@@ -134,25 +133,35 @@ object JumpAndRunService {
     }
 
     fun stopActionbar() {
-        if (runnable != null && !runnable!!.isCancelled) {
-            runnable!!.cancel()
+        if(runnable == null) {
+            return
+        }
+
+        val bukkitRunnable: BukkitRunnable = runnable ?: return;
+
+        if (!bukkitRunnable.isCancelled) {
+            bukkitRunnable.cancel()
         }
     }
 
     fun generate(player: Player) {
-        val jumps = latestJumps[player]!!
-        val material = blocks[player]!!
+        val jumps = latestJumps[player] ?: return
+        val material = blocks[player] ?: return
 
         if (jumps[0] != null) {
-            player.sendBlockChange(jumps[0]!!.location, Material.AIR.createBlockData())
+            val jump0 = jumps[0] ?: return
+
+            player.sendBlockChange(jump0.location, Material.AIR.createBlockData())
         }
 
         jumps[0] = jumps[1]
         jumps[1] = jumps[2]
 
-        player.sendBlockChange(jumps[1]!!.location, Material.SEA_LANTERN.createBlockData())
+        val block1 = jumps[1] ?: return
 
-        val nextJump = getValidBlock(jumps[1]!!.location, player)
+        player.sendBlockChange(block1.location, Material.SEA_LANTERN.createBlockData())
+
+        val nextJump = getValidBlock(block1.location, player)
         player.sendBlockChange(nextJump.location, material.createBlockData())
         jumps[2] = nextJump
     }
@@ -164,8 +173,7 @@ object JumpAndRunService {
         while (attempts < maxAttempts) {
             val heightOffset = random.nextInt(3) - 1
             val offset = OFFSETS[random.nextInt(OFFSETS.size)]
-            val nextLocation =
-                previousLocation.clone().add(offset).add(0.0, heightOffset.toDouble(), 0.0)
+            val nextLocation = previousLocation.clone().add(offset).add(0.0, heightOffset.toDouble(), 0.0)
 
             if (!this.isInRegion(nextLocation)) {
                 attempts++
@@ -180,42 +188,38 @@ object JumpAndRunService {
                 continue
             }
 
+            val latestPlayerJumps: Array<Block?> = latestJumps[player] ?: return previousLocation.clone().add(OFFSETS[0]).block
+
+            val block0: Block = latestPlayerJumps[0] ?: return previousLocation.clone().add(OFFSETS[0]).block
+            val block1: Block = latestPlayerJumps[1] ?: return previousLocation.clone().add(OFFSETS[0]).block
+            val block2: Block = latestPlayerJumps[2] ?: return previousLocation.clone().add(OFFSETS[0]).block
+
             /* Above the Jump */
-            if (latestJumps[player]!![0] != null && latestJumps[player]!![0]!!.location.clone()
-                    .add(0.0, 1.0, 0.0) == nextLocation
-            ) {
+            if (block0.location.clone().add(0.0, 1.0, 0.0) == nextLocation) {
                 attempts++
                 continue
             }
-            if (latestJumps[player]!![1] != null && latestJumps[player]!![1]!!.location.clone()
-                    .add(0.0, 1.0, 0.0) == nextLocation
-            ) {
+            if (block1.location.clone().add(0.0, 1.0, 0.0) == nextLocation) {
                 attempts++
                 continue
             }
-            if (latestJumps[player]!![2] != null && latestJumps[player]!![2]!!.location.clone()
-                    .add(0.0, 1.0, 0.0) == nextLocation
-            ) {
+            if (block2.location.clone().add(0.0, 1.0, 0.0) == nextLocation) {
                 attempts++
                 continue
             }
 
             /* 2 Blocks above the Jump */
-            if (latestJumps[player]!![0] != null && latestJumps[player]!![0]!!.location.clone()
-                    .add(0.0, 2.0, 0.0) == nextLocation
-            ) {
+            if (block0.location.clone().add(0.0, 2.0, 0.0) == nextLocation) {
                 attempts++
                 continue
             }
-            if (latestJumps[player]!![1] != null && latestJumps[player]!![1]!!.location.clone()
-                    .add(0.0, 2.0, 0.0) == nextLocation
-            ) {
+
+            if (block1.location.clone().add(0.0, 2.0, 0.0) == nextLocation) {
                 attempts++
                 continue
             }
-            if (latestJumps[player]!![2] != null && latestJumps[player]!![2]!!.location.clone()
-                    .add(0.0, 2.0, 0.0) == nextLocation
-            ) {
+
+            if (block2.location.clone().add(0.0, 2.0, 0.0) == nextLocation) {
                 attempts++
                 continue
             }
@@ -225,9 +229,7 @@ object JumpAndRunService {
                 continue
             }
 
-            if (nextLocation == player.location || nextLocation == player.location.clone()
-                    .add(0.0, 1.0, 0.0)
-            ) {
+            if (nextLocation == player.location || nextLocation == player.location.clone().add(0.0, 1.0, 0.0)) {
                 attempts++
                 continue
             }
@@ -445,7 +447,11 @@ object JumpAndRunService {
         currentPoints.compute(player) { p: Player?, curPts: Int? -> if (curPts == null) 1 else curPts + 1 }
 
         querySound(player.uniqueId).thenAccept { sound: Boolean? ->
-            if (!sound!!) {
+            if(sound == null) {
+                return@thenAccept
+            }
+
+            if (!sound) {
                 player.playSound(
                     Sound.sound(
                         org.bukkit.Sound.ENTITY_EXPERIENCE_ORB_PICKUP,
@@ -488,7 +494,12 @@ object JumpAndRunService {
 
                 querySound(player.uniqueId)
                     .thenAccept { sound: Boolean? ->
-                        if (!sound!!) {
+
+                        if (sound == null) {
+                            return@thenAccept
+                        }
+
+                        if (!sound) {
                             player.playSound(
                                 Sound.sound(
                                     org.bukkit.Sound.ITEM_TOTEM_USE,

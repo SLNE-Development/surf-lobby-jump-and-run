@@ -73,7 +73,7 @@ class ParkourPlaceholderExtension : PlaceholderExpansion() {
         }
 
         val uuid = sortedPlayers[place - 1]
-        return Database.getHighScore(uuid)!!
+        return Database.getHighScore(uuid) ?: -1
     }
 
     private fun getPoints(place: Int): Int {
@@ -85,7 +85,7 @@ class ParkourPlaceholderExtension : PlaceholderExpansion() {
         }
 
         val uuid = sortedPlayers[place - 1]
-        return Database.getPoints(uuid)!!
+        return Database.getPoints(uuid) ?: -1
     }
 
     private fun getName(uuid: UUID): String? {
@@ -100,7 +100,7 @@ class ParkourPlaceholderExtension : PlaceholderExpansion() {
             return highScores
                 .entries
                 .stream()
-                .sorted(Comparator.comparingInt<Map.Entry<UUID?, Int?>> { obj: Map.Entry<UUID?, Int?> -> obj.value!! })
+                .sorted(Comparator.comparingInt<Map.Entry<UUID?, Int?>> { obj: Map.Entry<UUID?, Int?> -> obj.value ?: 0 })
                 .map<UUID?> { obj: Map.Entry<UUID?, Int?> -> obj.key }
                 .collect(Collectors.toCollection<UUID?, ObjectArrayList<UUID>> { ObjectArrayList() })
         }
@@ -112,7 +112,7 @@ class ParkourPlaceholderExtension : PlaceholderExpansion() {
             return points
                 .entries
                 .stream()
-                .sorted(Comparator.comparingInt<Map.Entry<UUID?, Int?>> { obj: Map.Entry<UUID?, Int?> -> obj.value!! })
+                .sorted(Comparator.comparingInt { obj: Map.Entry<UUID?, Int?> -> obj.value ?: 0 })
                 .map<UUID?> { obj: Map.Entry<UUID?, Int?> -> obj.key }
                 .collect(Collectors.toCollection<UUID?, ObjectArrayList<UUID>> { ObjectArrayList() })
         }

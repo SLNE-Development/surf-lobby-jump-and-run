@@ -19,7 +19,7 @@ object Database {
 
             createTable()
         } catch (e: Exception) {
-            Bukkit.getConsoleSender().sendMessage(e.message!!)
+            Bukkit.getConsoleSender().sendMessage(e.message ?: this.javaClass.toString())
         }
     }
 
@@ -37,7 +37,7 @@ object Database {
         try {
             Base.exec(query)
         } catch (e: Exception) {
-            Bukkit.getConsoleSender().sendMessage(e.message!!)
+            Bukkit.getConsoleSender().sendMessage(e.message ?: this.javaClass.toString())
         }
     }
 
@@ -56,7 +56,7 @@ object Database {
                 trys = result.getInteger("trys")
             }
         } catch (e: Exception) {
-            Bukkit.getConsoleSender().sendMessage(e.message!!)
+            Bukkit.getConsoleSender().sendMessage(e.message ?: this.javaClass.toString())
         }
 
         return trys
@@ -71,7 +71,7 @@ object Database {
                 points = result.getInteger("points")
             }
         } catch (e: Exception) {
-            Bukkit.getConsoleSender().sendMessage(e.message!!)
+            Bukkit.getConsoleSender().sendMessage(e.message ?: this.javaClass.toString())
         }
 
         return points
@@ -86,7 +86,7 @@ object Database {
                 highScore = result.getInteger("high_score")
             }
         } catch (e: Exception) {
-            Bukkit.getConsoleSender().sendMessage(e.message!!)
+            Bukkit.getConsoleSender().sendMessage(e.message ?: this.javaClass.toString())
         }
 
         return highScore
@@ -101,7 +101,7 @@ object Database {
                 sound = result.getBoolean("sound")
             }
         } catch (e: Exception) {
-            Bukkit.getConsoleSender().sendMessage(e.message!!)
+            Bukkit.getConsoleSender().sendMessage(e.message ?: this.javaClass.toString())
         }
 
         return sound
@@ -118,7 +118,7 @@ object Database {
             model.set<Model>("sound", value)
             model.saveIt()
         } catch (e: Exception) {
-            Bukkit.getConsoleSender().sendMessage(e.message!!)
+            Bukkit.getConsoleSender().sendMessage(e.message ?: this.javaClass.toString())
         }
     }
 
@@ -133,7 +133,7 @@ object Database {
             model.set<Model>("points", points)
             model.saveIt()
         } catch (e: Exception) {
-            Bukkit.getConsoleSender().sendMessage(e.message!!)
+            Bukkit.getConsoleSender().sendMessage(e.message ?: this.javaClass.toString())
         }
     }
 
@@ -148,7 +148,7 @@ object Database {
             model.set<Model>("trys", trys)
             model.saveIt()
         } catch (e: Exception) {
-            Bukkit.getConsoleSender().sendMessage(e.message!!)
+            Bukkit.getConsoleSender().sendMessage(e.message ?: this.javaClass.toString())
         }
     }
 
@@ -163,7 +163,7 @@ object Database {
             model.set<Model>("high_score", highScore)
             model.saveIt()
         } catch (e: Exception) {
-            Bukkit.getConsoleSender().sendMessage(e.message!!)
+            Bukkit.getConsoleSender().sendMessage(e.message ?: this.javaClass.toString())
         }
     }
 
@@ -176,7 +176,7 @@ object Database {
                         result.getInteger("high_score")
                 }
             } catch (e: Exception) {
-                Bukkit.getConsoleSender().sendMessage(e.message!!)
+                Bukkit.getConsoleSender().sendMessage(e.message ?: this.javaClass.toString())
             }
             return highScores
         }

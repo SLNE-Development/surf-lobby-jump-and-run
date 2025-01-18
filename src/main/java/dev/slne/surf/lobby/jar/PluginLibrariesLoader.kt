@@ -18,12 +18,12 @@ class PluginLibrariesLoader : PluginLoader {
         val pluginLibraries = load()
         pluginLibraries.asDependencies().forEach { dependency: Dependency? ->
             resolver.addDependency(
-                dependency!!
+                dependency ?: return@forEach
             )
         }
         pluginLibraries.asRepositories().forEach { remoteRepository: RemoteRepository? ->
             resolver.addRepository(
-                remoteRepository!!
+                remoteRepository ?: return@forEach
             )
         }
         classpathBuilder.addLibrary(resolver)

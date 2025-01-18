@@ -280,10 +280,10 @@ class ItemBuilder {
      * @param flag the flag
      * @return the item builder
      */
-    fun addItemFlag(flag: ItemFlag?): ItemBuilder {
+    fun addItemFlag(flag: ItemFlag): ItemBuilder {
         itemStack.editMeta { meta: ItemMeta ->
             meta.addItemFlags(
-                flag!!
+                flag
             )
         }
 

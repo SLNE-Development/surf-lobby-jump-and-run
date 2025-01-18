@@ -49,7 +49,7 @@ object PluginConfig {
         val posTwo = getLocation(path + "posTwo")
         val spawn = getLocation(path + "spawn")
         val start = getLocation(path + "start")
-        val displayName = config().getString(path + "displayname", "Parkour")!!
+        val displayName = config().getString(path + "displayname", "Parkour")
         val materials: ObjectList<Material> = ObjectArrayList()
         val materialNames: ObjectList<String> = ObjectArrayList(
             config().getStringList(path + "materials")
@@ -60,12 +60,12 @@ object PluginConfig {
         }
 
         for (name in materialNames) {
-            materials.add(Material.valueOf(name!!))
+            materials.add(Material.valueOf(name))
         }
 
         val jumpAndRun = JumpAndRun()
 
-        jumpAndRun.displayName = displayName
+        jumpAndRun.displayName = displayName ?: "Parkour"
         jumpAndRun.posOne = posOne
         jumpAndRun.posTwo = posTwo
         jumpAndRun.spawn = spawn
@@ -88,11 +88,11 @@ object PluginConfig {
         val defaultLocation: Location = Bukkit.getWorlds().first().spawnLocation
 
         val worldName =
-            config().getString("$path.world", defaultLocation.world.name)!!
+            config().getString("$path.world", defaultLocation.world.name)
         val x = config().getInt("$path.x", defaultLocation.blockX)
         val y = config().getInt("$path.y", defaultLocation.blockY)
         val z = config().getInt("$path.z", defaultLocation.blockZ)
 
-        return Location(Bukkit.getWorld(worldName), x.toDouble(), y.toDouble(), z.toDouble())
+        return Location(Bukkit.getWorld(worldName ?: Bukkit.getWorlds().first().name), x.toDouble(), y.toDouble(), z.toDouble())
     }
 }
