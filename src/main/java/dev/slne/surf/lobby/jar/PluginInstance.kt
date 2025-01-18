@@ -18,9 +18,7 @@ import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.Bukkit
 import org.bukkit.plugin.java.JavaPlugin
-
-@Getter
-@Accessors(fluent = true)
+val plugin: PluginInstance get() = JavaPlugin.getPlugin(PluginInstance::class.java)
 class PluginInstance : SuspendingJavaPlugin() {
     var worldEditInstance: WorldEditPlugin? = null
     var worldedit = false

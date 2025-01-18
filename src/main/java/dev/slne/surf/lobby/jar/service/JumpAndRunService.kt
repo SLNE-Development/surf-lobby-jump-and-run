@@ -2,9 +2,11 @@ package dev.slne.surf.lobby.jar.service
 
 import com.github.benmanes.caffeine.cache.AsyncLoadingCache
 import com.github.benmanes.caffeine.cache.Caffeine
+import com.github.shynixn.mccoroutine.bukkit.launch
 import dev.slne.surf.lobby.jar.PluginInstance
 import dev.slne.surf.lobby.jar.config.PluginConfig
 import dev.slne.surf.lobby.jar.mysql.Database
+import dev.slne.surf.lobby.jar.plugin
 import dev.slne.surf.lobby.jar.util.PluginColor
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap
@@ -353,7 +355,11 @@ object JumpAndRunService {
 
        val allSaves = CompletableFuture.allOf(*futures.toTypedArray())
 
-        return allSaves.thenRun { this.removeAll() }.exceptionally { throwable: Throwable? ->
+        return allSaves.thenRun {
+            plugin.launch {
+                removeAll()
+            }
+        }.exceptionally { throwable: Throwable? ->
             logger.error(
                 "An error occurred while saving all data",
                 throwable
@@ -494,7 +500,8 @@ object JumpAndRunService {
 
                 player.sendMessage(PluginInstance.prefix.append(Component.text(String.format("Du hast deinen Highscore gebrochen! Dein neuer Highscore ist %s!", currentScore))))
 
-                querySound(player.uniqueId).thenAccept { sound: Boolean? ->
+                plugin.launch {
+                    querySound(player.uniqueId).thenAccept { sound: Boolean? ->
 
                         if (sound == null) {
                             return@thenAccept
@@ -511,6 +518,7 @@ object JumpAndRunService {
                             )
                         }
                     }
+                }
 
                 player.showTitle(
                     Title.title(
