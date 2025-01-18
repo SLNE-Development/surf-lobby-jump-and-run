@@ -34,11 +34,12 @@ dependencies {
     implementation("com.github.stefvanschie.inventoryframework:IF:0.10.17")
     implementation("dev.hsbrysk:caffeine-coroutines:1.2.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
+    implementation("com.github.shynixn.mccoroutine:mccoroutine-bukkit-api:2.20.0")
+    implementation("com.github.shynixn.mccoroutine:mccoroutine-bukkit-core:2.20.0")
 
     paperLibrary("com.zaxxer:HikariCP:5.0.1")
     paperLibrary("mysql:mysql-connector-java:8.0.33")
     paperLibrary("com.github.ben-manes.caffeine:caffeine:3.1.8")
-
     paperLibrary("org.javalite:activejdbc:3.5-j11")
 
     compileOnly(files("libs/VulcanAPI.jar"))
