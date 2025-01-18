@@ -34,23 +34,37 @@ import kotlin.math.min
 @Accessors(fluent = true)
 object JumpAndRunService {
     val jumpAndRun: JumpAndRun = PluginConfig.loadJumpAndRun()
+    private val logger = ComponentLogger.logger()
+
     private val random = SecureRandom()
     private val awaitingHighScores: ObjectList<Player> = ObjectArrayList()
-    private val latestJumps: Object2ObjectMap<Player, Array<Block>> = Object2ObjectOpenHashMap()
+    private val latestJumps: Object2ObjectMap<Player, Array<Block?>> = Object2ObjectOpenHashMap()
+
     val blocks: Object2ObjectMap<Player, Material> = Object2ObjectOpenHashMap()
     val currentPoints: Object2ObjectMap<Player, Int> = Object2ObjectOpenHashMap()
 
-    private val points: AsyncLoadingCache<UUID, Int?> = Caffeine.newBuilder()
-        .buildAsync(CacheLoader { obj: UUID -> Database.getPoints(obj) })
+    private val points: AsyncLoadingCache<UUID, Int?> = Caffeine.newBuilder().buildAsync{ obj: UUID -> Database.getPoints(obj) }
+    private val highScores: AsyncLoadingCache<UUID, Int?> = Caffeine.newBuilder().buildAsync { obj: UUID -> Database.getHighScore(obj) }
+    private val trys: AsyncLoadingCache<UUID, Int?> = Caffeine.newBuilder().buildAsync { obj: UUID -> Database.getTrys(obj) }
+    private val sounds: AsyncLoadingCache<UUID, Boolean?> = Caffeine.newBuilder().buildAsync { obj: UUID -> Database.getSound(obj) }
 
-    private val highScores: AsyncLoadingCache<UUID, Int?> = Caffeine.newBuilder()
-        .buildAsync { obj: UUID -> Database.getHighScore(obj) }
-
-    private val trys: AsyncLoadingCache<UUID, Int?> = Caffeine.newBuilder()
-        .buildAsync { obj: UUID -> Database.getTrys(obj) }
-
-    private val sounds: AsyncLoadingCache<UUID, Boolean?> = Caffeine.newBuilder()
-        .buildAsync { obj: UUID -> Database.getSound(obj) }
+  private val OFFSETS = arrayOf(
+    Vector(3, 0, 0),
+    Vector(-3, 0, 0),
+    Vector(0, 0, 3),
+    Vector(0, 0, -3),
+    Vector(3, 0, 0),
+    Vector(-3, 0, 0),
+    Vector(0, 0, 3),
+    Vector(0, 0, -3),
+    Vector(3, 0, 3),
+    Vector(-3, 0, 3),
+    Vector(3, 0, 3),
+    Vector(-3, 0, 3),
+    Vector(3, 0, 0),
+    Vector(0, 0, 3),
+    Vector(-3, 0, 0)
+  )
 
     private var runnable: BukkitRunnable? = null
 
@@ -60,7 +74,7 @@ object JumpAndRunService {
         val jumps = arrayOfNulls<Block>(3)
 
         latestJumps[player] = jumps
-        jumpAndRun.getPlayers().add(player)
+        jumpAndRun.players.add(player)
         currentPoints[player] = 0
         awaitingHighScores.remove(player)
 
@@ -69,28 +83,14 @@ object JumpAndRunService {
 
         queryHighScore(player.uniqueId).thenAccept { highScore: Int? ->
             if (highScore == null) {
-                player.sendMessage(
-                    PluginInstance.prefix()
-                        .append(Component.text("Du bist nun im Parkour. Springe so weit wie möglich, um einen Highscore aufzustellen!"))
-                )
+                player.sendMessage(PluginInstance.prefix.append(Component.text("Du bist nun im Parkour. Springe so weit wie möglich, um einen Highscore aufzustellen!")))
                 return@thenAccept
             }
-            player.sendMessage(
-                PluginInstance.prefix().append(
-                    Component.text(
-                        String.format(
-                            "Du bist nun im Parkour. Springe so weit wie möglich, versuche deinen Highscore von %s zu brechen!",
-                            highScore
-                        )
-                    )
-                )
-            )
+
+            player.sendMessage(PluginInstance.prefix.append(Component.text(String.format("Du bist nun im Parkour. Springe so weit wie möglich, versuche deinen Highscore von %s zu brechen!", highScore))))
         }.exceptionally { throwable: Throwable? ->
-            logger.error(
-                "An error occurred starting jump and run.",
-                throwable
-            )
-            null
+          logger.error("An error occurred while starting the parkour", throwable)
+          null
         }
     }
 
@@ -100,7 +100,7 @@ object JumpAndRunService {
 
         val start = randomLocation.add(0.0, 1.0, 0.0)
         val block = start.block
-        val material = jumpAndRun.getMaterials()[random.nextInt(jumpAndRun.getMaterials().size)]
+        val material = jumpAndRun.materials[random.nextInt(jumpAndRun.materials.size)]
 
         player.sendBlockChange(block.location, material.createBlockData())
         latestJumps[player]!![0] = block
@@ -122,17 +122,15 @@ object JumpAndRunService {
     fun startActionbar() {
         runnable = object : BukkitRunnable() {
             override fun run() {
-                jumpAndRun.getPlayers().forEach(Consumer { player: Player ->
-                    player.sendActionBar(
-                        Component.text(
-                            currentPoints[player]!!, PluginColor.BLUE_MID
-                        )
-                            .append(Component.text(" Spr\u00FCnge", PluginColor.DARK_GRAY))
-                    )
+                jumpAndRun.players.forEach(Consumer { player: Player ->
+                    player.sendActionBar(Component.text(currentPoints[player]!!, PluginColor.BLUE_MID).append(Component.text(" Spr\u00FCnge", PluginColor.DARK_GRAY)))
                 })
             }
         }
-        runnable.runTaskTimerAsynchronously(PluginInstance.Companion.instance(), 0L, 20L)
+
+      runnable?.let {
+        it.runTaskTimerAsynchronously(PluginInstance.instance(), 0L, 20L)
+      }
     }
 
     fun stopActionbar() {
@@ -241,8 +239,8 @@ object JumpAndRunService {
 
 
     private fun getRandomLocationInRegion(world: World): Location? {
-        val posOne = jumpAndRun.getPosOne()
-        val posTwo = jumpAndRun.getPosTwo()
+        val posOne = jumpAndRun.posOne ?: return null
+        val posTwo = jumpAndRun.posTwo ?: return null
 
         var minX = min(posOne.blockX.toDouble(), posTwo.blockX.toDouble()).toInt()
         var maxX = max(posOne.blockX.toDouble(), posTwo.blockX.toDouble()).toInt()
@@ -274,9 +272,9 @@ object JumpAndRunService {
     }
 
 
-    fun isInRegion(location: Location): Boolean {
-        val posOne = jumpAndRun.getPosOne()
-        val posTwo = jumpAndRun.getPosTwo()
+    private fun isInRegion(location: Location): Boolean {
+        val posOne = jumpAndRun.posOne ?: return false
+        val posTwo = jumpAndRun.posTwo ?: return false
 
         if (location.world != null && posOne.world != null && posTwo.world != null) {
             if (location.world != posOne.world || location.world != posTwo.world) {
@@ -291,10 +289,10 @@ object JumpAndRunService {
         val minZ = min(posOne.blockZ.toDouble(), posTwo.blockZ.toDouble()).toInt()
         val maxZ = max(posOne.blockZ.toDouble(), posTwo.blockZ.toDouble()).toInt()
 
-        return location.blockX >= minX && location.blockX <= maxX && location.blockY >= minY && location.blockY <= maxY && location.blockZ >= minZ && location.blockZ <= maxZ
+        return location.blockX in minX..maxX && location.blockY >= minY && location.blockY <= maxY && location.blockZ >= minZ && location.blockZ <= maxZ
     }
 
-    fun getLatestJumps(player: Player): Array<Block> {
+    fun getLatestJumps(player: Player): Array<Block?> {
         return latestJumps[player] ?: return arrayOf()
     }
 
@@ -304,6 +302,8 @@ object JumpAndRunService {
         }
 
         for (block in getLatestJumps(player)) {
+          if(block == null) continue
+
           player.sendBlockChange(block.location, Material.AIR.createBlockData())
         }
 
@@ -313,13 +313,13 @@ object JumpAndRunService {
 
         currentPoints.remove(player)
         latestJumps.remove(player)
-        jumpAndRun.getPlayers().remove(player)
+        jumpAndRun.players.remove(player)
 
-        player.teleportAsync(jumpAndRun.getSpawn())
+        player.teleportAsync(jumpAndRun.spawn ?: return)
     }
 
-    fun removeAll() {
-        for (player in jumpAndRun.getPlayers()) {
+    private fun removeAll() {
+        for (player in jumpAndRun.players) {
             this.remove(player)
         }
     }
@@ -347,8 +347,7 @@ object JumpAndRunService {
             futures.add(future)
         }
 
-        val allSaves =
-            CompletableFuture.allOf(*futures.toArray<CompletableFuture<*>> { _Dummy_.__Array__() })
+       val allSaves = CompletableFuture.allOf(*futures.toTypedArray())
 
         return allSaves.thenRun { this.removeAll() }.exceptionally { throwable: Throwable? ->
             logger.error(
@@ -485,16 +484,7 @@ object JumpAndRunService {
                 awaitingHighScores.remove(player)
                 highScores.synchronous().put(player.uniqueId, currentScore)
 
-                player.sendMessage(
-                    PluginInstance.prefix().append(
-                        Component.text(
-                            String.format(
-                                "Du hast deinen Highscore gebrochen! Dein neuer Highscore ist %s!",
-                                currentScore
-                            )
-                        )
-                    )
-                )
+                player.sendMessage(PluginInstance.prefix.append(Component.text(String.format("Du hast deinen Highscore gebrochen! Dein neuer Highscore ist %s!", currentScore))))
 
                 querySound(player.uniqueId)
                     .thenAccept { sound: Boolean? ->
@@ -544,28 +534,6 @@ object JumpAndRunService {
     }
 
     fun isJumping(player: Player?): Boolean {
-        return jumpAndRun.getPlayers().contains(player)
-    }
-
-    companion object {
-        private val logger = ComponentLogger.logger()
-
-        private val OFFSETS = arrayOf(
-            Vector(3, 0, 0),
-            Vector(-3, 0, 0),
-            Vector(0, 0, 3),
-            Vector(0, 0, -3),
-            Vector(3, 0, 0),
-            Vector(-3, 0, 0),
-            Vector(0, 0, 3),
-            Vector(0, 0, -3),
-            Vector(3, 0, 3),
-            Vector(-3, 0, 3),
-            Vector(3, 0, 3),
-            Vector(-3, 0, 3),
-            Vector(3, 0, 0),
-            Vector(0, 0, 3),
-            Vector(-3, 0, 0)
-        )
+        return jumpAndRun.players.contains(player)
     }
 }
