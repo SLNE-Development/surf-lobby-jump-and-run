@@ -7,6 +7,7 @@ plugins {
     id("com.gradleup.shadow") version "9.0.0-beta4"
     id("io.freefair.lombok") version "8.11"
     id("xyz.jpenilla.run-paper") version "2.3.1"
+    id("de.schablinski.activejdbc-gradle-plugin") version "2.0.1"
 }
 
 group = "dev.slne"
@@ -30,12 +31,14 @@ dependencies {
     compileOnly("com.sk89q.worldedit:worldedit-bukkit:7.2.0-SNAPSHOT")
 
     implementation("com.github.stefvanschie.inventoryframework:IF:0.10.17")
+
     paperLibrary("com.zaxxer:HikariCP:5.0.1")
     paperLibrary("mysql:mysql-connector-java:8.0.33")
     paperLibrary("com.github.ben-manes.caffeine:caffeine:3.1.8")
     paperLibrary("org.javalite:activejdbc:3.5-j11")
-}
 
+    compileOnly(files("libs/VulcanAPI.jar"))
+}
 
 paper {
     name = "SurfLobbyJumpAndRun"
@@ -72,6 +75,7 @@ java {
         languageVersion.set(JavaLanguageVersion.of(21))
     }
 }
+
 
 tasks {
     runServer {

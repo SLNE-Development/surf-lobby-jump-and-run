@@ -65,16 +65,16 @@ public class ParkourListener implements Listener {
   @EventHandler
   public void onInteract(PlayerInteractEvent event) {
     Player player = event.getPlayer();
-    Block block = event.getClickedBlock();
+    Location location = event.getInteractionPoint();
 
-    if(block == null) {
-
+    if(location == null) {
+      return;
     }
 
     Block[] jumps = PluginInstance.instance().jumpAndRunProvider().getLatestJumps(player);
 
     for (Block jump : jumps) {
-      if(jump.getLocation().equals(block.getLocation())) {
+      if(jump.getLocation().equals(location)) {
         player.sendBlockChange(jump.getLocation(), jump.getBlockData());
       }
     }
