@@ -47,7 +47,7 @@ object Database {
         }
     }
 
-    fun getTrys(uuid: UUID): Int? {
+    suspend fun getTrys(uuid: UUID): Int {
         var trys: Int? = null
 
         try {
@@ -59,10 +59,10 @@ object Database {
             Bukkit.getConsoleSender().sendMessage(e.message ?: this.javaClass.toString())
         }
 
-        return trys
+        return trys ?: 0
     }
 
-    fun getPoints(uuid: UUID): Int? {
+    fun getPoints(uuid: UUID): Int {
         var points: Int? = null
 
         try {
@@ -74,10 +74,10 @@ object Database {
             Bukkit.getConsoleSender().sendMessage(e.message ?: this.javaClass.toString())
         }
 
-        return points
+        return points ?: 0
     }
 
-    fun getHighScore(uuid: UUID): Int? {
+    fun getHighScore(uuid: UUID): Int {
         var highScore: Int? = null
 
         try {
@@ -89,7 +89,7 @@ object Database {
             Bukkit.getConsoleSender().sendMessage(e.message ?: this.javaClass.toString())
         }
 
-        return highScore
+        return highScore ?: 0
     }
 
     fun getSound(uuid: UUID): Boolean {

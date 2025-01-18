@@ -3,6 +3,8 @@ package dev.slne.surf.lobby.jar.service
 import com.github.benmanes.caffeine.cache.AsyncLoadingCache
 import com.github.benmanes.caffeine.cache.Caffeine
 import com.github.shynixn.mccoroutine.bukkit.launch
+import dev.hsbrysk.caffeine.CoroutineLoadingCache
+import dev.hsbrysk.caffeine.buildCoroutine
 import dev.slne.surf.lobby.jar.PluginInstance
 import dev.slne.surf.lobby.jar.config.PluginConfig
 import dev.slne.surf.lobby.jar.mysql.Database
@@ -26,7 +28,6 @@ import org.bukkit.util.Vector
 import java.security.SecureRandom
 import java.time.Duration
 import java.util.*
-import java.util.concurrent.CompletableFuture
 import java.util.function.Consumer
 import kotlin.math.abs
 import kotlin.math.max
@@ -45,10 +46,10 @@ object JumpAndRunService {
     val blocks: Object2ObjectMap<Player, Material> = Object2ObjectOpenHashMap()
     val currentPoints: Object2ObjectMap<Player, Int> = Object2ObjectOpenHashMap()
 
-    private val points: AsyncLoadingCache<UUID, Int?> = Caffeine.newBuilder().buildAsync{ obj: UUID -> Database.getPoints(obj) }
-    private val highScores: AsyncLoadingCache<UUID, Int?> = Caffeine.newBuilder().buildAsync { obj: UUID -> Database.getHighScore(obj) }
-    private val trys: AsyncLoadingCache<UUID, Int?> = Caffeine.newBuilder().buildAsync { obj: UUID -> Database.getTrys(obj) }
-    private val sounds: AsyncLoadingCache<UUID, Boolean?> = Caffeine.newBuilder().buildAsync { obj: UUID -> Database.getSound(obj) }
+    private val points: CoroutineLoadingCache<UUID, Int> = Caffeine.newBuilder().buildCoroutine { obj: UUID -> Database.getPoints(obj) }
+    private val highScores: CoroutineLoadingCache<UUID, Int> = Caffeine.newBuilder().buildCoroutine { obj: UUID -> Database.getHighScore(obj) }
+    private val trys: CoroutineLoadingCache<UUID, Int> = Caffeine.newBuilder().buildCoroutine() { obj: UUID -> Database.getTrys(obj) }
+    private val sounds: CoroutineLoadingCache<UUID, Boolean> = Caffeine.newBuilder().buildCoroutine { obj: UUID -> Database.getSound(obj) }
 
   private val OFFSETS = arrayOf(
     Vector(3, 0, 0),
@@ -83,17 +84,14 @@ object JumpAndRunService {
         addTry(player)
         generateInitialJumps(player)
 
-        queryHighScore(player.uniqueId).thenAccept { highScore: Int? ->
-            if (highScore == null) {
-                player.sendMessage(PluginInstance.prefix.append(Component.text("Du bist nun im Parkour. Springe so weit wie möglich, um einen Highscore aufzustellen!")))
-                return@thenAccept
-            }
+        val highscore: Int? = queryHighScore(player.uniqueId);
 
-            player.sendMessage(PluginInstance.prefix.append(Component.text(String.format("Du bist nun im Parkour. Springe so weit wie möglich, versuche deinen Highscore von %s zu brechen!", highScore))))
-        }.exceptionally { throwable: Throwable? ->
-          logger.error("An error occurred while starting the parkour", throwable)
-          null
+        if (highscore == null || highscore < 1) {
+            player.sendMessage(PluginInstance.prefix.append(Component.text("Du bist nun im Parkour. Springe so weit wie möglich, um einen Highscore aufzustellen!")))
+            return
         }
+
+        player.sendMessage(PluginInstance.prefix.append(Component.text("Du bist nun im Parkour. Springe so weit wie möglich, um deinen Highscore von $highscore zu brechen!")))
     }
 
 
@@ -330,212 +328,131 @@ object JumpAndRunService {
         }
     }
 
-    suspend fun saveAll(): CompletableFuture<Void?> {
-        val futures: ObjectList<CompletableFuture<Void>> = ObjectArrayList()
-
+    suspend fun saveAll(){
         for (player in points.synchronous().asMap().keys) {
-            val future = savePoints(player)
-            futures.add(future)
+            savePoints(player)
         }
 
         for (player in sounds.synchronous().asMap().keys) {
-            val future = saveSound(player)
-            futures.add(future)
+            saveSound(player)
         }
 
         for (player in highScores.synchronous().asMap().keys) {
-            val future = saveHighScore(player)
-            futures.add(future)
+            saveHighScore(player)
         }
 
         for (player in trys.synchronous().asMap().keys) {
-            val future = saveTrys(player)
-            futures.add(future)
+            saveTrys(player)
         }
 
-       val allSaves = CompletableFuture.allOf(*futures.toTypedArray())
-
-        return allSaves.thenRun {
-            plugin.launch {
-                removeAll()
-            }
-        }.exceptionally { throwable: Throwable? ->
-            logger.error(
-                "An error occurred while saving all data",
-                throwable
-            )
-            null
-        }
+        removeAll()
     }
 
-    suspend fun queryTrys(player: UUID): CompletableFuture<Int?> {
-        return trys[player]
+    suspend fun queryTrys(player: UUID): Int {
+        return trys.get(player) ?: 0
     }
 
-    suspend fun querySound(player: UUID): CompletableFuture<Boolean?> {
-        return sounds[player]
+    suspend fun querySound(player: UUID): Boolean {
+        return sounds.get(player) ?: true
     }
 
-    suspend fun queryPoints(player: UUID): CompletableFuture<Int?> {
-        return points[player]
+    suspend fun queryPoints(player: UUID): Int {
+        return points.get(player) ?: 0
     }
 
-    suspend fun queryHighScore(player: UUID): CompletableFuture<Int?> {
-        return highScores[player]
+    suspend fun queryHighScore(player: UUID): Int {
+        return highScores.get(player) ?: 0
     }
 
-    suspend fun saveSound(player: UUID): CompletableFuture<Void> {
-        return querySound(player).thenCompose { sound: Boolean? ->
-            CompletableFuture.runAsync {
-                Database.saveSound(
-                    player,
-                    sound
-                )
-            }.thenRun { sounds.synchronous().invalidate(player) }
-        }
+    private suspend fun saveSound(player: UUID) {
+        val sound: Boolean = querySound(player)
+
+        Database.saveSound(player, sound)
+        sounds.synchronous().invalidate(player)
     }
 
-    suspend fun saveTrys(player: UUID): CompletableFuture<Void> {
-        return queryTrys(player).thenCompose { points: Int? ->
-            if (points == null) {
-                return@thenCompose CompletableFuture.completedFuture<Void?>(
-                    null
-                )
-            }
-            CompletableFuture.runAsync { Database.saveTrys(player, points) }
-                .thenRun {
-                    trys.synchronous()
-                        .invalidate(player)
-                }
-        }
+    private suspend fun saveTrys(player: UUID) {
+        val tryCount: Int = queryTrys(player)
+
+        Database.saveTrys(player, tryCount)
+        trys.synchronous().invalidate(player)
     }
 
-    suspend fun savePoints(player: UUID): CompletableFuture<Void> {
-        return queryPoints(player).thenCompose { points: Int? ->
-            if (points == null) {
-                return@thenCompose CompletableFuture.completedFuture<Void?>(
-                    null
-                )
-            }
-            CompletableFuture.runAsync { Database.savePoints(player, points) }
-                .thenRun {
-                    JumpAndRunService.points.synchronous()
-                        .invalidate(player)
-                }
-        }
+    private suspend fun savePoints(player: UUID) {
+        val pointCount: Int = queryPoints(player)
+
+        Database.saveTrys(player, pointCount)
+        points.synchronous().invalidate(player)
     }
 
-    suspend fun saveHighScore(player: UUID): CompletableFuture<Void> {
-        return queryHighScore(player).thenCompose { highScore: Int? ->
-            if (highScore == null) {
-                return@thenCompose CompletableFuture.completedFuture<Void?>(
-                    null
-                )
-            }
-            CompletableFuture.runAsync {
-                Database.saveHighScore(
-                    player,
-                    highScore
-                )
-            }.thenRun { highScores.synchronous().invalidate(player) }
-        }
+    private suspend fun saveHighScore(player: UUID) {
+        val highScoreCount: Int = queryHighScore(player)
+
+        Database.saveTrys(player, highScoreCount)
+        highScores.synchronous().invalidate(player)
     }
 
-    fun setSound(player: Player, value: Boolean?) {
+    fun setSound(player: Player, value: Boolean) {
         sounds.synchronous().put(player.uniqueId, value)
     }
 
 
     suspend fun addPoint(player: Player) {
-        points[player.uniqueId].thenAccept { points: Int? ->
-            val newPoints = if (points == null) 1 else points + 1
-            JumpAndRunService.points.synchronous().put(player.uniqueId, newPoints)
-        }
+        val points: Int = currentPoints[player] ?: 1
+        val newPoints = points + 1
 
-        currentPoints.compute(player) { p: Player?, curPts: Int? -> if (curPts == null) 1 else curPts + 1 }
+        JumpAndRunService.points.synchronous().put(player.uniqueId, newPoints)
+        currentPoints.compute(player) { _: Player?, curPts: Int? -> if (curPts == null) 1 else curPts + 1 }
 
-        querySound(player.uniqueId).thenAccept { sound: Boolean? ->
-            if(sound == null) {
-                return@thenAccept
-            }
+        val allowSounds: Boolean = querySound(player.uniqueId)
 
-            if (!sound) {
-                player.playSound(
-                    Sound.sound(
-                        org.bukkit.Sound.ENTITY_EXPERIENCE_ORB_PICKUP,
-                        Sound.Source.MASTER,
-                        100f,
-                        1f
-                    ), Sound.Emitter.self()
-                )
-            }
+        if (!allowSounds) {
+            player.playSound(
+                Sound.sound(
+                    org.bukkit.Sound.ENTITY_EXPERIENCE_ORB_PICKUP,
+                    Sound.Source.MASTER,
+                    100f,
+                    1f
+                ), Sound.Emitter.self()
+            )
         }
     }
 
     suspend fun addTry(player: Player) {
-        queryTrys(player.uniqueId).thenAccept { trys: Int? ->
-            val newTrys = if (trys == null) 1 else trys + 1
-            JumpAndRunService.trys.synchronous().put(player.uniqueId, newTrys)
-        }
+        val tryCount: Int = queryTrys(player.uniqueId)
+        val newTrys = tryCount + 1
+
+        trys.synchronous().put(player.uniqueId, newTrys)
     }
 
     suspend fun checkHighScore(player: Player) {
         val currentScore = currentPoints[player]
+        val highScore: Int = queryHighScore(player.uniqueId)
 
-        queryHighScore(player.uniqueId).thenAccept { highScore: Int? ->
-            if (currentScore != null && (highScore == null || currentScore > highScore)) {
-                awaitingHighScores.add(player)
-            }
+        if (currentScore != null && (currentScore > highScore)) {
+            awaitingHighScores.add(player)
         }
     }
 
 
-    suspend fun setHighScore(player: Player) {
+    private suspend fun setHighScore(player: Player) {
         val currentScore = currentPoints[player]
+        val highScore: Int = queryHighScore(player.uniqueId)
+        val allowSounds: Boolean = querySound(player.uniqueId)
 
-        queryHighScore(player.uniqueId).thenAccept { highScore: Int? ->
-            if (currentScore != null && (highScore == null || currentScore > highScore)) {
-                awaitingHighScores.remove(player)
-                highScores.synchronous().put(player.uniqueId, currentScore)
-
-                player.sendMessage(PluginInstance.prefix.append(Component.text(String.format("Du hast deinen Highscore gebrochen! Dein neuer Highscore ist %s!", currentScore))))
-
-                plugin.launch {
-                    querySound(player.uniqueId).thenAccept { sound: Boolean? ->
-
-                        if (sound == null) {
-                            return@thenAccept
-                        }
-
-                        if (!sound) {
-                            player.playSound(
-                                Sound.sound(
-                                    org.bukkit.Sound.ITEM_TOTEM_USE,
-                                    Sound.Source.MASTER,
-                                    100f,
-                                    1f
-                                ), Sound.Emitter.self()
-                            )
-                        }
-                    }
-                }
-
-                player.showTitle(
-                    Title.title(
-                        Component.text("Rekord!", PluginColor.BLUE_MID),
-                        Component.text(
-                            "Du hast einen neuen persönlichen Rekord aufgestellt.",
-                            PluginColor.DARK_GRAY
-                        ),
-                        Title.Times.times(
-                            Duration.ofSeconds(1),
-                            Duration.ofSeconds(2),
-                            Duration.ofSeconds(1)
-                        )
-                    )
-                )
-            }
+        if(currentScore == null || currentScore <= highScore) {
+            return
         }
+
+        awaitingHighScores.remove(player)
+        highScores.synchronous().put(player.uniqueId, currentScore)
+
+        if (allowSounds) {
+            player.playSound(Sound.sound(org.bukkit.Sound.ITEM_TOTEM_USE, Sound.Source.MASTER, 100f, 1f), Sound.Emitter.self())
+        }
+
+        player.sendMessage(PluginInstance.prefix.append(Component.text("Du hast deinen Highscore gebrochen! Dein neuer Highscore ist ${currentScore}!")));
+        player.showTitle(Title.title(Component.text("Rekord!", PluginColor.BLUE_MID), Component.text("Du hast einen neuen persönlichen Rekord aufgestellt.", PluginColor.DARK_GRAY), Title.Times.times(Duration.ofSeconds(1), Duration.ofSeconds(2), Duration.ofSeconds(1))))
     }
 
 
@@ -553,7 +470,7 @@ object JumpAndRunService {
         }
     }
 
-    fun isJumping(player: Player?): Boolean {
+    fun isJumping(player: Player): Boolean {
         return jumpAndRun.players.contains(player)
     }
 }
