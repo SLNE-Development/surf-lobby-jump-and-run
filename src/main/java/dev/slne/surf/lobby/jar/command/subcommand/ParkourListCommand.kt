@@ -10,24 +10,18 @@ import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.entity.Player
 
 class ParkourListCommand(commandName: String) : CommandAPICommand(commandName) {
-    private val provider: JumpAndRunService? =
-        PluginInstance.Companion.instance().jumpAndRunProvider()
-
     init {
         withPermission("jumpandrun.command.list")
 
-        executesPlayer(PlayerCommandExecutor { player: Player, args: CommandArguments? ->
-            val playerCount = provider!!.jumpAndRun().players.size
+        executesPlayer(PlayerCommandExecutor { player: Player, _: CommandArguments? ->
+            val playerCount = JumpAndRunService.jumpAndRun.players.size
+
             if (playerCount == 0) {
-                player.sendMessage(
-                    PluginInstance.prefix()
-                        .append(
-                            Component.text("Aktuell sind ", NamedTextColor.GRAY)
-                                .append(Component.text("keine Spieler", NamedTextColor.YELLOW))
-                                .append(Component.text(" im Jump And Run.", NamedTextColor.WHITE))
-                        )
-                )
-                return@executesPlayer
+                player.sendMessage(PluginInstance.prefix.append(Component.text("Aktuell sind ", NamedTextColor.GRAY)
+                    .append(Component.text("keine Spieler", NamedTextColor.YELLOW))
+                    .append(Component.text(" im Jump And Run.", NamedTextColor.WHITE))))
+
+                return@PlayerCommandExecutor
             }
 
             val header: Component = Component.text("Aktuell sind ", NamedTextColor.GRAY)
@@ -37,22 +31,23 @@ class ParkourListCommand(commandName: String) : CommandAPICommand(commandName) {
             var playerList: Component = Component.empty()
             var current = 0
 
-            for (target in provider.jumpAndRun().players) {
+            for (target in JumpAndRunService.jumpAndRun.players) {
                 current++
+
+                val points = JumpAndRunService.currentPoints[target] ?: 0
 
                 var playerComponent: Component = Component.text(target.name, NamedTextColor.WHITE)
                     .append(Component.text(" (", NamedTextColor.GRAY))
-                    .append(Component.text(provider.currentPoints()[target], NamedTextColor.YELLOW))
+                    .append(Component.text(points, NamedTextColor.YELLOW))
                     .append(Component.text(")", NamedTextColor.GRAY))
 
                 if (current < playerCount) {
-                    playerComponent =
-                        playerComponent.append(Component.text(", ", NamedTextColor.GRAY))
+                    playerComponent = playerComponent.append(Component.text(", ", NamedTextColor.GRAY))
                 }
 
                 playerList = playerList.append(playerComponent)
             }
-            player.sendMessage(PluginInstance.prefix().append(header.append(playerList)))
+            player.sendMessage(PluginInstance.prefix.append(header.append(playerList)))
         })
     }
 }

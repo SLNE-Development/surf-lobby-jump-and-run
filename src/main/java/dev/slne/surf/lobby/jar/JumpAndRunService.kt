@@ -36,8 +36,8 @@ object JumpAndRunService {
     val jumpAndRun: JumpAndRun = PluginConfig.loadJumpAndRun()
     private val random = SecureRandom()
     private val awaitingHighScores: ObjectList<Player> = ObjectArrayList()
-    private val latestJumps: Object2ObjectMap<Player, Array<Block?>> = Object2ObjectOpenHashMap()
-    val blocks: Object2ObjectMap<Player, Material> = Object2ObjectOpenHashMap()
+    private val latestJumps: Object2ObjectMap<Player, Array<Block>> = Object2ObjectOpenHashMap()
+    private val blocks: Object2ObjectMap<Player, Material> = Object2ObjectOpenHashMap()
     val currentPoints: Object2ObjectMap<Player, Int> = Object2ObjectOpenHashMap()
 
     private val points: AsyncLoadingCache<UUID, Int?> = Caffeine.newBuilder()

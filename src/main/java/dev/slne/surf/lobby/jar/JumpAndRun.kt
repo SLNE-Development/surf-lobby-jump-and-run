@@ -1,7 +1,6 @@
 package dev.slne.surf.lobby.jar
 
-import it.unimi.dsi.fastutil.objects.Object2ObjectMap
-import it.unimi.dsi.fastutil.objects.ObjectList
+import it.unimi.dsi.fastutil.objects.*
 import lombok.Builder
 import lombok.Getter
 import lombok.Setter
@@ -14,22 +13,22 @@ import org.bukkit.entity.Player
 @Getter
 @Setter
 class JumpAndRun {
-    private val displayName: String? = null
+    private val displayName: String = "Parkour"
 
-    private val posOne: Location? = null
-    private val posTwo: Location? = null
-    private val spawn: Location? = null
-    private val start: Location? = null
+    var posOne: Location? = null
+    var posTwo: Location? = null
+    var spawn: Location? = null
+    var start: Location? = null
 
-    private val players: ObjectList<Player>? = null
-    private val materials: ObjectList<Material>? = null
-    private val latestBlocks: Object2ObjectMap<Player, Block>? = null
+    val players: ObjectSet<Player> = ObjectArraySet()
+    val materials: ObjectList<Material> = ObjectArrayList()
+    val latestBlocks: Object2ObjectMap<Player, Block> = Object2ObjectOpenHashMap()
 
-    fun kick(player: Player?) {
-        PluginInstance.Companion.instance().jumpAndRunProvider().remove(player)
+    fun kick(player: Player) {
+        JumpAndRunService.remove(player)
     }
 
-    fun join(player: Player?) {
-        PluginInstance.Companion.instance().jumpAndRunProvider().start(player)
+    fun join(player: Player) {
+        JumpAndRunService.start(player)
     }
 }

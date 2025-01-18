@@ -14,23 +14,16 @@ import java.util.*
 object MaterialArgument {
     @JvmStatic
     fun argument(nodeName: String?): Argument<Material> {
-        return CustomArgument<Material, String?>(
-            StringArgument(nodeName)
-        ) { info: CustomArgumentInfo<String?> ->
+        return CustomArgument (StringArgument(nodeName)) { info: CustomArgumentInfo<String?> ->
             val material = Material.getMaterial(info.input())
+
             if (material == null || material.isAir || !material.isSolid) {
-                throw CustomArgumentException.fromMessageBuilder(
-                    CustomArgument.MessageBuilder("Unknown or invalid material: ")
-                        .appendArgInput()
-                )
+                throw CustomArgumentException.fromMessageBuilder(CustomArgument.MessageBuilder("Unknown or invalid material: ").appendArgInput())
             }
+
             material
-        }.replaceSuggestions(ArgumentSuggestions.strings<CommandSender?> { info: SuggestionInfo<CommandSender?>? ->
-            Arrays.stream<Material>(
-                Material.entries.toTypedArray()
-            ).filter { obj: Material -> obj.isSolid }
-                .map<String> { obj: Material -> obj.name }
-                .toArray<String?> { _Dummy_.__Array__() }
+        }.replaceSuggestions(ArgumentSuggestions.strings<CommandSender?> { _: SuggestionInfo<CommandSender?>? ->
+            Arrays.stream(Material.entries.toTypedArray()).filter { obj: Material -> obj.isSolid }.map { obj: Material -> obj.name }.toArray {}
         })
     }
 }

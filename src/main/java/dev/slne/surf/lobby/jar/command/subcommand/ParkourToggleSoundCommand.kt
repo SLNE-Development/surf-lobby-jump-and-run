@@ -10,38 +10,25 @@ import net.kyori.adventure.text.Component
 import org.bukkit.entity.Player
 
 class ParkourToggleSoundCommand(commandName: String) : CommandAPICommand(commandName) {
-    private val provider: JumpAndRunService? =
-        PluginInstance.Companion.instance().jumpAndRunProvider()
-
     init {
         withPermission("jumpandrun.command.toggle")
 
-        executesPlayer(PlayerCommandExecutor { player: Player, args: CommandArguments? ->
-            provider!!.querySound(player.uniqueId).thenAccept { sound: Boolean? ->
-                var sound = sound
-                if (sound == null) {
-                    sound = true
+        executesPlayer(PlayerCommandExecutor { player: Player, _: CommandArguments ->
+            JumpAndRunService.querySound(player.uniqueId).thenAccept { sound: Boolean? ->
+                var setting = sound
+
+                if (setting == null) {
+                    setting = true
                 }
-                if (sound) {
-                    provider.setSound(player, false)
-                    player.sendMessage(
-                        PluginInstance.prefix().append(
-                            Component.text(
-                                "Sounds sind nun für dich aktiviert.",
-                                PluginColor.GOLD
-                            )
-                        )
-                    )
+
+                setting = !setting
+
+                if (setting) {
+                    JumpAndRunService.setSound(player, false)
+                    player.sendMessage(PluginInstance.prefix.append(Component.text("Sounds sind nun für dich aktiviert.", PluginColor.GOLD)))
                 } else {
-                    provider.setSound(player, true)
-                    player.sendMessage(
-                        PluginInstance.prefix().append(
-                            Component.text(
-                                "Sounds sind nun für dich deaktiviert.",
-                                PluginColor.GOLD
-                            )
-                        )
-                    )
+                    JumpAndRunService.setSound(player, true)
+                    player.sendMessage(PluginInstance.prefix.append(Component.text("Sounds sind nun für dich deaktiviert.", PluginColor.GOLD)))
                 }
             }
         })

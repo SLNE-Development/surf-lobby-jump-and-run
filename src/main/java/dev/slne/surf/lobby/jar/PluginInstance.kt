@@ -19,14 +19,12 @@ import org.bukkit.plugin.java.JavaPlugin
 @Getter
 @Accessors(fluent = true)
 class PluginInstance : JavaPlugin() {
-    var jumpAndRunProvider: JumpAndRunService? = null
     var worldEditInstance: WorldEditPlugin? = null
     var worldedit = false
 
 
     override fun onEnable() {
-        this.jumpAndRunProvider = JumpAndRunService()
-        jumpAndRunProvider!!.startActionbar()
+        JumpAndRunService.startActionbar()
 
         this.handlePlaceholderAPI()
         this.handeWorldEdit()
@@ -40,11 +38,11 @@ class PluginInstance : JavaPlugin() {
     }
 
     override fun onDisable() {
-        jumpAndRunProvider!!.stopActionbar()
-        jumpAndRunProvider!!.saveAll().join()
+        JumpAndRunService.stopActionbar()
+      JumpAndRunService.saveAll().join()
 
         Database.closeConnection()
-        PluginConfig.save(jumpAndRunProvider!!.jumpAndRun()!!)
+        PluginConfig.save(JumpAndRunService.jumpAndRun)
     }
 
     private fun handlePlaceholderAPI() {
