@@ -1,10 +1,6 @@
-package dev.slne.surf.lobby.jar
+package dev.slne.surf.lobby.jar.service
 
 import it.unimi.dsi.fastutil.objects.*
-import lombok.AllArgsConstructor
-import lombok.Builder
-import lombok.Getter
-import lombok.Setter
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.block.Block

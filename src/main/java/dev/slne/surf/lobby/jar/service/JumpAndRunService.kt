@@ -1,7 +1,8 @@
-package dev.slne.surf.lobby.jar
+package dev.slne.surf.lobby.jar.service
 
 import com.github.benmanes.caffeine.cache.AsyncLoadingCache
 import com.github.benmanes.caffeine.cache.Caffeine
+import dev.slne.surf.lobby.jar.PluginInstance
 import dev.slne.surf.lobby.jar.config.PluginConfig
 import dev.slne.surf.lobby.jar.mysql.Database
 import dev.slne.surf.lobby.jar.util.PluginColor
@@ -68,7 +69,7 @@ object JumpAndRunService {
     private var runnable: BukkitRunnable? = null
 
     fun start(player: Player) {
-        this.remove(player)
+        remove(player)
 
         val jumps = arrayOfNulls<Block>(3)
 
@@ -77,8 +78,8 @@ object JumpAndRunService {
         currentPoints[player] = 0
         awaitingHighScores.remove(player)
 
-        this.addTry(player)
-        this.generateInitialJumps(player)
+        addTry(player)
+        generateInitialJumps(player)
 
         queryHighScore(player.uniqueId).thenAccept { highScore: Int? ->
             if (highScore == null) {
@@ -95,7 +96,7 @@ object JumpAndRunService {
 
 
     private fun generateInitialJumps(player: Player) {
-        val randomLocation = this.getRandomLocationInRegion(player.world) ?: return
+        val randomLocation = getRandomLocationInRegion(player.world) ?: return
 
         val start = randomLocation.add(0.0, 1.0, 0.0)
         val block = start.block
@@ -104,12 +105,12 @@ object JumpAndRunService {
         player.sendBlockChange(block.location, material.createBlockData())
         latestJumps[player]!![0] = block
 
-        val next = this.getValidBlock(start, player)
+        val next = getValidBlock(start, player)
 
         player.sendBlockChange(next.location, Material.SEA_LANTERN.createBlockData())
         latestJumps[player]!![1] = next
 
-        val next2 = this.getValidBlock(next.location, player)
+        val next2 = getValidBlock(next.location, player)
 
         player.sendBlockChange(next2.location, material.createBlockData())
         latestJumps[player]!![2] = next2
@@ -175,7 +176,7 @@ object JumpAndRunService {
             val offset = OFFSETS[random.nextInt(OFFSETS.size)]
             val nextLocation = previousLocation.clone().add(offset).add(0.0, heightOffset.toDouble(), 0.0)
 
-            if (!this.isInRegion(nextLocation)) {
+            if (!isInRegion(nextLocation)) {
                 attempts++
                 continue
             }
@@ -188,7 +189,8 @@ object JumpAndRunService {
                 continue
             }
 
-            val latestPlayerJumps: Array<Block?> = latestJumps[player] ?: return previousLocation.clone().add(OFFSETS[0]).block
+            val latestPlayerJumps: Array<Block?> = latestJumps[player] ?: return previousLocation.clone().add(
+                OFFSETS[0]).block
 
             val block0: Block = latestPlayerJumps[0] ?: return previousLocation.clone().add(OFFSETS[0]).block
             val block1: Block = latestPlayerJumps[1] ?: return previousLocation.clone().add(OFFSETS[0]).block
@@ -299,7 +301,7 @@ object JumpAndRunService {
     }
 
     fun remove(player: Player) {
-        if (this.getLatestJumps(player).isEmpty()) {
+        if (getLatestJumps(player).isEmpty()) {
             return
         }
 
@@ -310,7 +312,7 @@ object JumpAndRunService {
         }
 
         if (awaitingHighScores.contains(player)) {
-            this.setHighScore(player)
+            setHighScore(player)
         }
 
         currentPoints.remove(player)
@@ -322,7 +324,7 @@ object JumpAndRunService {
 
     private fun removeAll() {
         for (player in jumpAndRun.players) {
-            this.remove(player)
+            remove(player)
         }
     }
 
@@ -351,7 +353,7 @@ object JumpAndRunService {
 
        val allSaves = CompletableFuture.allOf(*futures.toTypedArray())
 
-        return allSaves.thenRun { this.removeAll() }.exceptionally { throwable: Throwable? ->
+        return allSaves.thenRun { removeAll() }.exceptionally { throwable: Throwable? ->
             logger.error(
                 "An error occurred while saving all data",
                 throwable
@@ -411,7 +413,7 @@ object JumpAndRunService {
             }
             CompletableFuture.runAsync { Database.savePoints(player, points) }
                 .thenRun {
-                    this.points.synchronous()
+                    JumpAndRunService.points.synchronous()
                         .invalidate(player)
                 }
         }
@@ -441,7 +443,7 @@ object JumpAndRunService {
     fun addPoint(player: Player) {
         points[player.uniqueId].thenAccept { points: Int? ->
             val newPoints = if (points == null) 1 else points + 1
-            this.points.synchronous().put(player.uniqueId, newPoints)
+            JumpAndRunService.points.synchronous().put(player.uniqueId, newPoints)
         }
 
         currentPoints.compute(player) { p: Player?, curPts: Int? -> if (curPts == null) 1 else curPts + 1 }
@@ -467,7 +469,7 @@ object JumpAndRunService {
     fun addTry(player: Player) {
         queryTrys(player.uniqueId).thenAccept { trys: Int? ->
             val newTrys = if (trys == null) 1 else trys + 1
-            this.trys.synchronous().put(player.uniqueId, newTrys)
+            JumpAndRunService.trys.synchronous().put(player.uniqueId, newTrys)
         }
     }
 
@@ -531,16 +533,16 @@ object JumpAndRunService {
 
 
     fun onQuit(player: Player) {
-        this.saveHighScore(player.uniqueId)
-        this.savePoints(player.uniqueId)
-        this.saveTrys(player.uniqueId)
+        saveHighScore(player.uniqueId)
+        savePoints(player.uniqueId)
+        saveTrys(player.uniqueId)
 
         currentPoints.remove(player)
         awaitingHighScores.remove(player)
 
 
-        if (this.isJumping(player)) {
-            this.remove(player)
+        if (isJumping(player)) {
+            remove(player)
         }
     }
 

@@ -1,7 +1,6 @@
 package dev.slne.surf.lobby.jar.listener
 
-import dev.slne.surf.lobby.jar.JumpAndRunService
-import dev.slne.surf.lobby.jar.PluginInstance
+import dev.slne.surf.lobby.jar.service.JumpAndRunService
 import org.bukkit.Location
 import org.bukkit.block.Block
 import org.bukkit.block.BlockFace

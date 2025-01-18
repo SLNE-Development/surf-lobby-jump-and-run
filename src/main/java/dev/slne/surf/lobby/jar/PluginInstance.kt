@@ -8,6 +8,7 @@ import dev.slne.surf.lobby.jar.listener.ParkourListener
 import dev.slne.surf.lobby.jar.listener.PlayerKickListener
 import dev.slne.surf.lobby.jar.mysql.Database
 import dev.slne.surf.lobby.jar.papi.ParkourPlaceholderExtension
+import dev.slne.surf.lobby.jar.service.JumpAndRunService
 import dev.slne.surf.lobby.jar.util.PluginColor
 import lombok.Getter
 import lombok.experimental.Accessors

@@ -4,7 +4,7 @@ import dev.jorel.commandapi.CommandAPICommand
 import dev.jorel.commandapi.arguments.PlayerArgument
 import dev.jorel.commandapi.executors.CommandArguments
 import dev.jorel.commandapi.executors.PlayerCommandExecutor
-import dev.slne.surf.lobby.jar.JumpAndRunService
+import dev.slne.surf.lobby.jar.service.JumpAndRunService
 import dev.slne.surf.lobby.jar.util.PluginColor
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.TextDecoration

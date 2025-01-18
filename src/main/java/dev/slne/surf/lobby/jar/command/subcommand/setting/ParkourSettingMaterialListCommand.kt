@@ -3,7 +3,7 @@ package dev.slne.surf.lobby.jar.command.subcommand.setting
 import dev.jorel.commandapi.CommandAPICommand
 import dev.jorel.commandapi.executors.CommandArguments
 import dev.jorel.commandapi.executors.PlayerCommandExecutor
-import dev.slne.surf.lobby.jar.JumpAndRunService
+import dev.slne.surf.lobby.jar.service.JumpAndRunService
 import dev.slne.surf.lobby.jar.PluginInstance
 import dev.slne.surf.lobby.jar.util.PluginColor
 import net.kyori.adventure.text.Component

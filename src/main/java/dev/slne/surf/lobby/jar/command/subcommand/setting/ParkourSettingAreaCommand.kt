@@ -5,8 +5,8 @@ import com.sk89q.worldedit.bukkit.WorldEditPlugin
 import dev.jorel.commandapi.CommandAPICommand
 import dev.jorel.commandapi.executors.CommandArguments
 import dev.jorel.commandapi.executors.PlayerCommandExecutor
-import dev.slne.surf.lobby.jar.JumpAndRun
-import dev.slne.surf.lobby.jar.JumpAndRunService
+import dev.slne.surf.lobby.jar.service.JumpAndRun
+import dev.slne.surf.lobby.jar.service.JumpAndRunService
 import dev.slne.surf.lobby.jar.PluginInstance
 import net.kyori.adventure.text.Component
 import org.bukkit.Location

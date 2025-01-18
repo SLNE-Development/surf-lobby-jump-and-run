@@ -1,6 +1,6 @@
 package dev.slne.surf.lobby.jar.config
 
-import dev.slne.surf.lobby.jar.JumpAndRun
+import dev.slne.surf.lobby.jar.service.JumpAndRun
 import dev.slne.surf.lobby.jar.PluginInstance
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap
 import it.unimi.dsi.fastutil.objects.ObjectArrayList
