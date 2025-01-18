@@ -333,7 +333,7 @@ public class JumpAndRunProvider {
     this.latestJumps.remove(player);
     this.jumpAndRun.getPlayers().remove(player);
 
-    player.teleport(jumpAndRun.getSpawn());
+    player.teleportAsync(jumpAndRun.getSpawn());
   }
 
   public void removeAll() {
