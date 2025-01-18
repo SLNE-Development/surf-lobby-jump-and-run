@@ -4,6 +4,7 @@ import dev.slne.surf.lobby.jar.JumpAndRun
 import dev.slne.surf.lobby.jar.PluginInstance
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap
 import it.unimi.dsi.fastutil.objects.ObjectArrayList
+import it.unimi.dsi.fastutil.objects.ObjectArraySet
 import it.unimi.dsi.fastutil.objects.ObjectList
 import org.bukkit.Bukkit
 import org.bukkit.Location
@@ -12,11 +13,11 @@ import org.bukkit.configuration.file.FileConfiguration
 
 object PluginConfig {
     fun config(): FileConfiguration {
-        return PluginInstance.Companion.instance().getConfig()
+        return PluginInstance.instance().config
     }
 
-    fun createConfig() {
-        PluginInstance.Companion.instance().saveDefaultConfig()
+    private fun createConfig() {
+        PluginInstance.instance().saveDefaultConfig()
     }
 
     @JvmStatic
@@ -32,10 +33,10 @@ object PluginConfig {
         config[path + "materials"] = materialNames
         config[path + "displayname"] = jumpAndRun.displayName
 
-        saveLocation(path + "posOne", jumpAndRun.posOne)
-        saveLocation(path + "posTwo", jumpAndRun.posTwo)
-        saveLocation(path + "spawn", jumpAndRun.spawn)
-        saveLocation(path + "start", jumpAndRun.start)
+        saveLocation(path + "posOne", jumpAndRun.posOne ?: return)
+        saveLocation(path + "posTwo", jumpAndRun.posTwo ?: return)
+        saveLocation(path + "spawn", jumpAndRun.spawn ?: return)
+        saveLocation(path + "start", jumpAndRun.start ?: return)
 
         PluginInstance.Companion.instance().saveConfig()
     }
@@ -62,27 +63,29 @@ object PluginConfig {
             materials.add(Material.valueOf(name!!))
         }
 
-        return JumpAndRun.builder()
-            .displayName(displayName)
-            .posOne(posOne)
-            .posTwo(posTwo)
-            .spawn(spawn)
-            .start(start)
-            .players(ObjectArrayList())
-            .materials(ObjectArrayList(materials))
-            .latestBlocks(Object2ObjectOpenHashMap())
-            .build()
+        val jumpAndRun = JumpAndRun()
+
+        jumpAndRun.displayName = displayName
+        jumpAndRun.posOne = posOne
+        jumpAndRun.posTwo = posTwo
+        jumpAndRun.spawn = spawn
+        jumpAndRun.start = start
+        jumpAndRun.players = ObjectArraySet()
+        jumpAndRun.materials = ObjectArrayList(materials)
+        jumpAndRun.latestBlocks = Object2ObjectOpenHashMap()
+
+        return jumpAndRun
     }
 
-    fun saveLocation(path: String, location: Location) {
+    private fun saveLocation(path: String, location: Location) {
         config()["$path.world"] = location.world.name
         config()["$path.x"] = location.blockX
         config()["$path.y"] = location.blockY
         config()["$path.z"] = location.blockZ
     }
 
-    fun getLocation(path: String): Location {
-        val defaultLocation: Location = Bukkit.getWorlds().getFirst().getSpawnLocation()
+    private fun getLocation(path: String): Location {
+        val defaultLocation: Location = Bukkit.getWorlds().first().spawnLocation
 
         val worldName =
             config().getString("$path.world", defaultLocation.world.name)!!
