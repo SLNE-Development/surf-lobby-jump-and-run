@@ -69,7 +69,7 @@ class ItemBuilder {
      *
      * @return The cloned instance.
      */
-    override fun clone(): ItemBuilder {
+    fun clone(): ItemBuilder {
         return ItemBuilder(itemStack)
     }
 
@@ -152,7 +152,7 @@ class ItemBuilder {
      * @param value the value
      * @return the item builder
     </V></T> */
-    fun <T, V> addDataToPersistenceContainer(
+    fun <T, V : Any> addDataToPersistenceContainer(
         key: NamespacedKey, type: PersistentDataType<T, V>,
         value: V
     ): ItemBuilder {
@@ -313,31 +313,6 @@ class ItemBuilder {
         ) { meta: Damageable ->
             meta.damage =
                 Short.MAX_VALUE.toInt()
-        }
-
-        return this
-    }
-
-    /**
-     * Re-sets the lore.
-     *
-     * @param lore The lore to set it to.
-     * @return the lore
-     */
-    fun setLore(vararg lore: Component): ItemBuilder {
-        itemStack.editMeta { meta: ItemMeta ->
-            meta.lore(
-                Arrays.asList<Component>(
-                    *Arrays.stream<Component>(
-                        lore
-                    )
-                        .map<Component> { component: Component ->
-                            component.decoration(
-                                TextDecoration.ITALIC,
-                                false
-                            )
-                        }.toArray<Component> { _Dummy_.__Array__() })
-            )
         }
 
         return this
