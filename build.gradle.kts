@@ -55,6 +55,7 @@ paper {
     authors = listOf("TheBjoRedCraft", "SLNE Development")
     prefix = "SurfLobbyJumpAndRun"
     version = "1.21.1-1.0.0-SNAPSHOT"
+    foliaSupported = false
 
     generateLibrariesJson = true
 
@@ -83,7 +84,6 @@ java {
     }
 }
 
-
 tasks {
     runServer {
         minecraftVersion("1.21.1")
@@ -92,6 +92,8 @@ tasks {
             hangar("CommandAPI", "9.7.0")
             hangar("PlaceholderAPI", "2.11.6")
         }
+
+        runPaper.folia.registerTask()
     }
     shadowJar {
         archiveClassifier = ""
