@@ -1,26 +1,27 @@
-package dev.slne.surf.lobby.jar.command.subcommand.setting;
+package dev.slne.surf.lobby.jar.command.subcommand.setting
 
-import dev.jorel.commandapi.CommandAPICommand;
-import dev.jorel.commandapi.arguments.LocationArgument;
-import dev.slne.surf.lobby.jar.PluginInstance;
-import net.kyori.adventure.text.Component;
-import org.bukkit.Location;
+import dev.jorel.commandapi.CommandAPICommand
+import dev.jorel.commandapi.arguments.LocationArgument
+import dev.jorel.commandapi.executors.CommandArguments
+import dev.jorel.commandapi.executors.PlayerCommandExecutor
+import dev.slne.surf.lobby.jar.PluginInstance
+import net.kyori.adventure.text.Component
+import org.bukkit.Location
+import org.bukkit.entity.Player
 
-public class ParkourSettingSpawnCommand extends CommandAPICommand {
+class ParkourSettingSpawnCommand(commandName: String) : CommandAPICommand(commandName) {
+    init {
+        withArguments(LocationArgument("pos"))
 
-  public ParkourSettingSpawnCommand(String commandName) {
-    super(commandName);
+        withPermission("jumpandrun.command.setting.setSpawn")
 
-    withArguments(new LocationArgument("pos"));
-
-    withPermission("jumpandrun.command.setting.setSpawn");
-
-    executesPlayer((player, args) -> {
-      Location pos = args.getUnchecked("pos");
-
-      PluginInstance.instance().jumpAndRunProvider().jumpAndRun().setSpawn(pos);
-
-      player.sendMessage(PluginInstance.prefix().append(Component.text("Du hast den Spawn erfolgreich neu definiert.")));
-    });
-  }
+        executesPlayer(PlayerCommandExecutor { player: Player, args: CommandArguments ->
+            val pos = args.getUnchecked<Location>("pos")
+            PluginInstance.instance().jumpAndRunProvider().jumpAndRun().setSpawn(pos)
+            player.sendMessage(
+                PluginInstance.prefix()
+                    .append(Component.text("Du hast den Spawn erfolgreich neu definiert."))
+            )
+        })
+    }
 }

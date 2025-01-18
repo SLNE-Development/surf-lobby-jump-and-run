@@ -20,8 +20,8 @@ import org.bukkit.plugin.java.JavaPlugin
 @Accessors(fluent = true)
 class PluginInstance : JavaPlugin() {
     var jumpAndRunProvider: JumpAndRunService? = null
-    private var worldEditInstance: WorldEditPlugin? = null
-    private var worldedit = false
+    var worldEditInstance: WorldEditPlugin? = null
+    var worldedit = false
 
 
     override fun onEnable() {

@@ -1,23 +1,23 @@
-package dev.slne.surf.lobby.jar.command.subcommand.setting;
+package dev.slne.surf.lobby.jar.command.subcommand.setting
 
-import dev.jorel.commandapi.CommandAPICommand;
-import dev.jorel.commandapi.arguments.LocationArgument;
-import dev.slne.surf.lobby.jar.PluginInstance;
-import dev.slne.surf.lobby.jar.config.PluginConfig;
-import net.kyori.adventure.text.Component;
-import org.bukkit.Location;
+import dev.jorel.commandapi.CommandAPICommand
+import dev.jorel.commandapi.executors.CommandArguments
+import dev.jorel.commandapi.executors.PlayerCommandExecutor
+import dev.slne.surf.lobby.jar.PluginInstance
+import dev.slne.surf.lobby.jar.config.PluginConfig.save
+import net.kyori.adventure.text.Component
+import org.bukkit.entity.Player
 
-public class ParkourSettingSaveCommand extends CommandAPICommand {
+class ParkourSettingSaveCommand(commandName: String) : CommandAPICommand(commandName) {
+    init {
+        withPermission("jumpandrun.command.setting.save")
 
-  public ParkourSettingSaveCommand(String commandName) {
-    super(commandName);
-
-    withPermission("jumpandrun.command.setting.save");
-
-    executesPlayer((player, args) -> {
-      PluginConfig.save(PluginInstance.instance().jumpAndRunProvider().jumpAndRun());
-
-      player.sendMessage(PluginInstance.prefix().append(Component.text("Du hast erfolgreich die Einstellungen gespeichert.")));
-    });
-  }
+        executesPlayer(PlayerCommandExecutor { player: Player, args: CommandArguments? ->
+            save(PluginInstance.instance().jumpAndRunProvider().jumpAndRun())
+            player.sendMessage(
+                PluginInstance.prefix()
+                    .append(Component.text("Du hast erfolgreich die Einstellungen gespeichert."))
+            )
+        })
+    }
 }
