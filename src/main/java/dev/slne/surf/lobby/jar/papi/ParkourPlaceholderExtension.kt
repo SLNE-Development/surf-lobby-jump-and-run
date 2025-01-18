@@ -7,7 +7,6 @@ import me.clip.placeholderapi.expansion.PlaceholderExpansion
 import org.bukkit.Bukkit
 import org.bukkit.OfflinePlayer
 import java.util.*
-import java.util.function.Supplier
 import java.util.stream.Collectors
 
 class ParkourPlaceholderExtension : PlaceholderExpansion() {
@@ -96,31 +95,25 @@ class ParkourPlaceholderExtension : PlaceholderExpansion() {
 
     private val sortedHighScores: ObjectList<UUID>
         get() {
-            val highScores = Database.getHighScores()
+            val highScores = Database.highScores
 
             return highScores
                 .entries
                 .stream()
                 .sorted(Comparator.comparingInt<Map.Entry<UUID?, Int?>> { obj: Map.Entry<UUID?, Int?> -> obj.value!! })
                 .map<UUID?> { obj: Map.Entry<UUID?, Int?> -> obj.key }
-                .collect(
-                    Collectors.toCollection<UUID?, ObjectArrayList<UUID>>(
-                        Supplier<ObjectArrayList<UUID>> { ObjectArrayList() })
-                )
+                .collect(Collectors.toCollection<UUID?, ObjectArrayList<UUID>> { ObjectArrayList() })
         }
 
     private val sortedPoints: ObjectList<UUID>
         get() {
-            val points = Database.getPoints()
+            val points = Database.points
 
             return points
                 .entries
                 .stream()
                 .sorted(Comparator.comparingInt<Map.Entry<UUID?, Int?>> { obj: Map.Entry<UUID?, Int?> -> obj.value!! })
                 .map<UUID?> { obj: Map.Entry<UUID?, Int?> -> obj.key }
-                .collect(
-                    Collectors.toCollection<UUID?, ObjectArrayList<UUID>>(
-                        Supplier<ObjectArrayList<UUID>> { ObjectArrayList() })
-                )
+                .collect(Collectors.toCollection<UUID?, ObjectArrayList<UUID>> { ObjectArrayList() })
         }
 }
