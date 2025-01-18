@@ -10,6 +10,7 @@ import dev.jorel.commandapi.arguments.StringArgument
 import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import java.util.*
+import java.util.stream.Collectors
 
 object MaterialArgument {
     @JvmStatic
@@ -23,7 +24,7 @@ object MaterialArgument {
 
             material
         }.replaceSuggestions(ArgumentSuggestions.strings<CommandSender?> { _: SuggestionInfo<CommandSender?>? ->
-            Arrays.stream(Material.entries.toTypedArray()).filter { obj: Material -> obj.isSolid }.map { obj: Material -> obj.name }.toArray {}
+            Material.entries.filter { it.isSolid }.map { it.name }.toTypedArray()
         })
     }
 }
