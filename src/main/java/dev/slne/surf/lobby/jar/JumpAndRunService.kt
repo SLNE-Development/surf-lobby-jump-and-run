@@ -37,7 +37,7 @@ object JumpAndRunService {
     private val random = SecureRandom()
     private val awaitingHighScores: ObjectList<Player> = ObjectArrayList()
     private val latestJumps: Object2ObjectMap<Player, Array<Block>> = Object2ObjectOpenHashMap()
-    private val blocks: Object2ObjectMap<Player, Material> = Object2ObjectOpenHashMap()
+    val blocks: Object2ObjectMap<Player, Material> = Object2ObjectOpenHashMap()
     val currentPoints: Object2ObjectMap<Player, Int> = Object2ObjectOpenHashMap()
 
     private val points: AsyncLoadingCache<UUID, Int?> = Caffeine.newBuilder()
@@ -294,21 +294,17 @@ object JumpAndRunService {
         return location.blockX >= minX && location.blockX <= maxX && location.blockY >= minY && location.blockY <= maxY && location.blockZ >= minZ && location.blockZ <= maxZ
     }
 
-    fun getLatestJumps(player: Player): Array<Block?>? {
-        return latestJumps[player]
+    fun getLatestJumps(player: Player): Array<Block> {
+        return latestJumps[player] ?: return arrayOf()
     }
 
     fun remove(player: Player) {
-        if (this.getLatestJumps(player) == null) {
+        if (this.getLatestJumps(player).isEmpty()) {
             return
         }
 
-        for (block in getLatestJumps(player)!!) {
-            if (block == null) {
-                continue
-            }
-
-            player.sendBlockChange(block.location, Material.AIR.createBlockData())
+        for (block in getLatestJumps(player)) {
+          player.sendBlockChange(block.location, Material.AIR.createBlockData())
         }
 
         if (awaitingHighScores.contains(player)) {

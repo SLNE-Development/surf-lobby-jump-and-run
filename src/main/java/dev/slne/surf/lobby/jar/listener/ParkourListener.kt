@@ -11,9 +11,6 @@ import org.bukkit.event.player.PlayerMoveEvent
 import org.bukkit.event.player.PlayerQuitEvent
 
 class ParkourListener : Listener {
-    private val jumpAndRunProvider: JumpAndRunService? =
-        PluginInstance.Companion.instance().jumpAndRunProvider()
-
     @EventHandler
     fun onMove(event: PlayerMoveEvent) {
         if (!event.hasChangedPosition()) {
@@ -23,41 +20,33 @@ class ParkourListener : Listener {
         val toBlock = event.to.block
         val block = toBlock.getRelative(BlockFace.DOWN)
         val player = event.player
-        val jumps = jumpAndRunProvider!!.getLatestJumps(player)
+        val jumps = JumpAndRunService.getLatestJumps(player)
 
-        if (toBlock.location
-            == jumpAndRunProvider.jumpAndRun().start.block.location
-        ) {
-            jumpAndRunProvider.start(player)
+        if (toBlock.location == JumpAndRunService.jumpAndRun.start!!.block.location) {
+            JumpAndRunService.start(player)
             return
         }
 
-        if (jumps == null) {
+        if (jumps.isEmpty() || jumps.size < 2) {
             return
         }
 
-        if (jumps.size < 2 || jumps[0] == null || jumps[1] == null) {
-            return
-        }
+
 
         val playerLocation = player.location
-        if (playerLocation.y < jumps[0]!!.location.y && playerLocation.y < jumps[1]!!
-                .location.y
-        ) {
-            jumpAndRunProvider.remove(player)
-            return
-        }
-
-        if (jumps[1] == null) {
+        if (playerLocation.y < jumps[0].location.y && playerLocation.y < jumps[1].location.y) {
+            JumpAndRunService.remove(player)
             return
         }
 
         if (block == jumps[1]) {
-            jumps[1]!!.setType(jumpAndRunProvider.blocks()[player])
+            val material = JumpAndRunService.blocks[player] ?: return
 
-            jumpAndRunProvider.addPoint(player)
-            jumpAndRunProvider.checkHighScore(player)
-            jumpAndRunProvider.generate(player)
+            jumps[1].type = material
+
+            JumpAndRunService.addPoint(player)
+            JumpAndRunService.checkHighScore(player)
+            JumpAndRunService.generate(player)
         }
     }
 
@@ -66,8 +55,7 @@ class ParkourListener : Listener {
         val player = event.player
         val location = event.interactionPoint ?: return
 
-        val jumps: Array<Block> =
-            PluginInstance.Companion.instance().jumpAndRunProvider().getLatestJumps(player)
+        val jumps: Array<Block> = JumpAndRunService.getLatestJumps(player)
 
         for (jump in jumps) {
             if (jump.location == location) {
@@ -80,6 +68,6 @@ class ParkourListener : Listener {
     fun onQuit(event: PlayerQuitEvent) {
         val player = event.player
 
-        jumpAndRunProvider!!.onQuit(player)
+        JumpAndRunService.onQuit(player)
     }
 }
