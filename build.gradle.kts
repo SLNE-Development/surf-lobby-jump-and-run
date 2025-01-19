@@ -1,4 +1,3 @@
-import de.schablinski.gradle.activejdbc.ActiveJDBCInstrumentation
 import net.minecrell.pluginyml.paper.PaperPluginDescription
 
 plugins {
@@ -7,17 +6,34 @@ plugins {
 
     id("net.minecrell.plugin-yml.paper") version "0.6.0"
     id("com.gradleup.shadow") version "9.0.0-beta4"
-    id("io.freefair.lombok") version "8.11"
     id("xyz.jpenilla.run-paper") version "2.3.1"
-    id("de.schablinski.activejdbc-gradle-plugin") version "2.0.1"
     id("org.hibernate.build.maven-repo-auth") version "3.0.4"
 
-    kotlin("jvm") version "2.1.0"
-    kotlin("plugin.noarg") version "2.1.0"
+    id("org.springframework.boot") version "3.4.1"
+    id("io.spring.dependency-management") version "1.1.7"
+
+    kotlin("jvm") version "1.9.25"
+    kotlin("plugin.spring") version "1.9.25"
+    kotlin("plugin.jpa") version "1.9.25"
+    kotlin("plugin.serialization") version "2.1.0"
 }
 
-noArg {
-    annotation("dev.slne.surf.lobby.jar.mysql.DatabaseModel")
+dependencyManagement {
+    imports {
+        mavenBom("org.springframework.cloud:spring-cloud-dependencies:2024.0.0")
+    }
+}
+
+kotlin {
+    compilerOptions {
+        freeCompilerArgs.addAll("-Xjsr305=strict")
+    }
+}
+
+allOpen {
+    annotation("jakarta.persistence.Entity")
+    annotation("jakarta.persistence.MappedSuperclass")
+    annotation("jakarta.persistence.Embeddable")
 }
 
 group = "dev.slne"
@@ -44,18 +60,18 @@ dependencies {
     compileOnly("me.frep:vulcan-api:2.0.0")
 
     implementation("com.github.stefvanschie.inventoryframework:IF:0.10.17")
-    implementation("dev.hsbrysk:caffeine-coroutines:1.2.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
     implementation("com.github.shynixn.mccoroutine:mccoroutine-bukkit-api:2.20.0")
     implementation("com.github.shynixn.mccoroutine:mccoroutine-bukkit-core:2.20.0")
 
-    paperLibrary("com.zaxxer:HikariCP:5.0.1")
+    paperLibrary("org.jetbrains.kotlin:kotlin-reflect")
+    paperLibrary("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
+    paperLibrary("org.springframework.boot:spring-boot-starter-data-jpa")
     paperLibrary("org.mariadb.jdbc:mariadb-java-client:3.5.1")
     paperLibrary("com.github.ben-manes.caffeine:caffeine:3.1.8")
-    paperLibrary("org.javalite:activejdbc:3.4-j11")
-    paperLibrary("org.javalite:activejdbc-kt:3.4-j11")
+    paperLibrary("dev.hsbrysk:caffeine-coroutines:1.2.0")
+    paperLibrary("com.fasterxml.jackson.module:jackson-module-kotlin")
 
-    activejdbc("org.jetbrains.kotlin:kotlin-stdlib:2.1.0")
+    runtimeOnly("org.mariadb.jdbc:mariadb-java-client")
 }
 
 paper {
@@ -91,19 +107,6 @@ paper {
 java {
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(21))
-    }
-}
-
-val instrumentKotlinModels by tasks.register<ActiveJDBCInstrumentation>("instrumentKotlinModels") {
-    group = "build"
-
-    classesDir = "${buildDir}/classes/kotlin/main"
-    outputDir = "${buildDir}/classes/kotlin/main"
-}
-
-tasks.named("compileKotlin") {
-    doLast {
-        instrumentKotlinModels.instrument()
     }
 }
 

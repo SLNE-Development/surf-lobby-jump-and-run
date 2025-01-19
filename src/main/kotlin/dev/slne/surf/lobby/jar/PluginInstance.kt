@@ -8,7 +8,6 @@ import dev.slne.surf.lobby.jar.command.subcommand.ParkourStatsCommand
 import dev.slne.surf.lobby.jar.config.PluginConfig
 import dev.slne.surf.lobby.jar.listener.ParkourListener
 import dev.slne.surf.lobby.jar.listener.PlayerKickListener
-import dev.slne.surf.lobby.jar.mysql.DataSource
 import dev.slne.surf.lobby.jar.papi.ParkourPlaceholderExtension
 import dev.slne.surf.lobby.jar.service.JumpAndRunService
 import org.bukkit.Bukkit
@@ -32,15 +31,10 @@ class PluginInstance : SuspendingJavaPlugin() {
 
         Bukkit.getPluginManager().registerSuspendingEvents(ParkourListener, this)
         Bukkit.getPluginManager().registerSuspendingEvents(PlayerKickListener, this)
-
-        // Init Db
-        DataSource
     }
 
     override suspend fun onDisableAsync() {
         JumpAndRunService.stopTask()
-
-        DataSource.closeAll()
         PluginConfig.save(JumpAndRunService.jumpAndRun)
     }
 

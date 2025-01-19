@@ -1,6 +1,6 @@
 package dev.slne.surf.lobby.jar.player
 
-import dev.slne.surf.lobby.jar.mysql.JumpAndRunPlayerModel
+import dev.slne.surf.lobby.jar.mysql.JnrPlayerModel
 import dev.slne.surf.lobby.jar.mysql.worker.ConnectionWorkers
 import dev.slne.surf.lobby.jar.util.PluginColor
 import dev.slne.surf.lobby.jar.util.prefix
@@ -13,12 +13,12 @@ import java.util.*
 
 class JumpAndRunPlayer(val uuid: UUID) {
 
-    private lateinit var jumpAndRunPlayerModel: JumpAndRunPlayerModel
+    private lateinit var jnrPlayerModel: JnrPlayerModel
 
-    val points get() = jumpAndRunPlayerModel.points
-    val trys get() = jumpAndRunPlayerModel.trys
-    val sound get() = jumpAndRunPlayerModel.sound
-    val highScore get() = jumpAndRunPlayerModel.highScore
+    val points get() = jnrPlayerModel.points
+    val trys get() = jnrPlayerModel.tries
+    val sound get() = jnrPlayerModel.sound
+    val highScore get() = jnrPlayerModel.highScore
 
     val player get() = Bukkit.getPlayer(uuid)
 
@@ -38,7 +38,7 @@ class JumpAndRunPlayer(val uuid: UUID) {
     }
 
     suspend fun incrementTrys() {
-        update { it.trys += 1 }
+        update { it.tries += 1 }
     }
 
     suspend fun setSound(sound: Boolean) {
@@ -83,17 +83,17 @@ class JumpAndRunPlayer(val uuid: UUID) {
     }
 
     suspend fun fetch() = ConnectionWorkers.async {
-        jumpAndRunPlayerModel = JumpAndRunPlayerModel.findFirst("uuid = ?", uuid.toString())
-            ?: JumpAndRunPlayerModel(uuid).apply { saveIt() }
+        jnrPlayerModel = JnrPlayerModel.findFirst("uuid = ?", uuid.toString())
+            ?: JnrPlayerModel(uuid).apply { saveIt() }
 
-        jumpAndRunPlayerModel
+        jnrPlayerModel
     }
 
-    suspend fun update(block: (JumpAndRunPlayerModel) -> Unit) = ConnectionWorkers.async {
-        block.invoke(jumpAndRunPlayerModel)
-        jumpAndRunPlayerModel.saveIt()
+    suspend fun update(block: (JnrPlayerModel) -> Unit) = ConnectionWorkers.async {
+        block.invoke(jnrPlayerModel)
+        jnrPlayerModel.saveIt()
 
-        jumpAndRunPlayerModel
+        jnrPlayerModel
     }
 
     fun sendMessage(message: Component) {

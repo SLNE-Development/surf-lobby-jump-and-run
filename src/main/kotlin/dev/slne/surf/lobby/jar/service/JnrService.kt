@@ -2,19 +2,22 @@ package dev.slne.surf.lobby.jar.service
 
 import com.github.shynixn.mccoroutine.bukkit.launch
 import dev.slne.surf.lobby.jar.config.PluginConfig
-import dev.slne.surf.lobby.jar.mysql.JumpAndRunPlayerModel
-import dev.slne.surf.lobby.jar.mysql.worker.ConnectionWorkers
+import dev.slne.surf.lobby.jar.player.JnrPlayerModelRepository
 import dev.slne.surf.lobby.jar.player.JumpAndRunPlayer
 import dev.slne.surf.lobby.jar.plugin
 import dev.slne.surf.lobby.jar.util.JumpGenerator
 import dev.slne.surf.lobby.jar.util.PluginColor
 import dev.slne.surf.lobby.jar.util.prefix
-import it.unimi.dsi.fastutil.objects.Object2ObjectMap
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap
+import jakarta.annotation.PostConstruct
+import jakarta.annotation.PreDestroy
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import net.kyori.adventure.text.Component
 import org.bukkit.Material
-import org.bukkit.entity.Player
 import org.bukkit.scheduler.BukkitRunnable
+import org.springframework.data.domain.Limit
+import org.springframework.stereotype.Service
 import java.security.SecureRandom
 import java.time.ZonedDateTime
 import java.util.*
@@ -23,39 +26,39 @@ import kotlin.time.toJavaDuration
 
 val random = SecureRandom()
 
-object JumpAndRunService {
+@Service
+class JnrService(private val jnrPlayerModelRepository: JnrPlayerModelRepository) {
     val jumpAndRun: JumpAndRun = PluginConfig.loadJumpAndRun()
-    val blocks: Object2ObjectMap<Player, Material> = Object2ObjectOpenHashMap()
 
     val currentJumpAndRuns = Object2ObjectOpenHashMap<JumpAndRunPlayer, JumpGenerator>()
 
     // @formatter:off
     val UPDATE_DURATION = 5.minutes
 
-    var latestLeaderboardHighScoreUpdate: ZonedDateTime? = null
+    final var latestLeaderboardHighScoreUpdate: ZonedDateTime? = null
         private set
 
-    var latestLeaderboardPointsUpdate: ZonedDateTime? = null
+    final var latestLeaderboardPointsUpdate: ZonedDateTime? = null
         private set
 
     val nextLeaderboardHighscoreUpdate = latestLeaderboardHighScoreUpdate?.plus(UPDATE_DURATION.toJavaDuration()) ?: ZonedDateTime.now()
     val nextLeaderboardPointsUpdate = latestLeaderboardPointsUpdate?.plus(UPDATE_DURATION.toJavaDuration()) ?: ZonedDateTime.now()
 
-    var leaderboardPoints = Object2ObjectOpenHashMap<UUID, Int>()
+    final var leaderboardPoints = Object2ObjectOpenHashMap<UUID, Int>()
         private set
-    var leaderboardHighscores = Object2ObjectOpenHashMap<UUID, Int>()
+    final var leaderboardHighscores = Object2ObjectOpenHashMap<UUID, Int>()
         private set
     // @formatter:on
 
     private var runnable: BukkitRunnable? = null
 
-    private suspend fun getHighsccores(count: Int = 10) = ConnectionWorkers.async {
-        JumpAndRunPlayerModel.findAll().sortedByDescending { it.highScore }.take(count)
+    private suspend fun getHighsccores(count: Int = 10) = withContext(Dispatchers.IO) {
+        jnrPlayerModelRepository.queryHighScoreLeaderboard(Limit.of(count))
             .associate { it.uuid to it.highScore }
     }
 
-    private suspend fun getPoints(count: Int = 10) = ConnectionWorkers.async {
-        JumpAndRunPlayerModel.findAll().sortedByDescending { it.points }.take(count)
+    private suspend fun getPoints(count: Int = 10) = withContext(Dispatchers.IO) {
+        jnrPlayerModelRepository.queryPointsLeaderboard(Limit.of(count))
             .associate { it.uuid to it.points }
     }
 
@@ -87,6 +90,7 @@ object JumpAndRunService {
         jnrPlayer.sendMessage(prefix.append(Component.text("Du bist nun im Parkour. Springe so weit wie möglich, um deinen Highscore von $highscore zu brechen!")))
     }
 
+    @PostConstruct
     fun startTask() {
         runnable = object : BukkitRunnable() {
             override fun run() {
@@ -118,6 +122,7 @@ object JumpAndRunService {
         runnable?.runTaskTimerAsynchronously(plugin, 0L, 20L)
     }
 
+    @PreDestroy
     fun stopTask() {
         val runnable = runnable ?: return
 

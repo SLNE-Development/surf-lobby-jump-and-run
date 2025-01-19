@@ -1,13 +1,15 @@
 package dev.slne.surf.lobby.jar.util
 
 import dev.slne.surf.lobby.jar.player.JumpAndRunPlayer
-import dev.slne.surf.lobby.jar.service.JumpAndRunService.blocks
-import dev.slne.surf.lobby.jar.service.JumpAndRunService.jumpAndRun
 import dev.slne.surf.lobby.jar.service.random
+import it.unimi.dsi.fastutil.objects.Object2ObjectMap
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap
+import it.unimi.dsi.fastutil.objects.ObjectArrayList
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.World
 import org.bukkit.block.Block
+import org.bukkit.entity.Player
 import org.bukkit.util.Vector
 import kotlin.math.abs
 
@@ -15,6 +17,7 @@ import kotlin.math.abs
 class JumpGenerator(private val jnrPlayer: JumpAndRunPlayer) {
 
     val latestJumps: Array<Block?> = arrayOfNulls(3)
+    val blocks = ObjectArrayList<Material>()
 
     private val offsets = arrayOf(
         Vector(3, 0, 0),
