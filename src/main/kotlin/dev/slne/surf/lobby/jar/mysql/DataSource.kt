@@ -22,7 +22,6 @@ object DataSource {
 
     init {
         val config = plugin.config
-        val dbType = config.getString("mysql.type", "mariadb")
         val hostname = config.getString("mysql.hostname")
         val port = config.getInt("mysql.port")
         val databaseName = config.getString("mysql.database")
@@ -31,7 +30,7 @@ object DataSource {
             driverClassName = config.getString("mysql.driver", "org.mariadb.jdbc.Driver")
             poolName = config.getString("mysql.poolName", "surf-lobby-jnr")
 
-            jdbcUrl = "jdbc:$dbType://$hostname:$port/$databaseName"
+            jdbcUrl = "jdbc:mariadb://$hostname:$port/$databaseName"
             username = config.getString("mysql.username")
             password = config.getString("mysql.password")
 

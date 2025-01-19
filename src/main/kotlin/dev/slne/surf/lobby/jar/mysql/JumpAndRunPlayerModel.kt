@@ -12,5 +12,5 @@ data class JumpAndRunPlayerModel(
     var sound: Boolean = true,
     var highScore: Int = 0
 ) : Model() {
-    companion object : CompanionModel<JumpAndRunPlayerModel>(JumpAndRunPlayerModel::class.java)
+    companion object : CompanionModel<JumpAndRunPlayerModel>(JumpAndRunPlayerModel::class)
 }
