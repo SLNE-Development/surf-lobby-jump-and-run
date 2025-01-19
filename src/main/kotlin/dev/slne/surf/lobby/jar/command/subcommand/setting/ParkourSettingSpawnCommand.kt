@@ -5,7 +5,7 @@ import dev.jorel.commandapi.arguments.LocationArgument
 import dev.jorel.commandapi.executors.CommandArguments
 import dev.jorel.commandapi.executors.PlayerCommandExecutor
 import dev.slne.surf.lobby.jar.service.JumpAndRunService
-import dev.slne.surf.lobby.jar.util.prefix
+import dev.slne.surf.lobby.jar.PluginInstance
 import net.kyori.adventure.text.Component
 import org.bukkit.Location
 import org.bukkit.entity.Player
@@ -17,11 +17,11 @@ class ParkourSettingSpawnCommand(commandName: String) : CommandAPICommand(comman
         withPermission("jumpandrun.command.setting.setSpawn")
 
         executesPlayer(PlayerCommandExecutor { player: Player, args: CommandArguments ->
-            val pos = args.getUnchecked<Location>("pos")!!
+            val pos = args.getUnchecked<Location>("pos")
 
-            JumpAndRunService.jumpAndRun.spawn = pos.toVector()
+            JumpAndRunService.jumpAndRun.spawn = pos
 
-            player.sendMessage(prefix.append(Component.text("Du hast den Spawn erfolgreich neu definiert.")))
+            player.sendMessage(PluginInstance.prefix.append(Component.text("Du hast den Spawn erfolgreich neu definiert.")))
         })
     }
 }
