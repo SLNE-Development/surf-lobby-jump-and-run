@@ -1,26 +1,21 @@
 package dev.slne.surf.lobby.jar.config
 
-import dev.slne.surf.lobby.jar.PluginInstance
+import dev.slne.surf.lobby.jar.plugin
 import dev.slne.surf.lobby.jar.service.JumpAndRun
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap
 import it.unimi.dsi.fastutil.objects.ObjectArrayList
-import it.unimi.dsi.fastutil.objects.ObjectArraySet
 import it.unimi.dsi.fastutil.objects.ObjectList
-import org.bukkit.Bukkit
-import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.configuration.file.FileConfiguration
 
 object PluginConfig {
     fun config(): FileConfiguration {
-        return PluginInstance.instance().config
+        return plugin.config
     }
 
     private fun createConfig() {
-        PluginInstance.instance().saveDefaultConfig()
+        plugin.saveDefaultConfig()
     }
 
-    @JvmStatic
     fun save(jumpAndRun: JumpAndRun) {
         val config = config()
         val materialNames: ObjectList<String> = ObjectArrayList()
@@ -30,29 +25,31 @@ object PluginConfig {
             materialNames.add(material.name)
         }
 
-        config[path + "materials"] = materialNames
-        config[path + "displayname"] = jumpAndRun.displayName
+        config["$path.world"] = jumpAndRun.world?.name
+        config["$path.materials"] = materialNames
+        config["$path.displayName"] = jumpAndRun.displayName
 
-        saveLocation(path + "posOne", jumpAndRun.posOne ?: return)
-        saveLocation(path + "posTwo", jumpAndRun.posTwo ?: return)
-        saveLocation(path + "spawn", jumpAndRun.spawn ?: return)
-        saveLocation(path + "start", jumpAndRun.start ?: return)
+        config["$path.posOne"] = jumpAndRun.boundingBox.min
+        config["$path.posTwo"] = jumpAndRun.boundingBox.max
+        config["$path.spawn"] = jumpAndRun.spawn
+        config["$path.start"] = jumpAndRun.start
 
-        PluginInstance.Companion.instance().saveConfig()
+        plugin.saveConfig()
     }
 
     fun loadJumpAndRun(): JumpAndRun {
         createConfig()
 
         val path = "settings.arena"
-        val posOne = getLocation(path + "posOne")
-        val posTwo = getLocation(path + "posTwo")
-        val spawn = getLocation(path + "spawn")
-        val start = getLocation(path + "start")
-        val displayName = config().getString(path + "displayname", "Parkour")
+        val world = config().getString("$path.world")
+        val posOne = config().getVector("$path.posOne")
+        val posTwo = config().getVector("$path.posTwo")
+        val spawn = config().getVector("$path.spawn")
+        val start = config().getVector("$path.start")
+        val displayName = config().getString("$path.displayName", "Parkour")
         val materials: ObjectList<Material> = ObjectArrayList()
         val materialNames: ObjectList<String> = ObjectArrayList(
-            config().getStringList(path + "materials")
+            config().getStringList("$path.materials")
         )
 
         if (materialNames.isEmpty()) {
@@ -63,36 +60,16 @@ object PluginConfig {
             materials.add(Material.valueOf(name))
         }
 
-        val jumpAndRun = JumpAndRun()
-
-        jumpAndRun.displayName = displayName ?: "Parkour"
-        jumpAndRun.posOne = posOne
-        jumpAndRun.posTwo = posTwo
-        jumpAndRun.spawn = spawn
-        jumpAndRun.start = start
-        jumpAndRun.players = ObjectArraySet()
-        jumpAndRun.materials = ObjectArrayList(materials)
-        jumpAndRun.latestBlocks = Object2ObjectOpenHashMap()
+        val jumpAndRun = JumpAndRun(
+            displayName = displayName ?: "Parkour",
+            worldName = world,
+            posOne = posOne,
+            posTwo = posTwo,
+            spawn = spawn,
+            start = start,
+            materials = materials,
+        )
 
         return jumpAndRun
-    }
-
-    private fun saveLocation(path: String, location: Location) {
-        config()["$path.world"] = location.world.name
-        config()["$path.x"] = location.blockX
-        config()["$path.y"] = location.blockY
-        config()["$path.z"] = location.blockZ
-    }
-
-    private fun getLocation(path: String): Location {
-        val defaultLocation: Location = Bukkit.getWorlds().first().spawnLocation
-
-        val worldName =
-            config().getString("$path.world", defaultLocation.world.name)
-        val x = config().getInt("$path.x", defaultLocation.blockX)
-        val y = config().getInt("$path.y", defaultLocation.blockY)
-        val z = config().getInt("$path.z", defaultLocation.blockZ)
-
-        return Location(Bukkit.getWorld(worldName ?: Bukkit.getWorlds().first().name), x.toDouble(), y.toDouble(), z.toDouble())
     }
 }

@@ -2,22 +2,31 @@ import net.minecrell.pluginyml.paper.PaperPluginDescription
 
 plugins {
     java
+    publishing
 
     id("net.minecrell.plugin-yml.paper") version "0.6.0"
     id("com.gradleup.shadow") version "9.0.0-beta4"
     id("io.freefair.lombok") version "8.11"
     id("xyz.jpenilla.run-paper") version "2.3.1"
     id("de.schablinski.activejdbc-gradle-plugin") version "2.0.1"
+    id("org.hibernate.build.maven-repo-auth") version "3.0.4"
 
-    kotlin("jvm")
+    kotlin("jvm") version "2.1.0"
+    kotlin("plugin.noarg") version "2.1.0"
+}
+
+noArg {
+    annotation("dev.slne.surf.lobby.jar.mysql.DatabaseModel")
 }
 
 group = "dev.slne"
 version = "1.21.1-1.0.0-SNAPSHOT"
 
 repositories {
+    gradlePluginPortal()
     mavenCentral()
 
+    maven("https://repo.slne.dev/repository/maven-unsafe/") { name = "maven-unsafe" }
     maven("https://repo.papermc.io/repository/maven-public/") { name = "papermc-repo" }
 
     maven("https://repo.codemc.org/repository/maven-public/")
@@ -31,6 +40,7 @@ dependencies {
     compileOnly("dev.jorel:commandapi-bukkit-core:9.5.2")
     compileOnly("me.clip:placeholderapi:2.11.6")
     compileOnly("com.sk89q.worldedit:worldedit-bukkit:7.2.0-SNAPSHOT")
+    compileOnly("me.frep:vulcan-api:2.0.0")
 
     implementation("com.github.stefvanschie.inventoryframework:IF:0.10.17")
     implementation("dev.hsbrysk:caffeine-coroutines:1.2.0")
@@ -39,11 +49,10 @@ dependencies {
     implementation("com.github.shynixn.mccoroutine:mccoroutine-bukkit-core:2.20.0")
 
     paperLibrary("com.zaxxer:HikariCP:5.0.1")
-    paperLibrary("mysql:mysql-connector-java:8.0.33")
+    paperLibrary("org.mariadb.jdbc:mariadb-java-client:3.5.1")
     paperLibrary("com.github.ben-manes.caffeine:caffeine:3.1.8")
-    paperLibrary("org.javalite:activejdbc:3.5-j11")
-
-    compileOnly(files("libs/VulcanAPI.jar"))
+    paperLibrary("org.javalite:activejdbc:3.4-j11")
+    paperLibrary("org.javalite:activejdbc-kt:3.4-j11")
     implementation(kotlin("stdlib-jdk8"))
 }
 
@@ -58,7 +67,6 @@ paper {
     foliaSupported = false
 
     generateLibrariesJson = true
-
 
     serverDependencies {
         register("CommandAPI") {
@@ -89,12 +97,12 @@ tasks {
         minecraftVersion("1.21.1")
 
         downloadPlugins {
-            hangar("CommandAPI", "9.7.0")
+            modrinth("CommandAPI", "9.7.0")
+            modrinth("FastAsyncWorldEdit", "2.12.3")
             hangar("PlaceholderAPI", "2.11.6")
-            hangar("FastAsyncWorldEdit", "2.8.1")
         }
 
-        runPaper.folia.registerTask()
+//        runPaper.folia.registerTask()
     }
     shadowJar {
         archiveClassifier = ""

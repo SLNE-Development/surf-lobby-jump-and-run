@@ -1,7 +1,7 @@
 package dev.slne.surf.lobby.jar.listener
 
 import dev.slne.surf.lobby.jar.service.JumpAndRunService
-import org.bukkit.Location
+import dev.slne.surf.lobby.jar.util.toJnrPlayer
 import org.bukkit.block.Block
 import org.bukkit.block.BlockFace
 import org.bukkit.event.EventHandler
@@ -10,9 +10,10 @@ import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerMoveEvent
 import org.bukkit.event.player.PlayerQuitEvent
 
-class ParkourListener : Listener {
+object ParkourListener : Listener {
+
     @EventHandler
-    fun onMove(event: PlayerMoveEvent) {
+    suspend fun onMove(event: PlayerMoveEvent) {
         if (!event.hasChangedPosition()) {
             return
         }
@@ -20,11 +21,15 @@ class ParkourListener : Listener {
         val toBlock = event.to.block
         val block = toBlock.getRelative(BlockFace.DOWN)
         val player = event.player
-        val jumps = JumpAndRunService.getLatestJumps(player)
-        val startLocation: Location = JumpAndRunService.jumpAndRun.start ?: return
+        val jnrPlayer = player.toJnrPlayer()
 
-        if (toBlock.location == startLocation.block.location) {
-            JumpAndRunService.start(player)
+        val generator = JumpAndRunService.currentJumpAndRuns[jnrPlayer]
+        val jumps = generator?.latestJumps ?: return
+
+        val startLocation = JumpAndRunService.jumpAndRun.start ?: return
+
+        if (toBlock.location.toVector() == startLocation) {
+            JumpAndRunService.start(jnrPlayer)
             return
         }
 
@@ -40,10 +45,9 @@ class ParkourListener : Listener {
         val jump2: Block = jumps[1] ?: return
 
 
-
         val playerLocation = player.location
         if (playerLocation.y < jump1.location.y && playerLocation.y < jump2.location.y) {
-            JumpAndRunService.remove(player)
+            JumpAndRunService.remove(jnrPlayer)
             return
         }
 
@@ -52,18 +56,18 @@ class ParkourListener : Listener {
 
             jump2.type = material
 
-            JumpAndRunService.addPoint(player)
-            JumpAndRunService.checkHighScore(player)
-            JumpAndRunService.generate(player)
+            jnrPlayer.incrementPoints()
+            generator.generate()
         }
     }
 
     @EventHandler
-    fun onInteract(event: PlayerInteractEvent) {
+    suspend fun onInteract(event: PlayerInteractEvent) {
         val player = event.player
         val location = event.interactionPoint ?: return
 
-        val jumps: Array<Block?> = JumpAndRunService.getLatestJumps(player)
+        val generator = JumpAndRunService.currentJumpAndRuns[player.toJnrPlayer()]
+        val jumps: Array<Block?> = generator?.latestJumps ?: return
 
         for (jump in jumps) {
             if (jump == null) {
@@ -77,9 +81,7 @@ class ParkourListener : Listener {
     }
 
     @EventHandler
-    fun onQuit(event: PlayerQuitEvent) {
-        val player = event.player
-
-        JumpAndRunService.onQuit(player)
+    suspend fun onQuit(event: PlayerQuitEvent) {
+        JumpAndRunService.onQuit(event.player.toJnrPlayer())
     }
 }

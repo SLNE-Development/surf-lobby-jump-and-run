@@ -1,26 +1,17 @@
 package dev.slne.surf.lobby.jar.papi
 
-import dev.slne.surf.lobby.jar.mysql.Database
-import it.unimi.dsi.fastutil.objects.ObjectArrayList
-import it.unimi.dsi.fastutil.objects.ObjectList
+import dev.slne.surf.lobby.jar.service.JumpAndRunService
 import me.clip.placeholderapi.expansion.PlaceholderExpansion
 import org.bukkit.Bukkit
 import org.bukkit.OfflinePlayer
 import java.util.*
-import java.util.stream.Collectors
 
 class ParkourPlaceholderExtension : PlaceholderExpansion() {
-    override fun getIdentifier(): String {
-        return "surf-lobby-parkour"
-    }
+    override fun getIdentifier() = "surf-lobby-parkour"
 
-    override fun getAuthor(): String {
-        return "SLNE Development, TheBjoRedCraft"
-    }
+    override fun getAuthor() = "SLNE Development, TheBjoRedCraft"
 
-    override fun getVersion(): String {
-        return "1.0.0"
-    }
+    override fun getVersion() = "1.0.0"
 
     override fun onRequest(player: OfflinePlayer, params: String): String? {
         val parts = params.split("_".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
@@ -40,13 +31,13 @@ class ParkourPlaceholderExtension : PlaceholderExpansion() {
 
         if (category == "highscore") {
             if (params.endsWith("name")) {
-                return getName(place, sortedHighScores)
+                return getHighScoreName(place)
             } else if (params.endsWith("value")) {
                 return getHighScore(place).toString()
             }
         } else if (category == "points") {
             if (params.endsWith("name")) {
-                return getName(place, sortedPoints)
+                return getPointsName(place)
             } else if (params.endsWith("value")) {
                 return getPoints(place).toString()
             }
@@ -55,65 +46,45 @@ class ParkourPlaceholderExtension : PlaceholderExpansion() {
         return null
     }
 
-    private fun getName(place: Int, sortedPlayers: ObjectList<UUID>): String? {
-        if (place <= 0 || place > sortedPlayers.size) {
-            return "/"
+    private fun getHighScoreName(index: Int): String {
+        val list = JumpAndRunService.leaderboardHighscores.toList()
+
+        if (index < 0 || index >= list.size) {
+            return "Unknown"
         }
 
-        val uuid = sortedPlayers[place - 1]
-        return getName(uuid)
+        return getName(list[index].first)
+    }
+
+    private fun getPointsName(index: Int): String {
+        val list = JumpAndRunService.leaderboardPoints.toList()
+
+        if (index < 0 || index >= list.size) {
+            return "Unknown"
+        }
+
+        return getName(list[index].first)
     }
 
     private fun getHighScore(place: Int): Int {
-        val sortedPlayers =
-            sortedHighScores
+        val list = JumpAndRunService.leaderboardHighscores.toList()
 
-        if (place <= 0 || place > sortedPlayers.size) {
+        if (place <= 0 || place > list.size) {
             return -1
         }
 
-        val uuid = sortedPlayers[place - 1]
-        return Database.getHighScore(uuid) ?: -1
+        return list[place - 1].second
     }
 
     private fun getPoints(place: Int): Int {
-        val sortedPlayers =
-            sortedPoints
+        val list = JumpAndRunService.leaderboardPoints.toList()
 
-        if (place <= 0 || place > sortedPlayers.size) {
+        if (place <= 0 || place > list.size) {
             return -1
         }
 
-        val uuid = sortedPlayers[place - 1]
-        return Database.getPoints(uuid) ?: -1
+        return list[place - 1].second
     }
 
-    private fun getName(uuid: UUID): String? {
-        val player = Bukkit.getOfflinePlayer(uuid)
-        return if (player.name != null) player.name else "Unknown"
-    }
-
-    private val sortedHighScores: ObjectList<UUID>
-        get() {
-            val highScores = Database.highScores
-
-            return highScores
-                .entries
-                .stream()
-                .sorted(Comparator.comparingInt<Map.Entry<UUID?, Int?>> { obj: Map.Entry<UUID?, Int?> -> obj.value ?: 0 })
-                .map<UUID?> { obj: Map.Entry<UUID?, Int?> -> obj.key }
-                .collect(Collectors.toCollection<UUID?, ObjectArrayList<UUID>> { ObjectArrayList() })
-        }
-
-    private val sortedPoints: ObjectList<UUID>
-        get() {
-            val points = Database.points
-
-            return points
-                .entries
-                .stream()
-                .sorted(Comparator.comparingInt { obj: Map.Entry<UUID?, Int?> -> obj.value ?: 0 })
-                .map<UUID?> { obj: Map.Entry<UUID?, Int?> -> obj.key }
-                .collect(Collectors.toCollection<UUID?, ObjectArrayList<UUID>> { ObjectArrayList() })
-        }
+    private fun getName(uuid: UUID) = Bukkit.getOfflinePlayer(uuid).name ?: "Unknown"
 }

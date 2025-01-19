@@ -4,9 +4,9 @@ import dev.jorel.commandapi.CommandAPI
 import dev.jorel.commandapi.CommandAPICommand
 import dev.jorel.commandapi.executors.CommandArguments
 import dev.jorel.commandapi.executors.PlayerCommandExecutor
-import dev.slne.surf.lobby.jar.service.JumpAndRunService
-import dev.slne.surf.lobby.jar.PluginInstance
 import dev.slne.surf.lobby.jar.command.argument.MaterialArgument.argument
+import dev.slne.surf.lobby.jar.service.JumpAndRunService
+import dev.slne.surf.lobby.jar.util.prefix
 import net.kyori.adventure.text.Component
 import org.bukkit.Material
 import org.bukkit.entity.Player
@@ -17,11 +17,21 @@ class ParkourSettingMaterialAddCommand(commandName: String) : CommandAPICommand(
         withArguments(argument("material"))
 
         executesPlayer(PlayerCommandExecutor { player: Player, args: CommandArguments ->
-            val material = args.getUnchecked<Material>("material") ?: throw CommandAPI.failWithString("Das Material wurde nicht gefunden.")
+            val material = args.getUnchecked<Material>("material")
+                ?: throw CommandAPI.failWithString("Das Material wurde nicht gefunden.")
 
             JumpAndRunService.jumpAndRun.materials.add(material)
 
-            player.sendMessage(PluginInstance.prefix.append(Component.text(String.format("Du hast %s zur Liste der Materialien hinzugefügt.", material.name))))
+            player.sendMessage(
+                prefix.append(
+                    Component.text(
+                        String.format(
+                            "Du hast %s zur Liste der Materialien hinzugefügt.",
+                            material.name
+                        )
+                    )
+                )
+            )
         })
     }
 }

@@ -1,28 +1,44 @@
 package dev.slne.surf.lobby.jar.service
 
-import it.unimi.dsi.fastutil.objects.*
-import org.bukkit.Location
+import it.unimi.dsi.fastutil.objects.ObjectArrayList
+import it.unimi.dsi.fastutil.objects.ObjectList
+import org.bukkit.Bukkit
 import org.bukkit.Material
-import org.bukkit.block.Block
-import org.bukkit.entity.Player
+import org.bukkit.World
+import org.bukkit.util.BoundingBox
+import org.bukkit.util.Vector
 
-class JumpAndRun {
-    var displayName: String = "Parkour"
+data class JumpAndRun(
+    val displayName: String = "Parkour",
+    private var worldName: String?,
+    private var posOne: Vector?,
+    private var posTwo: Vector?,
+    var spawn: Vector?,
+    var start: Vector?,
 
-    var posOne: Location? = null
-    var posTwo: Location? = null
-    var spawn: Location? = null
-    var start: Location? = null
+    val materials: ObjectList<Material> = ObjectArrayList(),
+) {
+    var world: World?
+        get() = worldName?.let { Bukkit.getWorld(it) }
+        set(value) {
+            worldName = value?.name
+        }
 
-    var players: ObjectSet<Player> = ObjectArraySet()
-    var materials: ObjectList<Material> = ObjectArrayList()
-    var latestBlocks: Object2ObjectMap<Player, Block> = Object2ObjectOpenHashMap()
+    var boundingBox: BoundingBox
+        get() {
+            require(posOne != null && posTwo != null) { "Positions not set" }
 
-    fun kick(player: Player) {
-        JumpAndRunService.remove(player)
-    }
-
-    fun join(player: Player) {
-        JumpAndRunService.start(player)
-    }
+            return BoundingBox(
+                posOne!!.x,
+                posOne!!.y,
+                posOne!!.z,
+                posTwo!!.x,
+                posTwo!!.y,
+                posTwo!!.z
+            )
+        }
+        set(value) {
+            posOne = Vector(value.minX, value.minY, value.minZ)
+            posTwo = Vector(value.maxX, value.maxY, value.maxZ)
+        }
 }
