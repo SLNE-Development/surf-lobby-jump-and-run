@@ -1,3 +1,4 @@
+import de.schablinski.gradle.activejdbc.ActiveJDBCInstrumentation
 import net.minecrell.pluginyml.paper.PaperPluginDescription
 
 plugins {
@@ -53,7 +54,8 @@ dependencies {
     paperLibrary("com.github.ben-manes.caffeine:caffeine:3.1.8")
     paperLibrary("org.javalite:activejdbc:3.4-j11")
     paperLibrary("org.javalite:activejdbc-kt:3.4-j11")
-    implementation(kotlin("stdlib-jdk8"))
+
+    activejdbc("org.jetbrains.kotlin:kotlin-stdlib:2.1.0")
 }
 
 paper {
@@ -92,6 +94,19 @@ java {
     }
 }
 
+val instrumentKotlinModels by tasks.register<ActiveJDBCInstrumentation>("instrumentKotlinModels") {
+    group = "build"
+
+    classesDir = "${buildDir}/classes/kotlin/main"
+    outputDir = "${buildDir}/classes/kotlin/main"
+}
+
+tasks.named("compileKotlin") {
+    doLast {
+        instrumentKotlinModels.instrument()
+    }
+}
+
 tasks {
     runServer {
         minecraftVersion("1.21.1")
@@ -106,6 +121,7 @@ tasks {
     }
     shadowJar {
         archiveClassifier = ""
+        mergeServiceFiles()
 
         relocate(
             "com.github.stefvanschie.inventoryframework",

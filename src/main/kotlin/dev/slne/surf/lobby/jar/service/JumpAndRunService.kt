@@ -2,7 +2,8 @@ package dev.slne.surf.lobby.jar.service
 
 import com.github.shynixn.mccoroutine.bukkit.launch
 import dev.slne.surf.lobby.jar.config.PluginConfig
-import dev.slne.surf.lobby.jar.mysql.Database
+import dev.slne.surf.lobby.jar.mysql.JumpAndRunPlayerModel
+import dev.slne.surf.lobby.jar.mysql.worker.ConnectionWorkers
 import dev.slne.surf.lobby.jar.player.JumpAndRunPlayer
 import dev.slne.surf.lobby.jar.plugin
 import dev.slne.surf.lobby.jar.util.JumpGenerator
@@ -48,13 +49,23 @@ object JumpAndRunService {
 
     private var runnable: BukkitRunnable? = null
 
+    private suspend fun getHighsccores(count: Int = 10) = ConnectionWorkers.async {
+        JumpAndRunPlayerModel.findAll().sortedByDescending { it.highScore }.take(count)
+            .associate { it.uuid to it.highScore }
+    }
+
+    private suspend fun getPoints(count: Int = 10) = ConnectionWorkers.async {
+        JumpAndRunPlayerModel.findAll().sortedByDescending { it.points }.take(count)
+            .associate { it.uuid to it.points }
+    }
+
     suspend fun fetchHighscores() {
-        leaderboardHighscores = Object2ObjectOpenHashMap(Database.getHighsccores())
+        leaderboardHighscores = Object2ObjectOpenHashMap(getHighsccores())
         latestLeaderboardHighScoreUpdate = ZonedDateTime.now()
     }
 
     suspend fun fetchPoints() {
-        leaderboardPoints = Object2ObjectOpenHashMap(Database.getPoints())
+        leaderboardPoints = Object2ObjectOpenHashMap(getPoints())
         latestLeaderboardPointsUpdate = ZonedDateTime.now()
     }
 
