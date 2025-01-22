@@ -17,6 +17,7 @@ object Database {
     private var username = "user"
     private var password = "password"
     private var table = "table"
+    private var url = "url"
 
     init {
         val config = plugin.config
@@ -27,6 +28,7 @@ object Database {
 
         driverClassName = config.getString("mysql.driver", "org.mariadb.jdbc.Driver") ?: "org.mariadb.jdbc.Driver"
         poolName = config.getString("mysql.poolName", "surf-lobby-jnr") ?: "something"
+        url = config.getString("mysql.url") ?: "url"
 
         jdbcUrl = "jdbc:$dbType://$hostname:$port/$databaseName"
         username = config.getString("mysql.username") ?: "user"
@@ -35,8 +37,14 @@ object Database {
     }
 
     fun createConnection() {
+        val finalUrl: String = if(url == "url") {
+            jdbcUrl
+        } else {
+            url
+        }
+
         try {
-            Base.open(driverClassName, jdbcUrl, username, password)
+            Base.open(driverClassName, finalUrl, username, password)
 
             createTable()
         } catch (e: Exception) {

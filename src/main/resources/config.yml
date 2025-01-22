@@ -6,6 +6,7 @@ mysql:
   username: u23_EBylWRFWwE
   password: password
   table: jumpandrun
+  url: "url"
 
   driver: org.mariadb.jdbc.Driver
   poolName: surf-lobby-jnr
