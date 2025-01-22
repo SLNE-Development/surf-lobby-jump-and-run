@@ -1,21 +1,42 @@
 package dev.slne.surf.lobby.jar.mysql
 
-import dev.slne.surf.lobby.jar.config.PluginConfig
+import dev.slne.surf.lobby.jar.plugin
+
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap
+
 import org.bukkit.Bukkit
 import org.javalite.activejdbc.Base
 import org.javalite.activejdbc.Model
 import java.util.*
 
 object Database {
+    private var driverClassName = "org.mariadb.jdbc.Driver"
+    private var poolName = "surf-lobby-jnr"
+    private var jdbcUrl = "url"
+    private var username = "user"
+    private var password = "password"
+    private var table = "table"
+
+    init {
+        val config = plugin.config
+        val dbType = config.getString("mysql.type", "mariadb")
+        val hostname = config.getString("mysql.hostname")
+        val port = config.getInt("mysql.port")
+        val databaseName = config.getString("mysql.database")
+
+        driverClassName = config.getString("mysql.driver", "org.mariadb.jdbc.Driver") ?: "org.mariadb.jdbc.Driver"
+        poolName = config.getString("mysql.poolName", "surf-lobby-jnr") ?: "something"
+
+        jdbcUrl = "jdbc:$dbType://$hostname:$port/$databaseName"
+        username = config.getString("mysql.username") ?: "user"
+        password = config.getString("mysql.password") ?: "password"
+        table = config.getString("mysql.table") ?: "table"
+    }
+
     fun createConnection() {
         try {
-            val url = PluginConfig.config().getString("mysql.url")
-            val user = PluginConfig.config().getString("mysql.user")
-            val password = PluginConfig.config().getString("mysql.password")
-
-            Base.open("com.mysql.jdbc.Driver", url, user, password)
+            Base.open(driverClassName, jdbcUrl, username, password)
 
             createTable()
         } catch (e: Exception) {
