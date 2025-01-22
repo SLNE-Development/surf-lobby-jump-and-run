@@ -23,20 +23,20 @@ repositories {
     gradlePluginPortal()
     mavenCentral()
 
+    maven ("https://jitpack.io")
+
     maven("https://repo.slne.dev/repository/maven-unsafe/") { name = "maven-unsafe" }
     maven("https://repo.papermc.io/repository/maven-public/") { name = "papermc-repo" }
 
     maven("https://repo.codemc.org/repository/maven-public/")
     maven("https://repo.extendedclip.com/content/repositories/placeholderapi/")
 
-    maven("https://maven.enginehub.org/repo/")
 }
 
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.1-R0.1-SNAPSHOT")
     compileOnly("dev.jorel:commandapi-bukkit-core:9.5.2")
     compileOnly("me.clip:placeholderapi:2.11.6")
-    compileOnly("com.sk89q.worldedit:worldedit-bukkit:7.2.0-SNAPSHOT")
     compileOnly("me.frep:vulcan-api:2.0.0")
 
     implementation("com.github.stefvanschie.inventoryframework:IF:0.10.17")
@@ -44,6 +44,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
     implementation("com.github.shynixn.mccoroutine:mccoroutine-bukkit-api:2.20.0")
     implementation("com.github.shynixn.mccoroutine:mccoroutine-bukkit-core:2.20.0")
+    implementation("com.cjcrafter:foliascheduler:0.6.3")
 
     paperLibrary("com.zaxxer:HikariCP:5.0.1")
     paperLibrary("org.mariadb.jdbc:mariadb-java-client:3.5.1")
@@ -64,7 +65,7 @@ paper {
     authors = listOf("TheBjoRedCraft", "SLNE Development")
     prefix = "SurfLobbyJumpAndRun"
     version = "1.21.1-1.0.0-SNAPSHOT"
-    foliaSupported = false
+    foliaSupported = true
 
     generateLibrariesJson = true
 
@@ -77,11 +78,6 @@ paper {
         register("PlaceholderAPI") {
             load = PaperPluginDescription.RelativeLoadOrder.BEFORE
             required = false
-        }
-
-        register("WorldEdit") {
-            load = PaperPluginDescription.RelativeLoadOrder.BEFORE
-            required = true
         }
     }
 }
@@ -103,11 +99,13 @@ tasks {
     runServer {
         minecraftVersion("1.21.4")
 
+        /*
         downloadPlugins {
             modrinth("CommandAPI", "9.7.0")
             modrinth("FastAsyncWorldEdit", "2.12.3")
-            hangar("PlaceholderAPI", "2.11.6")
+            modrinth("PlaceholderAPI", "2.11.6")
         }
+         */
     }
     shadowJar {
         archiveClassifier = ""
@@ -116,6 +114,11 @@ tasks {
         relocate(
             "com.github.stefvanschie.inventoryframework",
             "dev.slne.surf.lobby.jar.inventoryframework"
+        )
+
+        relocate (
+            "com.cjcrafter.foliascheduler",
+            "dev.slne.surf.lobby.jar.foliascheduler"
         )
 
         //instrumentKotlinModels.instrument()

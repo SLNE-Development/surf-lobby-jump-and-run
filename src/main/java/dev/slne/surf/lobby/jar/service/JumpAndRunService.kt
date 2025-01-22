@@ -1,5 +1,6 @@
 package dev.slne.surf.lobby.jar.service
 
+import com.cjcrafter.foliascheduler.TaskImplementation
 import com.github.benmanes.caffeine.cache.AsyncLoadingCache
 import com.github.benmanes.caffeine.cache.Caffeine
 import com.github.shynixn.mccoroutine.bukkit.launch
@@ -23,7 +24,6 @@ import net.kyori.adventure.title.Title
 import org.bukkit.*
 import org.bukkit.block.Block
 import org.bukkit.entity.Player
-import org.bukkit.scheduler.BukkitRunnable
 import org.bukkit.util.Vector
 import java.security.SecureRandom
 import java.time.Duration
@@ -69,7 +69,7 @@ object JumpAndRunService {
     Vector(-3, 0, 0)
   )
 
-    private var runnable: BukkitRunnable? = null
+    private var runnable: TaskImplementation<Void>? = null
 
     suspend fun start(player: Player) {
         remove(player)
@@ -120,17 +120,11 @@ object JumpAndRunService {
     }
 
     fun startActionbar() {
-        runnable = object : BukkitRunnable() {
-            override fun run() {
-                jumpAndRun.players.forEach(Consumer { player: Player ->
-                    player.sendActionBar(Component.text(currentPoints[player] ?: -1, PluginColor.BLUE_MID).append(Component.text(" Spr\u00FCnge", PluginColor.DARK_GRAY)))
-                })
+        runnable = plugin.scheduler.async().runAtFixedRate(Consumer {
+            jumpAndRun.players.forEach { player ->
+                player.sendActionBar(Component.text(currentPoints[player] ?: -1, PluginColor.BLUE_MID).append(Component.text(" Sprünge", PluginColor.DARK_GRAY)))
             }
-        }
-
-      runnable?.let {
-        it.runTaskTimerAsynchronously(PluginInstance.instance(), 0L, 20L)
-      }
+        }, 0L, 20L)
     }
 
     fun stopActionbar() {
@@ -138,10 +132,10 @@ object JumpAndRunService {
             return
         }
 
-        val bukkitRunnable: BukkitRunnable = runnable ?: return;
+        val task: TaskImplementation<Void> = runnable ?: return;
 
-        if (!bukkitRunnable.isCancelled) {
-            bukkitRunnable.cancel()
+        if (!task.isCancelled) {
+            task.cancel()
         }
     }
 
