@@ -21,7 +21,9 @@ class ParkourListener : Listener {
         val block = toBlock.getRelative(BlockFace.DOWN)
         val player = event.player
         val jumps = JumpAndRunService.getLatestJumps(player)
-        val startLocation: Location = JumpAndRunService.jumpAndRun.start ?: return
+        val world = JumpAndRunService.jumpAndRun.world ?: return
+        val spawn = JumpAndRunService.jumpAndRun.spawn ?: return
+        val startLocation: Location = spawn.clone().toLocation(world)
 
         if (toBlock.location == startLocation.block.location) {
             JumpAndRunService.start(player)

@@ -17,9 +17,9 @@ class ParkourSettingSpawnCommand(commandName: String) : CommandAPICommand(comman
         withPermission("jumpandrun.command.setting.setSpawn")
 
         executesPlayer(PlayerCommandExecutor { player: Player, args: CommandArguments ->
-            val pos = args.getUnchecked<Location>("pos")
+            val pos: Location = args.getUnchecked<Location>("pos") ?: return@PlayerCommandExecutor
 
-            JumpAndRunService.jumpAndRun.spawn = pos
+            JumpAndRunService.jumpAndRun.spawn = pos.toVector()
 
             player.sendMessage(PluginInstance.prefix.append(Component.text("Du hast den Spawn erfolgreich neu definiert.")))
         })

@@ -17,9 +17,9 @@ class ParkourSettingStartCommand(commandName: String) : CommandAPICommand(comman
         withArguments(LocationArgument("pos"))
 
         executesPlayer(PlayerCommandExecutor { player: Player, args: CommandArguments ->
-            val pos = args.getUnchecked<Location>("pos")
+            val pos = args.getUnchecked<Location>("pos") ?: return@PlayerCommandExecutor
 
-            JumpAndRunService.jumpAndRun.start = pos
+            JumpAndRunService.jumpAndRun.start = pos.toVector()
 
             player.sendMessage(PluginInstance.prefix.append(Component.text("Du hast den Start erfolgreich neu definiert.")))
         })
