@@ -1,9 +1,7 @@
 package dev.slne.surf.lobby.jar.service
 
 import com.cjcrafter.foliascheduler.TaskImplementation
-import com.github.benmanes.caffeine.cache.AsyncLoadingCache
 import com.github.benmanes.caffeine.cache.Caffeine
-import com.github.shynixn.mccoroutine.bukkit.launch
 import dev.hsbrysk.caffeine.CoroutineLoadingCache
 import dev.hsbrysk.caffeine.buildCoroutine
 import dev.slne.surf.lobby.jar.PluginInstance
@@ -19,7 +17,6 @@ import lombok.Getter
 import lombok.experimental.Accessors
 import net.kyori.adventure.sound.Sound
 import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.logger.slf4j.ComponentLogger
 import net.kyori.adventure.title.Title
 import org.bukkit.*
 import org.bukkit.block.Block
@@ -37,7 +34,6 @@ import kotlin.math.min
 @Accessors(fluent = true)
 object JumpAndRunService {
     val jumpAndRun: JumpAndRun = PluginConfig.loadJumpAndRun()
-    private val logger = ComponentLogger.logger()
 
     private val random = SecureRandom()
     private val awaitingHighScores: ObjectList<Player> = ObjectArrayList()
@@ -48,7 +44,7 @@ object JumpAndRunService {
 
     private val points: CoroutineLoadingCache<UUID, Int> = Caffeine.newBuilder().buildCoroutine { obj: UUID -> Database.getPoints(obj) }
     private val highScores: CoroutineLoadingCache<UUID, Int> = Caffeine.newBuilder().buildCoroutine { obj: UUID -> Database.getHighScore(obj) }
-    private val trys: CoroutineLoadingCache<UUID, Int> = Caffeine.newBuilder().buildCoroutine() { obj: UUID -> Database.getTrys(obj) }
+    private val trys: CoroutineLoadingCache<UUID, Int> = Caffeine.newBuilder().buildCoroutine { obj: UUID -> Database.getTrys(obj) }
     private val sounds: CoroutineLoadingCache<UUID, Boolean> = Caffeine.newBuilder().buildCoroutine { obj: UUID -> Database.getSound(obj) }
 
   private val OFFSETS = arrayOf(
@@ -84,9 +80,9 @@ object JumpAndRunService {
         addTry(player)
         generateInitialJumps(player)
 
-        val highscore: Int? = queryHighScore(player.uniqueId);
+        val highscore: Int = queryHighScore(player.uniqueId)
 
-        if (highscore == null || highscore < 1) {
+        if (highscore < 1) {
             player.sendMessage(PluginInstance.prefix.append(Component.text("Du bist nun im Parkour. Springe so weit wie möglich, um einen Highscore aufzustellen!")))
             return
         }
@@ -132,7 +128,7 @@ object JumpAndRunService {
             return
         }
 
-        val task: TaskImplementation<Void> = runnable ?: return;
+        val task: TaskImplementation<Void> = runnable ?: return
 
         if (!task.isCancelled) {
             task.cancel()
@@ -237,8 +233,8 @@ object JumpAndRunService {
 
 
     private fun getRandomLocationInRegion(world: World): Location? {
-        val posOne = jumpAndRun.posOne ?: return null
-        val posTwo = jumpAndRun.posTwo ?: return null
+        val posOne = jumpAndRun.boundingBox.max
+        val posTwo = jumpAndRun.boundingBox.min
 
         var minX = min(posOne.blockX.toDouble(), posTwo.blockX.toDouble()).toInt()
         var maxX = max(posOne.blockX.toDouble(), posTwo.blockX.toDouble()).toInt()
@@ -271,11 +267,11 @@ object JumpAndRunService {
 
 
     private fun isInRegion(location: Location): Boolean {
-        val posOne = jumpAndRun.posOne ?: return false
-        val posTwo = jumpAndRun.posTwo ?: return false
+        val posOne = jumpAndRun.boundingBox.max
+        val posTwo = jumpAndRun.boundingBox.min
 
-        if (location.world != null && posOne.world != null && posTwo.world != null) {
-            if (location.world != posOne.world || location.world != posTwo.world) {
+        if (location.world != null && jumpAndRun.world != null && jumpAndRun.world != null) {
+            if (location.world != jumpAndRun.world || location.world != jumpAndRun.world) {
                 return false
             }
         }
@@ -313,7 +309,9 @@ object JumpAndRunService {
         latestJumps.remove(player)
         jumpAndRun.players.remove(player)
 
-        player.teleportAsync(jumpAndRun.spawn ?: return)
+        val spawnLocation = jumpAndRun.spawn ?: return
+
+        player.teleportAsync(Location(jumpAndRun.world, spawnLocation.x, spawnLocation.y, spawnLocation.z))
     }
 
     private suspend fun removeAll() {
@@ -412,7 +410,7 @@ object JumpAndRunService {
         }
     }
 
-    suspend fun addTry(player: Player) {
+    private suspend fun addTry(player: Player) {
         val tryCount: Int = queryTrys(player.uniqueId)
         val newTrys = tryCount + 1
 
@@ -445,7 +443,7 @@ object JumpAndRunService {
             player.playSound(Sound.sound(org.bukkit.Sound.ITEM_TOTEM_USE, Sound.Source.MASTER, 100f, 1f), Sound.Emitter.self())
         }
 
-        player.sendMessage(PluginInstance.prefix.append(Component.text("Du hast deinen Highscore gebrochen! Dein neuer Highscore ist ${currentScore}!")));
+        player.sendMessage(PluginInstance.prefix.append(Component.text("Du hast deinen Highscore gebrochen! Dein neuer Highscore ist ${currentScore}!")))
         player.showTitle(Title.title(Component.text("Rekord!", PluginColor.BLUE_MID), Component.text("Du hast einen neuen persönlichen Rekord aufgestellt.", PluginColor.DARK_GRAY), Title.Times.times(Duration.ofSeconds(1), Duration.ofSeconds(2), Duration.ofSeconds(1))))
     }
 
