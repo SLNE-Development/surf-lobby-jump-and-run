@@ -17,12 +17,4 @@ class JumpAndRun {
     var players: ObjectSet<Player> = ObjectArraySet()
     var materials: ObjectList<Material> = ObjectArrayList()
     var latestBlocks: Object2ObjectMap<Player, Block> = Object2ObjectOpenHashMap()
-
-    fun kick(player: Player) {
-        JumpAndRunService.remove(player)
-    }
-
-    fun join(player: Player) {
-        JumpAndRunService.start(player)
-    }
 }

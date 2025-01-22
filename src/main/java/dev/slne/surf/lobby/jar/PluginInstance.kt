@@ -2,6 +2,7 @@ package dev.slne.surf.lobby.jar
 
 import com.github.shynixn.mccoroutine.bukkit.SuspendingJavaPlugin
 import com.github.shynixn.mccoroutine.bukkit.SuspendingPlugin
+import com.github.shynixn.mccoroutine.bukkit.registerSuspendingEvents
 import com.sk89q.worldedit.bukkit.WorldEditPlugin
 import dev.slne.surf.lobby.jar.command.ParkourCommand
 import dev.slne.surf.lobby.jar.command.subcommand.ParkourStatsCommand
@@ -33,14 +34,14 @@ class PluginInstance : SuspendingJavaPlugin() {
         ParkourCommand("parkour").register()
         ParkourStatsCommand("stats").register()
 
-        Bukkit.getPluginManager().registerEvents(ParkourListener(), this)
+        Bukkit.getPluginManager().registerSuspendingEvents(ParkourListener(), this)
         Bukkit.getPluginManager().registerEvents(PlayerKickListener(), this)
         Database.createConnection()
     }
 
     override suspend fun onDisableAsync() {
         JumpAndRunService.stopActionbar()
-      JumpAndRunService.saveAll().join()
+        JumpAndRunService.saveAll()
 
         Database.closeConnection()
         PluginConfig.save(JumpAndRunService.jumpAndRun)

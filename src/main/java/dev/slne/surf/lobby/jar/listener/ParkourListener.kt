@@ -12,7 +12,7 @@ import org.bukkit.event.player.PlayerQuitEvent
 
 class ParkourListener : Listener {
     @EventHandler
-    fun onMove(event: PlayerMoveEvent) {
+    suspend fun onMove(event: PlayerMoveEvent) {
         if (!event.hasChangedPosition()) {
             return
         }
@@ -59,7 +59,7 @@ class ParkourListener : Listener {
     }
 
     @EventHandler
-    fun onInteract(event: PlayerInteractEvent) {
+    suspend fun onInteract(event: PlayerInteractEvent) {
         val player = event.player
         val location = event.interactionPoint ?: return
 
@@ -77,7 +77,7 @@ class ParkourListener : Listener {
     }
 
     @EventHandler
-    fun onQuit(event: PlayerQuitEvent) {
+    suspend fun onQuit(event: PlayerQuitEvent) {
         val player = event.player
 
         JumpAndRunService.onQuit(player)

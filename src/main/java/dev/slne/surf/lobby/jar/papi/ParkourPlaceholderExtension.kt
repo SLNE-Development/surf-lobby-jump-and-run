@@ -65,8 +65,7 @@ class ParkourPlaceholderExtension : PlaceholderExpansion() {
     }
 
     private fun getHighScore(place: Int): Int {
-        val sortedPlayers =
-            sortedHighScores
+        val sortedPlayers = sortedHighScores
 
         if (place <= 0 || place > sortedPlayers.size) {
             return -1

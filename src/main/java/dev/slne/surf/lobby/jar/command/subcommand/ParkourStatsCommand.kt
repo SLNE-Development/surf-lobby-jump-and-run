@@ -1,9 +1,11 @@
 package dev.slne.surf.lobby.jar.command.subcommand
 
+import com.github.shynixn.mccoroutine.bukkit.launch
 import dev.jorel.commandapi.CommandAPICommand
 import dev.jorel.commandapi.arguments.PlayerArgument
 import dev.jorel.commandapi.executors.CommandArguments
 import dev.jorel.commandapi.executors.PlayerCommandExecutor
+import dev.slne.surf.lobby.jar.plugin
 import dev.slne.surf.lobby.jar.service.JumpAndRunService
 import dev.slne.surf.lobby.jar.util.PluginColor
 import net.kyori.adventure.text.Component
@@ -19,19 +21,13 @@ class ParkourStatsCommand(commandName: String) : CommandAPICommand(commandName) 
         executesPlayer(PlayerCommandExecutor { player: Player, args: CommandArguments ->
             val target = args.getOrDefaultUnchecked("target", player)
 
-            JumpAndRunService.queryHighScore(target.uniqueId).thenAccept { highScore: Int? ->
-                JumpAndRunService.queryPoints(target.uniqueId).thenAccept { points: Int? ->
-                    JumpAndRunService.queryTrys(target.uniqueId).thenAccept { trys: Int? ->
-                        if (points == null || highScore == null) {
-                            player.sendMessage(Component.text("Aktuell sind keine Statistiken verfügbar... (Rejoin?)", PluginColor.RED))
-                            return@thenAccept
-                        }
+            plugin.launch {
+                val highscore = JumpAndRunService.queryHighScore(target.uniqueId);
+                val points = JumpAndRunService.queryPoints(target.uniqueId);
+                val trys = JumpAndRunService.queryTrys(target.uniqueId);
+                val currentPoints = JumpAndRunService.currentPoints[player] ?: 0
 
-                        val currentPoints = JumpAndRunService.currentPoints[player] ?: 0
-
-                        player.sendMessage(createStatisticMessage(points.toString(), highScore.toString(), if (JumpAndRunService.isJumping(target)) currentPoints.toString() else "Kein laufender Parkour", trys.toString()))
-                    }
-                }
+                player.sendMessage(createStatisticMessage(points.toString(), highscore.toString(), if (JumpAndRunService.isJumping(target)) currentPoints.toString() else "Kein laufender Parkour", trys.toString()))
             }
         })
     }
