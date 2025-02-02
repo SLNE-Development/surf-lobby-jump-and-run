@@ -42,8 +42,8 @@ dependencies {
     implementation("com.github.stefvanschie.inventoryframework:IF:0.10.17")
     implementation("dev.hsbrysk:caffeine-coroutines:1.2.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
-    implementation("com.github.shynixn.mccoroutine:mccoroutine-bukkit-api:2.20.0")
-    implementation("com.github.shynixn.mccoroutine:mccoroutine-bukkit-core:2.20.0")
+    implementation("com.github.shynixn.mccoroutine:mccoroutine-folia-api:2.20.0")
+    implementation("com.github.shynixn.mccoroutine:mccoroutine-folia-core:2.20.0")
     implementation("com.cjcrafter:foliascheduler:0.6.3")
 
     paperLibrary("com.zaxxer:HikariCP:5.0.1")
