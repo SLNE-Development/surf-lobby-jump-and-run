@@ -15,9 +15,7 @@ import org.bukkit.entity.Player
 class ParkourStatsCommand(commandName: String) : CommandAPICommand(commandName) {
     init {
         withPermission("jumpandrun.command.stats")
-
         withOptionalArguments(PlayerArgument("target"))
-
         executesPlayer(PlayerCommandExecutor { player: Player, args: CommandArguments ->
             val target = args.getOrDefaultUnchecked("target", player)
 
