@@ -10,109 +10,103 @@ import java.util.*
 import java.util.stream.Collectors
 
 class ParkourPlaceholderExtension : PlaceholderExpansion() {
-    override fun getIdentifier(): String {
-        return "surf-lobby-parkour"
+    companion object {
+        private const val IDENTIFIER = "surf-parkour"
+        private const val AUTHOR = "SLNE Development, TheBjoRedCraft"
+        private const val VERSION = "1.0.0"
+        private const val CATEGORY_HIGHSCORE = "highscore"
+        private const val CATEGORY_POINTS = "points"
+        private const val SUFFIX_NAME = "name"
+        private const val SUFFIX_VALUE = "value"
     }
+    
+    /*
+    Um die Platzhalter abzufragen, kannst du die folgenden Beispiele verwenden:  
+    Um den Namen des Spielers mit dem höchsten Highscore abzufragen:  
+    %surf-parkour_highscore_1_name%
+    
+    Um den Wert des höchsten Highscores abzufragen:  
+    %surf-parkour_highscore_1_value%
+    
+    Um den Namen des Spielers mit den meisten Punkten abzufragen:  
+    %surf-parkour_points_1_name%
+    
+    Um den Wert der meisten Punkte abzufragen:  
+    %surf-parkour_points_1_value%
+     */
 
-    override fun getAuthor(): String {
-        return "SLNE Development, TheBjoRedCraft"
-    }
+    override fun getIdentifier(): String = IDENTIFIER
 
-    override fun getVersion(): String {
-        return "1.0.0"
-    }
+    override fun getAuthor(): String = AUTHOR
+
+    override fun getVersion(): String = VERSION
 
     override fun onRequest(player: OfflinePlayer, params: String): String? {
-        val parts = params.split("_".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
-
-        if (parts.size < 3) {
-            return null
-        }
+        val parts = params.split("_")
+        if (parts.size < 3) return null
 
         val category = parts[0]
-        val place: Int
+        val place = parts[1].toIntOrNull() ?: return null
+        val suffix = parts[2]
 
-        try {
-            place = parts[1].toInt()
-        } catch (e: NumberFormatException) {
-            return null
+        return when (category) {
+            CATEGORY_HIGHSCORE -> handleRequest(place, suffix, ::getHighScore, ::getSortedHighScores)
+            CATEGORY_POINTS -> handleRequest(place, suffix, ::getPoints, ::getSortedPoints)
+            else -> null
         }
-
-        if (category == "highscore") {
-            if (params.endsWith("name")) {
-                return getName(place, sortedHighScores)
-            } else if (params.endsWith("value")) {
-                return getHighScore(place).toString()
-            }
-        } else if (category == "points") {
-            if (params.endsWith("name")) {
-                return getName(place, sortedPoints)
-            } else if (params.endsWith("value")) {
-                return getPoints(place).toString()
-            }
-        }
-
-        return null
     }
 
-    private fun getName(place: Int, sortedPlayers: ObjectList<UUID>): String? {
-        if (place <= 0 || place > sortedPlayers.size) {
-            return "/"
+    private fun handleRequest(
+        place: Int,
+        suffix: String,
+        valueProvider: (Int) -> Int,
+        sortedPlayersProvider: () -> ObjectList<UUID>
+    ): String? {
+        return when (suffix) {
+            SUFFIX_NAME -> getName(place, sortedPlayersProvider())
+            SUFFIX_VALUE -> valueProvider(place).toString()
+            else -> null
         }
+    }
 
+    private fun getName(place: Int, sortedPlayers: ObjectList<UUID>): String {
+        if (place <= 0 || place > sortedPlayers.size) return "/"
         val uuid = sortedPlayers[place - 1]
         return getName(uuid)
     }
 
     private fun getHighScore(place: Int): Int {
-        val sortedPlayers = sortedHighScores
-
-        if (place <= 0 || place > sortedPlayers.size) {
-            return -1
-        }
-
+        val sortedPlayers = getSortedHighScores()
+        if (place <= 0 || place > sortedPlayers.size) return -1
         val uuid = sortedPlayers[place - 1]
-        return Database.getHighScore(uuid) ?: -1
+        return Database.getHighScore(uuid)
     }
 
     private fun getPoints(place: Int): Int {
-        val sortedPlayers =
-            sortedPoints
-
-        if (place <= 0 || place > sortedPlayers.size) {
-            return -1
-        }
-
+        val sortedPlayers = getSortedPoints()
+        if (place <= 0 || place > sortedPlayers.size) return -1
         val uuid = sortedPlayers[place - 1]
-        return Database.getPoints(uuid) ?: -1
+        return Database.getPoints(uuid)
     }
 
-    private fun getName(uuid: UUID): String? {
+    private fun getName(uuid: UUID): String {
         val player = Bukkit.getOfflinePlayer(uuid)
-        return if (player.name != null) player.name else "Unknown"
+        return player.name ?: "Unknown"
     }
 
-    private val sortedHighScores: ObjectList<UUID>
-        get() {
-            val highScores = Database.highScores
+    private fun getSortedHighScores(): ObjectList<UUID> {
+        val highScores = Database.highScores
+        return highScores.entries.stream()
+            .sorted(Comparator.comparingInt { it.value ?: 0 })
+            .map { it.key }
+            .collect(Collectors.toCollection { ObjectArrayList() })
+    }
 
-            return highScores
-                .entries
-                .stream()
-                .sorted(Comparator.comparingInt<Map.Entry<UUID?, Int?>> { obj: Map.Entry<UUID?, Int?> -> obj.value ?: 0 })
-                .map<UUID?> { obj: Map.Entry<UUID?, Int?> -> obj.key }
-                .collect(Collectors.toCollection<UUID?, ObjectArrayList<UUID>> { ObjectArrayList() })
-        }
-
-    private val sortedPoints: ObjectList<UUID>
-        get() {
-            val points = Database.points
-
-            return points
-                .entries
-                .stream()
-                .sorted(Comparator.comparingInt { obj: Map.Entry<UUID?, Int?> -> obj.value ?: 0 })
-                .map<UUID?> { obj: Map.Entry<UUID?, Int?> -> obj.key }
-                .collect(Collectors.toCollection<UUID?, ObjectArrayList<UUID>> { ObjectArrayList() })
-        }
+    private fun getSortedPoints(): ObjectList<UUID> {
+        val points = Database.points
+        return points.entries.stream()
+            .sorted(Comparator.comparingInt { it.value ?: 0 })
+            .map { it.key }
+            .collect(Collectors.toCollection { ObjectArrayList() })
+    }
 }
