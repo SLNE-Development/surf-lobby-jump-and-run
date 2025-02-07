@@ -27,8 +27,7 @@ data class JumpAndRun(
             worldName = value?.name
         }
 
-    var boundingBox: BoundingBox
-        get() {
+    var boundingBox: BoundingBox get() {
             require(posOne != null && posTwo != null) { "Positions not set" }
 
             return BoundingBox(
@@ -40,6 +39,7 @@ data class JumpAndRun(
                 posTwo!!.z
             )
         }
+
         set(value) {
             posOne = Vector(value.minX, value.minY, value.minZ)
             posTwo = Vector(value.maxX, value.maxY, value.maxZ)

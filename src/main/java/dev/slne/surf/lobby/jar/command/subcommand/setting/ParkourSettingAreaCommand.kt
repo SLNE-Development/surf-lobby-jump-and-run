@@ -10,6 +10,7 @@ import dev.slne.surf.lobby.jar.PluginInstance
 import net.kyori.adventure.text.Component
 import org.bukkit.Location
 import org.bukkit.entity.Player
+import org.bukkit.util.BoundingBox
 import org.bukkit.util.Vector
 
 class ParkourSettingAreaCommand(commandName: String) : CommandAPICommand(commandName) {
@@ -25,8 +26,7 @@ class ParkourSettingAreaCommand(commandName: String) : CommandAPICommand(command
             val max = Vector(pos1.x, pos1.y, pos1.z)
             val min = Vector(pos2.x, pos2.y, pos2.z)
 
-            JumpAndRunService.jumpAndRun.boundingBox.max.setX(max.x).setY(max.y).setZ(max.z)
-            JumpAndRunService.jumpAndRun.boundingBox.min.setX(min.x).setY(min.y).setZ(min.z)
+            JumpAndRunService.jumpAndRun.boundingBox = BoundingBox.of(min, max)
             JumpAndRunService.jumpAndRun.world = args.getUnchecked("world")
 
             player.sendMessage(PluginInstance.prefix.append(Component.text("Du hast die Arena erfolgreich neu definiert.")))

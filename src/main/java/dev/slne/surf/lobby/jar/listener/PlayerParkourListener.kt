@@ -1,7 +1,6 @@
 package dev.slne.surf.lobby.jar.listener
 
 import dev.slne.surf.lobby.jar.service.JumpAndRunService
-import org.bukkit.Location
 import org.bukkit.block.Block
 import org.bukkit.block.BlockFace
 import org.bukkit.event.EventHandler
@@ -22,8 +21,8 @@ class PlayerParkourListener : Listener {
         val player = event.player
         val jumps = JumpAndRunService.getLatestJumps(player)
         val world = JumpAndRunService.jumpAndRun.world ?: return
-        val spawn = JumpAndRunService.jumpAndRun.spawn ?: return
-        val startLocation: Location = spawn.clone().toLocation(world)
+        val start = JumpAndRunService.jumpAndRun.start ?: return
+        val startLocation = start.toLocation(world)
 
         if (toBlock.location == startLocation.block.location) {
             JumpAndRunService.start(player)
@@ -40,8 +39,6 @@ class PlayerParkourListener : Listener {
 
         val jump1: Block = jumps[0] ?: return
         val jump2: Block = jumps[1] ?: return
-
-
 
         val playerLocation = player.location
         if (playerLocation.y < jump1.location.y && playerLocation.y < jump2.location.y) {
@@ -61,7 +58,7 @@ class PlayerParkourListener : Listener {
     }
 
     @EventHandler
-    suspend fun onInteract(event: PlayerInteractEvent) {
+    fun onInteract(event: PlayerInteractEvent) {
         val player = event.player
         val location = event.interactionPoint ?: return
 

@@ -85,13 +85,6 @@ java {
     }
 }
 
-val instrumentKotlinModels by tasks.register<ActiveJDBCInstrumentation>("instrumentKotlinModels") {
-    group = "build"
-
-    classesDir = "${layout.buildDirectory}/classes/kotlin/main"
-    outputDir = "${layout.buildDirectory}/classes/kotlin/main"
-}
-
 tasks {
     runServer {
         minecraftVersion("1.21.4")
@@ -104,15 +97,8 @@ tasks {
         }
          */
     }
+
     shadowJar {
         archiveFileName.set("${internalPluginName}-${version}.jar")
-
-        relocate(
-            "com.github.stefvanschie.inventoryframework",
-            "dev.slne.surf.lobby.jar.inventoryframework"
-        )
-
-        //instrumentKotlinModels.instrument()
-        //dependsOn(instrumentKotlinModels)
     }
 }
