@@ -10,7 +10,7 @@ import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerMoveEvent
 import org.bukkit.event.player.PlayerQuitEvent
 
-class ParkourListener : Listener {
+class PlayerParkourListener : Listener {
     @EventHandler
     suspend fun onMove(event: PlayerMoveEvent) {
         if (!event.hasChangedPosition()) {

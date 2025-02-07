@@ -1,7 +1,7 @@
 package dev.slne.surf.lobby.jar.service
 
-import com.cjcrafter.foliascheduler.TaskImplementation
 import com.github.benmanes.caffeine.cache.Caffeine
+import com.github.shynixn.mccoroutine.folia.ticks
 import dev.hsbrysk.caffeine.CoroutineLoadingCache
 import dev.hsbrysk.caffeine.buildCoroutine
 import dev.slne.surf.lobby.jar.PluginInstance
@@ -13,6 +13,7 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectMap
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap
 import it.unimi.dsi.fastutil.objects.ObjectArrayList
 import it.unimi.dsi.fastutil.objects.ObjectList
+import kotlinx.coroutines.delay
 import lombok.Getter
 import lombok.experimental.Accessors
 import net.kyori.adventure.sound.Sound
@@ -47,6 +48,8 @@ object JumpAndRunService {
     private val trys: CoroutineLoadingCache<UUID, Int> = Caffeine.newBuilder().buildCoroutine { obj: UUID -> Database.getTrys(obj) }
     private val sounds: CoroutineLoadingCache<UUID, Boolean> = Caffeine.newBuilder().buildCoroutine { obj: UUID -> Database.getSound(obj) }
 
+    private var actionbarInfo: Boolean = false
+
   private val OFFSETS = arrayOf(
     Vector(3, 0, 0),
     Vector(-3, 0, 0),
@@ -64,8 +67,6 @@ object JumpAndRunService {
     Vector(0, 0, 3),
     Vector(-3, 0, 0)
   )
-
-    private var runnable: TaskImplementation<Void>? = null
 
     suspend fun start(player: Player) {
         remove(player)
@@ -115,24 +116,20 @@ object JumpAndRunService {
         blocks[player] = material
     }
 
-    fun startActionbar() {
-        runnable = plugin.scheduler.async().runAtFixedRate(Consumer {
+    suspend fun startActionbar() {
+        this.actionbarInfo = true
+
+        while (this.actionbarInfo) {
+            delay(20.ticks)
+
             jumpAndRun.players.forEach { player ->
                 player.sendActionBar(Component.text(currentPoints[player] ?: -1, PluginColor.BLUE_MID).append(Component.text(" Sprünge", PluginColor.DARK_GRAY)))
             }
-        }, 0L, 20L)
+        }
     }
 
     fun stopActionbar() {
-        if(runnable == null) {
-            return
-        }
-
-        val task: TaskImplementation<Void> = runnable ?: return
-
-        if (!task.isCancelled) {
-            task.cancel()
-        }
+        this.actionbarInfo = false
     }
 
     fun generate(player: Player) {

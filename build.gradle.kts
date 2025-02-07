@@ -44,7 +44,6 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
     implementation("com.github.shynixn.mccoroutine:mccoroutine-folia-api:2.20.0")
     implementation("com.github.shynixn.mccoroutine:mccoroutine-folia-core:2.20.0")
-    implementation("com.cjcrafter:foliascheduler:0.6.3")
 
     paperLibrary("com.zaxxer:HikariCP:5.0.1")
     paperLibrary("org.mariadb.jdbc:mariadb-java-client:3.5.1")
@@ -114,11 +113,6 @@ tasks {
         relocate(
             "com.github.stefvanschie.inventoryframework",
             "dev.slne.surf.lobby.jar.inventoryframework"
-        )
-
-        relocate (
-            "com.cjcrafter.foliascheduler",
-            "dev.slne.surf.lobby.jar.foliascheduler"
         )
 
         //instrumentKotlinModels.instrument()

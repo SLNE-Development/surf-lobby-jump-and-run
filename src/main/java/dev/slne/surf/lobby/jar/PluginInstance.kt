@@ -1,19 +1,17 @@
 package dev.slne.surf.lobby.jar
 
-import com.cjcrafter.foliascheduler.FoliaCompatibility
-import com.cjcrafter.foliascheduler.ServerImplementation
-
-import com.github.shynixn.mccoroutine.bukkit.SuspendingJavaPlugin
-import com.github.shynixn.mccoroutine.bukkit.registerSuspendingEvents
+import com.github.shynixn.mccoroutine.folia.SuspendingJavaPlugin
+import com.github.shynixn.mccoroutine.folia.registerSuspendingEvents
 
 import dev.slne.surf.lobby.jar.command.ParkourCommand
 import dev.slne.surf.lobby.jar.command.subcommand.ParkourStatsCommand
 import dev.slne.surf.lobby.jar.config.PluginConfig
-import dev.slne.surf.lobby.jar.listener.ParkourListener
+import dev.slne.surf.lobby.jar.listener.PlayerParkourListener
 import dev.slne.surf.lobby.jar.listener.PlayerKickListener
 import dev.slne.surf.lobby.jar.mysql.Database
 import dev.slne.surf.lobby.jar.papi.ParkourPlaceholderExtension
 import dev.slne.surf.lobby.jar.service.JumpAndRunService
+import dev.slne.surf.lobby.jar.util.DispatcherUtil
 import dev.slne.surf.lobby.jar.util.PluginColor
 
 import net.kyori.adventure.text.Component
@@ -23,8 +21,6 @@ import org.bukkit.Bukkit
 import org.bukkit.plugin.java.JavaPlugin
 val plugin: PluginInstance get() = JavaPlugin.getPlugin(PluginInstance::class.java)
 class PluginInstance : SuspendingJavaPlugin() {
-    val scheduler: ServerImplementation = FoliaCompatibility(this).serverImplementation
-
 
     override suspend fun onEnableAsync() {
         JumpAndRunService.startActionbar()
@@ -34,7 +30,7 @@ class PluginInstance : SuspendingJavaPlugin() {
         ParkourCommand("parkour").register()
         ParkourStatsCommand("stats").register()
 
-        Bukkit.getPluginManager().registerSuspendingEvents(ParkourListener(), this)
+        Bukkit.getPluginManager().registerSuspendingEvents(PlayerParkourListener(), this, DispatcherUtil.PARKOUR)
         Bukkit.getPluginManager().registerEvents(PlayerKickListener(), this)
         Database.createConnection()
     }
