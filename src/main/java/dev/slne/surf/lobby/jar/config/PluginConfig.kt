@@ -1,19 +1,14 @@
 package dev.slne.surf.lobby.jar.config
 
-import dev.slne.surf.lobby.jar.PluginInstance
 import dev.slne.surf.lobby.jar.plugin
 import dev.slne.surf.lobby.jar.service.JumpAndRun
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap
 import it.unimi.dsi.fastutil.objects.ObjectArrayList
-import it.unimi.dsi.fastutil.objects.ObjectArraySet
 import it.unimi.dsi.fastutil.objects.ObjectList
-import org.bukkit.Bukkit
-import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.configuration.file.FileConfiguration
 
 object PluginConfig {
-    fun config(): FileConfiguration {
+    fun getConfig(): FileConfiguration {
         return plugin.config
     }
 
@@ -22,7 +17,7 @@ object PluginConfig {
     }
 
     fun save(jumpAndRun: JumpAndRun) {
-        val config = config()
+        val config = this.getConfig()
         val materialNames: ObjectList<String> = ObjectArrayList()
         val path = "settings.arena"
 
@@ -46,16 +41,15 @@ object PluginConfig {
         createConfig()
 
         val path = "settings.arena"
-        val world = config().getString("$path.world")
-        val posOne = config().getVector("$path.posOne")
-        val posTwo = config().getVector("$path.posTwo")
-        val spawn = config().getVector("$path.spawn")
-        val start = config().getVector("$path.start")
-        val displayName = config().getString("$path.displayName", "Parkour")
+        val world = this.getConfig().getString("$path.world")
+        val posOne = this.getConfig().getVector("$path.posOne")
+        val posTwo = this.getConfig().getVector("$path.posTwo")
+        val spawn = this.getConfig().getVector("$path.spawn")
+        val start = this.getConfig().getVector("$path.start")
+        val displayName = this.getConfig().getString("$path.displayName", "Parkour")
         val materials: ObjectList<Material> = ObjectArrayList()
         val materialNames: ObjectList<String> = ObjectArrayList(
-            config().getStringList("$path.materials")
-        )
+            this.getConfig().getStringList("$path.materials"))
 
         if (materialNames.isEmpty()) {
             materialNames.add(Material.RED_STAINED_GLASS.toString())

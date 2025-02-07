@@ -23,8 +23,6 @@ val plugin: PluginInstance get() = JavaPlugin.getPlugin(PluginInstance::class.ja
 class PluginInstance : SuspendingJavaPlugin() {
 
     override suspend fun onEnableAsync() {
-        JumpAndRunService.startActionbar()
-
         this.handlePlaceholderAPI()
 
         ParkourCommand("parkour").register()
@@ -33,6 +31,8 @@ class PluginInstance : SuspendingJavaPlugin() {
         Bukkit.getPluginManager().registerSuspendingEvents(PlayerParkourListener(), this, DispatcherUtil.PARKOUR)
         Bukkit.getPluginManager().registerEvents(PlayerKickListener(), this)
         Database.createConnection()
+
+        JumpAndRunService.startActionbar()
     }
 
     override suspend fun onDisableAsync() {
@@ -55,9 +55,5 @@ class PluginInstance : SuspendingJavaPlugin() {
             .append(Component.text("Parkour", PluginColor.BLUE_LIGHT))
             .append(Component.text(" | ", NamedTextColor.DARK_GRAY))
 
-        @JvmStatic
-        fun instance(): PluginInstance {
-            return getPlugin(PluginInstance::class.java)
-        }
     }
 }

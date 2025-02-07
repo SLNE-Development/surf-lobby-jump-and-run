@@ -1,16 +1,12 @@
 mysql:
   type: mariadb
-  hostname: 51.195.3.239
+  hostname: localhost
   port: 3306
-  database: s23_lobby_jnr
-  username: u23_EBylWRFWwE
-  password: password
-  table: jumpandrun
-  url: "url"
-
+  database: my_database
+  username: my_user
+  password: my_password
+  table: my_table
   driver: org.mariadb.jdbc.Driver
-  poolName: surf-lobby-jnr
-
   cachePrepStmts: true
   prepStmtCacheSize: 250
   prepStmtCacheSqlLimit: 2048

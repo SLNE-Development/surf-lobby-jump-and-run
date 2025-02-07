@@ -119,13 +119,13 @@ object JumpAndRunService {
     suspend fun startActionbar() {
         this.actionbarInfo = true
 
-        while (this.actionbarInfo) {
-            delay(20.ticks)
-
-            jumpAndRun.players.forEach { player ->
-                player.sendActionBar(Component.text(currentPoints[player] ?: -1, PluginColor.BLUE_MID).append(Component.text(" Sprünge", PluginColor.DARK_GRAY)))
-            }
-        }
+//        while (this.actionbarInfo) {
+//            delay(20.ticks)
+//
+//            jumpAndRun.players.forEach { player ->
+//                player.sendActionBar(Component.text(currentPoints[player] ?: -1, PluginColor.BLUE_MID).append(Component.text(" Sprünge", PluginColor.DARK_GRAY)))
+//            }
+//        }
     }
 
     fun stopActionbar() {

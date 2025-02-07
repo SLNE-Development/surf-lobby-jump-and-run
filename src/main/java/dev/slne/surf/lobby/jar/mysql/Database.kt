@@ -2,6 +2,7 @@ package dev.slne.surf.lobby.jar.mysql
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
+import dev.slne.surf.lobby.jar.config.PluginConfig
 import dev.slne.surf.lobby.jar.plugin
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap
@@ -13,8 +14,6 @@ import javax.sql.DataSource
 
 object Database {
     private const val DRIVER_CLASS_NAME_KEY = "mysql.driver"
-    private const val POOL_NAME_KEY = "mysql.poolName"
-    private const val URL_KEY = "mysql.url"
     private const val DB_TYPE_KEY = "mysql.type"
     private const val HOSTNAME_KEY = "mysql.hostname"
     private const val PORT_KEY = "mysql.port"
@@ -24,44 +23,35 @@ object Database {
     private const val TABLE_KEY = "mysql.table"
 
     private var driverClassName = "org.mariadb.jdbc.Driver"
-    private var poolName = "surf-lobby-jnr"
     private var jdbcUrl = "url"
     private var username = "user"
     private var password = "password"
     private var table = "table"
-    private var url = "url"
 
     private lateinit var dataSource: DataSource
 
     val highScores: Object2ObjectMap<UUID, Int> get() = getValues("high_score")
     val points: Object2ObjectMap<UUID, Int> get() = getValues("points")
 
-    init {
-        val config = plugin.config
+    private fun setupDataSource() {
+        val config = PluginConfig.getConfig()
         val dbType = config.getString(DB_TYPE_KEY, "mariadb")
         val hostname = config.getString(HOSTNAME_KEY)
         val port = config.getInt(PORT_KEY)
         val databaseName = config.getString(DATABASE_NAME_KEY)
 
         driverClassName = config.getString(DRIVER_CLASS_NAME_KEY, driverClassName) ?: driverClassName
-        poolName = config.getString(POOL_NAME_KEY, poolName) ?: poolName
-        url = config.getString(URL_KEY) ?: url
 
         jdbcUrl = "jdbc:$dbType://$hostname:$port/$databaseName"
         username = config.getString(USERNAME_KEY) ?: username
         password = config.getString(PASSWORD_KEY) ?: password
         table = config.getString(TABLE_KEY) ?: table
 
-        setupDataSource()
-    }
-
-    private fun setupDataSource() {
         val hikariConfig = HikariConfig().apply {
             jdbcUrl = this@Database.jdbcUrl
             driverClassName = this@Database.driverClassName
             username = this@Database.username
             password = this@Database.password
-            poolName = this@Database.poolName
             maximumPoolSize = 10
             minimumIdle = 2
             idleTimeout = 30000
@@ -72,6 +62,7 @@ object Database {
 
     fun createConnection() {
         try {
+            setupDataSource()
             Base.open(dataSource)
             createTable()
         } catch (e: Exception) {
@@ -81,7 +72,7 @@ object Database {
 
     private fun createTable() {
         val query = """
-            CREATE TABLE IF NOT EXISTS jumpandrun (
+            CREATE TABLE IF NOT EXISTS $table (
                 uuid VARCHAR(36) NOT NULL PRIMARY KEY,
                 points INT DEFAULT 0,
                 trys INT DEFAULT 0,

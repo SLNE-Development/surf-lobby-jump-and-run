@@ -60,13 +60,11 @@ dependencies {
 paper {
     name = pluginName
     main = "dev.slne.surf.lobby.jar.PluginInstance"
-    loader = "dev.slne.surf.lobby.jar.PluginLibrariesLoader"
     apiVersion = "1.21.4"
     authors = listOf("TheBjoRedCraft", "SLNE Development")
     prefix = pluginName
     version = "${project.version}"
     foliaSupported = true
-    generateLibrariesJson = true
 
     serverDependencies {
         register("CommandAPI") {
@@ -108,8 +106,6 @@ tasks {
     }
     shadowJar {
         archiveFileName.set("${internalPluginName}-${version}.jar")
-
-        mergeServiceFiles()
 
         relocate(
             "com.github.stefvanschie.inventoryframework",

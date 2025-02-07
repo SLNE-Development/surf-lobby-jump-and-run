@@ -36,9 +36,7 @@ class ParkourPlaceholderExtension : PlaceholderExpansion() {
      */
 
     override fun getIdentifier(): String = IDENTIFIER
-
     override fun getAuthor(): String = AUTHOR
-
     override fun getVersion(): String = VERSION
 
     override fun onRequest(player: OfflinePlayer, params: String): String? {

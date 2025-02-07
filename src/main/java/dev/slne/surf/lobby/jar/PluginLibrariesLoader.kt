@@ -47,6 +47,10 @@ class PluginLibrariesLoader : PluginLoader {
         val repositories: Map<String, String>,
         val dependencies: List<String>
     ) {
+        init {
+            requireNotNull(dependencies) { "dependencies must not be null" }
+        }
+
         fun asDependencies(): Stream<Dependency> {
             return dependencies.stream()
                 .map { d: String? -> Dependency(DefaultArtifact(d), null) }
