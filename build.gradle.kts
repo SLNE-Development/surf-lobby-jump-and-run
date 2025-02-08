@@ -1,4 +1,4 @@
-import de.schablinski.gradle.activejdbc.ActiveJDBCInstrumentation
+
 import net.minecrell.pluginyml.paper.PaperPluginDescription
 
 plugins {
@@ -9,7 +9,6 @@ plugins {
     id("com.gradleup.shadow") version "9.0.0-beta4"
     id("io.freefair.lombok") version "8.11"
     id("xyz.jpenilla.run-paper") version "2.3.1"
-    id("de.schablinski.activejdbc-gradle-plugin") version "2.0.1"
     id("org.hibernate.build.maven-repo-auth") version "3.0.4"
 
     kotlin("jvm") version "2.1.0"
@@ -47,12 +46,7 @@ dependencies {
     implementation("com.github.shynixn.mccoroutine:mccoroutine-folia-api:2.20.0")
     implementation("com.github.shynixn.mccoroutine:mccoroutine-folia-core:2.20.0")
     implementation("com.zaxxer:HikariCP:5.0.1")
-    implementation("org.mariadb.jdbc:mariadb-java-client:3.5.1")
     implementation("com.github.ben-manes.caffeine:caffeine:3.1.8")
-    implementation("org.javalite:activejdbc:3.4-j11")
-    implementation("org.javalite:activejdbc-kt:3.4-j11")
-
-    activejdbc("org.jetbrains.kotlin:kotlin-stdlib:2.1.0")
 
     runPaper.folia.registerTask()
 }

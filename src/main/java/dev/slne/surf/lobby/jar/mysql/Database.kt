@@ -3,14 +3,13 @@ package dev.slne.surf.lobby.jar.mysql
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import dev.slne.surf.lobby.jar.config.PluginConfig
-import dev.slne.surf.lobby.jar.plugin
-import it.unimi.dsi.fastutil.objects.Object2ObjectMap
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap
 import org.bukkit.Bukkit
-import org.javalite.activejdbc.Base
-import org.javalite.activejdbc.Model
+import java.sql.Connection
+import java.sql.SQLException
 import java.util.*
 import javax.sql.DataSource
+import it.unimi.dsi.fastutil.objects.Object2ObjectMap
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap
 
 object Database {
     private const val DRIVER_CLASS_NAME_KEY = "mysql.driver"
@@ -63,78 +62,142 @@ object Database {
     fun createConnection() {
         try {
             setupDataSource()
-            Base.open(dataSource)
-            createTable()
-        } catch (e: Exception) {
-            Bukkit.getConsoleSender().sendMessage(e.message ?: this.javaClass.toString())
-        }
-    }
-
-    private fun createTable() {
-        val query = """
-            CREATE TABLE IF NOT EXISTS $table (
-                uuid VARCHAR(36) NOT NULL PRIMARY KEY,
-                points INT DEFAULT 0,
-                trys INT DEFAULT 0,
-                sound TINYINT(1) DEFAULT TRUE,
-                high_score INT DEFAULT 0
-            )
-        """.trimIndent()
-
-        try {
-            Base.exec(query)
+            createTableIfNotExists()
         } catch (e: Exception) {
             Bukkit.getConsoleSender().sendMessage(e.message ?: this.javaClass.toString())
         }
     }
 
     fun closeConnection() {
-        if (Base.hasConnection()) {
-            Base.close()
+        if (dataSource is HikariDataSource) {
+            (dataSource as HikariDataSource).close()
         }
     }
 
-    fun getTrys(uuid: UUID): Int = getValue(uuid, "trys")
-    fun getPoints(uuid: UUID): Int = getValue(uuid, "points")
-    fun getHighScore(uuid: UUID): Int = getValue(uuid, "high_score")
-    fun getSound(uuid: UUID): Boolean = getValue(uuid, "sound") == 1
-    fun saveSound(uuid: UUID, value: Boolean?) = saveValue(uuid, "sound", value)
-    fun savePoints(uuid: UUID, points: Int?) = saveValue(uuid, "points", points)
-    fun saveTrys(uuid: UUID, trys: Int?) = saveValue(uuid, "trys", trys)
-    fun saveHighScore(uuid: UUID, highScore: Int?) = saveValue(uuid, "high_score", highScore)
+    private fun getConnection(): Connection {
+        return dataSource.connection
+    }
 
-    private fun getValue(uuid: UUID, column: String): Int {
-        return try {
-            Model.findFirst<JumpAndRunModel>("uuid = ?", uuid.toString())?.getInteger(column) ?: 0
-        } catch (e: Exception) {
-            Bukkit.getConsoleSender().sendMessage(e.message ?: this.javaClass.toString())
-            0
+    private fun createTableIfNotExists() {
+        getConnection().use { connection ->
+            val statement = connection.createStatement()
+            statement.executeUpdate("""
+                CREATE TABLE IF NOT EXISTS $table (
+                    uuid VARCHAR(36) PRIMARY KEY,
+                    points INT DEFAULT 0,
+                    high_score INT DEFAULT 0,
+                    trys INT DEFAULT 0,
+                    sound BOOLEAN DEFAULT TRUE
+                )
+            """.trimIndent())
         }
     }
 
-    private fun saveValue(uuid: UUID, column: String, value: Any?) {
-        try {
-            val model = Model.findFirst("uuid = ?", uuid.toString()) ?: JumpAndRunModel().apply {
-                set<Model>("uuid", uuid.toString())
+    @Throws(SQLException::class)
+    fun getPoints(uuid: UUID): Int {
+        getConnection().use { connection ->
+            val statement = connection.prepareStatement("SELECT points FROM $table WHERE uuid = ?")
+            statement.setString(1, uuid.toString())
+            val resultSet = statement.executeQuery()
+            return if (resultSet.next()) {
+                resultSet.getInt("points")
+            } else {
+                0
             }
-            model.set<Model>(column, value)
-            model.saveIt()
-        } catch (e: Exception) {
-            Bukkit.getConsoleSender().sendMessage(e.message ?: this.javaClass.toString())
+        }
+    }
+
+    @Throws(SQLException::class)
+    fun getHighScore(uuid: UUID): Int {
+        getConnection().use { connection ->
+            val statement = connection.prepareStatement("SELECT high_score FROM $table WHERE uuid = ?")
+            statement.setString(1, uuid.toString())
+            val resultSet = statement.executeQuery()
+            return if (resultSet.next()) {
+                resultSet.getInt("high_score")
+            } else {
+                0
+            }
+        }
+    }
+
+    @Throws(SQLException::class)
+    fun getTrys(uuid: UUID): Int {
+        getConnection().use { connection ->
+            val statement = connection.prepareStatement("SELECT trys FROM $table WHERE uuid = ?")
+            statement.setString(1, uuid.toString())
+            val resultSet = statement.executeQuery()
+            return if (resultSet.next()) {
+                resultSet.getInt("trys")
+            } else {
+                0
+            }
+        }
+    }
+
+    @Throws(SQLException::class)
+    fun getSound(uuid: UUID): Boolean {
+        getConnection().use { connection ->
+            val statement = connection.prepareStatement("SELECT sound FROM $table WHERE uuid = ?")
+            statement.setString(1, uuid.toString())
+            val resultSet = statement.executeQuery()
+            return if (resultSet.next()) {
+                resultSet.getBoolean("sound")
+            } else {
+                true
+            }
+        }
+    }
+
+    @Throws(SQLException::class)
+    fun saveSound(uuid: UUID, sound: Boolean) {
+        getConnection().use { connection ->
+            val statement = connection.prepareStatement("UPDATE $table SET sound = ? WHERE uuid = ?")
+            statement.setBoolean(1, sound)
+            statement.setString(2, uuid.toString())
+            statement.executeUpdate()
+        }
+    }
+
+    @Throws(SQLException::class)
+    fun saveTrys(uuid: UUID, trys: Int) {
+        getConnection().use { connection ->
+            val statement = connection.prepareStatement("UPDATE $table SET trys = ? WHERE uuid = ?")
+            statement.setInt(1, trys)
+            statement.setString(2, uuid.toString())
+            statement.executeUpdate()
+        }
+    }
+
+    @Throws(SQLException::class)
+    fun savePoints(uuid: UUID, points: Int) {
+        getConnection().use { connection ->
+            val statement = connection.prepareStatement("UPDATE $table SET points = ? WHERE uuid = ?")
+            statement.setInt(1, points)
+            statement.setString(2, uuid.toString())
+            statement.executeUpdate()
+        }
+    }
+
+    @Throws(SQLException::class)
+    fun saveHighScore(uuid: UUID, highScore: Int) {
+        getConnection().use { connection ->
+            val statement = connection.prepareStatement("UPDATE $table SET high_score = ? WHERE uuid = ?")
+            statement.setInt(1, highScore)
+            statement.setString(2, uuid.toString())
+            statement.executeUpdate()
         }
     }
 
     private fun getValues(column: String): Object2ObjectMap<UUID, Int> {
         val values: Object2ObjectMap<UUID, Int> = Object2ObjectOpenHashMap()
-        try {
-            for (result in Model.findAll<Model>()) {
-                values[UUID.fromString(result.getString("uuid"))] = result.getInteger(column)
+        getConnection().use { connection ->
+            val statement = connection.prepareStatement("SELECT uuid, $column FROM $table")
+            val resultSet = statement.executeQuery()
+            while (resultSet.next()) {
+                values[UUID.fromString(resultSet.getString("uuid"))] = resultSet.getInt(column)
             }
-        } catch (e: Exception) {
-            Bukkit.getConsoleSender().sendMessage(e.message ?: this.javaClass.toString())
         }
         return values
     }
 }
-
-internal class JumpAndRunModel : Model()
