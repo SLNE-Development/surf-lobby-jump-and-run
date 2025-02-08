@@ -25,7 +25,12 @@ class ParkourStatsCommand(commandName: String) : CommandAPICommand(commandName) 
                 val trys = JumpAndRunService.queryTrys(target.uniqueId);
                 val currentPoints = JumpAndRunService.currentPoints[player] ?: 0
 
-                player.sendMessage(createStatisticMessage(points.toString(), highscore.toString(), if (JumpAndRunService.isJumping(target)) currentPoints.toString() else "Kein laufender Parkour", trys.toString()))
+                player.sendMessage(createStatisticMessage(
+                    points.toString(),
+                    highscore.toString(),
+                    if (JumpAndRunService.isJumping(target)) currentPoints.toString() else "Kein laufender Parkour",
+                    trys.toString())
+                )
             }
         })
     }
@@ -41,10 +46,7 @@ class ParkourStatsCommand(commandName: String) : CommandAPICommand(commandName) 
                 .append(Component.text("Parkour ", PluginColor.BLUE))
                 .append(Component.text("| ", PluginColor.DARK_GRAY))
                 .append(Component.text("-------------", PluginColor.LIGHT_GRAY))
-                .append(
-                    Component.text("STATISTIK", PluginColor.BLUE_LIGHT)
-                        .decorate(TextDecoration.BOLD)
-                )
+                .append(Component.text("STATISTIK", PluginColor.BLUE_LIGHT).decorate(TextDecoration.BOLD))
                 .append(Component.text("-------------", PluginColor.LIGHT_GRAY))
                 .append(Component.newline())
                 .append(Component.text(">> ", PluginColor.DARK_GRAY))

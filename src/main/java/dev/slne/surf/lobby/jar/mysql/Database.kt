@@ -62,7 +62,7 @@ object Database {
     fun createConnection() {
         try {
             setupDataSource()
-            createTableIfNotExists()
+            createTable()
         } catch (e: Exception) {
             Bukkit.getConsoleSender().sendMessage(e.message ?: this.javaClass.toString())
         }
@@ -78,7 +78,7 @@ object Database {
         return dataSource.connection
     }
 
-    private fun createTableIfNotExists() {
+    private fun createTable() {
         getConnection().use { connection ->
             val statement = connection.createStatement()
             statement.executeUpdate("""

@@ -1,32 +1,36 @@
 package dev.slne.surf.lobby.jar.service
 
 import com.github.benmanes.caffeine.cache.Caffeine
-import com.github.shynixn.mccoroutine.folia.ticks
+
 import dev.hsbrysk.caffeine.CoroutineLoadingCache
 import dev.hsbrysk.caffeine.buildCoroutine
 import dev.slne.surf.lobby.jar.PluginInstance
 import dev.slne.surf.lobby.jar.config.PluginConfig
 import dev.slne.surf.lobby.jar.mysql.Database
-import dev.slne.surf.lobby.jar.plugin
 import dev.slne.surf.lobby.jar.util.PluginColor
+
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap
 import it.unimi.dsi.fastutil.objects.ObjectArrayList
 import it.unimi.dsi.fastutil.objects.ObjectList
+
 import kotlinx.coroutines.delay
 import lombok.Getter
 import lombok.experimental.Accessors
+
 import net.kyori.adventure.sound.Sound
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.title.Title
+
 import org.bukkit.*
 import org.bukkit.block.Block
 import org.bukkit.entity.Player
 import org.bukkit.util.Vector
+
 import java.security.SecureRandom
 import java.time.Duration
 import java.util.*
-import java.util.function.Consumer
+
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -337,21 +341,10 @@ object JumpAndRunService {
         removeAll()
     }
 
-    suspend fun queryTrys(player: UUID): Int {
-        return trys.get(player) ?: 0
-    }
-
-    suspend fun querySound(player: UUID): Boolean {
-        return sounds.get(player) ?: true
-    }
-
-    suspend fun queryPoints(player: UUID): Int {
-        return points.get(player) ?: 0
-    }
-
-    suspend fun queryHighScore(player: UUID): Int {
-        return highScores.get(player) ?: 0
-    }
+    suspend fun queryTrys(player: UUID): Int = trys.get(player) ?: 0
+    suspend fun querySound(player: UUID): Boolean = sounds.get(player) ?: true
+    suspend fun queryPoints(player: UUID): Int = points.get(player) ?: 0
+    suspend fun queryHighScore(player: UUID): Int = highScores.get(player) ?: 0
 
     private suspend fun saveSound(player: UUID) {
         val sound: Boolean = querySound(player)
@@ -370,14 +363,14 @@ object JumpAndRunService {
     private suspend fun savePoints(player: UUID) {
         val pointCount: Int = queryPoints(player)
 
-        Database.saveTrys(player, pointCount)
+        Database.savePoints(player, pointCount)
         points.synchronous().invalidate(player)
     }
 
     private suspend fun saveHighScore(player: UUID) {
         val highScoreCount: Int = queryHighScore(player)
 
-        Database.saveTrys(player, highScoreCount)
+        Database.saveHighScore(player, highScoreCount)
         highScores.synchronous().invalidate(player)
     }
 
@@ -395,7 +388,7 @@ object JumpAndRunService {
 
         val allowSounds: Boolean = querySound(player.uniqueId)
 
-        if (!allowSounds) {
+        if (allowSounds) {
             player.playSound(
                 Sound.sound(
                     org.bukkit.Sound.ENTITY_EXPERIENCE_ORB_PICKUP,
@@ -449,6 +442,7 @@ object JumpAndRunService {
         saveHighScore(player.uniqueId)
         savePoints(player.uniqueId)
         saveTrys(player.uniqueId)
+        saveSound(player.uniqueId)
 
         currentPoints.remove(player)
         awaitingHighScores.remove(player)
