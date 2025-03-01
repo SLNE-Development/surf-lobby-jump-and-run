@@ -48,7 +48,9 @@ dependencies {
     implementation("com.zaxxer:HikariCP:5.0.1")
     implementation("com.github.ben-manes.caffeine:caffeine:3.1.8")
 
-    runPaper.folia.registerTask()
+    implementation("org.jetbrains.exposed:exposed-core:0.59.0")
+    implementation("org.jetbrains.exposed:exposed-dao:0.59.0")
+    implementation("org.jetbrains.exposed:exposed-jdbc:0.59.0")
 }
 
 paper {
@@ -58,7 +60,7 @@ paper {
     authors = listOf("TheBjoRedCraft", "SLNE Development")
     prefix = pluginName
     version = "${project.version}"
-    foliaSupported = true
+    foliaSupported = false
 
     serverDependencies {
         register("CommandAPI") {
