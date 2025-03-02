@@ -8,35 +8,3 @@ database:
     database: "database"
     username: "username"
     password: "password"
-
-settings:
-  start:
-    world: world
-    x: 0
-    y: 100
-    z: 0
-  posOne:
-    world: world
-    x: -143
-    y: 200
-    z: 238
-  posTwo:
-    world: world
-    x: -47
-    y: 80
-    z: 124
-  spawn:
-    world: world
-    x: -66
-    y: 63
-    z: 143
-  displayname: Parkour
-  materials:
-    - RED_CONCRETE
-    - YELLOW_CONCRETE
-    - GREEN_CONCRETE
-    - LIME_CONCRETE
-    - BLUE_CONCRETE
-    - BLUE_CONCRETE
-    - ORANGE_CONCRETE
-    - LIGHT_BLUE_CONCRETE

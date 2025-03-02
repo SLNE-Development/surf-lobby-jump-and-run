@@ -39,12 +39,11 @@ dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.4-R0.1-SNAPSHOT")
     compileOnly("dev.jorel:commandapi-bukkit-core:9.5.2")
     compileOnly("me.clip:placeholderapi:2.11.6")
-    compileOnly("me.frep:vulcan-api:2.0.0")
 
     implementation("dev.hsbrysk:caffeine-coroutines:1.2.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
-    implementation("com.github.shynixn.mccoroutine:mccoroutine-folia-api:2.20.0")
-    implementation("com.github.shynixn.mccoroutine:mccoroutine-folia-core:2.20.0")
+    implementation("com.github.shynixn.mccoroutine:mccoroutine-bukkit-api:2.21.0")
+    implementation("com.github.shynixn.mccoroutine:mccoroutine-bukkit-core:2.21.0")
     implementation("com.github.ben-manes.caffeine:caffeine:3.1.8")
     implementation ("com.sksamuel.aedile:aedile-core:2.0.3")
 
@@ -55,7 +54,7 @@ dependencies {
 
 paper {
     name = pluginName
-    main = "dev.slne.surf.lobby.jar.PluginInstance"
+    main = "dev.slne.surf.parkour.SurfParkour"
     apiVersion = "1.21.4"
     authors = listOf("TheBjoRedCraft", "SLNE Development")
     prefix = pluginName
