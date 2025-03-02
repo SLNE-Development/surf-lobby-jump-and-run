@@ -45,9 +45,9 @@ data class Parkour (
     val activePlayers: ObjectSet<Player>
 ) {
     private val random = Random
-    private val latestJumps: Object2ObjectMap<Player, Array<Block?>> = Object2ObjectOpenHashMap()
 
-    private val blocks: Object2ObjectMap<Player, Material> = Object2ObjectOpenHashMap()
+    val blocks: Object2ObjectMap<Player, Material> = Object2ObjectOpenHashMap()
+    val latestJumps: Object2ObjectMap<Player, Array<Block?>> = Object2ObjectOpenHashMap()
     val currentPoints: Object2ObjectMap<Player, Int> = Object2ObjectOpenHashMap()
 
     private val offsets = arrayOf(
@@ -136,7 +136,7 @@ data class Parkour (
         blocks[player] = material
     }
 
-    private fun generate(player: Player) {
+    fun generate(player: Player) {
         val jumps = latestJumps[player] ?: return
         val material = blocks[player] ?: return
 
@@ -164,7 +164,7 @@ data class Parkour (
      *
      */
 
-    private suspend fun increaseTrys(player: Player) {
+    suspend fun increaseTrys(player: Player) {
         val playerData = DatabaseProvider.getPlayerData(player.uniqueId)
 
         playerData.edit {
@@ -172,7 +172,7 @@ data class Parkour (
         }
     }
 
-    private suspend fun increasePoints(player: Player) {
+    suspend fun increasePoints(player: Player) {
         val playerData = DatabaseProvider.getPlayerData(player.uniqueId)
 
         playerData.edit {
@@ -186,7 +186,7 @@ data class Parkour (
         }
     }
 
-    private suspend fun updateHighscore(player: Player) {
+    suspend fun updateHighscore(player: Player) {
         val currentScore = currentPoints[player] ?: return
         val playerData = DatabaseProvider.getPlayerData(player.uniqueId)
 

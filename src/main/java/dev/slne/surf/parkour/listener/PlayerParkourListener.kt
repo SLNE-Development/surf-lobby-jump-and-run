@@ -1,33 +1,24 @@
 package dev.slne.surf.parkour.listener
 
-import dev.slne.surf.parkour.service.JumpAndRunService
+import dev.slne.surf.parkour.parkour.Parkour
+
 import org.bukkit.block.Block
 import org.bukkit.block.BlockFace
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerMoveEvent
-import org.bukkit.event.player.PlayerQuitEvent
 
 class PlayerParkourListener : Listener {
     @EventHandler
     suspend fun onMove(event: PlayerMoveEvent) {
         if (!event.hasChangedPosition()) {
-            retur
-        }
-
-        val toBlock = event.to.block
-        val block = toBlock.getRelative(BlockFace.DOWN)
-        val player = event.player
-        val jumps = JumpAndRunService.getLatestJumps(player)
-        val world = JumpAndRunService.jumpAndRun.world ?: return
-        val start = JumpAndRunService.jumpAndRun.start ?: return
-        val startLocation = start.toLocation(world)
-
-        if (toBlock.location == startLocation.block.location) {
-            JumpAndRunService.start(player)
             return
         }
+
+        val player = event.player
+        val parkour = Parkour.getParkour(player) ?: return
+        val jumps = parkour.latestJumps[player] ?: return
 
         if (jumps.isEmpty() || jumps.size < 2) {
             return
@@ -40,20 +31,20 @@ class PlayerParkourListener : Listener {
         val jump1: Block = jumps[0] ?: return
         val jump2: Block = jumps[1] ?: return
 
-        val playerLocation = player.location
-        if (playerLocation.y < jump1.location.y && playerLocation.y < jump2.location.y) {
-            JumpAndRunService.remove(player)
+
+        if (player.location.y < jump1.location.y && player.location.y < jump2.location.y) {
+            parkour.cancel(player)
             return
         }
 
-        if (block == jumps[1]) {
-            val material = JumpAndRunService.blocks[player] ?: return
+        if (event.to.block.getRelative(BlockFace.DOWN) == jumps[1]) {
+            val material = parkour.blocks[player] ?: return
 
             jump2.type = material
 
-            JumpAndRunService.addPoint(player)
-            JumpAndRunService.checkHighScore(player)
-            JumpAndRunService.generate(player)
+            parkour.increasePoints(player)
+            parkour.updateHighscore(player)
+            parkour.generate(player)
         }
     }
 
@@ -62,7 +53,9 @@ class PlayerParkourListener : Listener {
         val player = event.player
         val location = event.interactionPoint ?: return
 
-        val jumps: Array<Block?> = JumpAndRunService.getLatestJumps(player)
+        val parkour = Parkour.getParkour(player) ?: return
+
+        val jumps: Array<Block?> = parkour.latestJumps[player] ?: return
 
         for (jump in jumps) {
             if (jump == null) {
@@ -73,12 +66,5 @@ class PlayerParkourListener : Listener {
                 player.sendBlockChange(jump.location, jump.blockData)
             }
         }
-    }
-
-    @EventHandler
-    suspend fun onQuit(event: PlayerQuitEvent) {
-        val player = event.player
-
-        JumpAndRunService.onQuit(player)
     }
 }
