@@ -1,16 +1,19 @@
 package dev.slne.surf.parkour.parkour
 
 import com.github.shynixn.mccoroutine.bukkit.launch
+
 import dev.slne.surf.parkour.database.DatabaseProvider
 import dev.slne.surf.parkour.plugin
-import dev.slne.surf.parkour.service.JumpAndRunService.getLatestJumps
 import dev.slne.surf.parkour.util.Area
 import dev.slne.surf.parkour.util.Colors
 import dev.slne.surf.parkour.util.PluginColor
+
 import it.unimi.dsi.fastutil.objects.*
+
 import net.kyori.adventure.sound.Sound
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.title.Title
+
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Material
@@ -18,9 +21,11 @@ import org.bukkit.World
 import org.bukkit.block.Block
 import org.bukkit.entity.Player
 import org.bukkit.util.Vector
+
 import java.time.Duration
 
 import java.util.UUID
+
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -329,5 +334,17 @@ data class Parkour (
             return nextLocation.block
         }
         return previousLocation.clone().add(offsets[0]).block
+    }
+
+    /**
+     *
+     * Static Parkour functions
+     *
+     */
+
+    companion object {
+        fun getByName(name: String): Parkour? {
+            return DatabaseProvider.getParkours().firstOrNull { it.name == name }
+        }
     }
 }

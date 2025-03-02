@@ -125,7 +125,7 @@ object DatabaseProvider {
         }
     }
 
-    suspend fun updatePlayerData(data: PlayerData) {
+    fun updatePlayerData(data: PlayerData) {
         dataCache.put(data.uuid, data)
     }
 
@@ -148,23 +148,6 @@ object DatabaseProvider {
         return withContext(Dispatchers.IO) {
             transaction {
                 Users.select(Users.uuid eq uuid).map {
-                    PlayerData(
-                        it[Users.uuid],
-                        it[Users.name],
-                        it[Users.highScore],
-                        it[Users.points],
-                        it[Users.trys],
-                        it[Users.likesSound]
-                    )
-                }.firstOrNull()
-            }
-        }
-    }
-
-    suspend fun loadPlayer(name: String): PlayerData? {
-        return withContext(Dispatchers.IO) {
-            transaction {
-                Users.select(Users.name eq name).map {
                     PlayerData(
                         it[Users.uuid],
                         it[Users.name],

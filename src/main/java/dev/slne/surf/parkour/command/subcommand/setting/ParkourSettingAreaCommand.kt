@@ -26,6 +26,8 @@ class ParkourSettingAreaCommand(commandName: String) : CommandAPICommand(command
             val max = Vector(pos1.x, pos1.y, pos1.z)
             val min = Vector(pos2.x, pos2.y, pos2.z)
 
+
+
             JumpAndRunService.jumpAndRun.boundingBox = BoundingBox.of(min, max)
             JumpAndRunService.jumpAndRun.world = args.getUnchecked("world")
 
