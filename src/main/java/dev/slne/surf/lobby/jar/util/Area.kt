@@ -1,9 +1,21 @@
 package dev.slne.surf.lobby.jar.util
 
-import org.bukkit.World
 import org.bukkit.util.Vector
 
 data class Area (
     val max: Vector,
     val min: Vector
-)
+) {
+    override fun toString(): String {
+        return "Area(max=$max, min=$min)"
+    }
+
+    companion object {
+        fun fromString(string: String): Area {
+            val split = string.split(" ")
+            val max = Vector(split[0].toDouble(), split[1].toDouble(), split[2].toDouble())
+            val min = Vector(split[3].toDouble(), split[4].toDouble(), split[5].toDouble())
+            return Area(max, min)
+        }
+    }
+}

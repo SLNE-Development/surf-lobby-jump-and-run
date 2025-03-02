@@ -5,15 +5,22 @@ import com.github.shynixn.mccoroutine.folia.launch
 import com.google.gson.Gson
 import dev.hsbrysk.caffeine.CoroutineLoadingCache
 import dev.hsbrysk.caffeine.buildCoroutine
-import dev.slne.surf.lobby.jar.PluginInstance
 import dev.slne.surf.lobby.jar.config.PluginConfig
+import dev.slne.surf.lobby.jar.parkour.Parkour
 import dev.slne.surf.lobby.jar.player.PlayerData
 import dev.slne.surf.lobby.jar.plugin
+import dev.slne.surf.lobby.jar.util.Area
 import dev.slne.surf.lobby.jar.util.MessageBuilder
+import it.unimi.dsi.fastutil.objects.ObjectArraySet
+import it.unimi.dsi.fastutil.objects.ObjectSet
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger
+import org.bukkit.Bukkit
 import org.bukkit.Location
+import org.bukkit.Material
+import org.bukkit.entity.Player
+import org.bukkit.util.Vector
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -77,16 +84,17 @@ object DatabaseProvider {
      */
 
     object Parkours: Table() {
+        val uuid: Column<UUID> = uuid("uuid")
         val name: Column<String> = text("name")
-        val world: Column<String> = text("world")
-        val materials: Column<String> = text("materials")
-        val displayName: Column<String> = text("display_name")
-        val posOne: Column<String> = text("pos_one")
-        val posTwo: Column<String> = text("pos_two")
-        val spawn: Column<String> = text("spawn")
-        val start: Column<String> = text("start")
 
-        override val primaryKey = PrimaryKey(name)
+        val world: Column<String> = text("world")
+        val area: Column<String> = text("area")
+        val start: Column<String> = text("start")
+        val respawn: Column<String> = text("respawn")
+
+        val availableMaterials: Column<String> = text("available_materials")
+
+        override val primaryKey = PrimaryKey(uuid)
     }
 
     /**
@@ -174,12 +182,53 @@ object DatabaseProvider {
         }
     }
 
-    private fun serializeLocation(location: Location): String {
-        return gson.toJson(location)
+    suspend fun fetchParkours(): ObjectSet<Parkour> {
+        val parkours = ObjectArraySet<Parkour>()
+
+        withContext(Dispatchers.IO) {
+            transaction {
+                Parkours.selectAll().map {
+                    parkours.add(
+                        Parkour(
+                            uuid = UUID.fromString(it[Parkours.uuid].toString()),
+                            name = it[Parkours.name],
+                            world = Bukkit.getWorld(it[Parkours.world]) ?: Bukkit.getWorlds().first(),
+                            area = Area.fromString(it[Parkours.area]),
+                            start = deserializeVector(it[Parkours.start]),
+                            respawn = deserializeVector(it[Parkours.respawn]),
+                            availableMaterials = ObjectArraySet(deserializeList(it[Parkours.availableMaterials]).map { Material.valueOf(it) }),
+                            activePlayers = ObjectArraySet()
+                        )
+                    )
+                }
+            }
+        }
+
+        return parkours
     }
 
-    private fun deserializeLocation(json: String): Location {
-        return gson.fromJson(json, Location::class.java)
+    suspend fun saveParkour(parkour: Parkour) {
+        withContext(Dispatchers.IO) {
+            transaction {
+                Parkours.insert {
+                    it[uuid] = parkour.uuid
+                    it[name] = parkour.name
+                    it[world] = parkour.world.name
+                    it[area] = parkour.area.toString()
+                    it[start] = serializeVector(parkour.start)
+                    it[respawn] = serializeVector(parkour.respawn)
+                    it[availableMaterials] = serializeList(parkour.availableMaterials.map { it.name })
+                }
+            }
+        }
+    }
+
+    private fun serializeVector(vector: Vector): String {
+        return gson.toJson(vector)
+    }
+
+    private fun deserializeVector(json: String): Vector {
+        return gson.fromJson(json, Vector::class.java)
     }
 
     private fun serializeList(list: List<String>): String {

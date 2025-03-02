@@ -9,7 +9,6 @@ import dev.slne.surf.lobby.jar.config.PluginConfig
 import dev.slne.surf.lobby.jar.database.DatabaseProvider
 import dev.slne.surf.lobby.jar.listener.PlayerParkourListener
 import dev.slne.surf.lobby.jar.listener.PlayerKickListener
-import dev.slne.surf.lobby.jar.mysql.Database
 import dev.slne.surf.lobby.jar.papi.ParkourPlaceholderExtension
 import dev.slne.surf.lobby.jar.service.JumpAndRunService
 import dev.slne.surf.lobby.jar.util.DispatcherUtil
