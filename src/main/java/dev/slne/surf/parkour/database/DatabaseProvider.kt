@@ -10,7 +10,7 @@ import dev.hsbrysk.caffeine.buildCoroutine
 
 import dev.slne.surf.parkour.parkour.Parkour
 import dev.slne.surf.parkour.player.PlayerData
-import dev.slne.surf.parkour.plugin
+import dev.slne.surf.parkour.instance
 import dev.slne.surf.parkour.util.Area
 import dev.slne.surf.parkour.util.MessageBuilder
 
@@ -35,7 +35,7 @@ import java.util.UUID
 import java.util.concurrent.TimeUnit
 
 object DatabaseProvider {
-    private val config = plugin.config
+    private val config = instance.config
     private val logger = ComponentLogger.logger(this.javaClass)
     private val gson = Gson()
 
@@ -47,7 +47,7 @@ object DatabaseProvider {
         .newBuilder()
         .expireAfterWrite(30L, TimeUnit.DAYS)
         .removalListener<UUID, PlayerData> { uuid, data, _ ->
-            plugin.launch {
+            instance.launch {
                 if (uuid != null && data != null) {
                     savePlayer(data)
                 }

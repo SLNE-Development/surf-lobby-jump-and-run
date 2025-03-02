@@ -17,7 +17,7 @@ import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import org.bukkit.plugin.java.JavaPlugin
 
-val plugin: SurfParkour get() = JavaPlugin.getPlugin(SurfParkour::class.java)
+val instance: SurfParkour get() = JavaPlugin.getPlugin(SurfParkour::class.java)
 class SurfParkour : SuspendingJavaPlugin() {
 
     override suspend fun onEnableAsync() {

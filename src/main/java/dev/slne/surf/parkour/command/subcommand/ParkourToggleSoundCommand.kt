@@ -6,12 +6,10 @@ import dev.jorel.commandapi.executors.CommandArguments
 import dev.jorel.commandapi.executors.PlayerCommandExecutor
 import dev.slne.surf.parkour.SurfParkour
 import dev.slne.surf.parkour.database.DatabaseProvider
-import dev.slne.surf.parkour.plugin
+import dev.slne.surf.parkour.instance
 
-import dev.slne.surf.parkour.util.Colors
 import dev.slne.surf.parkour.util.MessageBuilder
 import dev.slne.surf.parkour.util.Permission
-import net.kyori.adventure.text.Component
 import org.bukkit.entity.Player
 
 class ParkourToggleSoundCommand(commandName: String) : CommandAPICommand(commandName) {
@@ -19,7 +17,7 @@ class ParkourToggleSoundCommand(commandName: String) : CommandAPICommand(command
         withPermission(Permission.COMMAND_PARKOUR_TOGGLE)
 
         executesPlayer(PlayerCommandExecutor { player: Player, _: CommandArguments ->
-            plugin.launch {
+            instance.launch {
                 val playerData = DatabaseProvider.getPlayerData(player.uniqueId)
 
                 playerData.edit {

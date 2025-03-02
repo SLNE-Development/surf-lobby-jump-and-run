@@ -4,7 +4,7 @@ import com.github.shynixn.mccoroutine.bukkit.launch
 import dev.slne.surf.parkour.SurfParkour
 
 import dev.slne.surf.parkour.database.DatabaseProvider
-import dev.slne.surf.parkour.plugin
+import dev.slne.surf.parkour.instance
 import dev.slne.surf.parkour.util.Area
 import dev.slne.surf.parkour.util.Colors
 import dev.slne.surf.parkour.util.MessageBuilder
@@ -75,7 +75,7 @@ data class Parkour (
      */
 
     fun start(player: Player) {
-        plugin.launch {
+        instance.launch {
             val jumps = arrayOfNulls<Block>(3)
             val highscore = DatabaseProvider.getPlayerData(player.uniqueId).highScore
 
