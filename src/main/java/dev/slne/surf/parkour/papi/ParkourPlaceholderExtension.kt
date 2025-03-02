@@ -1,12 +1,21 @@
 package dev.slne.surf.parkour.papi
 
+import com.github.shynixn.mccoroutine.bukkit.launch
+import dev.slne.surf.parkour.SurfParkour
+import dev.slne.surf.parkour.database.DatabaseProvider
+import dev.slne.surf.parkour.instance
 import it.unimi.dsi.fastutil.objects.ObjectArrayList
 import it.unimi.dsi.fastutil.objects.ObjectList
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import me.clip.placeholderapi.expansion.PlaceholderExpansion
 import org.bukkit.Bukkit
 import org.bukkit.OfflinePlayer
+import org.jetbrains.exposed.sql.SortOrder
+import org.jetbrains.exposed.sql.selectAll
+import org.jetbrains.exposed.sql.transactions.transaction
 import java.util.*
-import java.util.stream.Collectors
+import kotlin.collections.List
 
 class ParkourPlaceholderExtension : PlaceholderExpansion() {
     companion object {
@@ -46,44 +55,33 @@ class ParkourPlaceholderExtension : PlaceholderExpansion() {
         val place = parts[1].toIntOrNull() ?: return null
         val suffix = parts[2]
 
-        return when (category) {
-            CATEGORY_HIGHSCORE -> handleRequest(place, suffix, ::getHighScore, ::getSortedHighScores)
-            CATEGORY_POINTS -> handleRequest(place, suffix, ::getPoints, ::getSortedPoints)
-            else -> null
+        var result: String? = null
+        val job = instance.launch {
+            result = when (category) {
+                CATEGORY_HIGHSCORE -> handleRequestAsync(place, suffix, ::getHighScore, ::getSortedHighScores)
+                CATEGORY_POINTS -> handleRequestAsync(place, suffix, ::getPoints, ::getSortedPoints)
+                else -> null
+            }
         }
+        job.invokeOnCompletion { /* Handle completion if needed */ }
+        return result
     }
 
-    private fun handleRequest(
+    private fun handleRequestAsync(
         place: Int,
         suffix: String,
-        valueProvider: (Int) -> Int,
-        sortedPlayersProvider: () -> ObjectList<UUID>
-    ): String? {
-        return when (suffix) {
+        valueProvider: suspend (Int) -> Int,
+        sortedPlayersProvider: suspend () -> ObjectList<UUID>
+    ) = instance.launch {
+        when (suffix) {
             SUFFIX_NAME -> getName(place, sortedPlayersProvider())
             SUFFIX_VALUE -> valueProvider(place).toString()
-            else -> null
         }
     }
 
     private fun getName(place: Int, sortedPlayers: ObjectList<UUID>): String {
         if (place <= 0 || place > sortedPlayers.size) return "/"
-        val uuid = sortedPlayers[place - 1]
-        return getName(uuid)
-    }
-
-    private fun getHighScore(place: Int): Int {
-        val sortedPlayers = getSortedHighScores()
-        if (place <= 0 || place > sortedPlayers.size) return -1
-        val uuid = sortedPlayers[place - 1]
-        return Database.getHighScore(uuid)
-    }
-
-    private fun getPoints(place: Int): Int {
-        val sortedPlayers = getSortedPoints()
-        if (place <= 0 || place > sortedPlayers.size) return -1
-        val uuid = sortedPlayers[place - 1]
-        return Database.getPoints(uuid)
+        return getName(sortedPlayers[place - 1])
     }
 
     private fun getName(uuid: UUID): String {
@@ -91,19 +89,49 @@ class ParkourPlaceholderExtension : PlaceholderExpansion() {
         return player.name ?: "Unknown"
     }
 
-    private fun getSortedHighScores(): ObjectList<UUID> {
-        val highScores = Database.highScores
-        return highScores.entries.stream()
-            .sorted(Comparator.comparingInt { it.value ?: 0 })
-            .map { it.key }
-            .collect(Collectors.toCollection { ObjectArrayList() })
+    private suspend fun getSortedHighScores(): ObjectList<UUID> {
+        return withContext(Dispatchers.IO) {
+            transaction {
+                DatabaseProvider.Users.selectAll()
+                    .orderBy(DatabaseProvider.Users.highScore, SortOrder.DESC)
+                    .map { it[DatabaseProvider.Users.uuid] }.toObjectList()
+            }
+        }
     }
 
-    private fun getSortedPoints(): ObjectList<UUID> {
-        val points = Database.points
-        return points.entries.stream()
-            .sorted(Comparator.comparingInt { it.value ?: 0 })
-            .map { it.key }
-            .collect(Collectors.toCollection { ObjectArrayList() })
+    private suspend fun getSortedPoints(): ObjectList<UUID> {
+        return withContext(Dispatchers.IO) {
+            transaction {
+                DatabaseProvider.Users.selectAll()
+                    .orderBy(DatabaseProvider.Users.points, SortOrder.DESC)
+                    .map { it[DatabaseProvider.Users.uuid] }.toObjectList()
+            }
+        }
+    }
+
+    private suspend fun getHighScore(place: Int): Int {
+        return withContext(Dispatchers.IO) {
+            transaction {
+                DatabaseProvider.Users.selectAll()
+                    .orderBy(DatabaseProvider.Users.highScore, SortOrder.DESC)
+                    .map { it[DatabaseProvider.Users.highScore] }
+                    .getOrNull(place - 1) ?: 0
+            }
+        }
+    }
+
+    private suspend fun getPoints(place: Int): Int {
+        return withContext(Dispatchers.IO) {
+            transaction {
+                DatabaseProvider.Users.selectAll()
+                    .orderBy(DatabaseProvider.Users.points, SortOrder.DESC)
+                    .map { it[DatabaseProvider.Users.points] }
+                    .getOrNull(place - 1) ?: 0
+            }
+        }
+    }
+
+    private fun <T> List<T>.toObjectList(): ObjectList<T> {
+        return ObjectArrayList(this)
     }
 }
