@@ -48,20 +48,10 @@ object DatabaseProvider {
         .buildCoroutine(DatabaseProvider::loadPlayer)
 
     /**
-     * Cache for parkour data
+     * Cache for parkours
      */
 
-    private val parkourCache: CoroutineLoadingCache<UUID, PlayerData> = Caffeine
-        .newBuilder()
-        .expireAfterWrite(30L, TimeUnit.DAYS)
-        .removalListener<UUID, PlayerData> { uuid, data, _ ->
-            plugin.launch {
-                if (uuid != null && data != null) {
-                    savePlayer(data)
-                }
-            }
-        }
-        .buildCoroutine(DatabaseProvider::loadPlayer)
+    private val parkourList = ObjectArraySet<Parkour>()
 
     /**
      * Player Data Table
@@ -135,6 +125,10 @@ object DatabaseProvider {
         }
     }
 
+    suspend fun updatePlayerData(data: PlayerData) {
+        dataCache.put(data.uuid, data)
+    }
+
     private suspend fun savePlayer(data: PlayerData) {
         withContext(Dispatchers.IO) {
             transaction {
@@ -184,12 +178,14 @@ object DatabaseProvider {
         }
     }
 
-    suspend fun fetchParkours(): ObjectSet<Parkour> {
+    suspend fun fetchParkours() {
         val parkours = ObjectArraySet<Parkour>()
 
         withContext(Dispatchers.IO) {
+            val begin = System.currentTimeMillis()
+
             transaction {
-                Parkours.selectAll().map {
+                Parkours.selectAll().map { it ->
                     parkours.add(
                         Parkour(
                             uuid = UUID.fromString(it[Parkours.uuid].toString()),
@@ -204,24 +200,33 @@ object DatabaseProvider {
                     )
                 }
             }
+
+            logger.info(MessageBuilder().withPrefix().info("Fetched ${parkours.size} parkours in ${System.currentTimeMillis() - begin}ms!").build())
         }
 
-        return parkours
+        this.parkourList.addAll(parkours)
     }
 
-    suspend fun saveParkour(parkour: Parkour) {
+    suspend fun saveParkours() {
         withContext(Dispatchers.IO) {
+            val begin = System.currentTimeMillis()
             transaction {
-                Parkours.insert {
-                    it[uuid] = parkour.uuid
-                    it[name] = parkour.name
-                    it[world] = parkour.world.name
-                    it[area] = parkour.area.toString()
-                    it[start] = serializeVector(parkour.start)
-                    it[respawn] = serializeVector(parkour.respawn)
-                    it[availableMaterials] = serializeList(parkour.availableMaterials.map { it.name })
+                Parkours.deleteAll()
+
+                parkourList.forEach { parkour ->
+                    Parkours.insert { it ->
+                        it[uuid] = parkour.uuid
+                        it[name] = parkour.name
+                        it[world] = parkour.world.name
+                        it[area] = parkour.area.toString()
+                        it[start] = serializeVector(parkour.start)
+                        it[respawn] = serializeVector(parkour.respawn)
+                        it[availableMaterials] = serializeList(parkour.availableMaterials.map { it.name })
+                    }
                 }
             }
+
+            logger.info(MessageBuilder().withPrefix().info("Saved ${parkourList.size} parkours in ${System.currentTimeMillis() - begin}ms!").build())
         }
     }
 
@@ -239,5 +244,13 @@ object DatabaseProvider {
 
     private fun deserializeList(json: String): List<String> {
         return gson.fromJson(json, Array<String>::class.java).toList()
+    }
+
+    suspend fun getPlayerData(uuid: UUID): PlayerData {
+        return dataCache.get(uuid) ?: PlayerData(uuid = uuid, name = Bukkit.getOfflinePlayer(uuid).name ?: "Unknown")
+    }
+
+    fun getParkours(): ObjectSet<Parkour> {
+        return this.parkourList
     }
 }

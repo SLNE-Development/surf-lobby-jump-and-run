@@ -13,7 +13,7 @@ class PlayerParkourListener : Listener {
     @EventHandler
     suspend fun onMove(event: PlayerMoveEvent) {
         if (!event.hasChangedPosition()) {
-            return
+            retur
         }
 
         val toBlock = event.to.block

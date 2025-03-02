@@ -1,7 +1,6 @@
 package dev.slne.surf.parkour.config
 
 import dev.slne.surf.parkour.plugin
-import dev.slne.surf.parkour.service.JumpAndRun
 import it.unimi.dsi.fastutil.objects.ObjectArrayList
 import it.unimi.dsi.fastutil.objects.ObjectList
 import org.bukkit.Material
