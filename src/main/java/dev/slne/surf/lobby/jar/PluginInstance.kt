@@ -6,6 +6,7 @@ import com.github.shynixn.mccoroutine.folia.registerSuspendingEvents
 import dev.slne.surf.lobby.jar.command.ParkourCommand
 import dev.slne.surf.lobby.jar.command.subcommand.ParkourStatsCommand
 import dev.slne.surf.lobby.jar.config.PluginConfig
+import dev.slne.surf.lobby.jar.database.DatabaseProvider
 import dev.slne.surf.lobby.jar.listener.PlayerParkourListener
 import dev.slne.surf.lobby.jar.listener.PlayerKickListener
 import dev.slne.surf.lobby.jar.mysql.Database
@@ -30,7 +31,7 @@ class PluginInstance : SuspendingJavaPlugin() {
 
         Bukkit.getPluginManager().registerSuspendingEvents(PlayerParkourListener(), this, DispatcherUtil.PARKOUR)
         Bukkit.getPluginManager().registerEvents(PlayerKickListener(), this)
-        Database.createConnection()
+        DatabaseProvider.connect()
 
         JumpAndRunService.startActionbar()
     }
@@ -39,7 +40,6 @@ class PluginInstance : SuspendingJavaPlugin() {
         JumpAndRunService.stopActionbar()
         JumpAndRunService.saveAll()
 
-        Database.closeConnection()
         PluginConfig.save(JumpAndRunService.jumpAndRun)
     }
 
