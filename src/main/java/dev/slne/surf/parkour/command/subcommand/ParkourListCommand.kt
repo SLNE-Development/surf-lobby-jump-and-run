@@ -1,53 +1,34 @@
 package dev.slne.surf.parkour.command.subcommand
 
 import dev.jorel.commandapi.CommandAPICommand
+import dev.jorel.commandapi.arguments.IntegerArgument
 import dev.jorel.commandapi.executors.CommandArguments
 import dev.jorel.commandapi.executors.PlayerCommandExecutor
-import dev.slne.surf.parkour.service.JumpAndRunService
-import dev.slne.surf.parkour.util.Colors
-import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.format.NamedTextColor
+import dev.slne.surf.parkour.command.argument.ParkourArgument
+import dev.slne.surf.parkour.parkour.Parkour
+import dev.slne.surf.parkour.util.MessageBuilder
+import dev.slne.surf.parkour.util.PageableMessageBuilder
+import dev.slne.surf.parkour.util.Permission
 import org.bukkit.entity.Player
 
 class ParkourListCommand(commandName: String) : CommandAPICommand(commandName) {
     init {
-        withPermission("jumpandrun.command.list")
+        withPermission(Permission.COMMAND_PARKOUR_LIST)
+        withArguments(ParkourArgument("parkour"))
+        withOptionalArguments(IntegerArgument("page"))
+        executesPlayer(PlayerCommandExecutor { player: Player, args: CommandArguments ->
+            val parkour = args.getUnchecked<Parkour>("parkour") ?: return@PlayerCommandExecutor
+            val page = args.getOrDefaultUnchecked("page", 1)
+            val message = PageableMessageBuilder()
 
-        executesPlayer(PlayerCommandExecutor { player: Player, _: CommandArguments? ->
-            val playerCount = JumpAndRunService.jumpAndRun.players.size
+            message.setPageCommand("/parkour list ${parkour.name} %page%")
+            message.setTitle(MessageBuilder().primary("Spieler in ").info(parkour.name).build())
 
-            if (playerCount == 0) {
-                player.sendMessage(Colors.PREFIX.append(Component.text("Aktuell sind ", NamedTextColor.GRAY)
-                    .append(Component.text("keine Spieler", NamedTextColor.YELLOW))
-                    .append(Component.text(" im Jump And Run.", NamedTextColor.WHITE))))
-
-                return@PlayerCommandExecutor
+            for (activePlayer in parkour.activePlayers) {
+                message.addLine(MessageBuilder().darkSpacer("- ").variableValue(activePlayer.name).darkSpacer(" (${parkour.currentPoints[activePlayer]})").build())
             }
 
-            val header: Component = Component.text("Aktuell sind ", NamedTextColor.GRAY)
-                .append(Component.text("$playerCount Spieler", NamedTextColor.YELLOW))
-                .append(Component.text(" im Jump And Run: ", NamedTextColor.WHITE))
-
-            var playerList: Component = Component.empty()
-            var current = 0
-
-            for (target in JumpAndRunService.jumpAndRun.players) {
-                current++
-
-                val points = JumpAndRunService.currentPoints[target] ?: 0
-
-                var playerComponent: Component = Component.text(target.name, NamedTextColor.WHITE)
-                    .append(Component.text(" (", NamedTextColor.GRAY))
-                    .append(Component.text(points, NamedTextColor.YELLOW))
-                    .append(Component.text(")", NamedTextColor.GRAY))
-
-                if (current < playerCount) {
-                    playerComponent = playerComponent.append(Component.text(", ", NamedTextColor.GRAY))
-                }
-
-                playerList = playerList.append(playerComponent)
-            }
-            player.sendMessage(Colors.PREFIX.append(header.append(playerList)))
+            message.send(player, page)
         })
     }
 }

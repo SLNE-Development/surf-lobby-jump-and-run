@@ -1,12 +1,13 @@
 package dev.slne.surf.parkour.parkour
 
 import com.github.shynixn.mccoroutine.bukkit.launch
+import dev.slne.surf.parkour.SurfParkour
 
 import dev.slne.surf.parkour.database.DatabaseProvider
 import dev.slne.surf.parkour.plugin
 import dev.slne.surf.parkour.util.Area
 import dev.slne.surf.parkour.util.Colors
-import dev.slne.surf.parkour.util.PluginColor
+import dev.slne.surf.parkour.util.MessageBuilder
 
 import it.unimi.dsi.fastutil.objects.*
 
@@ -33,12 +34,12 @@ import kotlin.random.Random
 
 data class Parkour (
     val uuid: UUID,
-    val name: String,
+    var name: String,
 
-    val world: World,
-    val area: Area,
-    val start: Vector,
-    val respawn: Vector,
+    var world: World,
+    var area: Area,
+    var start: Vector,
+    var respawn: Vector,
 
     val availableMaterials: ObjectSet<Material>,
     val activePlayers: ObjectSet<Player>
@@ -47,7 +48,7 @@ data class Parkour (
     private val latestJumps: Object2ObjectMap<Player, Array<Block?>> = Object2ObjectOpenHashMap()
 
     private val blocks: Object2ObjectMap<Player, Material> = Object2ObjectOpenHashMap()
-    private val currentPoints: Object2ObjectMap<Player, Int> = Object2ObjectOpenHashMap()
+    val currentPoints: Object2ObjectMap<Player, Int> = Object2ObjectOpenHashMap()
 
     private val offsets = arrayOf(
         Vector(3, 0, 0),
@@ -201,8 +202,8 @@ data class Parkour (
             player.playSound(Sound.sound(org.bukkit.Sound.ITEM_TOTEM_USE, Sound.Source.MASTER, 10f, 1f), Sound.Emitter.self())
         }
 
-        player.sendMessage(Colors.PREFIX.append(Component.text("Du hast deinen Highscore gebrochen! Dein neuer Highscore ist ${currentScore}!")))
-        player.showTitle(Title.title(Component.text("Rekord!", PluginColor.BLUE_MID), Component.text("Du hast einen neuen persönlichen Rekord aufgestellt.", PluginColor.DARK_GRAY), Title.Times.times(Duration.ofSeconds(1), Duration.ofSeconds(2), Duration.ofSeconds(1))))
+        player.showTitle(Title.title(MessageBuilder().primary("Record!").build(), MessageBuilder().info("Du hast einen neuen persönlichen Rekord aufgestellt.").build(), Title.Times.times(Duration.ofSeconds(1), Duration.ofSeconds(2), Duration.ofSeconds(1))))
+        SurfParkour.send(player, MessageBuilder().primary("Du hast deinen Highscore gebrochen! Dein neuer Highscore ist ").info(currentScore.toString()).success("!"))
     }
 
     /**
@@ -336,6 +337,12 @@ data class Parkour (
         return previousLocation.clone().add(offsets[0]).block
     }
 
+    fun edit(block: Parkour.() -> Unit) {
+        DatabaseProvider.getParkours().remove(this)
+        this.apply(block)
+        DatabaseProvider.getParkours().add(this)
+    }
+
     /**
      *
      * Static Parkour functions
@@ -345,6 +352,14 @@ data class Parkour (
     companion object {
         fun getByName(name: String): Parkour? {
             return DatabaseProvider.getParkours().firstOrNull { it.name == name }
+        }
+
+        fun isJumping(player: Player): Boolean {
+            return DatabaseProvider.getParkours().any { it.activePlayers.contains(player) }
+        }
+
+        fun getParkour(player: Player): Parkour? {
+            return DatabaseProvider.getParkours().firstOrNull { it.activePlayers.contains(player) }
         }
     }
 }

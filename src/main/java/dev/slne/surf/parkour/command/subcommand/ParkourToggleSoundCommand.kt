@@ -4,29 +4,32 @@ import com.github.shynixn.mccoroutine.bukkit.launch
 import dev.jorel.commandapi.CommandAPICommand
 import dev.jorel.commandapi.executors.CommandArguments
 import dev.jorel.commandapi.executors.PlayerCommandExecutor
+import dev.slne.surf.parkour.SurfParkour
+import dev.slne.surf.parkour.database.DatabaseProvider
 import dev.slne.surf.parkour.plugin
-import dev.slne.surf.parkour.service.JumpAndRunService
+
 import dev.slne.surf.parkour.util.Colors
-import dev.slne.surf.parkour.util.PluginColor
+import dev.slne.surf.parkour.util.MessageBuilder
+import dev.slne.surf.parkour.util.Permission
 import net.kyori.adventure.text.Component
 import org.bukkit.entity.Player
 
 class ParkourToggleSoundCommand(commandName: String) : CommandAPICommand(commandName) {
     init {
-        withPermission("jumpandrun.command.toggle")
+        withPermission(Permission.COMMAND_PARKOUR_TOGGLE)
 
         executesPlayer(PlayerCommandExecutor { player: Player, _: CommandArguments ->
             plugin.launch {
-                var sound = JumpAndRunService.querySound(player.uniqueId);
+                val playerData = DatabaseProvider.getPlayerData(player.uniqueId)
 
-                sound = !sound
+                playerData.edit {
+                    likesSound = !likesSound
+                }
 
-                if (sound) {
-                    JumpAndRunService.setSound(player, false)
-                    player.sendMessage(Colors.PREFIX.append(Component.text("Sounds sind nun für dich deaktiviert.", PluginColor.GOLD)))
+                if (playerData.likesSound) {
+                    SurfParkour.send(player, MessageBuilder().primary("Parkour-Sounds sind nun für dich ").success("aktiviert").primary("."))
                 } else {
-                    JumpAndRunService.setSound(player, true)
-                    player.sendMessage(Colors.PREFIX.append(Component.text("Sounds sind nun für dich aktiviert.", PluginColor.GOLD)))
+                    SurfParkour.send(player, MessageBuilder().primary("Parkour-Sounds sind nun für dich ").error("deaktiviert").primary("."))
                 }
             }
         })

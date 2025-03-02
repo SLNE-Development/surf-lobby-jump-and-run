@@ -4,24 +4,30 @@ import dev.jorel.commandapi.CommandAPICommand
 import dev.jorel.commandapi.arguments.LocationArgument
 import dev.jorel.commandapi.executors.CommandArguments
 import dev.jorel.commandapi.executors.PlayerCommandExecutor
-import dev.slne.surf.parkour.service.JumpAndRunService
-import dev.slne.surf.parkour.util.Colors
-import net.kyori.adventure.text.Component
+import dev.slne.surf.parkour.SurfParkour
+import dev.slne.surf.parkour.command.argument.ParkourArgument
+import dev.slne.surf.parkour.parkour.Parkour
+import dev.slne.surf.parkour.util.MessageBuilder
+import dev.slne.surf.parkour.util.Permission
 import org.bukkit.Location
 import org.bukkit.entity.Player
 
 class ParkourSettingStartCommand(commandName: String) : CommandAPICommand(commandName) {
     init {
-        withPermission("jumpandrun.command.setting.setStart")
+        withPermission(Permission.COMMAND_PARKOUR_START)
 
         withArguments(LocationArgument("pos"))
+        withArguments(ParkourArgument("parkour"))
 
         executesPlayer(PlayerCommandExecutor { player: Player, args: CommandArguments ->
             val pos = args.getUnchecked<Location>("pos") ?: return@PlayerCommandExecutor
+            val parkour = args.getUnchecked<Parkour>("parkour") ?: return@PlayerCommandExecutor
 
-            JumpAndRunService.jumpAndRun.start = pos.toVector().normalize()
+            parkour.edit {
+                this.start = pos.toVector().normalize()
+            }
 
-            player.sendMessage(Colors.PREFIX.append(Component.text("Du hast den Start erfolgreich neu definiert.")))
+            SurfParkour.send(player, MessageBuilder().primary("Du hast den Start von ").info(parkour.name).primary(" neu definiert."))
         })
     }
 }

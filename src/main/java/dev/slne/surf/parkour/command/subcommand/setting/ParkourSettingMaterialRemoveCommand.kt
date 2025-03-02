@@ -4,24 +4,32 @@ import dev.jorel.commandapi.CommandAPI
 import dev.jorel.commandapi.CommandAPICommand
 import dev.jorel.commandapi.executors.CommandArguments
 import dev.jorel.commandapi.executors.PlayerCommandExecutor
+
+import dev.slne.surf.parkour.SurfParkour
 import dev.slne.surf.parkour.command.argument.MaterialArgument.argument
-import dev.slne.surf.parkour.service.JumpAndRunService
-import dev.slne.surf.parkour.util.Colors
-import net.kyori.adventure.text.Component
+import dev.slne.surf.parkour.command.argument.ParkourArgument
+import dev.slne.surf.parkour.parkour.Parkour
+import dev.slne.surf.parkour.util.MessageBuilder
+import dev.slne.surf.parkour.util.Permission
+
 import org.bukkit.Material
 import org.bukkit.entity.Player
 
 class ParkourSettingMaterialRemoveCommand(commandName: String) : CommandAPICommand(commandName) {
     init {
-        withPermission("jumpandrun.command.setting.removematerial")
+        withPermission(Permission.COMMAND_PARKOUR_SETTING_MATERIAL_ADD)
         withArguments(argument("material"))
+        withArguments(ParkourArgument("parkour"))
 
         executesPlayer(PlayerCommandExecutor { player: Player, args: CommandArguments ->
             val material = args.getUnchecked<Material>("material") ?: throw CommandAPI.failWithString("Das Material wurde nicht gefunden.")
+            val parkour = args.getUnchecked<Parkour>("parkour") ?: throw CommandAPI.failWithString("Der Parkour wurde nicht gefunden.")
 
-            JumpAndRunService.jumpAndRun.materials.remove(material)
+            parkour.edit {
+                this.availableMaterials.remove(material)
+            }
 
-            player.sendMessage(Colors.PREFIX.append(Component.text(String.format("Du hast %s aus der Liste der Materialien entfernt.", material.name))))
+            SurfParkour.send(player, MessageBuilder().primary("Du hast ").info(material.name).primary(" von der Liste der Materialien von ").info(parkour.name).error(" entfernt."))
         })
     }
 }

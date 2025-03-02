@@ -2,32 +2,40 @@ package dev.slne.surf.parkour.database
 
 import com.github.benmanes.caffeine.cache.Caffeine
 import com.github.shynixn.mccoroutine.bukkit.launch
+
 import com.google.gson.Gson
+
 import dev.hsbrysk.caffeine.CoroutineLoadingCache
 import dev.hsbrysk.caffeine.buildCoroutine
-import dev.slne.surf.parkour.config.PluginConfig
+
 import dev.slne.surf.parkour.parkour.Parkour
 import dev.slne.surf.parkour.player.PlayerData
 import dev.slne.surf.parkour.plugin
 import dev.slne.surf.parkour.util.Area
 import dev.slne.surf.parkour.util.MessageBuilder
+
 import it.unimi.dsi.fastutil.objects.ObjectArraySet
 import it.unimi.dsi.fastutil.objects.ObjectSet
+
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger
+
 import org.bukkit.Bukkit
 import org.bukkit.Material
 
 import org.bukkit.util.Vector
+
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.transaction
+
 import java.util.UUID
 import java.util.concurrent.TimeUnit
 
 object DatabaseProvider {
-    private val config = PluginConfig.getConfig()
+    private val config = plugin.config
     private val logger = ComponentLogger.logger(this.javaClass)
     private val gson = Gson()
 
@@ -91,7 +99,7 @@ object DatabaseProvider {
      */
 
     fun connect() {
-        val method = PluginConfig.getConfig().getString("storage-method") ?: "local"
+        val method = config.getString("storage-method") ?: "local"
 
         when (method.lowercase()) {
             "local" -> {

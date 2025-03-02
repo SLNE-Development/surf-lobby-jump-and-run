@@ -3,8 +3,8 @@ package dev.slne.surf.parkour.util
 import org.bukkit.util.Vector
 
 data class Area (
-    val max: Vector,
-    val min: Vector
+    var max: Vector,
+    var min: Vector
 ) {
     override fun toString(): String {
         return "Area(max=$max, min=$min)"

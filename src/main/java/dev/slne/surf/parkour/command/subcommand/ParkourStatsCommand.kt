@@ -5,34 +5,45 @@ import dev.jorel.commandapi.CommandAPICommand
 import dev.jorel.commandapi.arguments.PlayerArgument
 import dev.jorel.commandapi.executors.CommandArguments
 import dev.jorel.commandapi.executors.PlayerCommandExecutor
+import dev.slne.surf.parkour.database.DatabaseProvider
+import dev.slne.surf.parkour.parkour.Parkour
 import dev.slne.surf.parkour.plugin
-import dev.slne.surf.parkour.service.JumpAndRunService
-import dev.slne.surf.parkour.util.PluginColor
+import dev.slne.surf.parkour.util.Colors
+import dev.slne.surf.parkour.util.Permission
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.entity.Player
 
 class ParkourStatsCommand(commandName: String) : CommandAPICommand(commandName) {
     init {
-        withPermission("jumpandrun.command.stats")
+        withPermission(Permission.COMMAND_PARKOUR_STATISTIC)
         withOptionalArguments(PlayerArgument("target"))
         executesPlayer(PlayerCommandExecutor { player: Player, args: CommandArguments ->
             val target = args.getOrDefaultUnchecked("target", player)
 
             plugin.launch {
-                val highscore = JumpAndRunService.queryHighScore(target.uniqueId);
-                val points = JumpAndRunService.queryPoints(target.uniqueId);
-                val trys = JumpAndRunService.queryTrys(target.uniqueId);
-                val currentPoints = JumpAndRunService.currentPoints[player] ?: 0
+                val playerData = DatabaseProvider.getPlayerData(target.uniqueId)
 
-                player.sendMessage(
-                    createStatisticMessage(
-                        points.toString(),
-                        highscore.toString(),
-                        if (JumpAndRunService.isJumping(target)) currentPoints.toString() else "Kein laufender Parkour",
-                        trys.toString()
+
+                val parkour = Parkour.getParkour(target)
+
+                if(parkour == null) {
+                    player.sendMessage(createStatisticMessage(
+                        playerData.points.toString(),
+                        playerData.highScore.toString(),
+                        "Kein laufender Parkour",
+                        playerData.trys.toString()
+                        )
                     )
-                )
+                } else {
+                    player.sendMessage(createStatisticMessage(
+                        playerData.points.toString(),
+                        playerData.highScore.toString(),
+                        parkour.currentPoints[target].toString(),
+                        playerData.trys.toString()
+                    )
+                    )
+                }
             }
         })
     }
@@ -44,75 +55,45 @@ class ParkourStatsCommand(commandName: String) : CommandAPICommand(commandName) 
             current: String,
             trys: String
         ): Component {
-            return Component.text(">> ", PluginColor.DARK_GRAY)
-                .append(Component.text("Parkour ", PluginColor.BLUE))
-                .append(Component.text("| ", PluginColor.DARK_GRAY))
-                .append(Component.text("-------------", PluginColor.LIGHT_GRAY))
-                .append(Component.text("STATISTIK", PluginColor.BLUE_LIGHT).decorate(TextDecoration.BOLD))
-                .append(Component.text("-------------", PluginColor.LIGHT_GRAY))
+            return Colors.PREFIX
+                .append(Component.text("-------------", Colors.SPACER))
+                .append(Component.text("STATISTIK", Colors.INFO).decorate(TextDecoration.BOLD))
+                .append(Component.text("-------------", Colors.SPACER))
                 .append(Component.newline())
-                .append(Component.text(">> ", PluginColor.DARK_GRAY))
-                .append(Component.text("Parkour ", PluginColor.BLUE))
-                .append(Component.text("|", PluginColor.DARK_GRAY))
+                .append(Colors.PREFIX)
                 .append(Component.newline())
-                .append(Component.text(">> ", PluginColor.DARK_GRAY))
-                .append(Component.text("Parkour ", PluginColor.BLUE))
-                .append(Component.text("| ", PluginColor.DARK_GRAY))
-                .append(Component.text("Seit Aufzeichnung:", PluginColor.DARK_GRAY))
+                .append(Colors.PREFIX)
+                .append(Component.text("Seit Aufzeichnung:", Colors.DARK_SPACER))
                 .append(Component.newline())
-                .append(Component.text(">> ", PluginColor.DARK_GRAY))
-                .append(Component.text("Parkour ", PluginColor.BLUE))
-                .append(Component.text("|", PluginColor.DARK_GRAY))
+                .append(Colors.PREFIX)
                 .append(Component.newline())
-                .append(Component.text(">> ", PluginColor.DARK_GRAY))
-                .append(Component.text("Parkour ", PluginColor.BLUE))
-                .append(Component.text("|    ", PluginColor.DARK_GRAY))
-                .append(Component.text("Sprünge: ", PluginColor.BLUE_MID))
-                .append(Component.text(points, PluginColor.GOLD))
+                .append(Colors.PREFIX)
+                .append(Component.text("       Sprünge: ", Colors.PRIMARY))
+                .append(Component.text("       $points", Colors.VARIABLE_VALUE))
                 .append(Component.newline())
-                .append(Component.text(">> ", PluginColor.DARK_GRAY))
-                .append(Component.text("Parkour ", PluginColor.BLUE))
-                .append(Component.text("|    ", PluginColor.DARK_GRAY))
-                .append(Component.text("Rekord: ", PluginColor.BLUE_MID))
-                .append(Component.text(highScore, PluginColor.GOLD))
+                .append(Colors.PREFIX)
+                .append(Component.text("       Rekord: ", Colors.PRIMARY))
+                .append(Component.text("       $highScore", Colors.VARIABLE_VALUE))
                 .append(Component.newline())
-                .append(Component.text(">> ", PluginColor.DARK_GRAY))
-                .append(Component.text("Parkour ", PluginColor.BLUE))
-                .append(Component.text("|    ", PluginColor.DARK_GRAY))
-                .append(Component.text("Versuche: ", PluginColor.BLUE_MID))
-                .append(Component.text(trys, PluginColor.GOLD))
+                .append(Colors.PREFIX)
+                .append(Component.text("       Versuche: ", Colors.PRIMARY))
+                .append(Component.text("       $trys", Colors.VARIABLE_VALUE))
                 .append(Component.newline())
-                .append(Component.text(">> ", PluginColor.DARK_GRAY))
-                .append(Component.text("Parkour ", PluginColor.BLUE))
-                .append(Component.text("|", PluginColor.DARK_GRAY))
+                .append(Colors.PREFIX)
                 .append(Component.newline())
-                .append(Component.text(">> ", PluginColor.DARK_GRAY))
-                .append(Component.text("Parkour ", PluginColor.BLUE))
-                .append(Component.text("| Laufender Parkour:", PluginColor.DARK_GRAY))
+                .append(Colors.PREFIX)
+                .append(Component.text("Laufender Parkour:", Colors.DARK_SPACER))
                 .append(Component.newline())
-                .append(Component.text(">> ", PluginColor.DARK_GRAY))
-                .append(Component.text("Parkour ", PluginColor.BLUE))
-                .append(Component.text("|", PluginColor.DARK_GRAY))
+                .append(Colors.PREFIX)
                 .append(Component.newline())
-                .append(Component.text(">> ", PluginColor.DARK_GRAY))
-                .append(Component.text("Parkour ", PluginColor.BLUE))
-                .append(Component.text("|    ", PluginColor.DARK_GRAY))
-                .append(Component.text("Sprünge: ", PluginColor.BLUE_MID))
-                .append(Component.text(current, PluginColor.GOLD))
+                .append(Colors.PREFIX)
+                .append(Component.text("       Sprünge: ", Colors.PRIMARY))
+                .append(Component.text("       $current", Colors.VARIABLE_VALUE))
                 .append(Component.newline())
-                .append(Component.text(">> ", PluginColor.DARK_GRAY))
-                .append(Component.text("Parkour ", PluginColor.BLUE))
-                .append(Component.text("|", PluginColor.DARK_GRAY))
+                .append(Colors.PREFIX)
                 .append(Component.newline())
-                .append(Component.text(">> ", PluginColor.DARK_GRAY))
-                .append(Component.text("Parkour ", PluginColor.BLUE))
-                .append(Component.text("| ", PluginColor.DARK_GRAY))
-                .append(
-                    Component.text(
-                        "-----------------------------------",
-                        PluginColor.LIGHT_GRAY
-                    )
-                )
+                .append(Colors.PREFIX)
+                .append(Component.text("-----------------------------------", Colors.SPACER))
         }
     }
 }

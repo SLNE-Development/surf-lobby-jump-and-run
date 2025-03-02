@@ -11,7 +11,7 @@ data class PlayerData (
     var trys: Int = 0,
     var likesSound: Boolean = true
 ) {
-    suspend fun edit(block: PlayerData.() -> Unit) {
+    fun edit(block: PlayerData.() -> Unit) {
         block()
         DatabaseProvider.updatePlayerData(this)
     }

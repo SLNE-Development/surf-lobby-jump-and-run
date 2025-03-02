@@ -1,50 +1,36 @@
 package dev.slne.surf.parkour.command.subcommand.setting
 
 import dev.jorel.commandapi.CommandAPICommand
+import dev.jorel.commandapi.arguments.IntegerArgument
 import dev.jorel.commandapi.executors.CommandArguments
 import dev.jorel.commandapi.executors.PlayerCommandExecutor
-import dev.slne.surf.parkour.service.JumpAndRunService
-import dev.slne.surf.parkour.util.Colors
-import dev.slne.surf.parkour.util.PluginColor
-import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.format.NamedTextColor
+
+import dev.slne.surf.parkour.command.argument.ParkourArgument
+import dev.slne.surf.parkour.parkour.Parkour
+import dev.slne.surf.parkour.util.MessageBuilder
+import dev.slne.surf.parkour.util.PageableMessageBuilder
+import dev.slne.surf.parkour.util.Permission
+
 import org.bukkit.entity.Player
 
 class ParkourSettingMaterialListCommand(commandName: String) : CommandAPICommand(commandName) {
     init {
-        withPermission("jumpandrun.command.setting.listmaterial")
-        executesPlayer(PlayerCommandExecutor { player: Player, args: CommandArguments? ->
-            val materialCount: Int = JumpAndRunService.jumpAndRun.materials.size
-            val header: Component = Component.text("Materialien im Jump And Run: ", PluginColor.LIGHT_GRAY)
-              .append(Component.text("(", PluginColor.DARK_GRAY))
-              .append(Component.text(materialCount, NamedTextColor.YELLOW))
-              .append(Component.text(") ", PluginColor.DARK_GRAY))
+        withPermission(Permission.COMMAND_PARKOUR_SETTING_MATERIAL_LIST)
+        withArguments(ParkourArgument("parkour"))
+        withOptionalArguments(IntegerArgument("page"))
+        executesPlayer(PlayerCommandExecutor { player: Player, args: CommandArguments ->
+            val parkour = args.getUnchecked<Parkour>("parkour") ?: return@PlayerCommandExecutor
+            val page = args.getOrDefaultUnchecked("page", 1)
+            val message = PageableMessageBuilder()
 
-            val materialList = this.getComponent(materialCount)
+            message.setPageCommand("/parkour material list ${parkour.name} %page%")
+            message.setTitle(MessageBuilder().primary("Materialien von ").info(parkour.name).build())
 
-            player.sendMessage(Colors.PREFIX.append(header.append(materialList)))
-        })
-    }
-
-    private fun getComponent(materialCount: Int): Component {
-        var materialList: Component = Component.text("")
-        var current = 0
-
-        for (material in JumpAndRunService.jumpAndRun.materials) {
-            current++
-            val materialComponent: Component = Component.text(material.name, NamedTextColor.WHITE)
-
-            materialList = if (current < materialCount) {
-                materialList.append(materialComponent).append(
-                    Component.text(
-                        ", ",
-                        NamedTextColor.GRAY
-                    )
-                )
-            } else {
-                materialList.append(materialComponent)
+            for (availableMaterial in parkour.availableMaterials) {
+                message.addLine(MessageBuilder().darkSpacer("- ").variableValue(availableMaterial.name).build())
             }
-        }
-        return materialList
+
+            message.send(player, page)
+        })
     }
 }

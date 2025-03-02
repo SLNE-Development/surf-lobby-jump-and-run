@@ -5,6 +5,7 @@ import dev.slne.surf.parkour.command.subcommand.ParkourListCommand
 import dev.slne.surf.parkour.command.subcommand.ParkourStartCommand
 import dev.slne.surf.parkour.command.subcommand.ParkourStatsCommand
 import dev.slne.surf.parkour.command.subcommand.ParkourToggleSoundCommand
+import dev.slne.surf.parkour.command.subcommand.setting.ParkourMaterialCommand
 import dev.slne.surf.parkour.command.subcommand.setting.ParkourSettingCommand
 
 class ParkourCommand(commandName: String) : CommandAPICommand(commandName) {
@@ -16,5 +17,6 @@ class ParkourCommand(commandName: String) : CommandAPICommand(commandName) {
         withSubcommand(ParkourListCommand("list"))
         withSubcommand(ParkourStatsCommand("stats"))
         withSubcommand(ParkourToggleSoundCommand("toggleSound"))
+        withSubcommand(ParkourMaterialCommand("material"))
     }
 }
