@@ -9,7 +9,7 @@ import dev.slne.surf.parkour.command.subcommand.ParkourStatsCommand
 import dev.slne.surf.parkour.database.DatabaseProvider
 import dev.slne.surf.parkour.listener.PlayerKickListener
 import dev.slne.surf.parkour.listener.PlayerParkourListener
-import dev.slne.surf.parkour.papi.ParkourPlaceholderExtension
+//import dev.slne.surf.parkour.papi.ParkourPlaceholderExtension
 import dev.slne.surf.parkour.util.Colors
 import dev.slne.surf.parkour.util.MessageBuilder
 
@@ -38,9 +38,9 @@ class SurfParkour : SuspendingJavaPlugin() {
     }
 
     private fun handlePlaceholderAPI() {
-        if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
-            ParkourPlaceholderExtension().register()
-        }
+//        if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
+//            ParkourPlaceholderExtension().register()
+//        }
     }
 
     companion object {
