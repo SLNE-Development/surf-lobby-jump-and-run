@@ -6,6 +6,7 @@ import dev.jorel.commandapi.arguments.RotationArgument
 import dev.jorel.commandapi.arguments.StringArgument
 import dev.jorel.commandapi.arguments.WorldArgument
 import dev.jorel.commandapi.executors.PlayerCommandExecutor
+import dev.jorel.commandapi.wrappers.Rotation
 
 import dev.slne.surf.parkour.SurfParkour
 import dev.slne.surf.parkour.database.DatabaseProvider
@@ -13,8 +14,6 @@ import dev.slne.surf.parkour.parkour.Parkour
 import dev.slne.surf.parkour.util.Area
 import dev.slne.surf.parkour.util.MessageBuilder
 import dev.slne.surf.parkour.util.Permission
-
-import io.papermc.paper.math.Rotation
 
 import it.unimi.dsi.fastutil.objects.ObjectArraySet
 
@@ -52,7 +51,7 @@ class ParkourCreateCommand(commandName: String): CommandAPICommand(commandName) 
                 world,
                 Area(min.toVector(), max.toVector()),
                 start.toVector(),
-                respawn.setRotation(rotation).toVector(),
+                respawn.setRotation(rotation.yaw, rotation.pitch).toVector(),
                 ObjectArraySet.of(Material.RED_STAINED_GLASS),
                 ObjectArraySet()
             )
