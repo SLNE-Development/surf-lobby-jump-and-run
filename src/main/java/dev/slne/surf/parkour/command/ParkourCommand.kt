@@ -1,10 +1,7 @@
 package dev.slne.surf.parkour.command
 
 import dev.jorel.commandapi.CommandAPICommand
-import dev.slne.surf.parkour.command.subcommand.ParkourListCommand
-import dev.slne.surf.parkour.command.subcommand.ParkourStartCommand
-import dev.slne.surf.parkour.command.subcommand.ParkourStatsCommand
-import dev.slne.surf.parkour.command.subcommand.ParkourToggleSoundCommand
+import dev.slne.surf.parkour.command.subcommand.*
 import dev.slne.surf.parkour.command.subcommand.setting.ParkourMaterialCommand
 import dev.slne.surf.parkour.command.subcommand.setting.ParkourSettingCommand
 
@@ -18,5 +15,6 @@ class ParkourCommand(commandName: String) : CommandAPICommand(commandName) {
         withSubcommand(ParkourStatsCommand("stats"))
         withSubcommand(ParkourToggleSoundCommand("toggleSound"))
         withSubcommand(ParkourMaterialCommand("material"))
+        withSubcommand(ParkourCreateCommand("create"))
     }
 }
