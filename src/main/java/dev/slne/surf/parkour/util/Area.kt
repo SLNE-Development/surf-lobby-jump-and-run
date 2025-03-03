@@ -1,5 +1,6 @@
 package dev.slne.surf.parkour.util
 
+import com.google.gson.Gson
 import org.bukkit.util.Vector
 
 data class Area (
@@ -7,15 +8,12 @@ data class Area (
     var min: Vector
 ) {
     override fun toString(): String {
-        return "Area(max=$max, min=$min)"
+        return Gson().toJson(this)
     }
 
     companion object {
         fun fromString(string: String): Area {
-            val split = string.split(" ")
-            val max = Vector(split[0].toDouble(), split[1].toDouble(), split[2].toDouble())
-            val min = Vector(split[3].toDouble(), split[4].toDouble(), split[5].toDouble())
-            return Area(max, min)
+            return Gson().fromJson(string, Area::class.java)
         }
     }
 }
