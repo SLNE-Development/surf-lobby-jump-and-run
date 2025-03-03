@@ -206,7 +206,7 @@ data class Parkour (
             player.playSound(Sound.sound(org.bukkit.Sound.ITEM_TOTEM_USE, Sound.Source.MASTER, 10f, 1f), Sound.Emitter.self())
         }
 
-        player.showTitle(Title.title(MessageBuilder().primary("Record!").build(), MessageBuilder().info("Du hast einen neuen persönlichen Rekord aufgestellt.").build(), Title.Times.times(Duration.ofSeconds(1), Duration.ofSeconds(2), Duration.ofSeconds(1))))
+        player.showTitle(Title.title(MessageBuilder().primary("Rekord!").build(), MessageBuilder().info("Du hast einen neuen persönlichen Rekord aufgestellt.").build(), Title.Times.times(Duration.ofSeconds(1), Duration.ofSeconds(2), Duration.ofSeconds(1))))
         SurfParkour.send(player, MessageBuilder().primary("Du hast deinen Highscore gebrochen! ").info("Dein neuer Highscore ist $currentScore").primary("!"))
     }
 
