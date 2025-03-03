@@ -4,6 +4,7 @@ import dev.jorel.commandapi.CommandAPICommand
 import dev.jorel.commandapi.arguments.IntegerArgument
 import dev.jorel.commandapi.executors.CommandArguments
 import dev.jorel.commandapi.executors.PlayerCommandExecutor
+import dev.slne.surf.parkour.SurfParkour
 import dev.slne.surf.parkour.command.argument.ParkourArgument
 import dev.slne.surf.parkour.parkour.Parkour
 import dev.slne.surf.parkour.util.MessageBuilder
@@ -20,6 +21,11 @@ class ParkourListCommand(commandName: String) : CommandAPICommand(commandName) {
             val parkour = args.getUnchecked<Parkour>("parkour") ?: return@PlayerCommandExecutor
             val page = args.getOrDefaultUnchecked("page", 1)
             val message = PageableMessageBuilder()
+
+            if(parkour.activePlayers.isEmpty()) {
+                SurfParkour.send(player, MessageBuilder().error("Es sind keine Spieler in ").info(parkour.name).error(" aktiv."))
+                return@PlayerCommandExecutor
+            }
 
             message.setPageCommand("/parkour list ${parkour.name} %page%")
             message.setTitle(MessageBuilder().primary("Spieler in ").info(parkour.name).build())
