@@ -44,8 +44,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
     implementation("com.github.shynixn.mccoroutine:mccoroutine-bukkit-api:2.21.0")
     implementation("com.github.shynixn.mccoroutine:mccoroutine-bukkit-core:2.21.0")
-    implementation("com.github.ben-manes.caffeine:caffeine:3.1.8")
-    implementation ("com.sksamuel.aedile:aedile-core:2.0.3")
+    implementation("com.sksamuel.aedile:aedile-core:2.0.3")
 
     implementation("org.jetbrains.exposed:exposed-core:0.59.0")
     implementation("org.jetbrains.exposed:exposed-dao:0.59.0")
