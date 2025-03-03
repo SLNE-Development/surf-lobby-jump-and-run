@@ -18,6 +18,7 @@ import it.unimi.dsi.fastutil.objects.ObjectArraySet
 import it.unimi.dsi.fastutil.objects.ObjectSet
 
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger
@@ -171,19 +172,21 @@ object DatabaseProvider {
         }
     }
 
-    suspend fun saveAllPlayers() {
-        withContext(Dispatchers.IO) {
-            val start = System.currentTimeMillis()
+    fun saveAllPlayers() {
+        val start = System.currentTimeMillis()
 
-            dataCache.synchronous().asMap().forEach { (_, playerData) ->
-                savePlayer(playerData)
-            }
+        dataCache.synchronous().invalidateAll()
 
-            logger.info(MessageBuilder().withPrefix().primary("Successfully saved ${dataCache.synchronous().asMap().values.size} players in ${System.currentTimeMillis() - start}ms").build())
-        }
+        logger.info(
+            MessageBuilder().withPrefix()
+                .primary("Successfully saved all player data (${dataCache.synchronous().asMap().values.size}) in ${System.currentTimeMillis() - start}ms!")
+                .build()
+        )
     }
 
-    suspend fun loadPlayer(uuid: UUID): PlayerData? {
+
+
+    suspend fun loadPlayer(uuid: UUID): PlayerData {
         return withContext(Dispatchers.IO) {
             transaction {
                 Users.select(Users.uuid eq uuid).map {
@@ -195,7 +198,7 @@ object DatabaseProvider {
                         it[Users.trys],
                         it[Users.likesSound]
                     )
-                }.firstOrNull()
+                }.firstOrNull() ?: PlayerData(uuid = uuid, name = Bukkit.getOfflinePlayer(uuid).name ?: "Unknown")
             }
         }
     }
@@ -269,7 +272,7 @@ object DatabaseProvider {
     }
 
     suspend fun getPlayerData(uuid: UUID): PlayerData {
-        return dataCache.get(uuid) ?: PlayerData(uuid = uuid, name = Bukkit.getOfflinePlayer(uuid).name ?: "Unknown")
+        return dataCache.get(uuid)
     }
 
     fun getParkours(): ObjectSet<Parkour> {

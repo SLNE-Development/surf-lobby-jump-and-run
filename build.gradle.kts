@@ -40,7 +40,7 @@ dependencies {
     compileOnly("dev.jorel:commandapi-bukkit-core:9.5.2")
     compileOnly("me.clip:placeholderapi:2.11.6")
 
-    implementation("dev.hsbrysk:caffeine-coroutines:1.2.0")
+    implementation("dev.hsbrysk:caffeine-coroutines:2.0.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
     implementation("com.github.shynixn.mccoroutine:mccoroutine-bukkit-api:2.21.0")
     implementation("com.github.shynixn.mccoroutine:mccoroutine-bukkit-core:2.21.0")
