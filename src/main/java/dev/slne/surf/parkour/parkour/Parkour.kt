@@ -88,11 +88,9 @@ data class Parkour (
             generateInitial(player)
 
             if (highscore < 1) {
-                player.sendMessage(Colors.PREFIX.append(Component.text("Du bist nun im Parkour. Springe so weit wie möglich, um einen Highscore aufzustellen!")))
+                SurfParkour.send(player, MessageBuilder().primary("Springe so weit wie möglich, um deinen Highscore aufzustellen!"))
                 return@launch
             }
-
-            player.sendMessage(Colors.PREFIX.append(Component.text("Du bist nun im Parkour. Springe so weit wie möglich, um deinen Highscore von $highscore zu brechen!")))
         }
     }
 
