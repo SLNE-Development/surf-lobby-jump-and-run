@@ -16,5 +16,6 @@ class ParkourCommand(commandName: String) : CommandAPICommand(commandName) {
         withSubcommand(ParkourToggleSoundCommand("toggleSound"))
         withSubcommand(ParkourMaterialCommand("material"))
         withSubcommand(ParkourCreateCommand("create"))
+        withSubcommand(ParkourRemoveCommand("remove"))
     }
 }
