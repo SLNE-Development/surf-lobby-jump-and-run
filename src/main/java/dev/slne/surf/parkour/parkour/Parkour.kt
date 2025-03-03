@@ -105,11 +105,15 @@ data class Parkour (
             player.sendBlockChange(block.location, Material.AIR.createBlockData())
         }
 
-        currentPoints.remove(player)
-        latestJumps.remove(player)
-        activePlayers.remove(player)
-
         player.teleportAsync(Location(world, respawn.x, respawn.y, respawn.z))
+
+        instance.launch {
+            updateHighscore(player)
+
+            currentPoints.remove(player)
+            latestJumps.remove(player)
+            activePlayers.remove(player)
+        }
     }
 
     private fun generateInitial(player: Player) {

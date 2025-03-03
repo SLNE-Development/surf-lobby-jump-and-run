@@ -43,7 +43,6 @@ class PlayerParkourListener : Listener {
             jump2.type = material
 
             parkour.increasePoints(player)
-            parkour.updateHighscore(player)
             parkour.generate(player)
         }
     }
