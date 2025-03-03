@@ -30,6 +30,7 @@ import org.bukkit.util.Vector
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.transaction
+import java.io.File
 
 import java.util.UUID
 import java.util.concurrent.TimeUnit
@@ -104,7 +105,13 @@ object DatabaseProvider {
         when (method.lowercase()) {
             "local" -> {
                 Class.forName("org.sqlite.JDBC")
-                Database.connect("jdbc:sqlite:file:./plugins/SurfParkour/database.db", "org.sqlite.JDBC")
+                val dbFile = File("./plugins/SurfParkour/database.db")
+
+                if (!dbFile.exists()) {
+                    dbFile.parentFile.mkdirs()
+                    dbFile.createNewFile()
+                }
+                Database.connect("jdbc:sqlite:file:${dbFile.absolutePath}", "org.sqlite.JDBC")
             }
 
             "external" -> {
@@ -121,7 +128,13 @@ object DatabaseProvider {
                 logger.warn(MessageBuilder().withPrefix().info("Unknown storage method \"$method\". Using local storage...").build())
 
                 Class.forName("org.sqlite.JDBC")
-                Database.connect("jdbc:sqlite:file:./plugins/SurfParkour/database.db", "org.sqlite.JDBC")
+                val dbFile = File("./plugins/SurfParkour/database.db")
+
+                if (!dbFile.exists()) {
+                    dbFile.parentFile.mkdirs()
+                    dbFile.createNewFile()
+                }
+                Database.connect("jdbc:sqlite:file:${dbFile.absolutePath}", "org.sqlite.JDBC")
             }
         }
 
