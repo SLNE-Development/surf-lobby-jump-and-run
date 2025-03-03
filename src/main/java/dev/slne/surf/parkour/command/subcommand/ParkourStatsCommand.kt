@@ -55,7 +55,7 @@ class ParkourStatsCommand(commandName: String) : CommandAPICommand(commandName) 
             current: String,
             trys: String
         ): Component {
-            return Colors.PREFIX
+            return Component.newline().append(Colors.PREFIX)
                 .append(Component.text("-------------", Colors.SPACER))
                 .append(Component.text("STATISTIK", Colors.INFO).decorate(TextDecoration.BOLD))
                 .append(Component.text("-------------", Colors.SPACER))
