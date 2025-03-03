@@ -190,7 +190,7 @@ data class Parkour (
         }
     }
 
-    suspend fun updateHighscore(player: Player) {
+    private suspend fun updateHighscore(player: Player) {
         val currentScore = currentPoints[player] ?: return
         val playerData = DatabaseProvider.getPlayerData(player.uniqueId)
 
@@ -207,7 +207,7 @@ data class Parkour (
         }
 
         player.showTitle(Title.title(MessageBuilder().primary("Record!").build(), MessageBuilder().info("Du hast einen neuen persönlichen Rekord aufgestellt.").build(), Title.Times.times(Duration.ofSeconds(1), Duration.ofSeconds(2), Duration.ofSeconds(1))))
-        SurfParkour.send(player, MessageBuilder().primary("Du hast deinen Highscore gebrochen! Dein neuer Highscore ist ").info(currentScore.toString()).success("!"))
+        SurfParkour.send(player, MessageBuilder().primary("Du hast deinen Highscore gebrochen! ").info("Dein neuer Highscore ist $currentScore").primary("!"))
     }
 
     /**
