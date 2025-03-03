@@ -181,7 +181,7 @@ object DatabaseProvider {
                 }
             }
 
-            logger.info(MessageBuilder().withPrefix().primary("Successfully saved ${dataCache.synchronous().asMap().values.size} in ${System.currentTimeMillis() - start}ms").build())
+            logger.info(MessageBuilder().withPrefix().primary("Successfully saved ${dataCache.synchronous().asMap().values.size} players in ${System.currentTimeMillis() - start}ms").build())
         }
     }
 
