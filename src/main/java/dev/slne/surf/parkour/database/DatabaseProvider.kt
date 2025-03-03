@@ -34,6 +34,7 @@ import java.io.File
 
 import java.util.UUID
 import java.util.concurrent.TimeUnit
+import kotlin.math.log
 
 object DatabaseProvider {
     private val config = instance.config
@@ -167,6 +168,20 @@ object DatabaseProvider {
                     it[likesSound] = data.likesSound
                 }
             }
+        }
+    }
+
+    suspend fun saveAllPlayers() {
+        withContext(Dispatchers.IO) {
+            val start = System.currentTimeMillis()
+
+            dataCache.synchronous().asMap().forEach { (_, playerData) ->
+                instance.launch {
+                    savePlayer(playerData)
+                }
+            }
+
+            logger.info(MessageBuilder().withPrefix().primary("Successfully saved ${dataCache.synchronous().asMap().values.size} in ${System.currentTimeMillis() - start}ms").build())
         }
     }
 
