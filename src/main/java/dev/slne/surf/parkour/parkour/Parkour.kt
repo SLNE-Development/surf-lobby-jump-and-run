@@ -2,19 +2,15 @@ package dev.slne.surf.parkour.parkour
 
 import com.github.shynixn.mccoroutine.bukkit.launch
 import dev.slne.surf.parkour.SurfParkour
-
 import dev.slne.surf.parkour.database.DatabaseProvider
 import dev.slne.surf.parkour.instance
 import dev.slne.surf.parkour.util.Area
-import dev.slne.surf.parkour.util.Colors
 import dev.slne.surf.parkour.util.MessageBuilder
-
-import it.unimi.dsi.fastutil.objects.*
-
+import it.unimi.dsi.fastutil.objects.Object2ObjectMap
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap
+import it.unimi.dsi.fastutil.objects.ObjectSet
 import net.kyori.adventure.sound.Sound
-import net.kyori.adventure.text.Component
 import net.kyori.adventure.title.Title
-
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Material
@@ -22,17 +18,14 @@ import org.bukkit.World
 import org.bukkit.block.Block
 import org.bukkit.entity.Player
 import org.bukkit.util.Vector
-
 import java.time.Duration
-
-import java.util.UUID
-
+import java.util.*
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.random.Random
 
-data class Parkour (
+data class Parkour(
     val uuid: UUID,
     var name: String,
 
@@ -88,7 +81,9 @@ data class Parkour (
             generateInitial(player)
 
             if (highscore < 1) {
-                SurfParkour.send(player, MessageBuilder().primary("Springe so weit wie möglich, um deinen Highscore aufzustellen!"))
+                SurfParkour.send(
+                    player, MessageBuilder().primary("Springe so weit wie möglich, um deinen Highscore aufzustellen!")
+                )
                 return@launch
             }
         }
@@ -96,11 +91,10 @@ data class Parkour (
 
     fun cancel(player: Player) {
         val latest = latestJumps[player] ?: return
-
         for (block in latest) {
             if(block == null || block.type == Material.AIR) continue
 
-            player.sendBlockChange(block.location, Material.AIR.createBlockData())
+            updateBlock(player, block.location, Material.AIR)
         }
 
         player.teleportAsync(Location(world, respawn.x, respawn.y, respawn.z))
@@ -121,17 +115,17 @@ data class Parkour (
         val block = start.block
         val material = availableMaterials.random(random)
 
-        player.sendBlockChange(block.location, material.createBlockData())
+        updateBlock(player, block.location, material)
         latestJumps[player]!![0] = block
 
         val next = getValidBlock(start, player)
 
-        player.sendBlockChange(next.location, Material.SEA_LANTERN.createBlockData())
+        updateBlock(player, next.location, Material.SEA_LANTERN)
         latestJumps[player]!![1] = next
 
         val next2 = getValidBlock(next.location, player)
 
-        player.sendBlockChange(next2.location, material.createBlockData())
+        updateBlock(player, next2.location, material)
         latestJumps[player]!![2] = next2
 
         player.teleportAsync(block.location.add(0.5, 1.0, 0.5))
@@ -145,7 +139,7 @@ data class Parkour (
         if (jumps[0] != null) {
             val jump0 = jumps[0] ?: return
 
-            player.sendBlockChange(jump0.location, Material.AIR.createBlockData())
+            updateBlock(player, jump0.location, Material.AIR)
         }
 
         jumps[0] = jumps[1]
@@ -153,10 +147,11 @@ data class Parkour (
 
         val block1 = jumps[1] ?: return
 
-        player.sendBlockChange(block1.location, Material.SEA_LANTERN.createBlockData())
+        updateBlock(player, block1.location, Material.SEA_LANTERN)
 
         val nextJump = getValidBlock(block1.location, player)
-        player.sendBlockChange(nextJump.location, material.createBlockData())
+
+        updateBlock(player, nextJump.location, material)
         jumps[2] = nextJump
     }
 
@@ -184,7 +179,10 @@ data class Parkour (
         currentPoints.compute(player) { _: Player?, curPts: Int? -> if (curPts == null) 1 else curPts + 1 }
 
         if (playerData.likesSound) {
-            player.playSound(Sound.sound(org.bukkit.Sound.ENTITY_EXPERIENCE_ORB_PICKUP, Sound.Source.MASTER, 10f, 1f), Sound.Emitter.self())
+            player.playSound(
+                Sound.sound(org.bukkit.Sound.ENTITY_EXPERIENCE_ORB_PICKUP, Sound.Source.MASTER, 10f, 1f),
+                Sound.Emitter.self()
+            )
         }
     }
 
@@ -201,11 +199,24 @@ data class Parkour (
         }
 
         if (playerData.likesSound) {
-            player.playSound(Sound.sound(org.bukkit.Sound.ITEM_TOTEM_USE, Sound.Source.MASTER, 10f, 1f), Sound.Emitter.self())
+            player.playSound(
+                Sound.sound(org.bukkit.Sound.ITEM_TOTEM_USE, Sound.Source.MASTER, 10f, 1f),
+                Sound.Emitter.self()
+            )
         }
 
-        player.showTitle(Title.title(MessageBuilder().primary("Rekord!").build(), MessageBuilder().info("Du hast einen neuen persönlichen Rekord aufgestellt.").build(), Title.Times.times(Duration.ofSeconds(1), Duration.ofSeconds(2), Duration.ofSeconds(1))))
-        SurfParkour.send(player, MessageBuilder().primary("Du hast deinen Highscore gebrochen! ").info("Dein neuer Highscore ist $currentScore").primary("!"))
+        player.showTitle(
+            Title.title(
+                MessageBuilder().primary("Rekord!").build(),
+                MessageBuilder().info("Du hast einen neuen persönlichen Rekord aufgestellt.").build(),
+                Title.Times.times(Duration.ofSeconds(1), Duration.ofSeconds(2), Duration.ofSeconds(1))
+            )
+        )
+        SurfParkour.send(
+            player,
+            MessageBuilder().primary("Du hast deinen Highscore gebrochen! ")
+                .info("Dein neuer Highscore ist $currentScore").primary("!")
+        )
     }
 
     /**
@@ -290,7 +301,8 @@ data class Parkour (
                 continue
             }
 
-            val latestPlayerJumps: Array<Block?> = latestJumps[player] ?: return previousLocation.clone().add(offsets[0]).block
+            val latestPlayerJumps: Array<Block?> =
+                latestJumps[player] ?: return previousLocation.clone().add(offsets[0]).block
 
             val block0: Block = latestPlayerJumps[0] ?: return previousLocation.clone().add(offsets[0]).block
             val block1: Block = latestPlayerJumps[1] ?: return previousLocation.clone().add(offsets[0]).block
@@ -346,7 +358,6 @@ data class Parkour (
     }
 
     /**
-     *
      * Static Parkour functions
      *
      */
@@ -363,5 +374,9 @@ data class Parkour (
         fun getParkour(player: Player): Parkour? {
             return DatabaseProvider.getParkours().firstOrNull { it.activePlayers.contains(player) }
         }
+    }
+
+    private fun updateBlock(player: Player, blockLocation: Location, block: Material) {
+        player.sendBlockChange(blockLocation, block.createBlockData())
     }
 }
