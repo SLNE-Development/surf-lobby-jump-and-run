@@ -30,6 +30,8 @@ dependencies {
 surfPaperPluginApi {
     mainClass("dev.slne.surf.parkour.SurfParkour")
 
+    generateLibraryLoader(false)
+
     authors.add("SLNE Development")
     authors.add("Jo_field (Extern)")
 
