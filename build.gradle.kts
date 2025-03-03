@@ -16,7 +16,7 @@ plugins {
 }
 
 group = "dev.slne"
-version = "1.21.1-1.2.0-SNAPSHOT"
+version = "1.21.4-1.2.0-SNAPSHOT"
 
 val pluginName = "SurfParkour"
 val internalPluginName = "surf-parkour"
