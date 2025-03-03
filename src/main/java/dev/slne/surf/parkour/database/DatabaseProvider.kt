@@ -112,6 +112,7 @@ object DatabaseProvider {
                     dbFile.createNewFile()
                 }
                 Database.connect("jdbc:sqlite:file:${dbFile.absolutePath}", "org.sqlite.JDBC")
+                logger.info(MessageBuilder().withPrefix().success("Successfully connected to database with sqlite!").build())
             }
 
             "external" -> {
@@ -122,6 +123,8 @@ object DatabaseProvider {
                     user = config.getString("database.username") ?: return,
                     password = config.getString("database.password") ?: return
                 )
+
+                logger.info(MessageBuilder().withPrefix().success("Successfully connected to database with mysql!").build())
             }
 
             else -> {
@@ -135,6 +138,8 @@ object DatabaseProvider {
                     dbFile.createNewFile()
                 }
                 Database.connect("jdbc:sqlite:file:${dbFile.absolutePath}", "org.sqlite.JDBC")
+
+                logger.info(MessageBuilder().withPrefix().success("Successfully connected to database with sqlite!").build())
             }
         }
 
