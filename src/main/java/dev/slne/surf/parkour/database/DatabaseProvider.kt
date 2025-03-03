@@ -176,9 +176,7 @@ object DatabaseProvider {
             val start = System.currentTimeMillis()
 
             dataCache.synchronous().asMap().forEach { (_, playerData) ->
-                instance.launch {
-                    savePlayer(playerData)
-                }
+                savePlayer(playerData)
             }
 
             logger.info(MessageBuilder().withPrefix().primary("Successfully saved ${dataCache.synchronous().asMap().values.size} players in ${System.currentTimeMillis() - start}ms").build())
