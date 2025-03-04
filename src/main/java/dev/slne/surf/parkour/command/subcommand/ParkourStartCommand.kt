@@ -1,5 +1,6 @@
 package dev.slne.surf.parkour.command.subcommand
 
+import com.github.shynixn.mccoroutine.bukkit.launch
 import dev.jorel.commandapi.CommandAPICommand
 import dev.jorel.commandapi.executors.CommandArguments
 import dev.jorel.commandapi.executors.PlayerCommandExecutor
@@ -20,13 +21,15 @@ class ParkourStartCommand(commandName: String) : CommandAPICommand(commandName) 
         executesPlayer(PlayerCommandExecutor { player: Player, args: CommandArguments ->
             val parkour = args.getUnchecked<Parkour>("parkour") ?: return@PlayerCommandExecutor
 
-            if(parkour.activePlayers.contains(player)){
+            if(Parkour.isJumping(player)){
                 SurfParkour.send(player, MessageBuilder().primary("Du ").error("befindest dich bereits ").primary(" in einem parkour."))
                 return@PlayerCommandExecutor
             }
-            parkour.startParkour(player)
 
-            SurfParkour.send(player, MessageBuilder().primary("Du hast den Parkour ").info(parkour.name).success(" gestartet."))
+            dev.slne.surf.parkour.instance.launch {
+                parkour.startParkour(player)
+                SurfParkour.send(player, MessageBuilder().primary("Du hast den Parkour ").info(parkour.name).success(" gestartet."))
+            }
         })
     }
 }

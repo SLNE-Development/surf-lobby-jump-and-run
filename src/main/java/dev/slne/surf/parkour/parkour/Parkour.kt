@@ -7,6 +7,7 @@ import dev.slne.surf.parkour.instance
 import dev.slne.surf.parkour.util.Area
 import dev.slne.surf.parkour.util.Colors
 import dev.slne.surf.parkour.util.MessageBuilder
+import dev.slne.surf.surfapi.core.api.util.random
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap
 import it.unimi.dsi.fastutil.objects.ObjectSet
@@ -26,6 +27,7 @@ import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.random.Random
+import kotlin.random.asKotlinRandom
 
 data class Parkour(
     val uuid: UUID,
@@ -39,8 +41,6 @@ data class Parkour(
     val availableMaterials: ObjectSet<Material>,
     val activePlayers: ObjectSet<Player>
 ) {
-    private val random = Random
-
     val blocks: Object2ObjectMap<Player, Material> = Object2ObjectOpenHashMap()
     val latestJumps: Object2ObjectMap<Player, Array<Block?>> = Object2ObjectOpenHashMap()
     val currentPoints: Object2ObjectMap<Player, Int> = Object2ObjectOpenHashMap()
@@ -69,18 +69,16 @@ data class Parkour(
      *
      */
 
-    fun startParkour(player: Player) {
-        instance.launch {
-            val jumps = arrayOfNulls<Block>(3)
+    suspend fun startParkour(player: Player) {
+        val jumps = arrayOfNulls<Block>(3)
 
-            activePlayers.add(player)
+        activePlayers.add(player)
 
-            latestJumps[player] = jumps
-            currentPoints[player] = 0
+        latestJumps[player] = jumps
+        currentPoints[player] = 0
 
-            increaseTries(player)
-            generateInitial(player)
-        }
+        increaseTries(player)
+        generateInitial(player)
     }
 
     suspend fun cancelParkour(player: Player) {
@@ -107,13 +105,11 @@ data class Parkour(
 
         player.teleportAsync(Location(world, respawn.x, respawn.y, respawn.z))
 
-        instance.launch {
-            updateHighscore(player)
+        updateHighscore(player)
 
-            currentPoints.remove(player)
-            latestJumps.remove(player)
-            activePlayers.remove(player)
-        }
+        currentPoints.remove(player)
+        latestJumps.remove(player)
+        activePlayers.remove(player)
     }
 
     private suspend fun generateInitial(player: Player) {
@@ -122,7 +118,7 @@ data class Parkour(
 
         val start = randomLocation.add(0.0, 1.0, 0.0)
         val block = start.block
-        val material = availableMaterials.random(random)
+        val material = availableMaterials.random(random.asKotlinRandom())
 
         updateBlock(player, block.location, material)
         latestJumps[player]!![0] = block
@@ -223,16 +219,13 @@ data class Parkour(
             )
         }
 
-        player.showTitle(
-            Title.title(
+        player.showTitle(Title.title(
                 MessageBuilder().primary("Rekord!").build(),
                 MessageBuilder().info("Du hast einen neuen Rekord aufgestellt.").build(),
                 Title.Times.times(Duration.ofSeconds(1), Duration.ofSeconds(2), Duration.ofSeconds(1))
             )
         )
-        SurfParkour.send(
-            player,
-            MessageBuilder().primary("Du hast deinen Highscore gebrochen! ").newLine()
+        SurfParkour.send(player, MessageBuilder().primary("Du hast deinen Highscore gebrochen! ").newLine()
                 .primary("Dein neuer Highscore liegt nun bei")
                 .component(Component.text(("$currentScore Sprüngen")))
                 .primary("!")
@@ -377,6 +370,10 @@ data class Parkour(
         DatabaseProvider.getParkours().add(this)
     }
 
+    private fun updateBlock(player: Player, blockLocation: Location, block: Material) {
+        player.sendBlockChange(blockLocation, block.createBlockData())
+    }
+
     /**
      * Static Parkour functions
      *
@@ -394,9 +391,5 @@ data class Parkour(
         fun getParkour(player: Player): Parkour? {
             return DatabaseProvider.getParkours().firstOrNull { it.activePlayers.contains(player) }
         }
-    }
-
-    private fun updateBlock(player: Player, blockLocation: Location, block: Material) {
-        player.sendBlockChange(blockLocation, block.createBlockData())
     }
 }

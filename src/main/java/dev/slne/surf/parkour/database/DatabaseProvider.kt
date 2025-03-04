@@ -6,6 +6,7 @@ import com.github.shynixn.mccoroutine.bukkit.launch
 import com.google.gson.Gson
 import dev.hsbrysk.caffeine.CoroutineLoadingCache
 import dev.hsbrysk.caffeine.buildCoroutine
+import dev.slne.surf.parkour.SurfParkour
 
 import dev.slne.surf.parkour.parkour.Parkour
 import dev.slne.surf.parkour.player.PlayerData
@@ -106,7 +107,7 @@ object DatabaseProvider {
         when (method.lowercase()) {
             "local" -> {
                 Class.forName("org.sqlite.JDBC")
-                val dbFile = File("./plugins/SurfParkour/database.db")
+                val dbFile = File("${instance.dataPath}/storage.db")
 
                 if (!dbFile.exists()) {
                     dbFile.parentFile.mkdirs()
