@@ -1,9 +1,7 @@
 package dev.slne.surf.parkour.parkour
 
-import com.github.shynixn.mccoroutine.bukkit.launch
 import dev.slne.surf.parkour.SurfParkour
 import dev.slne.surf.parkour.database.DatabaseProvider
-import dev.slne.surf.parkour.instance
 import dev.slne.surf.parkour.util.Area
 import dev.slne.surf.parkour.util.Colors
 import dev.slne.surf.parkour.util.MessageBuilder
@@ -27,7 +25,6 @@ import java.util.*
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
-import kotlin.random.Random
 import kotlin.random.asKotlinRandom
 
 data class Parkour(
