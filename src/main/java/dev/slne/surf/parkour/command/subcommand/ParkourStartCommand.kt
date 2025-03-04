@@ -28,7 +28,7 @@ class ParkourStartCommand(commandName: String) : CommandAPICommand(commandName) 
 
             dev.slne.surf.parkour.instance.launch {
                 parkour.startParkour(player)
-                SurfParkour.send(player, MessageBuilder().primary("Du hast den Parkour ").info(parkour.name).success(" gestartet."))
+                parkour.announceNewParkourStarted(player, parkour.name)
             }
         })
     }

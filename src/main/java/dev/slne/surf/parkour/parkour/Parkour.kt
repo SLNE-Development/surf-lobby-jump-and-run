@@ -84,38 +84,24 @@ data class Parkour(
 
     suspend fun cancelParkour(player: Player) {
         val latest = latestJumps[player] ?: return
-        val playerData = DatabaseProvider.getPlayerData(player.uniqueId)
-        val jumps = currentPoints[player] ?: 0
 
         for (block in latest) {
             if (block == null) continue
 
             updateBlock(player, block.location, Material.AIR)
         }
-
-        if (playerData.likesSound) {
-            player.playSound(
-                Sound.sound(org.bukkit.Sound.ENTITY_VILLAGER_NO, Sound.Source.MASTER, 10f, 1f),
-                Sound.Emitter.self()
-            )
-        }
-        SurfParkour.send(
-            player,
-            MessageBuilder().primary("Du hast den Parkour mit ").variableValue("$jumps Sprüngen").primary(" beendet.")
-        )
-
         player.teleportAsync(Location(world, respawn.x, respawn.y, respawn.z))
 
         updateHighscore(player)
+        announceNewHighscore(player)
 
         currentPoints.remove(player)
         latestJumps.remove(player)
         activePlayers.remove(player)
     }
 
-    private suspend fun generateInitial(player: Player) {
+    private fun generateInitial(player: Player) {
         val randomLocation = getRandomLocationInRegion(world) ?: return
-        val playerData = DatabaseProvider.getPlayerData(player.uniqueId)
 
         val start = randomLocation.add(0.0, 1.0, 0.0)
         val block = start.block
@@ -134,12 +120,7 @@ data class Parkour(
         updateBlock(player, next2.location, material)
         latestJumps[player]!![2] = next2
 
-        if (playerData.likesSound) {
-            player.playSound(
-                Sound.sound(org.bukkit.Sound.BLOCK_NOTE_BLOCK_PLING, Sound.Source.MASTER, 10f, 1f),
-                Sound.Emitter.self()
-            )
-        }
+        // scored point
 
         player.teleportAsync(block.location.add(0.5, 1.0, 0.5))
         blocks[player] = material
@@ -169,6 +150,91 @@ data class Parkour(
     }
 
     /**
+     * player feedback
+     *
+     */
+
+    suspend fun announceNewParkourStarted(player: Player, parkour: String) {
+        val playerData = DatabaseProvider.getPlayerData(player.uniqueId)
+        if (playerData.likesSound) {
+            player.playSound(
+                Sound.sound(org.bukkit.Sound.BLOCK_NOTE_BLOCK_PLING, Sound.Source.MASTER, 10f, 1f),
+                Sound.Emitter.self()
+            )
+        }
+        SurfParkour.send(player, MessageBuilder().primary("Du hast den Parkour ").info(parkour).success(" gestartet").primary("."))
+    }
+
+    suspend fun announceNewScoredPoint(player: Player) {
+        val playerData = DatabaseProvider.getPlayerData(player.uniqueId)
+        val jumpCount = currentPoints[player] ?: 1
+        val highscore = playerData.highScore
+        if (playerData.likesSound) {
+            player.playSound(
+                Sound.sound(org.bukkit.Sound.ENTITY_CHICKEN_EGG, Sound.Source.MASTER, 10f, 1f),
+                Sound.Emitter.self()
+            )
+        }
+        player.sendActionBar(
+            Component.text("Rekord: $highscore Sprünge", Colors.GOLD).append(Component.text(" | ", Colors.SPACER))
+                .append(Component.text("Aktuelle Sprünge: $jumpCount", Colors.GOLD))
+        )
+    }
+
+    suspend fun announceParkourLoose(player: Player) {
+        val playerData = DatabaseProvider.getPlayerData(player.uniqueId)
+        val currentScore = currentPoints[player] ?: return
+
+        if (playerData.likesSound) {
+            player.playSound(
+                Sound.sound(org.bukkit.Sound.ENTITY_VILLAGER_NO, Sound.Source.MASTER, 10f, 1f),
+                Sound.Emitter.self()
+            )
+        }
+        SurfParkour.send(
+            player,
+            MessageBuilder()
+                .primary("Du hast den Parkour mit ")
+                .variableValue("$currentScore Sprüngen")
+                .primary(" beendet.")
+        )
+    }
+
+    private suspend fun announceNewHighscore(player: Player) {
+        val playerData = DatabaseProvider.getPlayerData(player.uniqueId)
+        val currentScore = currentPoints[player] ?: return
+        val highscore = playerData.highScore
+
+        if (currentScore < highscore) {
+            return
+        }
+
+        if (playerData.likesSound) {
+            player.playSound(
+                Sound.sound(org.bukkit.Sound.ENTITY_PLAYER_LEVELUP, Sound.Source.MASTER, 10f, 1f),
+                Sound.Emitter.self()
+            )
+        }
+
+        player.showTitle(
+            Title.title(
+                MessageBuilder().component(Component.text("Herzlichen Glückwunsch!", Colors.GOLD)).build(),
+                MessageBuilder().info("Du hast einen neuen Rekord aufgestellt!").build(),
+                Title.Times.times(Duration.ofSeconds(1), Duration.ofSeconds(2), Duration.ofSeconds(1))
+            )
+        )
+        SurfParkour.send(
+            player, MessageBuilder()
+                .primary("Du hast deinen Highscore gebrochen! ")
+                .newLine()
+                .withPrefix()
+                .primary("Dein neuer Highscore liegt nun bei")
+                .component(Component.text(" $currentScore Sprüngen", Colors.GOLD))
+                .primary("!")
+        )
+    }
+
+    /**
      *
      * Storage/Statistik functions
      *
@@ -185,20 +251,11 @@ data class Parkour(
     suspend fun increasePoints(player: Player) {
         val playerData = DatabaseProvider.getPlayerData(player.uniqueId)
 
-        playerData.edit {
-            points = (currentPoints[player] ?: 1) + 1
-        }
-
         currentPoints.compute(player) { _: Player?, curPts: Int? -> if (curPts == null) 1 else curPts + 1 }
 
-        if (playerData.likesSound) {
-            player.playSound(
-                Sound.sound(org.bukkit.Sound.ENTITY_CHICKEN_EGG, Sound.Source.MASTER, 10f, 1f),
-                Sound.Emitter.self()
-            )
-        }
-        val jumpCount = currentPoints[player] ?: 1
-        player.sendActionBar(Component.text("Sprünge: $jumpCount", Colors.GOLD))
+        playerData.edit {points++}
+
+
     }
 
     private suspend fun updateHighscore(player: Player) {
@@ -212,25 +269,6 @@ data class Parkour(
         playerData.edit {
             highScore = currentScore
         }
-
-        if (playerData.likesSound) {
-            player.playSound(
-                Sound.sound(org.bukkit.Sound.ENTITY_PLAYER_LEVELUP, Sound.Source.MASTER, 10f, 1f),
-                Sound.Emitter.self()
-            )
-        }
-
-        player.showTitle(Title.title(
-                MessageBuilder().primary("Rekord!").build(),
-                MessageBuilder().info("Du hast einen neuen Rekord aufgestellt.").build(),
-                Title.Times.times(Duration.ofSeconds(1), Duration.ofSeconds(2), Duration.ofSeconds(1))
-            )
-        )
-        SurfParkour.send(player, MessageBuilder().primary("Du hast deinen Highscore gebrochen! ").newLine()
-                .primary("Dein neuer Highscore liegt nun bei")
-                .component(Component.text((" $currentScore Sprüngen")))
-                .primary("!")
-        )
     }
 
     /**
