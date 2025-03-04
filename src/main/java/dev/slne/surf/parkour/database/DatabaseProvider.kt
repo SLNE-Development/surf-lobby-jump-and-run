@@ -6,7 +6,6 @@ import com.github.shynixn.mccoroutine.bukkit.launch
 import com.google.gson.Gson
 import dev.hsbrysk.caffeine.CoroutineLoadingCache
 import dev.hsbrysk.caffeine.buildCoroutine
-import dev.slne.surf.parkour.SurfParkour
 
 import dev.slne.surf.parkour.parkour.Parkour
 import dev.slne.surf.parkour.player.PlayerData
@@ -18,7 +17,6 @@ import it.unimi.dsi.fastutil.objects.ObjectArraySet
 import it.unimi.dsi.fastutil.objects.ObjectSet
 
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger
@@ -35,7 +33,6 @@ import java.io.File
 
 import java.util.UUID
 import java.util.concurrent.TimeUnit
-import kotlin.math.log
 
 object DatabaseProvider {
     private val config = instance.config
@@ -153,21 +150,6 @@ object DatabaseProvider {
         }
     }
 
-    fun savePlayers() {
-        val start = System.currentTimeMillis()
-
-        runBlocking {
-            for (mutableEntry in dataCache.synchronous().asMap()) {
-                savePlayer(mutableEntry.value)
-            }
-
-            logger.info(
-                MessageBuilder().withPrefix()
-                    .primary("Successfully saved all player data (${dataCache.synchronous().asMap().values.size}) in ${System.currentTimeMillis() - start}ms!")
-                    .build())
-        }
-    }
-
     fun updatePlayerData(data: PlayerData) {
         dataCache.put(data.uuid, data)
     }
@@ -175,7 +157,7 @@ object DatabaseProvider {
     private suspend fun savePlayer(data: PlayerData) {
         withContext(Dispatchers.IO) {
             transaction {
-                Users.insert {
+                Users.replace {
                     it[uuid] = data.uuid
                     it[name] = data.name
                     it[highScore] = data.highScore
@@ -187,16 +169,24 @@ object DatabaseProvider {
         }
     }
 
-    fun saveAllPlayers() {
-        val start = System.currentTimeMillis()
+    suspend fun savePlayers() {
+        withContext(Dispatchers.IO) {
+            val begin = System.currentTimeMillis()
+            transaction {
+                dataCache.synchronous().asMap().values.forEach { data ->
+                    Users.replace {
+                        it[uuid] = data.uuid
+                        it[name] = data.name
+                        it[highScore] = data.highScore
+                        it[points] = data.points
+                        it[trys] = data.trys
+                        it[likesSound] = data.likesSound
+                    }
+                }
+            }
 
-        dataCache.synchronous().invalidateAll()
-
-        logger.info(
-            MessageBuilder().withPrefix()
-                .primary("Successfully saved all player data (${dataCache.synchronous().asMap().values.size}) in ${System.currentTimeMillis() - start}ms!")
-                .build()
-        )
+            logger.info(MessageBuilder().withPrefix().info("Saved ${dataCache.asynchronous().asMap().values.size} player-data in ${System.currentTimeMillis() - begin}ms!").build())
+        }
     }
 
 

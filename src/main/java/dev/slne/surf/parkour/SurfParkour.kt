@@ -13,7 +13,6 @@ import dev.slne.surf.parkour.listener.PlayerParkourListener
 import dev.slne.surf.parkour.util.Colors
 import dev.slne.surf.parkour.util.MessageBuilder
 import fr.skytasul.glowingentities.GlowingBlocks
-import kotlinx.coroutines.Dispatchers
 
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
