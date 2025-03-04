@@ -38,7 +38,8 @@ class SurfParkour : SuspendingJavaPlugin() {
 
     override suspend fun onDisableAsync() {
         DatabaseProvider.saveParkours()
-        DatabaseProvider.saveAllPlayers()
+        DatabaseProvider.savePlayers()
+        //DatabaseProvider.saveAllPlayers()
     }
 
     private fun handlePlaceholderAPI() {
