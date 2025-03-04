@@ -19,6 +19,7 @@ import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.World
 import org.bukkit.block.Block
+
 import org.bukkit.entity.Player
 import org.bukkit.util.Vector
 import java.time.Duration
@@ -87,7 +88,7 @@ data class Parkour(
         val jumps = currentPoints[player] ?: 0
 
         for (block in latest) {
-            if (block == null || block.type == Material.AIR) continue
+            if (block == null) continue
 
             updateBlock(player, block.location, Material.AIR)
         }
