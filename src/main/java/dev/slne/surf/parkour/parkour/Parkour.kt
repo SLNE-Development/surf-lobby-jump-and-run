@@ -84,8 +84,10 @@ data class Parkour(
         val jumps = currentPoints[player] ?: 0
 
         for (block in latest) {
+            val blockApi = instance.blockApi ?: return
             if (block == null) continue
 
+            blockApi.unsetGlowing(block, player)
             updateBlock(player, block.location, Material.AIR)
         }
 
