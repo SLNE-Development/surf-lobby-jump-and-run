@@ -31,7 +31,7 @@ class ParkourStatsCommand(commandName: String) : CommandAPICommand(commandName) 
                     player.sendMessage(createStatisticMessage(
                         playerData.points.toString(),
                         playerData.highScore.toString(),
-                        "Kein laufender Parkour",
+                        "Du spielst aktuell keinen Parkour",
                         playerData.trys.toString()
                         )
                     )
@@ -56,9 +56,9 @@ class ParkourStatsCommand(commandName: String) : CommandAPICommand(commandName) 
             trys: String
         ): Component {
             return Component.newline().append(Colors.PREFIX)
-                .append(Component.text("-------------", Colors.SPACER))
+                .append(Component.text("--------------- ", Colors.SPACER))
                 .append(Component.text("STATISTIK", Colors.INFO).decorate(TextDecoration.BOLD))
-                .append(Component.text("-------------", Colors.SPACER))
+                .append(Component.text(" ---------------", Colors.SPACER))
                 .append(Component.newline())
                 .append(Colors.PREFIX)
                 .append(Component.newline())
@@ -84,7 +84,7 @@ class ParkourStatsCommand(commandName: String) : CommandAPICommand(commandName) 
                 .append(Colors.PREFIX)
                 .append(Component.newline())
                 .append(Colors.PREFIX)
-                .append(Component.text("Laufender Parkour:", Colors.INFO))
+                .append(Component.text("Aktueller Parkour:", Colors.INFO))
                 .append(Component.newline())
                 .append(Colors.PREFIX)
                 .append(Component.newline())
@@ -95,7 +95,7 @@ class ParkourStatsCommand(commandName: String) : CommandAPICommand(commandName) 
                 .append(Colors.PREFIX)
                 .append(Component.newline())
                 .append(Colors.PREFIX)
-                .append(Component.text("-----------------------------------", Colors.SPACER))
+                .append(Component.text("-----------------------------------------", Colors.SPACER))
         }
     }
 }
