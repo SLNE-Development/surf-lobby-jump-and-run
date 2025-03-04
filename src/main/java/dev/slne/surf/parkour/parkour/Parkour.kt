@@ -227,7 +227,7 @@ data class Parkour(
         )
         SurfParkour.send(player, MessageBuilder().primary("Du hast deinen Highscore gebrochen! ").newLine()
                 .primary("Dein neuer Highscore liegt nun bei")
-                .component(Component.text(("$currentScore Sprüngen")))
+                .component(Component.text((" $currentScore Sprüngen")))
                 .primary("!")
         )
     }
