@@ -25,9 +25,9 @@ class ParkourToggleSoundCommand(commandName: String) : CommandAPICommand(command
                 }
 
                 if (playerData.likesSound) {
-                    SurfParkour.send(player, MessageBuilder().primary("Parkour-Sounds sind nun für dich ").success("aktiviert").primary("."))
+                    SurfParkour.send(player, MessageBuilder().primary("Die ParkourSounds sind nun ").success("aktiviert").primary("."))
                 } else {
-                    SurfParkour.send(player, MessageBuilder().primary("Parkour-Sounds sind nun für dich ").error("deaktiviert").primary("."))
+                    SurfParkour.send(player, MessageBuilder().primary("Die ParkourSounds sind nun ").error("deaktiviert").primary("."))
                 }
             }
         })
