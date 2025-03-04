@@ -1,7 +1,6 @@
 package dev.slne.surf.parkour.listener
 
 import dev.slne.surf.parkour.parkour.Parkour
-
 import org.bukkit.block.Block
 import org.bukkit.block.BlockFace
 import org.bukkit.event.EventHandler
@@ -33,14 +32,14 @@ class PlayerParkourListener : Listener {
 
 
         if (player.location.y < jump1.location.y && player.location.y < jump2.location.y) {
-            parkour.cancel(player)
+            parkour.cancelParkour(player)
             return
         }
 
         if (event.to.block.getRelative(BlockFace.DOWN) == jumps[1]) {
             val material = parkour.blocks[player] ?: return
 
-            jump2.type = material
+            player.sendBlockChange(jump2.location, material.createBlockData())
 
             parkour.increasePoints(player)
             parkour.generate(player)

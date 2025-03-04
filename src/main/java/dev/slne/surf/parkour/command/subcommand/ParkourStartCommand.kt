@@ -20,7 +20,11 @@ class ParkourStartCommand(commandName: String) : CommandAPICommand(commandName) 
         executesPlayer(PlayerCommandExecutor { player: Player, args: CommandArguments ->
             val parkour = args.getUnchecked<Parkour>("parkour") ?: return@PlayerCommandExecutor
 
-            parkour.start(player)
+            if(parkour.activePlayers.contains(player)){
+                SurfParkour.send(player, MessageBuilder().primary("Du ").error("befindest dich bereits ").primary(" in einem parkour."))
+                return@PlayerCommandExecutor
+            }
+            parkour.startParkour(player)
 
             SurfParkour.send(player, MessageBuilder().primary("Du hast den Parkour ").info(parkour.name).success(" gestartet."))
         })
