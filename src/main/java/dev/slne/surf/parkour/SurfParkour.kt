@@ -24,6 +24,8 @@ class SurfParkour : SuspendingJavaPlugin() {
     override suspend fun onEnableAsync() {
         this.handlePlaceholderAPI()
 
+        this.saveDefaultConfig()
+
         ParkourCommand("parkour").register()
         ParkourStatsCommand("stats").register()
 
