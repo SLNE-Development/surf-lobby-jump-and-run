@@ -50,7 +50,7 @@ class ParkourCreateCommand(commandName: String): CommandAPICommand(commandName) 
                 Area(min.toVector(), max.toVector()),
                 start.toVector(),
                 respawn.setRotation(rotation.yaw, rotation.pitch).toVector(),
-                ObjectArraySet.of(Material.RED_STAINED_GLASS),
+                ObjectArraySet.of(Material.RED_CONCRETE),
                 ObjectArraySet()
             )
             if (DatabaseProvider.getParkours().any { it.name == name }){

@@ -82,8 +82,10 @@ data class Parkour(
         val latest = latestJumps[player] ?: return
 
         for (block in latest) {
+            val blockApi = instance.blockApi ?: return
             if (block == null) continue
 
+            blockApi.unsetGlowing(block, player)
             updateBlock(player, block.location, Material.AIR)
         }
         player.teleportAsync(Location(world, respawn.x, respawn.y, respawn.z))
