@@ -153,6 +153,21 @@ object DatabaseProvider {
         }
     }
 
+    fun savePlayers() {
+        val start = System.currentTimeMillis()
+
+        runBlocking {
+            for (mutableEntry in dataCache.synchronous().asMap()) {
+                savePlayer(mutableEntry.value)
+            }
+
+            logger.info(
+                MessageBuilder().withPrefix()
+                    .primary("Successfully saved all player data (${dataCache.synchronous().asMap().values.size}) in ${System.currentTimeMillis() - start}ms!")
+                    .build())
+        }
+    }
+
     fun updatePlayerData(data: PlayerData) {
         dataCache.put(data.uuid, data)
     }
