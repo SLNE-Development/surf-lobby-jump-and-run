@@ -2,20 +2,19 @@ package dev.slne.surf.parkour.parkour
 
 import dev.slne.surf.parkour.SurfParkour
 import dev.slne.surf.parkour.database.DatabaseProvider
+import dev.slne.surf.parkour.instance
 import dev.slne.surf.parkour.util.Area
 import dev.slne.surf.parkour.util.Colors
 import dev.slne.surf.parkour.util.MessageBuilder
 import dev.slne.surf.surfapi.core.api.util.random
+import fr.skytasul.glowingentities.GlowingBlocks
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap
 import it.unimi.dsi.fastutil.objects.ObjectSet
 import net.kyori.adventure.sound.Sound
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.title.Title
-import org.bukkit.Bukkit
-import org.bukkit.Location
-import org.bukkit.Material
-import org.bukkit.World
+import org.bukkit.*
 import org.bukkit.block.Block
 
 import org.bukkit.entity.Player
@@ -111,6 +110,7 @@ data class Parkour(
     }
 
     private suspend fun generateInitial(player: Player) {
+        val blockApi = instance.blockApi ?: return
         val randomLocation = getRandomLocationInRegion(world) ?: return
         val playerData = DatabaseProvider.getPlayerData(player.uniqueId)
 
@@ -123,7 +123,9 @@ data class Parkour(
 
         val next = getValidBlock(start, player)
 
-        updateBlock(player, next.location, Material.SEA_LANTERN)
+        updateBlock(player, next.location, material)
+        blockApi.setGlowing(next.location, player, ChatColor.WHITE)
+
         latestJumps[player]!![1] = next
 
         val next2 = getValidBlock(next.location, player)
@@ -143,6 +145,7 @@ data class Parkour(
     }
 
     fun generate(player: Player) {
+        val blockApi = instance.blockApi ?: return
         val jumps = latestJumps[player] ?: return
         val material = blocks[player] ?: return
 
@@ -156,8 +159,11 @@ data class Parkour(
         jumps[1] = jumps[2]
 
         val block1 = jumps[1] ?: return
+        val block0 = jumps[0] ?: return
 
-        updateBlock(player, block1.location, Material.SEA_LANTERN)
+        updateBlock(player, block1.location, material)
+        blockApi.setGlowing(block1.location, player, ChatColor.WHITE)
+        blockApi.unsetGlowing(block0.location, player)
 
         val nextJump = getValidBlock(block1.location, player)
 
