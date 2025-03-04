@@ -6,6 +6,7 @@ import org.bukkit.Color
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.enchantments.Enchantment
+import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.*
@@ -273,6 +274,20 @@ class ItemBuilder {
             )
         }
 
+        return this
+    }
+
+    /**
+     * Adds the meta for a playerskull.
+     *
+     * @param player the Player
+     * @return the item builder
+     */
+
+    fun applySkullMeta(player: Player): ItemBuilder {
+        itemStack.editMeta(SkullMeta::class.java) { meta ->
+            meta.owningPlayer = player
+        }
         return this
     }
 
