@@ -52,9 +52,7 @@ class PlayerParkourListener : Listener {
     fun onInteract(event: PlayerInteractEvent) {
         val player = event.player
         val location = event.interactionPoint ?: return
-
         val parkour = Parkour.getParkour(player) ?: return
-
         val jumps: Array<Block?> = parkour.latestJumps[player] ?: return
 
         for (jump in jumps) {
