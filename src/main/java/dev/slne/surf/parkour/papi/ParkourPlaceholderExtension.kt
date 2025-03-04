@@ -1,10 +1,11 @@
 import com.github.benmanes.caffeine.cache.Caffeine
+import com.github.shynixn.mccoroutine.bukkit.launch
 import dev.slne.surf.parkour.database.DatabaseProvider
+import dev.slne.surf.parkour.instance
 import it.unimi.dsi.fastutil.objects.ObjectArrayList
 import it.unimi.dsi.fastutil.objects.ObjectList
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+
 import kotlinx.coroutines.withContext
 import me.clip.placeholderapi.expansion.PlaceholderExpansion
 import org.bukkit.Bukkit
@@ -53,7 +54,7 @@ class ParkourPlaceholderExtension : PlaceholderExpansion() {
         }
     }
 
-    private fun getCachedValue(
+    private fun getCachedValue (
         cache: com.github.benmanes.caffeine.cache.Cache<Int, Pair<String, Int>>,
         place: Int,
         sortedFetcher: suspend (Int) -> ObjectList<UUID>,
@@ -70,7 +71,7 @@ class ParkourPlaceholderExtension : PlaceholderExpansion() {
         }
 
         // Asynchron laden, um Main-Thread nicht zu blockieren
-        GlobalScope.launch {
+        instance.launch {
             val sortedPlayers = sortedFetcher(10)
             val uuid = sortedPlayers.getOrNull(place - 1)
             val name = if (uuid != null) getName(uuid) else "/"
