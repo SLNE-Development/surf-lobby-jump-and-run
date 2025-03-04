@@ -25,6 +25,8 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-core:0.59.0")
     implementation("org.jetbrains.exposed:exposed-dao:0.59.0")
     implementation("org.jetbrains.exposed:exposed-jdbc:0.59.0")
+
+    implementation("fr.skytasul:glowingentities:1.4.3")
 }
 
 surfPaperPluginApi {
