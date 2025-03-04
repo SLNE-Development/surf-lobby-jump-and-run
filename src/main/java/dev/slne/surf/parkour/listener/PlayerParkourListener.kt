@@ -32,6 +32,7 @@ class PlayerParkourListener : Listener {
 
 
         if (player.location.y < jump1.location.y && player.location.y < jump2.location.y) {
+            parkour.announceParkourLoose(player)
             parkour.cancelParkour(player)
             return
         }
@@ -42,6 +43,7 @@ class PlayerParkourListener : Listener {
             player.sendBlockChange(jump2.location, material.createBlockData())
 
             parkour.increasePoints(player)
+            parkour.announceNewScoredPoint(player)
             parkour.generate(player)
         }
     }
