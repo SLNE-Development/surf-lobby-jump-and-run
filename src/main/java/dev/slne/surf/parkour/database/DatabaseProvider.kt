@@ -133,7 +133,7 @@ object DatabaseProvider {
                 logger.warn(MessageBuilder().withPrefix().info("Unknown storage method \"$method\". Using local storage...").build())
 
                 Class.forName("org.sqlite.JDBC")
-                val dbFile = File("./plugins/SurfParkour/database.db")
+                val dbFile = File("${instance.dataPath}/storage.db")
 
                 if (!dbFile.exists()) {
                     dbFile.parentFile.mkdirs()
