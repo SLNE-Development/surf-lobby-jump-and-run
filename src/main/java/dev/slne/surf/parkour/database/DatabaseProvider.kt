@@ -66,7 +66,7 @@ object DatabaseProvider {
      */
 
     object Users: Table() {
-        val uuid: Column<UUID> = uuid("uuid")
+        val uuid: Column<String> = text("uuid")
         val name: Column<String> = varchar("name", 16)
         val highScore: Column<Int> = integer("high_score")
         val points: Column<Int> = integer("points")
@@ -81,7 +81,7 @@ object DatabaseProvider {
      */
 
     object Parkours: Table() {
-        val uuid: Column<UUID> = uuid("uuid")
+        val uuid: Column<String> = text("uuid")
         val name: Column<String> = text("name")
 
         val world: Column<String> = text("world")
@@ -158,7 +158,7 @@ object DatabaseProvider {
         withContext(Dispatchers.IO) {
             transaction {
                 Users.replace {
-                    it[uuid] = data.uuid
+                    it[uuid] = data.uuid.toString()
                     it[name] = data.name
                     it[highScore] = data.highScore
                     it[points] = data.points
@@ -175,7 +175,7 @@ object DatabaseProvider {
             transaction {
                 dataCache.synchronous().asMap().values.forEach { data ->
                     Users.replace {
-                        it[uuid] = data.uuid
+                        it[uuid] = data.uuid.toString()
                         it[name] = data.name
                         it[highScore] = data.highScore
                         it[points] = data.points
@@ -194,19 +194,25 @@ object DatabaseProvider {
     suspend fun loadPlayer(uuid: UUID): PlayerData {
         return withContext(Dispatchers.IO) {
             transaction {
-                Users.select(Users.uuid eq uuid).map {
-                    PlayerData(
-                        it[Users.uuid],
-                        it[Users.name],
-                        it[Users.highScore],
-                        it[Users.points],
-                        it[Users.trys],
-                        it[Users.likesSound]
-                    )
-                }.firstOrNull() ?: PlayerData(uuid = uuid, name = Bukkit.getOfflinePlayer(uuid).name ?: "Unknown")
+                val result = Users.selectAll().where(Users.uuid.eq(uuid.toString())).firstOrNull()
+
+                if (result == null) {
+                    logger.warn(MessageBuilder().withPrefix().error("Player with uuid $uuid not found in database!").build())
+                    return@transaction PlayerData(uuid, name = Bukkit.getOfflinePlayer(uuid).name ?: "Unknown")
+                }
+
+                return@transaction PlayerData(
+                    UUID.fromString(result[Users.uuid]),
+                    result[Users.name],
+                    result[Users.highScore],
+                    result[Users.points],
+                    result[Users.trys],
+                    result[Users.likesSound]
+                )
             }
         }
     }
+
 
     suspend fun fetchParkours() {
         val parkours = ObjectArraySet<Parkour>()
@@ -218,7 +224,7 @@ object DatabaseProvider {
                 Parkours.selectAll().map { it ->
                     parkours.add(
                         Parkour(
-                            uuid = UUID.fromString(it[Parkours.uuid].toString()),
+                            uuid = UUID.fromString(it[Parkours.uuid]),
                             name = it[Parkours.name],
                             world = Bukkit.getWorld(it[Parkours.world]) ?: Bukkit.getWorlds().first(),
                             area = Area.fromString(it[Parkours.area]),
@@ -245,7 +251,7 @@ object DatabaseProvider {
 
                 parkourList.forEach { parkour ->
                     Parkours.insert { it ->
-                        it[uuid] = parkour.uuid
+                        it[uuid] = parkour.uuid.toString()
                         it[name] = parkour.name
                         it[world] = parkour.world.name
                         it[area] = parkour.area.toString()
