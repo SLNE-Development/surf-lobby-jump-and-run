@@ -320,9 +320,9 @@ data class Parkour(
 
     private fun getRotation(next: Location): Rotation {
         val direction = next.toVector().subtract(start).normalize()
-        val yaw = Math.toDegrees(atan2(direction.z, direction.x)).toFloat() - 90
-        val pitch = 0.0f
-        return Rotation(yaw, pitch)
+        val yaw = Math.toDegrees(atan2(-direction.x, direction.z)).toFloat()
+
+        return Rotation(yaw, 0.0f)
     }
 
 

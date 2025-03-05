@@ -2,10 +2,13 @@ package dev.slne.surf.parkour.leaderboard
 
 import dev.slne.surf.parkour.database.DatabaseProvider
 import dev.slne.surf.parkour.player.PlayerData
+
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+
 import org.jetbrains.exposed.sql.SortOrder
 import org.jetbrains.exposed.sql.selectAll
+
 import java.util.UUID
 
 object LeaderboardProvider {

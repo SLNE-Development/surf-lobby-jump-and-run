@@ -1,6 +1,7 @@
 package dev.slne.surf.parkour.listener
 
 import dev.slne.surf.parkour.parkour.Parkour
+
 import org.bukkit.block.Block
 import org.bukkit.block.BlockFace
 import org.bukkit.event.EventHandler
