@@ -167,7 +167,7 @@ data class Parkour(
                 Sound.Emitter.self()
             )
         }
-        SurfParkour.send(player, MessageBuilder().primary("Du hast den Parkour ").info(parkour).success(" gestartet").primary("."))
+        SurfParkour.send(player, MessageBuilder().primary("Du hast den Parkour ").info(parkour).success(" gestartet").primary("!"))
     }
 
     suspend fun announceNewScoredPoint(player: Player) {

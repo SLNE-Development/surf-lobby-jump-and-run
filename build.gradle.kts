@@ -27,6 +27,8 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-jdbc:0.59.0")
 
     implementation("fr.skytasul:glowingentities:1.4.3")
+
+    implementation("com.github.stefvanschie.inventoryframework:IF:0.10.19")
 }
 
 surfPaperPluginApi {

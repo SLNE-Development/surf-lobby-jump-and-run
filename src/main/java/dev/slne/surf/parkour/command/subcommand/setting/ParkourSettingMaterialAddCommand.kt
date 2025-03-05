@@ -27,7 +27,7 @@ class ParkourSettingMaterialAddCommand(commandName: String) : CommandAPICommand(
                 this.availableMaterials.add(material)
             }
 
-            SurfParkour.send(player, MessageBuilder().primary("Du hast ").info(material.name).primary(" zur Liste der Materialien von ").info(parkour.name).success(" hinzugefügt."))
+            SurfParkour.send(player, MessageBuilder().primary("Du hast ").info(material.name).primary(" zur Liste der Materialien von ").info(parkour.name).success(" hinzugefügt").primary("."))
         })
     }
 }

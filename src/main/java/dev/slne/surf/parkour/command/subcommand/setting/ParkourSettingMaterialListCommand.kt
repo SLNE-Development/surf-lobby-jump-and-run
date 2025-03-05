@@ -25,7 +25,7 @@ class ParkourSettingMaterialListCommand(commandName: String) : CommandAPICommand
             val message = PageableMessageBuilder()
 
             if(parkour.availableMaterials.isEmpty()) {
-                SurfParkour.send(player, MessageBuilder().error("Es sind keine Material-Typen in ").info(parkour.name).error(" eingestellt."))
+                SurfParkour.send(player, MessageBuilder().error("Es sind keine Material-Typen in ").info(parkour.name).error(" eingestellt").primary("."))
                 return@PlayerCommandExecutor
             }
 

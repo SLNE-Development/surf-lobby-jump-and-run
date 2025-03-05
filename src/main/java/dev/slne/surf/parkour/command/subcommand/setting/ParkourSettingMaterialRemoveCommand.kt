@@ -29,7 +29,7 @@ class ParkourSettingMaterialRemoveCommand(commandName: String) : CommandAPIComma
                 this.availableMaterials.remove(material)
             }
 
-            SurfParkour.send(player, MessageBuilder().primary("Du hast ").info(material.name).primary(" von der Liste der Materialien von ").info(parkour.name).error(" entfernt."))
+            SurfParkour.send(player, MessageBuilder().primary("Du hast ").info(material.name).primary(" von der Liste der Materialien von ").info(parkour.name).error(" entfernt").primary("."))
         })
     }
 }
