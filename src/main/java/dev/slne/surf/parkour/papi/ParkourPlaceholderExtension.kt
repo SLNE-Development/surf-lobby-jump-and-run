@@ -1,21 +1,20 @@
-import com.github.benmanes.caffeine.cache.Caffeine
+package dev.slne.surf.parkour.papi
+
 import com.github.shynixn.mccoroutine.bukkit.launch
 import dev.slne.surf.parkour.database.DatabaseProvider
 import dev.slne.surf.parkour.instance
-import it.unimi.dsi.fastutil.objects.ObjectArrayList
-import it.unimi.dsi.fastutil.objects.ObjectList
+import dev.slne.surf.parkour.player.PlayerData
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
-
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.withContext
 import me.clip.placeholderapi.expansion.PlaceholderExpansion
-import org.bukkit.Bukkit
 import org.bukkit.OfflinePlayer
 import org.jetbrains.exposed.sql.SortOrder
 import org.jetbrains.exposed.sql.selectAll
-import org.jetbrains.exposed.sql.transactions.transaction
 import java.util.*
-import java.util.concurrent.TimeUnit
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class ParkourPlaceholderExtension : PlaceholderExpansion() {
     companion object {
         private const val IDENTIFIER = "surf-parkour"
@@ -27,112 +26,64 @@ class ParkourPlaceholderExtension : PlaceholderExpansion() {
         private const val SUFFIX_VALUE = "value"
     }
 
-    private val highscoreCache = Caffeine.newBuilder()
-        .expireAfterWrite(10, TimeUnit.MINUTES)
-        .build<Int, Pair<String, Int>>()
-
-    private val pointsCache = Caffeine.newBuilder()
-        .expireAfterWrite(10, TimeUnit.MINUTES)
-        .build<Int, Pair<String, Int>>()
-
     override fun getIdentifier(): String = IDENTIFIER
     override fun getAuthor(): String = AUTHOR
     override fun getVersion(): String = VERSION
 
     override fun onRequest(player: OfflinePlayer, params: String): String? {
-        val parts = params.split("_")
-        if (parts.size < 3) return null
+        return "Coming Soon™️"
 
-        val category = parts[0]
-        val place = parts[1].toIntOrNull() ?: return null
-        val suffix = parts[2]
-
-        return when (category) {
-            CATEGORY_HIGHSCORE -> getCachedValue(highscoreCache, place, ::getSortedHighScores, ::getHighScore, suffix)
-            CATEGORY_POINTS -> getCachedValue(pointsCache, place, ::getSortedPoints, ::getPoints, suffix)
-            else -> null
-        }
+//        val parts = params.split("_")
+//        if (parts.size < 3) return null
+//
+//        val category = parts[0]
+//        val rank = parts[1].toIntOrNull() ?: return null
+//        val suffix = parts[2]
+//
+//        val deferred = CompletableDeferred<String>()
+//
+//        instance.launch {
+//            val playerData = getRankedPlayer(category, rank)
+//            val result = when (suffix) {
+//                SUFFIX_NAME -> playerData.name ?: "/"
+//                SUFFIX_VALUE -> playerData.let {
+//                    when (category) {
+//                        CATEGORY_HIGHSCORE -> it.highScore.toString()
+//                        CATEGORY_POINTS -> it.points.toString()
+//                        else -> "/"
+//                    }
+//                }
+//                else -> "/"
+//            }
+//
+//            deferred.complete(result)
+//        }
+//
+//        return deferred.getCompleted()
     }
 
-    private fun getCachedValue (
-        cache: com.github.benmanes.caffeine.cache.Cache<Int, Pair<String, Int>>,
-        place: Int,
-        sortedFetcher: suspend (Int) -> ObjectList<UUID>,
-        valueFetcher: suspend (Int) -> Int,
-        suffix: String
-    ): String {
-        val cached = cache.getIfPresent(place)
-        if (cached != null) {
-            return when (suffix) {
-                SUFFIX_NAME -> cached.first
-                SUFFIX_VALUE -> cached.second.toString()
-                else -> "/"
-            }
-        }
-
-        // Asynchron laden, um Main-Thread nicht zu blockieren
-        instance.launch {
-            val sortedPlayers = sortedFetcher(10)
-            val uuid = sortedPlayers.getOrNull(place - 1)
-            val name = if (uuid != null) getName(uuid) else "/"
-            val value = valueFetcher(place)
-
-            cache.put(place, name to value)
-        }
-
-        return "Lade..."
-    }
-
-    private fun getName(uuid: UUID): String {
-        val player = Bukkit.getOfflinePlayer(uuid)
-        return player.name ?: "Unknown"
-    }
-
-    private suspend fun getSortedHighScores(limit: Int): ObjectList<UUID> {
+    private suspend fun getRankedPlayer(category: String, rank: Int): PlayerData {
         return withContext(Dispatchers.IO) {
-            transaction {
-                DatabaseProvider.Users.selectAll()
-                    .orderBy(DatabaseProvider.Users.highScore, SortOrder.DESC)
-                    .limit(limit)
-                    .map { UUID.fromString(it[DatabaseProvider.Users.uuid]) }.toObjectList()
-            }
-        }
-    }
+            val stats = DatabaseProvider.Users.selectAll()
+                .orderBy(
+                    when (category) {
+                        CATEGORY_HIGHSCORE -> DatabaseProvider.Users.highScore to SortOrder.DESC
+                        CATEGORY_POINTS -> DatabaseProvider.Users.points to SortOrder.DESC
+                        else -> DatabaseProvider.Users.highScore to SortOrder.DESC
+                    }
+                )
+                .limit(rank)
+                .map { PlayerData(
+                    UUID.fromString(it[DatabaseProvider.Users.uuid]),
+                    it[DatabaseProvider.Users.name],
+                    it[DatabaseProvider.Users.highScore],
+                    it[DatabaseProvider.Users.points],
+                    it[DatabaseProvider.Users.trys],
+                    it[DatabaseProvider.Users.likesSound]
+                )
+                }
 
-    private suspend fun getSortedPoints(limit: Int): ObjectList<UUID> {
-        return withContext(Dispatchers.IO) {
-            transaction {
-                DatabaseProvider.Users.selectAll()
-                    .orderBy(DatabaseProvider.Users.points, SortOrder.DESC)
-                    .limit(limit)
-                    .map { UUID.fromString(it[DatabaseProvider.Users.uuid]) }.toObjectList()
-            }
+            return@withContext stats.getOrNull(rank - 1) ?: PlayerData(UUID.randomUUID())
         }
-    }
-
-    private suspend fun getHighScore(place: Int): Int {
-        return withContext(Dispatchers.IO) {
-            transaction {
-                DatabaseProvider.Users.selectAll()
-                    .orderBy(DatabaseProvider.Users.highScore, SortOrder.DESC)
-                    .map { it[DatabaseProvider.Users.highScore] }
-                    .getOrNull(place - 1) ?: 0
-            }
-        }
-    }
-
-    private suspend fun getPoints(place: Int): Int {
-        return withContext(Dispatchers.IO) {
-            transaction {
-                DatabaseProvider.Users.selectAll()
-                    .orderBy(DatabaseProvider.Users.points, SortOrder.DESC)
-                    .map { it[DatabaseProvider.Users.points] }
-                    .getOrNull(place - 1) ?: 0
-            }
-        }
-    }
-
-    private fun <T> List<T>.toObjectList(): ObjectList<T> {
-        return ObjectArrayList(this)
     }
 }
