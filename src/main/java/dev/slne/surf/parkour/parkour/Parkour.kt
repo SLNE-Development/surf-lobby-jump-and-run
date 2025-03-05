@@ -1,5 +1,6 @@
 package dev.slne.surf.parkour.parkour
 
+import dev.jorel.commandapi.wrappers.Rotation
 import dev.slne.surf.parkour.SurfParkour
 import dev.slne.surf.parkour.database.DatabaseProvider
 import dev.slne.surf.parkour.instance
@@ -7,7 +8,6 @@ import dev.slne.surf.parkour.util.Area
 import dev.slne.surf.parkour.util.Colors
 import dev.slne.surf.parkour.util.MessageBuilder
 import dev.slne.surf.surfapi.core.api.util.random
-import fr.skytasul.glowingentities.GlowingBlocks
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap
 import it.unimi.dsi.fastutil.objects.ObjectSet
@@ -22,6 +22,7 @@ import org.bukkit.util.Vector
 import java.time.Duration
 import java.util.*
 import kotlin.math.abs
+import kotlin.math.atan2
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.random.asKotlinRandom
@@ -123,7 +124,9 @@ data class Parkour(
 
         // scored point
 
-        player.teleportAsync(block.location.add(0.5, 1.0, 0.5))
+        val rotation = this.getRotation(next.location)
+
+        player.teleportAsync(block.location.add(0.5, 1.0, 0.5).setRotation(rotation.yaw, rotation.pitch))
         blocks[player] = material
     }
 
@@ -313,6 +316,13 @@ data class Parkour(
         val z = random.nextInt(maxZ - minZ + 1) + minZ
 
         return Location(world, x.toDouble(), y.toDouble(), z.toDouble())
+    }
+
+    private fun getRotation(next: Location): Rotation {
+        val direction = next.toVector().subtract(start).normalize()
+        val yaw = Math.toDegrees(atan2(direction.z, direction.x)).toFloat() - 90
+        val pitch = 0.0f
+        return Rotation(yaw, pitch)
     }
 
 
