@@ -7,7 +7,6 @@ import com.github.stefvanschie.inventoryframework.gui.type.ChestGui
 import com.github.stefvanschie.inventoryframework.pane.StaticPane
 import dev.slne.surf.parkour.database.DatabaseProvider
 import dev.slne.surf.parkour.instance
-import dev.slne.surf.parkour.util.Colors
 import dev.slne.surf.parkour.util.ItemBuilder
 import dev.slne.surf.parkour.util.MessageBuilder
 import net.kyori.adventure.text.Component
@@ -54,22 +53,25 @@ class ParkourMenu(player: Player): ChestGui(5, ComponentHolder.of(MessageBuilder
             val taskbarPane = StaticPane(0, 3, 9, 1)
             val statsItem = GuiItem(ItemBuilder(Material.NETHER_STAR)
                 .setName(MessageBuilder("Bestenliste").build())
-                .addLoreLine(MessageBuilder().info("Klicke, um dir die Bestenliste anzusehen.").build())
+                .addLoreLine(MessageBuilder().info("Klicke, um dir die Bestenliste anzusehen!").build())
                 .build())
 
             val startItem = GuiItem(ItemBuilder(Material.RECOVERY_COMPASS)
                 .setName(MessageBuilder("Parkour starten").build())
-                .addLoreLine(MessageBuilder().info("Klicke, um einen Parkour zu starten.").build())
-                .build())
+                .addLoreLine(MessageBuilder().info("Klicke, um einen Parkour zu starten!").build())
+                .build()) { event ->
+                event.isCancelled = true
+                ParkourSelectionMenu(player)
+            }
 
             val settingsItem = GuiItem(ItemBuilder(Material.REPEATING_COMMAND_BLOCK)
                 .setName(MessageBuilder("Einstellungen").build())
-                .addLoreLine(MessageBuilder().info("Klicke, um zu den Einstellungen zu gelangen.").build())
+                .addLoreLine(MessageBuilder().info("Klicke, um zu den Einstellungen zu gelangen!").build())
                 .build())
 
             val activePlayersItem = GuiItem(ItemBuilder(Material.WRITABLE_BOOK)
                 .setName(MessageBuilder("Aktive Spieler").build())
-                .addLoreLine(MessageBuilder().info("Klicke, um dir die aktiven Spieler anzusehen.").build())
+                .addLoreLine(MessageBuilder().info("Klicke, um dir die aktiven Spieler anzusehen!").build())
                 .build())
 
             taskbarPane.addItem(statsItem, 1, 0)
