@@ -1,7 +1,7 @@
 package dev.slne.surf.parkour
 
 
-import ParkourPlaceholderExtension
+import dev.slne.surf.parkour.papi.ParkourPlaceholderExtension
 import com.github.shynixn.mccoroutine.bukkit.SuspendingJavaPlugin
 import com.github.shynixn.mccoroutine.bukkit.registerSuspendingEvents
 
