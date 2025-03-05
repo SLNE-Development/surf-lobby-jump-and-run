@@ -11,11 +11,12 @@ import dev.slne.surf.parkour.util.Colors
 import dev.slne.surf.parkour.util.ItemBuilder
 import dev.slne.surf.parkour.util.MessageBuilder
 import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.Material
 import org.bukkit.entity.Player
 
 
-class ParkourMenu(player: Player): ChestGui(5, ComponentHolder.of(MessageBuilder().primary("Parkour").build())) {
+class ParkourMenu(player: Player): ChestGui(5, ComponentHolder.of(MessageBuilder().primary("ᴘᴀʀᴋᴏᴜʀ").build().decorate(TextDecoration.BOLD))) {
     init {
         instance.launch {
             val playerData = DatabaseProvider.getPlayerData(player.uniqueId)
@@ -39,20 +40,37 @@ class ParkourMenu(player: Player): ChestGui(5, ComponentHolder.of(MessageBuilder
             val playerHeadPane = StaticPane(4, 1, 1, 1)
 
             val profileHead = ItemBuilder(Material.PLAYER_HEAD)
-                .applySkullMeta(player)
-                .setName(Component.text(name, Colors.GOLD))
-                .addLoreLine(Component.text("Sprünge: ", Colors.DARK_AQUA).append(Component.text("$jumps", Colors.PRIMARY)))
-                .addLoreLine(Component.text("Versuche: ", Colors.DARK_AQUA).append(Component.text("$tries", Colors.PRIMARY)))
-                .addLoreLine(Component.text("HighScore ", Colors.DARK_AQUA).append(Component.text("$highscore", Colors.PRIMARY)))
+                .setSkullOwner(player)
+                .setName(MessageBuilder().primary(name).build())
+                .addLoreLine(Component.empty())
+                .addLoreLine(MessageBuilder().info("Statistiken:").build())
+                .addLoreLine(MessageBuilder().darkSpacer("  - ").variableKey("ѕᴘʀüɴɢᴇ: ").variableValue("$jumps").build())
+                .addLoreLine(MessageBuilder().darkSpacer("  - ").variableKey("ᴠᴇʀѕᴜᴄʜᴇ: ").variableValue("$tries").build())
+                .addLoreLine(MessageBuilder().darkSpacer("  - ").variableKey("ʜɪɢʜѕᴄᴏʀᴇ: ").variableValue("$highscore").build())
                 .build()
 
             playerHeadPane.addItem(GuiItem(profileHead), 0, 0)
 
             val taskbarPane = StaticPane(0, 3, 9, 1)
-            val statsItem = GuiItem(ItemBuilder(Material.NETHER_STAR).setName(Component.text("Bestenliste", Colors.DARK_AQUA)).addLoreLine(Component.text("Klicke, um dir die Bestenliste anzusehen!",Colors.GRAY)).build())
-            val startItem = GuiItem(ItemBuilder(Material.RECOVERY_COMPASS).setName(Component.text("Parkour starten", Colors.DARK_AQUA)).addLoreLine(Component.text("Klicke, um einen Parkour zu starten!",Colors.GRAY)).build()) { event -> event.isCancelled = true }
-            val settingsItem = GuiItem(ItemBuilder(Material.REPEATING_COMMAND_BLOCK).setName(Component.text("Einstellungen", Colors.DARK_AQUA)).addLoreLine(Component.text("Klicke, um zu den Einstellungen zu gelangen!",Colors.GRAY)).build())
-            val activePlayersItem = GuiItem(ItemBuilder(Material.WRITABLE_BOOK).setName(Component.text("Aktive Spieler", Colors.DARK_AQUA)).addLoreLine(Component.text("Klicke, um dir die aktiven Spieler anzusehen!",Colors.GRAY)).build())
+            val statsItem = GuiItem(ItemBuilder(Material.NETHER_STAR)
+                .setName(MessageBuilder("Bestenliste").build())
+                .addLoreLine(MessageBuilder().info("Klicke, um dir die Bestenliste anzusehen.").build())
+                .build())
+
+            val startItem = GuiItem(ItemBuilder(Material.RECOVERY_COMPASS)
+                .setName(MessageBuilder("Parkour starten").build())
+                .addLoreLine(MessageBuilder().info("Klicke, um einen Parkour zu starten.").build())
+                .build())
+
+            val settingsItem = GuiItem(ItemBuilder(Material.REPEATING_COMMAND_BLOCK)
+                .setName(MessageBuilder("Einstellungen").build())
+                .addLoreLine(MessageBuilder().info("Klicke, um zu den Einstellungen zu gelangen.").build())
+                .build())
+
+            val activePlayersItem = GuiItem(ItemBuilder(Material.WRITABLE_BOOK)
+                .setName(MessageBuilder("Aktive Spieler").build())
+                .addLoreLine(MessageBuilder().info("Klicke, um dir die aktiven Spieler anzusehen.").build())
+                .build())
 
             taskbarPane.addItem(statsItem, 1, 0)
             taskbarPane.addItem(startItem, 3, 0)

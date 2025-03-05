@@ -6,7 +6,14 @@ import net.kyori.adventure.text.event.HoverEvent
 import net.kyori.adventure.text.minimessage.MiniMessage
 
 class MessageBuilder {
-    private var message: Component = Component.empty()
+    private var message: Component
+
+    constructor() {
+        this.message = Component.empty()
+    }
+    constructor(message: String) {
+        this.message = Component.text(message, Colors.PRIMARY)
+    }
 
     fun withPrefix(): dev.slne.surf.parkour.util.MessageBuilder {
         message = message.append(dev.slne.surf.parkour.util.Colors.PREFIX)

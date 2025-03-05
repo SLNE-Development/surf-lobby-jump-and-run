@@ -5,9 +5,10 @@ import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.Color
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
+import org.bukkit.OfflinePlayer
 import org.bukkit.enchantments.Enchantment
-import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemFlag
+import org.bukkit.inventory.ItemRarity
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.*
 import org.bukkit.persistence.PersistentDataType
@@ -18,7 +19,6 @@ import java.util.*
 /**
  * The type Item builder.
  */
-@Suppress("unused")
 class ItemBuilder {
     private val itemStack: ItemStack
 
@@ -111,9 +111,17 @@ class ItemBuilder {
      */
     fun setCustomModelData(amount: Int): ItemBuilder {
         itemStack.editMeta { meta: ItemMeta ->
-            meta.setCustomModelData(
-                amount
-            )
+            meta.setCustomModelData(amount)
+        }
+
+        return this
+    }
+
+    fun setCustomModelData(customModelData: String): ItemBuilder {
+        itemStack.editMeta { meta: ItemMeta ->
+            val component = meta.customModelDataComponent
+            component.strings = java.util.List.of(customModelData)
+            meta.setCustomModelDataComponent(component)
         }
 
         return this
@@ -131,38 +139,24 @@ class ItemBuilder {
         itemStack.editMeta(
             PotionMeta::class.java
         ) { meta: PotionMeta ->
-            meta.addCustomEffect(
-                PotionEffect(
-                    type,
-                    duration,
-                    amplifier
-                ), true
-            )
+            meta.addCustomEffect(PotionEffect(type, duration, amplifier), true)
         }
 
         return this
     }
 
     /**
-     * Add data to persistence container item builder.
+     * Add stored Enchant item builder.
      *
-     * @param <T>   the type parameter
-     * @param <V>   the type parameter
-     * @param key   the key
-     * @param type  the type
-     * @param value the value
+     * @param enchantment the enchantment
+     * @param level the level
      * @return the item builder
-    </V></T> */
-    fun <T, V : Any> addDataToPersistenceContainer(
-        key: NamespacedKey, type: PersistentDataType<T, V>,
-        value: V
-    ): ItemBuilder {
-        itemStack.editMeta { meta: ItemMeta ->
-            meta.persistentDataContainer.set(
-                key,
-                type,
-                value
-            )
+     */
+    fun addStoredEnchant(enchantment: Enchantment, level: Int): ItemBuilder {
+        itemStack.editMeta(
+            EnchantmentStorageMeta::class.java
+        ) { meta: EnchantmentStorageMeta ->
+            meta.addStoredEnchant(enchantment, level, true)
         }
 
         return this
@@ -196,9 +190,8 @@ class ItemBuilder {
     fun setName(name: String): ItemBuilder {
         itemStack.editMeta { meta: ItemMeta ->
             meta.displayName(
-                Component.text(
-                    name
-                ).decoration(TextDecoration.ITALIC, false)
+                Component.text(name)
+                    .decoration(TextDecoration.ITALIC, false)
             )
         }
 
@@ -231,6 +224,32 @@ class ItemBuilder {
     }
 
     /**
+     * Set the skull owner for the item. Works on skulls only.
+     *
+     * @param owner The name of the skull's owner.
+     * @return the skull owner
+     */
+    fun setSkullOwner(owner: String?): ItemBuilder {
+        itemStack.editMeta(
+            SkullMeta::class.java
+        ) { meta: SkullMeta ->
+            meta.setOwner(owner)
+        }
+
+        return this
+    }
+
+    fun setSkullOwner(owner: OfflinePlayer?): ItemBuilder {
+        itemStack.editMeta(
+            SkullMeta::class.java
+        ) { meta: SkullMeta ->
+            meta.setOwningPlayer(owner)
+        }
+
+        return this
+    }
+
+    /**
      * Add an enchant to the item.
      *
      * @param enchantment The enchant to add
@@ -239,11 +258,7 @@ class ItemBuilder {
      */
     fun addEnchantment(enchantment: Enchantment, level: Int): ItemBuilder {
         itemStack.editMeta { meta: ItemMeta ->
-            meta.addEnchant(
-                enchantment,
-                level,
-                true
-            )
+            meta.addEnchant(enchantment, level, true)
         }
 
         return this
@@ -256,7 +271,9 @@ class ItemBuilder {
      * @return the unbreakable
      */
     fun setUnbreakable(b: Boolean): ItemBuilder {
-        itemStack.editMeta { meta: ItemMeta -> meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE) }
+        itemStack.editMeta { meta: ItemMeta ->
+            meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE)
+        }
 
         return this
     }
@@ -267,27 +284,13 @@ class ItemBuilder {
      * @param flag the flag
      * @return the item builder
      */
-    fun addItemFlag(flag: ItemFlag): ItemBuilder {
+    fun addItemFlag(flag: ItemFlag?): ItemBuilder {
         itemStack.editMeta { meta: ItemMeta ->
             meta.addItemFlags(
-                flag
+                flag!!
             )
         }
 
-        return this
-    }
-
-    /**
-     * Adds the meta for a playerskull.
-     *
-     * @param player the Player
-     * @return the item builder
-     */
-
-    fun applySkullMeta(player: Player): ItemBuilder {
-        itemStack.editMeta(SkullMeta::class.java) { meta ->
-            meta.owningPlayer = player
-        }
         return this
     }
 
@@ -312,8 +315,7 @@ class ItemBuilder {
         itemStack.editMeta(
             Damageable::class.java
         ) { meta: Damageable ->
-            meta.damage =
-                Short.MAX_VALUE.toInt()
+            meta.damage = Short.MAX_VALUE.toInt()
         }
 
         return this
@@ -326,7 +328,9 @@ class ItemBuilder {
      * @return the lore
      */
     fun setLore(lore: List<Component?>?): ItemBuilder {
-        itemStack.editMeta { meta: ItemMeta -> meta.lore(lore) }
+        itemStack.editMeta { meta: ItemMeta ->
+            meta.lore(lore)
+        }
 
         return this
     }
@@ -374,15 +378,24 @@ class ItemBuilder {
      * @param line The lore line to add.
      * @return the item builder
      */
-    fun addLoreLine(line: Component?): ItemBuilder {
+    fun addLoreLine(line: Component): ItemBuilder {
         val im = itemStack.itemMeta
         var lore: MutableList<Component?> = ArrayList()
         if (im.hasLore()) {
             lore = ArrayList(im.lore())
         }
-        lore.add(line)
+
+        lore.add(line.decoration(TextDecoration.ITALIC, false))
         im.lore(lore)
         itemStack.setItemMeta(im)
+        return this
+    }
+
+    fun setRarity(rarity: ItemRarity?): ItemBuilder {
+        itemStack.editMeta { meta: ItemMeta ->
+            meta.setRarity(rarity)
+        }
+
         return this
     }
 
@@ -398,6 +411,15 @@ class ItemBuilder {
         val lore: MutableList<Component> = ArrayList(im.lore())
         lore[pos] = line
         im.lore(lore)
+        itemStack.setItemMeta(im)
+        return this
+    }
+
+    fun setGlowing(value: Boolean): ItemBuilder {
+        val im = itemStack.itemMeta
+
+        im.setEnchantmentGlintOverride(if (value) true else null)
+
         itemStack.setItemMeta(im)
         return this
     }
