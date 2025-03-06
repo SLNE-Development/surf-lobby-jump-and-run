@@ -223,22 +223,6 @@ class ItemBuilder {
         return this
     }
 
-    /**
-     * Set the skull owner for the item. Works on skulls only.
-     *
-     * @param owner The name of the skull's owner.
-     * @return the skull owner
-     */
-    fun setSkullOwner(owner: String?): ItemBuilder {
-        itemStack.editMeta(
-            SkullMeta::class.java
-        ) { meta: SkullMeta ->
-            meta.setOwner(owner)
-        }
-
-        return this
-    }
-
     fun setSkullOwner(owner: OfflinePlayer?): ItemBuilder {
         itemStack.editMeta(
             SkullMeta::class.java
