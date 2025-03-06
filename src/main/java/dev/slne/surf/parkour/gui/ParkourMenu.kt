@@ -115,7 +115,14 @@ class ParkourMenu(player: Player) :
                 }
 
                 if(DatabaseProvider.getParkours().size == 1) {
-                    ParkourActivePlayersMenu(player, DatabaseProvider.getParkours().first())
+                    val parkour = DatabaseProvider.getParkours().first()
+
+                    if(parkour.activePlayers.isEmpty()) {
+                        ParkourGeneralFailureMenu(player, MessageBuilder().error("Dieser Parkour ist leer!"))
+                        return@GuiItem
+                    }
+
+                    ParkourActivePlayersMenu(player, parkour)
                     return@GuiItem
                 }
 
