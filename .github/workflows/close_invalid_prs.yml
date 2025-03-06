@@ -1,0 +1,27 @@
+name: Close Invalid Pull Requests
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+  workflow_dispatch:
+
+jobs:
+  close_invalid_pr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get Default Branch
+        id: get-default-branch
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          DEFAULT_BRANCH=$(gh repo view --json defaultBranchRef --template '{{.defaultBranchRef.name}}')
+          echo "default_branch=$DEFAULT_BRANCH" >> "$GITHUB_OUTPUT"
+
+      - name: Check if PR is from default branch
+        if: github.head_ref == steps.get-default-branch.outputs.default_branch
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Pull requests from the default branch '${{ steps.get-default-branch.outputs.default_branch }}' are not allowed. Closing PR #${{ github.event.pull_request.number }}."
+          gh pr close ${{ github.event.pull_request.number }} --comment "This pull request is invalid because it's created from the default branch '${{ steps.get-default-branch.outputs.default_branch }}'. Please use a feature branch."
+        shell: bash
