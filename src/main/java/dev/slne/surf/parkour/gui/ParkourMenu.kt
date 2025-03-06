@@ -11,6 +11,7 @@ import dev.slne.surf.parkour.gui.categories.ParkourScoreboardMenu
 import dev.slne.surf.parkour.gui.categories.ParkourStartGameMenu
 import dev.slne.surf.parkour.gui.categories.ParkourSettingsMenu
 import dev.slne.surf.parkour.instance
+import dev.slne.surf.parkour.leaderboard.LeaderboardSortingType
 import dev.slne.surf.parkour.util.ItemBuilder
 import dev.slne.surf.parkour.util.MessageBuilder
 import net.kyori.adventure.text.Component
@@ -78,7 +79,7 @@ class ParkourMenu(player: Player) :
                     .addLoreLine(MessageBuilder().info("Klicke, um dir die Bestenliste anzusehen!").build())
                     .build()
             ) {
-                ParkourScoreboardMenu(player)
+                ParkourScoreboardMenu(player, LeaderboardSortingType.POINTS_HIGHEST)
             }
 
             val startItem = GuiItem(
