@@ -12,6 +12,8 @@ import dev.slne.surf.parkour.player.PlayerData
 import dev.slne.surf.parkour.instance
 import dev.slne.surf.parkour.util.Area
 import dev.slne.surf.parkour.util.MessageBuilder
+import it.unimi.dsi.fastutil.objects.Object2ObjectMap
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap
 
 import it.unimi.dsi.fastutil.objects.ObjectArraySet
 import it.unimi.dsi.fastutil.objects.ObjectSet
@@ -23,6 +25,7 @@ import net.kyori.adventure.text.logger.slf4j.ComponentLogger
 
 import org.bukkit.Bukkit
 import org.bukkit.Material
+import org.bukkit.entity.Player
 
 import org.bukkit.util.Vector
 
