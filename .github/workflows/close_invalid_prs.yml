@@ -9,6 +9,9 @@ jobs:
   close_invalid_pr:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
       - name: Get Default Branch
         id: get-default-branch
         env:
