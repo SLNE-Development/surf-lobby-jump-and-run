@@ -99,7 +99,7 @@ data class Parkour(
         activePlayers.remove(player)
     }
 
-    private fun generateInitial(player: Player) {
+    private suspend fun generateInitial(player: Player) {
         val blockApi = instance.blockApi ?: return
         val randomLocation = getRandomLocationInRegion(player, world) ?: return
 
