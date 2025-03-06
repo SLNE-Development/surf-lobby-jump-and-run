@@ -15,8 +15,6 @@ repositories {
 }
 
 dependencies {
-    compileOnly("me.clip:placeholderapi:2.11.6")
-
     implementation("dev.hsbrysk:caffeine-coroutines:2.0.0")
 
     implementation("com.github.shynixn.mccoroutine:mccoroutine-bukkit-api:2.21.0")
