@@ -1,4 +1,4 @@
-package dev.slne.surf.parkour.menu
+package dev.slne.surf.parkour.gui
 
 import com.github.shynixn.mccoroutine.bukkit.launch
 import com.github.stefvanschie.inventoryframework.adventuresupport.ComponentHolder
@@ -6,6 +6,8 @@ import com.github.stefvanschie.inventoryframework.gui.GuiItem
 import com.github.stefvanschie.inventoryframework.gui.type.ChestGui
 import com.github.stefvanschie.inventoryframework.pane.StaticPane
 import dev.slne.surf.parkour.database.DatabaseProvider
+import dev.slne.surf.parkour.gui.categories.ParkourStartGameMenu
+import dev.slne.surf.parkour.gui.categories.ParkourSettingsMenu
 import dev.slne.surf.parkour.instance
 import dev.slne.surf.parkour.util.ItemBuilder
 import dev.slne.surf.parkour.util.MessageBuilder
@@ -26,10 +28,15 @@ class ParkourMenu(player: Player): ChestGui(5, ComponentHolder.of(MessageBuilder
 
             val outlinePane = StaticPane(0, 0, 9, 5)
             val outlineItem = GuiItem(ItemBuilder(Material.GRAY_STAINED_GLASS_PANE).setName(Component.text(" ")).build()) { event -> event.isCancelled = true }
+            val closeMenuItem = GuiItem(ItemBuilder(Material.BARRIER).setName(MessageBuilder().primary("Schließen").build()).addLoreLine(MessageBuilder().info("Klicke, um das Hautmenü zu schließen!").build()).build()) { player.closeInventory() }
 
             for (x in 0 until 9) {
                 outlinePane.addItem(outlineItem, x, 0)
-                outlinePane.addItem(outlineItem, x, 4)
+                if (x == 4) {
+                    outlinePane.addItem(closeMenuItem, x, 4)
+                } else {
+                    outlinePane.addItem(outlineItem, x, 4)
+                }
             }
             for (y in 1 until 4) {
                 outlinePane.addItem(outlineItem, 0, y)
@@ -61,7 +68,7 @@ class ParkourMenu(player: Player): ChestGui(5, ComponentHolder.of(MessageBuilder
                 .addLoreLine(MessageBuilder().info("Klicke, um einen Parkour zu starten!").build())
                 .build()) { event ->
                 event.isCancelled = true
-                ParkourSelectionMenu(player)
+                ParkourStartGameMenu(player)
             }
 
             val settingsItem = GuiItem(ItemBuilder(Material.REPEATING_COMMAND_BLOCK)
@@ -69,7 +76,7 @@ class ParkourMenu(player: Player): ChestGui(5, ComponentHolder.of(MessageBuilder
                 .addLoreLine(MessageBuilder().info("Klicke, um zu den Einstellungen zu gelangen!").build())
                 .build()){ event ->
                 event.isCancelled = true
-                ParkourSettings(player)
+                ParkourSettingsMenu(player)
             }
 
             val activePlayersItem = GuiItem(ItemBuilder(Material.WRITABLE_BOOK)

@@ -1,4 +1,4 @@
-package dev.slne.surf.parkour.menu
+package dev.slne.surf.parkour.gui.categories
 
 import com.github.shynixn.mccoroutine.bukkit.launch
 import com.github.stefvanschie.inventoryframework.adventuresupport.ComponentHolder
@@ -7,6 +7,7 @@ import com.github.stefvanschie.inventoryframework.gui.type.ChestGui
 import com.github.stefvanschie.inventoryframework.pane.StaticPane
 import dev.slne.surf.parkour.SurfParkour
 import dev.slne.surf.parkour.database.DatabaseProvider
+import dev.slne.surf.parkour.gui.ParkourMenu
 import dev.slne.surf.parkour.instance
 import dev.slne.surf.parkour.util.ItemBuilder
 import dev.slne.surf.parkour.util.MessageBuilder
@@ -15,7 +16,7 @@ import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.Material
 import org.bukkit.entity.Player
 
-class ParkourSettings(player: Player) : ChestGui(
+class ParkourSettingsMenu(player: Player) : ChestGui(
     5,
     ComponentHolder.of(MessageBuilder().primary("ᴇɪɴsᴛᴇʟʟᴜɴɢᴇɴ").build().decorate(TextDecoration.BOLD))
 ) {
@@ -26,10 +27,19 @@ class ParkourSettings(player: Player) : ChestGui(
             val outlineItem = GuiItem(
                 ItemBuilder(Material.GRAY_STAINED_GLASS_PANE).setName(Component.text(" ")).build()
             )
+            val menuButton =
+                GuiItem(ItemBuilder(Material.BARRIER).setName(MessageBuilder().primary("Hautmenü").build()).addLoreLine(MessageBuilder().info("Klicke, um zum hautmenü zurückzukehren!").build()).build())
+                {
+                    ParkourMenu(player)
+                }
 
             for (x in 0 until 9) {
                 outlinePane.addItem(outlineItem, x, 0)
-                outlinePane.addItem(outlineItem, x, 4)
+                if (x == 4) {
+                    outlinePane.addItem(menuButton, x, 4)
+                } else {
+                    outlinePane.addItem(outlineItem, x, 4)
+                }
             }
 
             for (y in 1 until 4) {
@@ -70,7 +80,7 @@ class ParkourSettings(player: Player) : ChestGui(
                     )
                 }
 
-                ParkourSettings(player) // update GUI because of currentSoundToggleState which is displayed
+                ParkourSettingsMenu(player) // update GUI because of currentSoundToggleState which is displayed
             }
             settingsPane.addItem(soundSettingsItem, 0, 0)
 
