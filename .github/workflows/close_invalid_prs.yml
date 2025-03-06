@@ -17,11 +17,15 @@ jobs:
           DEFAULT_BRANCH=$(gh repo view --json defaultBranchRef --template '{{.defaultBranchRef.name}}')
           echo "default_branch=$DEFAULT_BRANCH" >> "$GITHUB_OUTPUT"
 
-      - name: Check if PR is from default branch
-        if: github.head_ref == steps.get-default-branch.outputs.default_branch
+      - name: Close PRs from Default Branch
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo "Pull requests from the default branch '${{ steps.get-default-branch.outputs.default_branch }}' are not allowed. Closing PR #${{ github.event.pull_request.number }}."
-          gh pr close ${{ github.event.pull_request.number }} --comment "This pull request is invalid because it's created from the default branch '${{ steps.get-default-branch.outputs.default_branch }}'. Please use a feature branch."
+          DEFAULT_BRANCH=${{ steps.get-default-branch.outputs.default_branch }}
+          PR_NUMBERS=$(gh pr list --state open --json number,headRefName --template '{{range .}}{{if eq .headRefName "'"$DEFAULT_BRANCH"'"}}{{.number}} {{end}}{{end}}')
+
+          for PR_NUMBER in $PR_NUMBERS; do
+            echo "Closing PR #$PR_NUMBER from default branch '$DEFAULT_BRANCH'."
+            gh pr close $PR_NUMBER --comment "This pull request is invalid because it's created from the default branch '$DEFAULT_BRANCH'. Please use a feature branch."
+          done
         shell: bash
