@@ -6,13 +6,17 @@ import com.github.stefvanschie.inventoryframework.gui.GuiItem
 import com.github.stefvanschie.inventoryframework.gui.type.ChestGui
 import com.github.stefvanschie.inventoryframework.pane.PaginatedPane
 import com.github.stefvanschie.inventoryframework.pane.StaticPane
+import dev.slne.surf.parkour.database.DatabaseProvider
 import dev.slne.surf.parkour.gui.ParkourMenu
 import dev.slne.surf.parkour.instance
 import dev.slne.surf.parkour.leaderboard.LeaderboardSortingType
 import dev.slne.surf.parkour.util.ItemBuilder
 import dev.slne.surf.parkour.util.MessageBuilder
+import it.unimi.dsi.fastutil.objects.ObjectArrayList
+import it.unimi.dsi.fastutil.objects.ObjectList
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.TextDecoration
+import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.entity.Player
 
@@ -24,6 +28,7 @@ class ParkourScoreboardMenu(player: Player, sorting: LeaderboardSortingType) : C
 
     init {
         instance.launch {
+            val items: ObjectList<GuiItem> = ObjectArrayList()
             val outlinePane = StaticPane(0, 0, 9, 5)
             val pages = PaginatedPane(1, 1, 7, 3)
             val outlineItem = GuiItem(ItemBuilder(Material.GRAY_STAINED_GLASS_PANE).setName(Component.text(" ")).build())
@@ -45,8 +50,12 @@ class ParkourScoreboardMenu(player: Player, sorting: LeaderboardSortingType) : C
                 ParkourMenu(player)
             }
 
-            val cycleButton = GuiItem(ItemBuilder(Material.COMPASS).setName(MessageBuilder().primary("Sortieren nach: $sortingType").build()).addLoreLine(MessageBuilder().info("Klicke, um die Sortierung zu ändern!").build()).build()) {
+            val cycleButton = GuiItem(ItemBuilder(Material.COMPASS)
+                .setName(MessageBuilder().primary("Sortieren nach: $sortingType").build())
+                .addLoreLine(MessageBuilder().info("Klicke, um die Sortierung zu ändern!").build())
+                .build()) {
                 sortingType = LeaderboardSortingType.entries[(sortingType.ordinal + 1) % LeaderboardSortingType.entries.size]
+
                 ParkourScoreboardMenu(player, sortingType)
             }
 
@@ -66,6 +75,18 @@ class ParkourScoreboardMenu(player: Player, sorting: LeaderboardSortingType) : C
                         }
                     }
                 }
+            }
+
+            for (everyPlayerData in DatabaseProvider.getEveryPlayerData(sortingType)) {
+                items.add(GuiItem(ItemBuilder(Material.PLAYER_HEAD)
+                    .setSkullOwner(player)
+                    .setName(MessageBuilder(everyPlayerData.name).build())
+                    .addLoreLine(Component.empty())
+                    .addLoreLine(MessageBuilder().info("Statistiken:").build())
+                    .addLoreLine(MessageBuilder().darkSpacer("  - ").variableKey("ѕᴘʀüɴɢᴇ: ").variableValue("${everyPlayerData.points}").build())
+                    .addLoreLine(MessageBuilder().darkSpacer("  - ").variableKey("ᴠᴇʀѕᴜᴄʜᴇ: ").variableValue("${everyPlayerData.trys}").build())
+                    .addLoreLine(MessageBuilder().darkSpacer("  - ").variableKey("ʜɪɢʜѕᴄᴏʀᴇ: ").variableValue("${everyPlayerData.highScore}").build())
+                    .build()))
             }
 
             outlinePane.addItem(backButton, 2, 4)

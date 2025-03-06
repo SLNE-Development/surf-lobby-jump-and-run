@@ -10,12 +10,14 @@ import dev.hsbrysk.caffeine.buildCoroutine
 import dev.slne.surf.parkour.parkour.Parkour
 import dev.slne.surf.parkour.player.PlayerData
 import dev.slne.surf.parkour.instance
+import dev.slne.surf.parkour.leaderboard.LeaderboardSortingType
 import dev.slne.surf.parkour.util.Area
 import dev.slne.surf.parkour.util.MessageBuilder
-import it.unimi.dsi.fastutil.objects.Object2ObjectMap
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap
+import dev.slne.surf.surfapi.core.api.util.toObjectList
+import it.unimi.dsi.fastutil.objects.ObjectArrayList
 
 import it.unimi.dsi.fastutil.objects.ObjectArraySet
+import it.unimi.dsi.fastutil.objects.ObjectList
 import it.unimi.dsi.fastutil.objects.ObjectSet
 
 import kotlinx.coroutines.Dispatchers
@@ -25,7 +27,6 @@ import net.kyori.adventure.text.logger.slf4j.ComponentLogger
 
 import org.bukkit.Bukkit
 import org.bukkit.Material
-import org.bukkit.entity.Player
 
 import org.bukkit.util.Vector
 
@@ -268,6 +269,29 @@ object DatabaseProvider {
             logger.info(MessageBuilder().withPrefix().info("Saved ${parkourList.size} parkours in ${System.currentTimeMillis() - begin}ms!").build())
         }
     }
+
+    suspend fun getEveryPlayerData(sortType: LeaderboardSortingType): ObjectList<PlayerData> {
+        return withContext(Dispatchers.IO) {
+            val uuids = transaction {
+                Users.select(Users.uuid).map { UUID.fromString(it[Users.uuid]) }
+            }
+
+            val playerDataList = uuids.map { getPlayerData(it) }.toMutableList()
+
+            when (sortType) {
+                LeaderboardSortingType.POINTS_HIGHEST -> playerDataList.sortByDescending { it.points }
+                LeaderboardSortingType.POINTS_LOWEST -> playerDataList.sortBy { it.points }
+                LeaderboardSortingType.HIGHSCORE_HIGHEST -> playerDataList.sortByDescending { it.highScore }
+                LeaderboardSortingType.HIGHSCORE_LOWEST -> playerDataList.sortBy { it.highScore }
+                LeaderboardSortingType.NAME -> playerDataList.sortBy { it.name }
+            }
+
+            return@withContext ObjectArrayList(playerDataList)
+        }
+    }
+
+
+
 
     private fun serializeVector(vector: Vector): String {
         return gson.toJson(vector)
