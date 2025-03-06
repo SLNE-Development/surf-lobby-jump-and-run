@@ -100,7 +100,7 @@ data class Parkour(
 
     private suspend fun generateInitial(player: Player) {
         val blockApi = instance.blockApi ?: return
-        val randomLocation = getRandomLocationInRegion(world) ?: return
+        val randomLocation = getRandomLocationInRegion(player, world) ?: return
 
         val start = randomLocation.add(0.0, 1.0, 0.0)
         val block = start.block
@@ -282,7 +282,7 @@ data class Parkour(
      *
      */
 
-    private fun getRandomLocationInRegion(world: World): Location? {
+    private suspend fun getRandomLocationInRegion(player: Player, world: World): Location? {
         val posOne = area.max
         val posTwo = area.min
 
@@ -298,7 +298,9 @@ data class Parkour(
         val widthZ = maxZ - minZ
 
         if (widthX <= 20 || heightY <= 20 || widthZ <= 20) {
-            Bukkit.getConsoleSender().sendMessage("Die Jump and Run Region ist zu klein.")
+            Bukkit.getConsoleSender().sendMessage("Could not find random location in region because it is to small.. Parkour cancelled..")
+            cancelParkour(player)
+            SurfParkour.send(player, MessageBuilder().error("Es ist ein Fehler aufgetreten!"))
             return null
         }
 
