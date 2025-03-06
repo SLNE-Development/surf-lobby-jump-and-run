@@ -40,7 +40,6 @@ class ParkourActivePlayersMenu(player: Player, parkour: Parkour) : ChestGui(
                 if (pages.page < pages.pages - 1) {
                     pages.page += 1
                     update()
-
                 }
             }
 

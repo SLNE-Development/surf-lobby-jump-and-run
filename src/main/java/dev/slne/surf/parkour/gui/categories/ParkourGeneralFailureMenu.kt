@@ -15,13 +15,10 @@ import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.Material
 import org.bukkit.entity.Player
 
-class ParkourGeneralFailureMenu(player: Player, title: MessageBuilder) : ChestGui(5, ComponentHolder.of(MessageBuilder().error("ᴜᴘѕ! ᴇɪɴ ꜰᴇʜʟᴇʀ ɪѕᴛ ᴀᴜꜰɢᴇᴛʀᴇᴛᴇɴ.").build().decorate(TextDecoration.BOLD))) {
+class ParkourGeneralFailureMenu(player: Player, title: MessageBuilder) : ChestGui(5, ComponentHolder.of(MessageBuilder().error("ᴜᴘѕ...").build().decorate(TextDecoration.BOLD))) {
     init {
         val outlinePane = StaticPane(0, 0, 9, 5)
         val outlineItem = GuiItem(ItemBuilder(Material.GRAY_STAINED_GLASS_PANE).setName(Component.text(" ")).build())
-        val menuButton = GuiItem(ItemBuilder(Material.BARRIER).setName(MessageBuilder().primary("Hautmenü").build()).addLoreLine(MessageBuilder().info("Klicke, um zum Hautmenü zurückzukehren!").build()).build()) {
-                ParkourMenu(player)
-            }
 
         val failurePane = StaticPane(4, 2, 1, 1)
         val failureItem = GuiItem(ItemBuilder(Material.BARRIER).setName(title.build()).addLoreLine(MessageBuilder().info("Klicke, um zum Hautmenü zurückzukehren!").build()).build()) {
@@ -37,8 +34,7 @@ class ParkourGeneralFailureMenu(player: Player, title: MessageBuilder) : ChestGu
             outlinePane.addItem(outlineItem, 0, y)
             outlinePane.addItem(outlineItem, 8, y)
         }
-
-        outlinePane.addItem(menuButton, 4, 4)
+        
         failurePane.addItem(failureItem, 0, 0)
 
 

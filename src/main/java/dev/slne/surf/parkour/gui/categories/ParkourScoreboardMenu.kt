@@ -51,11 +51,16 @@ class ParkourScoreboardMenu(player: Player, sorting: LeaderboardSortingType) : C
             }
 
             val cycleButton = GuiItem(ItemBuilder(Material.COMPASS)
-                .setName(MessageBuilder().primary("Sortieren nach: $sortingType").build())
+                .setName(MessageBuilder().primary("Sortieren nach: ${sortingType.niceName}").build())
                 .addLoreLine(MessageBuilder().info("Klicke, um die Sortierung zu ändern!").build())
+                .apply {
+                    LeaderboardSortingType.entries.forEach { type ->
+                        val indicator = if (type == sortingType) "> " else "  "
+                        addLoreLine(MessageBuilder().darkSpacer(indicator).info(type.niceName).build())
+                    }
+                }
                 .build()) {
                 sortingType = LeaderboardSortingType.entries[(sortingType.ordinal + 1) % LeaderboardSortingType.entries.size]
-
                 ParkourScoreboardMenu(player, sortingType)
             }
 
@@ -79,7 +84,7 @@ class ParkourScoreboardMenu(player: Player, sorting: LeaderboardSortingType) : C
 
             for (everyPlayerData in DatabaseProvider.getEveryPlayerData(sortingType)) {
                 items.add(GuiItem(ItemBuilder(Material.PLAYER_HEAD)
-                    .setSkullOwner(player)
+                    .setSkullOwner(Bukkit.getOfflinePlayer(everyPlayerData.name))
                     .setName(MessageBuilder(everyPlayerData.name).build())
                     .addLoreLine(Component.empty())
                     .addLoreLine(MessageBuilder().info("Statistiken:").build())
@@ -89,15 +94,30 @@ class ParkourScoreboardMenu(player: Player, sorting: LeaderboardSortingType) : C
                     .build()))
             }
 
-            outlinePane.addItem(backButton, 2, 4)
+
+
+            if(pages.page > 1) {
+                outlinePane.addItem(backButton, 2, 4)
+            } else {
+                outlinePane.addItem(outlineItem, 2, 4)
+            }
+
+            if(pages.page < pages.pages - 1) {
+                outlinePane.addItem(continueButton, 6, 4)
+            } else {
+                outlinePane.addItem(outlineItem, 6, 4)
+            }
+
+            pages.populateWithGuiItems(items)
+
             outlinePane.addItem(menuButton, 4, 4)
-            outlinePane.addItem(continueButton, 6, 4)
             outlinePane.addItem(cycleButton, 4, 0)
 
             setOnGlobalDrag { it.isCancelled = true }
             setOnGlobalClick { it.isCancelled = true }
 
             addPane(outlinePane)
+            addPane(pages)
             show(player)
         }
     }

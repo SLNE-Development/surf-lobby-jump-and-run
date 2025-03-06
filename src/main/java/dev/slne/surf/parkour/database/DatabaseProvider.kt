@@ -21,7 +21,10 @@ import it.unimi.dsi.fastutil.objects.ObjectList
 import it.unimi.dsi.fastutil.objects.ObjectSet
 
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.withContext
+import net.kyori.adventure.text.Component
 
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger
 
@@ -276,7 +279,7 @@ object DatabaseProvider {
                 Users.select(Users.uuid).map { UUID.fromString(it[Users.uuid]) }
             }
 
-            val playerDataList = uuids.map { getPlayerData(it) }.toMutableList()
+            val playerDataList = uuids.map { async { getPlayerData(it) } }.awaitAll().toMutableList()
 
             when (sortType) {
                 LeaderboardSortingType.POINTS_HIGHEST -> playerDataList.sortByDescending { it.points }
@@ -289,7 +292,6 @@ object DatabaseProvider {
             return@withContext ObjectArrayList(playerDataList)
         }
     }
-
 
 
 
