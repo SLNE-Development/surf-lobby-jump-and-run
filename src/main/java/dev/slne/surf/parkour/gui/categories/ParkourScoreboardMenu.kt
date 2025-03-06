@@ -12,6 +12,7 @@ import dev.slne.surf.parkour.instance
 import dev.slne.surf.parkour.leaderboard.LeaderboardSortingType
 import dev.slne.surf.parkour.util.ItemBuilder
 import dev.slne.surf.parkour.util.MessageBuilder
+import dev.slne.surf.parkour.util.HeadUtil
 import it.unimi.dsi.fastutil.objects.ObjectArrayList
 import it.unimi.dsi.fastutil.objects.ObjectList
 import net.kyori.adventure.text.Component
@@ -82,15 +83,14 @@ class ParkourScoreboardMenu(player: Player, sorting: LeaderboardSortingType) : C
                 }
             }
 
-            for (everyPlayerData in DatabaseProvider.getEveryPlayerData(sortingType)) {
-                items.add(GuiItem(ItemBuilder(Material.PLAYER_HEAD)
-                    .setSkullOwner(Bukkit.getOfflinePlayer(everyPlayerData.name))
-                    .setName(MessageBuilder(everyPlayerData.name).build())
+            for (playerData in DatabaseProvider.getEveryPlayerData(sortingType)) {
+                items.add(GuiItem(ItemBuilder(HeadUtil.getPlayerHead(playerData.name))
+                    .setName(MessageBuilder(playerData.name).build())
                     .addLoreLine(Component.empty())
                     .addLoreLine(MessageBuilder().info("Statistiken:").build())
-                    .addLoreLine(MessageBuilder().darkSpacer("  - ").variableKey("ѕᴘʀüɴɢᴇ: ").variableValue("${everyPlayerData.points}").build())
-                    .addLoreLine(MessageBuilder().darkSpacer("  - ").variableKey("ᴠᴇʀѕᴜᴄʜᴇ: ").variableValue("${everyPlayerData.trys}").build())
-                    .addLoreLine(MessageBuilder().darkSpacer("  - ").variableKey("ʜɪɢʜѕᴄᴏʀᴇ: ").variableValue("${everyPlayerData.highScore}").build())
+                    .addLoreLine(MessageBuilder().darkSpacer("  - ").variableKey("ѕᴘʀüɴɢᴇ: ").variableValue("${playerData.points}").build())
+                    .addLoreLine(MessageBuilder().darkSpacer("  - ").variableKey("ᴠᴇʀѕᴜᴄʜᴇ: ").variableValue("${playerData.trys}").build())
+                    .addLoreLine(MessageBuilder().darkSpacer("  - ").variableKey("ʜɪɢʜѕᴄᴏʀᴇ: ").variableValue("${playerData.highScore}").build())
                     .build()))
             }
 

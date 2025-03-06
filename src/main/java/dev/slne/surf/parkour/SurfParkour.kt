@@ -1,7 +1,6 @@
 package dev.slne.surf.parkour
 
 
-import dev.slne.surf.parkour.papi.ParkourPlaceholderExtension
 import com.github.shynixn.mccoroutine.bukkit.SuspendingJavaPlugin
 import com.github.shynixn.mccoroutine.bukkit.registerSuspendingEvents
 
@@ -25,7 +24,6 @@ class SurfParkour : SuspendingJavaPlugin() {
     var blockApi: GlowingBlocks? = null
 
     override suspend fun onEnableAsync() {
-        this.handlePlaceholderAPI()
 
         this.saveDefaultConfig()
 
@@ -44,12 +42,6 @@ class SurfParkour : SuspendingJavaPlugin() {
     override suspend fun onDisableAsync() {
         DatabaseProvider.saveParkours()
         DatabaseProvider.savePlayers()
-    }
-
-    private fun handlePlaceholderAPI() {
-        if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
-            ParkourPlaceholderExtension().register()
-        }
     }
 
     companion object {
