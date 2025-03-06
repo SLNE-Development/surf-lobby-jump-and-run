@@ -6,10 +6,7 @@ import com.github.stefvanschie.inventoryframework.gui.GuiItem
 import com.github.stefvanschie.inventoryframework.gui.type.ChestGui
 import com.github.stefvanschie.inventoryframework.pane.StaticPane
 import dev.slne.surf.parkour.database.DatabaseProvider
-import dev.slne.surf.parkour.gui.categories.ParkourActivePlayersMenu
-import dev.slne.surf.parkour.gui.categories.ParkourScoreboardMenu
-import dev.slne.surf.parkour.gui.categories.ParkourStartGameMenu
-import dev.slne.surf.parkour.gui.categories.ParkourSettingsMenu
+import dev.slne.surf.parkour.gui.categories.*
 import dev.slne.surf.parkour.instance
 import dev.slne.surf.parkour.leaderboard.LeaderboardSortingType
 import dev.slne.surf.parkour.util.ItemBuilder
@@ -56,18 +53,12 @@ class ParkourMenu(player: Player) :
 
             val profileHead = ItemBuilder(Material.PLAYER_HEAD)
                 .setSkullOwner(player)
-                .setName(MessageBuilder().primary(name).build())
+                .setName(MessageBuilder(name).build())
                 .addLoreLine(Component.empty())
                 .addLoreLine(MessageBuilder().info("Statistiken:").build())
-                .addLoreLine(
-                    MessageBuilder().darkSpacer("  - ").variableKey("ѕᴘʀüɴɢᴇ: ").variableValue("$jumps").build()
-                )
-                .addLoreLine(
-                    MessageBuilder().darkSpacer("  - ").variableKey("ᴠᴇʀѕᴜᴄʜᴇ: ").variableValue("$tries").build()
-                )
-                .addLoreLine(
-                    MessageBuilder().darkSpacer("  - ").variableKey("ʜɪɢʜѕᴄᴏʀᴇ: ").variableValue("$highscore").build()
-                )
+                .addLoreLine(MessageBuilder().darkSpacer("  - ").variableKey("ѕᴘʀüɴɢᴇ: ").variableValue("$jumps").build())
+                .addLoreLine(MessageBuilder().darkSpacer("  - ").variableKey("ᴠᴇʀѕᴜᴄʜᴇ: ").variableValue("$tries").build())
+                .addLoreLine(MessageBuilder().darkSpacer("  - ").variableKey("ʜɪɢʜѕᴄᴏʀᴇ: ").variableValue("$highscore").build())
                 .build()
 
             playerHeadPane.addItem(GuiItem(profileHead), 0, 0)
@@ -107,7 +98,17 @@ class ParkourMenu(player: Player) :
                     .addLoreLine(MessageBuilder().info("Klicke, um dir die aktiven Spieler anzusehen!").build())
                     .build()
             ) {
-                ParkourActivePlayersMenu(player)
+                if(DatabaseProvider.getParkours().isEmpty()) {
+                    ParkourGeneralFailureMenu(player, MessageBuilder().error("Es gibt keine verfügbaren Parkours!"))
+                    return@GuiItem
+                }
+
+                if(DatabaseProvider.getParkours().size == 1) {
+                    ParkourActivePlayersMenu(player, DatabaseProvider.getParkours().first())
+                    return@GuiItem
+                }
+
+                ParkourSelectMenu(player, RedirectType.PARKOUR_ACTIVES)
             }
 
             taskbarPane.addItem(statsItem, 1, 0)
