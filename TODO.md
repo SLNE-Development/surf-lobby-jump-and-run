@@ -1,4 +1,4 @@
 # Surf Parkour (Surf Lobby Jump And Run)
 
-- Fix saving issues (player stats)
-- fix papi extension
+- eventuell neuer block generator
+- leaderboard stats nicht nur von den uuids aus der db sondern auch aus der cache
