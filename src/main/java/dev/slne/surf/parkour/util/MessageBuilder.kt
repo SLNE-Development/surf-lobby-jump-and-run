@@ -15,6 +15,11 @@ class MessageBuilder {
         this.message = Component.text(message, Colors.PRIMARY)
     }
 
+    fun append(other: MessageBuilder): MessageBuilder {
+        message = message.append(other.build())
+        return this
+    }
+
     fun withPrefix(): dev.slne.surf.parkour.util.MessageBuilder {
         message = message.append(dev.slne.surf.parkour.util.Colors.PREFIX)
         return this

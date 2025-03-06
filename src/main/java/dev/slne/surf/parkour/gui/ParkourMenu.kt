@@ -6,6 +6,8 @@ import com.github.stefvanschie.inventoryframework.gui.GuiItem
 import com.github.stefvanschie.inventoryframework.gui.type.ChestGui
 import com.github.stefvanschie.inventoryframework.pane.StaticPane
 import dev.slne.surf.parkour.database.DatabaseProvider
+import dev.slne.surf.parkour.gui.categories.ParkourActivePlayersMenu
+import dev.slne.surf.parkour.gui.categories.ParkourScoreboardMenu
 import dev.slne.surf.parkour.gui.categories.ParkourStartGameMenu
 import dev.slne.surf.parkour.gui.categories.ParkourSettingsMenu
 import dev.slne.surf.parkour.instance
@@ -17,7 +19,8 @@ import org.bukkit.Material
 import org.bukkit.entity.Player
 
 
-class ParkourMenu(player: Player): ChestGui(5, ComponentHolder.of(MessageBuilder().primary("ᴘᴀʀᴋᴏᴜʀ").build().decorate(TextDecoration.BOLD))) {
+class ParkourMenu(player: Player) :
+    ChestGui(5, ComponentHolder.of(MessageBuilder().primary("ᴘᴀʀᴋᴏᴜʀ").build().decorate(TextDecoration.BOLD))) {
     init {
         instance.launch {
             val playerData = DatabaseProvider.getPlayerData(player.uniqueId)
@@ -27,8 +30,13 @@ class ParkourMenu(player: Player): ChestGui(5, ComponentHolder.of(MessageBuilder
             val name = playerData.name
 
             val outlinePane = StaticPane(0, 0, 9, 5)
-            val outlineItem = GuiItem(ItemBuilder(Material.GRAY_STAINED_GLASS_PANE).setName(Component.text(" ")).build()) { event -> event.isCancelled = true }
-            val closeMenuItem = GuiItem(ItemBuilder(Material.BARRIER).setName(MessageBuilder().primary("Schließen").build()).addLoreLine(MessageBuilder().info("Klicke, um das Hautmenü zu schließen!").build()).build()) { player.closeInventory() }
+            val outlineItem = GuiItem(
+                ItemBuilder(Material.GRAY_STAINED_GLASS_PANE).setName(Component.text(" ")).build()
+            ) { event -> event.isCancelled = true }
+            val closeMenuItem = GuiItem(
+                ItemBuilder(Material.BARRIER).setName(MessageBuilder().primary("Schließen").build())
+                    .addLoreLine(MessageBuilder().info("Klicke, um das Hautmenü zu schließen!").build()).build()
+            ) { player.closeInventory() }
 
             for (x in 0 until 9) {
                 outlinePane.addItem(outlineItem, x, 0)
@@ -50,39 +58,56 @@ class ParkourMenu(player: Player): ChestGui(5, ComponentHolder.of(MessageBuilder
                 .setName(MessageBuilder().primary(name).build())
                 .addLoreLine(Component.empty())
                 .addLoreLine(MessageBuilder().info("Statistiken:").build())
-                .addLoreLine(MessageBuilder().darkSpacer("  - ").variableKey("ѕᴘʀüɴɢᴇ: ").variableValue("$jumps").build())
-                .addLoreLine(MessageBuilder().darkSpacer("  - ").variableKey("ᴠᴇʀѕᴜᴄʜᴇ: ").variableValue("$tries").build())
-                .addLoreLine(MessageBuilder().darkSpacer("  - ").variableKey("ʜɪɢʜѕᴄᴏʀᴇ: ").variableValue("$highscore").build())
+                .addLoreLine(
+                    MessageBuilder().darkSpacer("  - ").variableKey("ѕᴘʀüɴɢᴇ: ").variableValue("$jumps").build()
+                )
+                .addLoreLine(
+                    MessageBuilder().darkSpacer("  - ").variableKey("ᴠᴇʀѕᴜᴄʜᴇ: ").variableValue("$tries").build()
+                )
+                .addLoreLine(
+                    MessageBuilder().darkSpacer("  - ").variableKey("ʜɪɢʜѕᴄᴏʀᴇ: ").variableValue("$highscore").build()
+                )
                 .build()
 
             playerHeadPane.addItem(GuiItem(profileHead), 0, 0)
 
             val taskbarPane = StaticPane(0, 3, 9, 1)
-            val statsItem = GuiItem(ItemBuilder(Material.NETHER_STAR)
-                .setName(MessageBuilder("Bestenliste").build())
-                .addLoreLine(MessageBuilder().info("Klicke, um dir die Bestenliste anzusehen!").build())
-                .build())
+            val statsItem = GuiItem(
+                ItemBuilder(Material.NETHER_STAR)
+                    .setName(MessageBuilder("Bestenliste").build())
+                    .addLoreLine(MessageBuilder().info("Klicke, um dir die Bestenliste anzusehen!").build())
+                    .build()
+            ) {
+                ParkourScoreboardMenu(player)
+            }
 
-            val startItem = GuiItem(ItemBuilder(Material.RECOVERY_COMPASS)
-                .setName(MessageBuilder("Parkour starten").build())
-                .addLoreLine(MessageBuilder().info("Klicke, um einen Parkour zu starten!").build())
-                .build()) { event ->
-                event.isCancelled = true
+            val startItem = GuiItem(
+                ItemBuilder(Material.RECOVERY_COMPASS)
+                    .setName(MessageBuilder("Parkour starten").build())
+                    .addLoreLine(MessageBuilder().info("Klicke, um einen Parkour zu starten!").build())
+                    .build()
+            ) {
+
                 ParkourStartGameMenu(player)
             }
 
-            val settingsItem = GuiItem(ItemBuilder(Material.REPEATING_COMMAND_BLOCK)
-                .setName(MessageBuilder("Einstellungen").build())
-                .addLoreLine(MessageBuilder().info("Klicke, um zu den Einstellungen zu gelangen!").build())
-                .build()){ event ->
-                event.isCancelled = true
+            val settingsItem = GuiItem(
+                ItemBuilder(Material.REPEATING_COMMAND_BLOCK)
+                    .setName(MessageBuilder("Einstellungen").build())
+                    .addLoreLine(MessageBuilder().info("Klicke, um zu den Einstellungen zu gelangen!").build())
+                    .build()
+            ) {
                 ParkourSettingsMenu(player)
             }
 
-            val activePlayersItem = GuiItem(ItemBuilder(Material.WRITABLE_BOOK)
-                .setName(MessageBuilder("Aktive Spieler").build())
-                .addLoreLine(MessageBuilder().info("Klicke, um dir die aktiven Spieler anzusehen!").build())
-                .build())
+            val activePlayersItem = GuiItem(
+                ItemBuilder(Material.WRITABLE_BOOK)
+                    .setName(MessageBuilder("Aktive Spieler").build())
+                    .addLoreLine(MessageBuilder().info("Klicke, um dir die aktiven Spieler anzusehen!").build())
+                    .build()
+            ) {
+                ParkourActivePlayersMenu(player)
+            }
 
             taskbarPane.addItem(statsItem, 1, 0)
             taskbarPane.addItem(startItem, 3, 0)

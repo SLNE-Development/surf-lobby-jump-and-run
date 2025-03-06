@@ -24,12 +24,11 @@ class ParkourSettingsMenu(player: Player) : ChestGui(
         instance.launch {
             val playerData = DatabaseProvider.getPlayerData(player.uniqueId)
             val outlinePane = StaticPane(0, 0, 9, 5)
-            val outlineItem = GuiItem(
-                ItemBuilder(Material.GRAY_STAINED_GLASS_PANE).setName(Component.text(" ")).build()
-            )
+            val outlineItem = GuiItem(ItemBuilder(Material.GRAY_STAINED_GLASS_PANE).setName(Component.text(" ")).build())
             val menuButton =
-                GuiItem(ItemBuilder(Material.BARRIER).setName(MessageBuilder().primary("Hautmenü").build()).addLoreLine(MessageBuilder().info("Klicke, um zum hautmenü zurückzukehren!").build()).build())
-                {
+                GuiItem(ItemBuilder(Material.BARRIER).setName(MessageBuilder().primary("Hautmenü").build())
+                    .addLoreLine(MessageBuilder().info("Klicke, um zum Hautmenü zurückzukehren!").build()).build()
+                ) {
                     ParkourMenu(player)
                 }
 
@@ -49,21 +48,14 @@ class ParkourSettingsMenu(player: Player) : ChestGui(
 
             val settingsPane = StaticPane(1, 1, 7, 3)
             val currentSoundToggleState = if (playerData.likesSound) {
-                MessageBuilder().success("aktiviert").build()
+                MessageBuilder().success("aktiviert")
             } else {
-                MessageBuilder().error("deaktiviert").build()
+                MessageBuilder().error("deaktiviert")
             }
 
-            val soundSettingsItem = GuiItem(
-                ItemBuilder(Material.JUKEBOX)
+            val soundSettingsItem = GuiItem(ItemBuilder(Material.JUKEBOX)
                     .setName(MessageBuilder("Sound").build())
-                    .addLoreLine(
-                        MessageBuilder()
-                            .info("Der Sound ist aktuell ")
-                            .build()
-                            .append(currentSoundToggleState)
-                            .append(MessageBuilder().info(".").build())
-                    )
+                    .addLoreLine(MessageBuilder().info("Der Sound ist aktuell ").append(currentSoundToggleState).info(".").build())
                     .addLoreLine(MessageBuilder().info("Klicke, um die Einstellung zu ändern!").build())
                     .build()
             ) {
@@ -71,16 +63,15 @@ class ParkourSettingsMenu(player: Player) : ChestGui(
                 if (playerData.likesSound) {
                     SurfParkour.send(
                         player,
-                        MessageBuilder().primary("Die ParkourSounds sind nun ").success("aktiviert").primary(".")
+                        MessageBuilder().primary("Die Parkour-Sounds sind nun ").success("aktiviert").primary(".")
                     )
                 } else {
                     SurfParkour.send(
                         player,
-                        MessageBuilder().primary("Die ParkourSounds sind nun ").error("deaktiviert").primary(".")
+                        MessageBuilder().primary("Die Parkour-Sounds sind nun ").error("deaktiviert").primary(".")
                     )
                 }
-
-                ParkourSettingsMenu(player) // update GUI because of currentSoundToggleState which is displayed
+                ParkourSettingsMenu(player) // needed to update also the lore with the togglestate
             }
             settingsPane.addItem(soundSettingsItem, 0, 0)
 
