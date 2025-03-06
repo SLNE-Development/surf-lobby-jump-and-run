@@ -28,7 +28,7 @@ class ParkourStartCommand(commandName: String) : CommandAPICommand(commandName) 
             }
 
             if(Parkour.isJumping(player)){
-                SurfParkour.send(player, MessageBuilder().primary("Du ").error("befindest dich bereits ").primary(" in einem parkour."))
+                SurfParkour.send(player, MessageBuilder().primary("Du ").error("befindest dich bereits ").primary("in einem Parkour."))
                 return@PlayerCommandExecutor
             }
 
