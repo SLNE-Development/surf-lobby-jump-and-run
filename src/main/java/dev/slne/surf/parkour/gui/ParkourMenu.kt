@@ -79,8 +79,19 @@ class ParkourMenu(player: Player) :
                     .addLoreLine(MessageBuilder().info("Klicke, um einen Parkour zu starten!").build())
                     .build()
             ) {
+                if(DatabaseProvider.getParkours().isEmpty()) {
+                    ParkourGeneralFailureMenu(player, MessageBuilder().error("Es gibt keine verfügbaren Parkours!"))
+                    return@GuiItem
+                }
 
-                ParkourStartGameMenu(player)
+                if(DatabaseProvider.getParkours().size == 1) {
+                    instance.launch {
+                        DatabaseProvider.getParkours().first().startParkour(player)
+                    }
+                    return@GuiItem
+                }
+
+                ParkourSelectMenu(player, RedirectType.START_PARKOUR)
             }
 
             val settingsItem = GuiItem(

@@ -68,6 +68,8 @@ data class Parkour(
      */
 
     suspend fun startParkour(player: Player) {
+        this.cancelParkour(player)
+
         val jumps = arrayOfNulls<Block>(3)
 
         activePlayers.add(player)

@@ -1,5 +1,6 @@
 package dev.slne.surf.parkour.gui.categories
 
+import com.github.shynixn.mccoroutine.bukkit.launch
 import com.github.stefvanschie.inventoryframework.adventuresupport.ComponentHolder
 import com.github.stefvanschie.inventoryframework.gui.GuiItem
 import com.github.stefvanschie.inventoryframework.gui.type.ChestGui
@@ -8,6 +9,7 @@ import com.github.stefvanschie.inventoryframework.pane.StaticPane
 import dev.slne.surf.parkour.database.DatabaseProvider
 import dev.slne.surf.parkour.gui.ParkourMenu
 import dev.slne.surf.parkour.gui.RedirectType
+import dev.slne.surf.parkour.instance
 import dev.slne.surf.parkour.util.ItemBuilder
 import dev.slne.surf.parkour.util.MessageBuilder
 import it.unimi.dsi.fastutil.objects.ObjectArrayList
@@ -49,6 +51,12 @@ class ParkourSelectMenu(player: Player, redirect: RedirectType) : ChestGui(5, Co
                     }
                     RedirectType.PARKOUR_ACTIVES -> {
                         ParkourActivePlayersMenu(player, parkour)
+                    }
+
+                    RedirectType.START_PARKOUR -> {
+                        instance.launch {
+                            parkour.startParkour(player)
+                        }
                     }
                 }
             })
