@@ -67,7 +67,10 @@ class ParkourMenu(player: Player): ChestGui(5, ComponentHolder.of(MessageBuilder
             val settingsItem = GuiItem(ItemBuilder(Material.REPEATING_COMMAND_BLOCK)
                 .setName(MessageBuilder("Einstellungen").build())
                 .addLoreLine(MessageBuilder().info("Klicke, um zu den Einstellungen zu gelangen!").build())
-                .build())
+                .build()){ event ->
+                event.isCancelled = true
+                ParkourSettings(player)
+            }
 
             val activePlayersItem = GuiItem(ItemBuilder(Material.WRITABLE_BOOK)
                 .setName(MessageBuilder("Aktive Spieler").build())
