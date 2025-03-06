@@ -77,9 +77,16 @@ class ParkourActivePlayersMenu(player: Player) : ChestGui(
                     }
                 }
             }
-            outlinePane.addItem(backButton, 2, 4)
+
+            if(pages.page > 1) {
+                outlinePane.addItem(backButton, 2, 4)
+            }
+
+            if(pages.page < pages.pages - 1) {
+                outlinePane.addItem(continueButton, 6, 4)
+            }
+
             outlinePane.addItem(menuButton, 4, 4)
-            outlinePane.addItem(continueButton, 6, 4)
 
 
             for (parkour in DatabaseProvider.getParkours()) {
