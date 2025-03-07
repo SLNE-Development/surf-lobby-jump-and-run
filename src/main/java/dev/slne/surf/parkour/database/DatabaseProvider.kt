@@ -1,43 +1,35 @@
 package dev.slne.surf.parkour.database
 
 import com.github.benmanes.caffeine.cache.Caffeine
-import com.github.shynixn.mccoroutine.bukkit.launch
-
 import com.google.gson.Gson
-import dev.hsbrysk.caffeine.CoroutineLoadingCache
+import com.sksamuel.aedile.core.expireAfterWrite
+import com.sksamuel.aedile.core.withRemovalListener
 import dev.hsbrysk.caffeine.buildCoroutine
-
+import dev.slne.surf.parkour.leaderboard.LeaderboardSortingType
 import dev.slne.surf.parkour.parkour.Parkour
 import dev.slne.surf.parkour.player.PlayerData
 import dev.slne.surf.parkour.plugin
-import dev.slne.surf.parkour.leaderboard.LeaderboardSortingType
 import dev.slne.surf.parkour.util.Area
 import dev.slne.surf.parkour.util.MessageBuilder
 import it.unimi.dsi.fastutil.objects.ObjectArrayList
-
 import it.unimi.dsi.fastutil.objects.ObjectArraySet
 import it.unimi.dsi.fastutil.objects.ObjectList
 import it.unimi.dsi.fastutil.objects.ObjectSet
-
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.withContext
-
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger
-
 import org.bukkit.Bukkit
 import org.bukkit.Material
-
 import org.bukkit.util.Vector
-
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.io.File
-
-import java.util.UUID
+import java.util.*
 import java.util.concurrent.TimeUnit
+import kotlin.time.Duration.Companion.days
 
 object DatabaseProvider {
     private val config = plugin.config
@@ -48,17 +40,14 @@ object DatabaseProvider {
      * Cache for player data
      */
 
-    private val dataCache: CoroutineLoadingCache<UUID, PlayerData> = Caffeine
-        .newBuilder()
-        .expireAfterWrite(30L, TimeUnit.DAYS)
-        .removalListener<UUID, PlayerData> { uuid, data, _ ->
-            plugin.launch {
-                if (uuid != null && data != null) {
-                    savePlayer(data)
-                }
+    private val dataCache = Caffeine.newBuilder()
+        .expireAfterWrite(30.days)
+        .withRemovalListener { uuid, data, _ ->
+            if (uuid != null && data != null) {
+                savePlayer(data as PlayerData)
             }
         }
-        .buildCoroutine(DatabaseProvider::loadPlayer)
+        .buildCoroutine<UUID, PlayerData>(DatabaseProvider::loadPlayer)
 
     /**
      * Cache for parkours
