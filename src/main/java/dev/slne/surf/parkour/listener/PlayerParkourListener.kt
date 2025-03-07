@@ -49,21 +49,5 @@ class PlayerParkourListener : Listener {
         }
     }
 
-    @EventHandler
-    fun onInteract(event: PlayerInteractEvent) {
-        val player = event.player
-        val location = event.interactionPoint ?: return
-        val parkour = Parkour.getParkour(player) ?: return
-        val jumps: Array<Block?> = parkour.latestJumps[player] ?: return
 
-        for (jump in jumps) {
-            if (jump == null) {
-                continue
-            }
-
-            if (jump.location == location) {
-                player.sendBlockChange(jump.location, jump.blockData)
-            }
-        }
-    }
 }
