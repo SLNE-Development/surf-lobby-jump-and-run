@@ -28,14 +28,8 @@ import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.jetbrains.exposed.sql.transactions.transaction
-import java.io.File
 import java.util.*
-import kotlin.io.path.absolutePathString
-import kotlin.io.path.createDirectories
-import kotlin.io.path.createFile
-import kotlin.io.path.div
-import kotlin.io.path.exists
-import kotlin.io.path.notExists
+import kotlin.io.path.*
 import kotlin.time.Duration.Companion.days
 
 object DatabaseProvider {
@@ -64,7 +58,7 @@ object DatabaseProvider {
     /**
      * Player Data Table
      */
-    object Users: Table() {
+    object Users : Table() {
         val uuid = char("uuid", 36)
         val name = char("name", 16)
         val highScore = integer("high_score")
@@ -79,7 +73,7 @@ object DatabaseProvider {
      * Parkour Data Table
      */
 
-    object Parkours: Table() {
+    object Parkours : Table() {
         val uuid = char("uuid", 36)
         val name = text("name")
 
@@ -96,7 +90,7 @@ object DatabaseProvider {
     /**
      * Connect to the database with the method given in the config
      */
-   suspend fun connect() {
+    suspend fun connect() {
         val method = config.getString("storage-method") ?: "local"
 
         when (method.lowercase()) {
@@ -108,35 +102,57 @@ object DatabaseProvider {
                     dbFile.createDirectories()
                     dbFile.createFile()
                 }
-                Database.connect("jdbc:sqlite:file:${dbFile.absolutePathString()}", "org.sqlite.JDBC")
-                logger.info(MessageBuilder().withPrefix().success("Successfully connected to database with sqlite!").build())
+                Database.connect(
+                    "jdbc:sqlite:file:${dbFile.absolutePathString()}",
+                    "org.sqlite.JDBC"
+                )
+                logger.info(
+                    MessageBuilder().withPrefix()
+                        .success("Successfully connected to database with sqlite!").build()
+                )
             }
 
             "external" -> {
                 Class.forName("com.mysql.cj.jdbc.Driver")
                 Database.connect(
-                    url = "jdbc:mysql://${config.getString("database.hostname")}:${config.getInt("database.port")}/${config.getString("database.database")}",
+                    url = "jdbc:mysql://${config.getString("database.hostname")}:${config.getInt("database.port")}/${
+                        config.getString(
+                            "database.database"
+                        )
+                    }",
                     driver = "com.mysql.cj.jdbc.Driver",
                     user = config.getString("database.username") ?: return,
                     password = config.getString("database.password") ?: return
                 )
 
-                logger.info(MessageBuilder().withPrefix().success("Successfully connected to database with mysql!").build())
+                logger.info(
+                    MessageBuilder().withPrefix()
+                        .success("Successfully connected to database with mysql!").build()
+                )
             }
 
             else -> {
-                logger.warn(MessageBuilder().withPrefix().info("Unknown storage method \"$method\". Using local storage...").build())
+                logger.warn(
+                    MessageBuilder().withPrefix()
+                        .info("Unknown storage method \"$method\". Using local storage...").build()
+                )
 
                 Class.forName("org.sqlite.JDBC")
-                val dbFile = plugin.dataPath/"storage.db"
+                val dbFile = plugin.dataPath / "storage.db"
 
                 if (!dbFile.exists()) {
                     dbFile.createDirectories()
                     dbFile.createFile()
                 }
-                Database.connect("jdbc:sqlite:file:${dbFile.absolutePathString()}", "org.sqlite.JDBC")
+                Database.connect(
+                    "jdbc:sqlite:file:${dbFile.absolutePathString()}",
+                    "org.sqlite.JDBC"
+                )
 
-                logger.info(MessageBuilder().withPrefix().success("Successfully connected to database with sqlite!").build())
+                logger.info(
+                    MessageBuilder().withPrefix()
+                        .success("Successfully connected to database with sqlite!").build()
+                )
             }
         }
 
@@ -183,7 +199,13 @@ object DatabaseProvider {
                 }
             }
 
-            logger.info(MessageBuilder().withPrefix().info("Saved ${dataCache.asynchronous().asMap().values.size} player-data in ${System.currentTimeMillis() - begin}ms!").build())
+            logger.info(
+                MessageBuilder().withPrefix().info(
+                    "Saved ${
+                        dataCache.asynchronous().asMap().values.size
+                    } player-data in ${System.currentTimeMillis() - begin}ms!"
+                ).build()
+            )
         }
     }
 
@@ -192,11 +214,14 @@ object DatabaseProvider {
     }
 
 
-
     suspend fun loadPlayer(uuid: UUID): PlayerData {
         return withContext(Dispatchers.IO) {
             transaction {
-                val result = Users.selectAll().where(Users.uuid.eq(uuid.toString())).firstOrNull() ?: return@transaction PlayerData(uuid, name = Bukkit.getOfflinePlayer(uuid).name ?: "Unknown")
+                val result = Users.selectAll().where(Users.uuid.eq(uuid.toString())).firstOrNull()
+                    ?: return@transaction PlayerData(
+                        uuid,
+                        name = Bukkit.getOfflinePlayer(uuid).name ?: "Unknown"
+                    )
 
                 return@transaction PlayerData(
                     UUID.fromString(result[Users.uuid]),
@@ -228,14 +253,22 @@ object DatabaseProvider {
                             area = Area.fromString(it[Parkours.area]),
                             start = deserializeVector(it[Parkours.start]),
                             respawn = deserializeVector(it[Parkours.respawn]),
-                            availableMaterials = ObjectArraySet(deserializeList(it[Parkours.availableMaterials]).map { Material.valueOf(it) }),
+                            availableMaterials = ObjectArraySet(deserializeList(it[Parkours.availableMaterials]).map {
+                                Material.valueOf(
+                                    it
+                                )
+                            }),
                             activePlayers = ObjectArraySet()
                         )
                     )
                 }
             }
 
-            logger.info(MessageBuilder().withPrefix().info("Fetched ${parkours.size} parkours in ${System.currentTimeMillis() - begin}ms!").build())
+            logger.info(
+                MessageBuilder().withPrefix()
+                    .info("Fetched ${parkours.size} parkours in ${System.currentTimeMillis() - begin}ms!")
+                    .build()
+            )
         }
 
         this.parkourList.addAll(parkours)
@@ -255,12 +288,17 @@ object DatabaseProvider {
                         it[area] = parkour.area.toString()
                         it[start] = serializeVector(parkour.start)
                         it[respawn] = serializeVector(parkour.respawn)
-                        it[availableMaterials] = serializeList(parkour.availableMaterials.map { it.name })
+                        it[availableMaterials] =
+                            serializeList(parkour.availableMaterials.map { it.name })
                     }
                 }
             }
 
-            logger.info(MessageBuilder().withPrefix().info("Saved ${parkourList.size} parkours in ${System.currentTimeMillis() - begin}ms!").build())
+            logger.info(
+                MessageBuilder().withPrefix()
+                    .info("Saved ${parkourList.size} parkours in ${System.currentTimeMillis() - begin}ms!")
+                    .build()
+            )
         }
     }
 
@@ -277,8 +315,8 @@ object DatabaseProvider {
             }
 
 
-
-            val playerDataList = uuids.map { async { getPlayerData(it) } }.awaitAll().toMutableList()
+            val playerDataList =
+                uuids.map { async { getPlayerData(it) } }.awaitAll().toMutableList()
 
             when (sortType) {
                 LeaderboardSortingType.POINTS_HIGHEST -> playerDataList.sortByDescending { it.points }
@@ -291,7 +329,6 @@ object DatabaseProvider {
             return@withContext ObjectArrayList(playerDataList)
         }
     }
-
 
 
     private fun serializeVector(vector: Vector): String {
