@@ -48,6 +48,4 @@ class PlayerParkourListener : Listener {
             parkour.generate(player)
         }
     }
-
-
 }
