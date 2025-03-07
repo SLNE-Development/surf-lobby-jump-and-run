@@ -59,6 +59,8 @@ class SurfParkour : SuspendingJavaPlugin() {
             .addLoreLine(MessageBuilder().darkSpacer("   - ").info("Einstellungen verwalten").build())
             .build()
 
+        val instance = plugin
+
         fun send(player: Player, message: MessageBuilder) {
             player.sendMessage(Colors.PREFIX.append(message.build()))
         }

@@ -6,6 +6,7 @@ import com.github.stefvanschie.inventoryframework.gui.GuiItem
 import com.github.stefvanschie.inventoryframework.gui.type.ChestGui
 import com.github.stefvanschie.inventoryframework.pane.PaginatedPane
 import com.github.stefvanschie.inventoryframework.pane.StaticPane
+import dev.slne.surf.parkour.SurfParkour
 import dev.slne.surf.parkour.database.DatabaseProvider
 import dev.slne.surf.parkour.gui.ParkourMenu
 import dev.slne.surf.parkour.gui.RedirectType
@@ -17,8 +18,7 @@ import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.Material
 import org.bukkit.entity.Player
 
-class ParkourSelectMenu(private val redirect: RedirectType) :
-    ChestGui(5, ComponentHolder.of(MessageBuilder().primary("ᴘᴀʀᴋᴏᴜʀ ᴡÄʜʟᴇɴ").build().decorate(TextDecoration.BOLD))) {
+class ParkourSelectMenu(private val redirect: RedirectType) : ChestGui(5, ComponentHolder.of(MessageBuilder().primary("ᴘᴀʀᴋᴏᴜʀ ᴡÄʜʟᴇɴ").build().decorate(TextDecoration.BOLD))) {
 
     private val outlinePane = StaticPane(0, 0, 9, 5)
     private val pages = PaginatedPane(1, 1, 7, 3)
@@ -59,7 +59,9 @@ class ParkourSelectMenu(private val redirect: RedirectType) :
                 GuiItem(
                     ItemBuilder(Material.COMPASS)
                         .setName(MessageBuilder(parkour.name).build())
-                        .addLoreLine(MessageBuilder().info("Klicke, um den Parkour auszuwählen.").build())
+                        .addLoreLine(
+                            MessageBuilder().info("Klicke, um den Parkour auszuwählen.").build()
+                        )
                         .build()
                 ) {
                     val player = it.whoClicked as? Player ?: return@GuiItem
@@ -81,7 +83,7 @@ class ParkourSelectMenu(private val redirect: RedirectType) :
                         }
 
                         RedirectType.START_PARKOUR -> {
-                            instance.launch {
+                            SurfParkour.instance.launch {
                                 parkour.startParkour(player)
                             }
                         }
@@ -108,25 +110,13 @@ class ParkourSelectMenu(private val redirect: RedirectType) :
 
         addPane(outlinePane)
         addPane(pages)
-        
-        setOnGlobalClick { event ->
-            event.isCancelled = true
-                    RedirectType.START_PARKOUR -> {
-                        plugin.launch {
-                            parkour.startParkour(player)
-                        }
-                    }
-                }
-            })
-        }
-        setOnGlobalDrag { event ->
-            event.isCancelled = true
-        }
-        update()
+
+
+        setOnGlobalDrag{ it.isCancelled = true}
+        setOnGlobalClick{ it.isCancelled = true}
     }
 
     override fun update() {
-
         if (pages.page > 0) {
             outlinePane.addItem(backButton, 2, 4)
         } else {
