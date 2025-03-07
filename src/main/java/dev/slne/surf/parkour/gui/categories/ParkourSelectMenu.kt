@@ -63,6 +63,11 @@ class ParkourSelectMenu(player: Player, redirect: RedirectType) : ChestGui(5, Co
                         ParkourMenu(player)
                     }
                     RedirectType.PARKOUR_ACTIVES -> {
+                        if(parkour.activePlayers.isEmpty()) {
+                            ParkourGeneralFailureMenu(player, MessageBuilder().error("Es sind keine Spieler in diesem Parkour."))
+                            return@GuiItem
+                        }
+
                         ParkourActivePlayersMenu(player, parkour)
                     }
 
