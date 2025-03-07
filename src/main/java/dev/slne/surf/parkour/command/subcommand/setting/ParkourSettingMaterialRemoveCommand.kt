@@ -17,7 +17,7 @@ import org.bukkit.entity.Player
 
 class ParkourSettingMaterialRemoveCommand(commandName: String) : CommandAPICommand(commandName) {
     init {
-        withPermission(Permission.COMMAND_PARKOUR_SETTING_MATERIAL_ADD)
+        withPermission(Permission.COMMAND_PARKOUR_SETTING_MATERIAL_REMOVE)
         withArguments(argument("material"))
         withArguments(ParkourArgument("parkour"))
 
