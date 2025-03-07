@@ -26,9 +26,16 @@ import org.bukkit.Material
 import org.bukkit.util.Vector
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.io.File
 import java.util.*
+import kotlin.io.path.absolutePathString
+import kotlin.io.path.createDirectories
+import kotlin.io.path.createFile
+import kotlin.io.path.div
+import kotlin.io.path.exists
+import kotlin.io.path.notExists
 import kotlin.time.Duration.Companion.days
 
 object DatabaseProvider {
@@ -89,20 +96,19 @@ object DatabaseProvider {
     /**
      * Connect to the database with the method given in the config
      */
-
-    fun connect() {
+   suspend fun connect() {
         val method = config.getString("storage-method") ?: "local"
 
         when (method.lowercase()) {
             "local" -> {
                 Class.forName("org.sqlite.JDBC")
-                val dbFile = File("${plugin.dataPath}/storage.db")
+                val dbFile = plugin.dataPath / "storage.db"
 
-                if (!dbFile.exists()) {
-                    dbFile.parentFile.mkdirs()
-                    dbFile.createNewFile()
+                if (dbFile.notExists()) {
+                    dbFile.createDirectories()
+                    dbFile.createFile()
                 }
-                Database.connect("jdbc:sqlite:file:${dbFile.absolutePath}", "org.sqlite.JDBC")
+                Database.connect("jdbc:sqlite:file:${dbFile.absolutePathString()}", "org.sqlite.JDBC")
                 logger.info(MessageBuilder().withPrefix().success("Successfully connected to database with sqlite!").build())
             }
 
@@ -122,19 +128,19 @@ object DatabaseProvider {
                 logger.warn(MessageBuilder().withPrefix().info("Unknown storage method \"$method\". Using local storage...").build())
 
                 Class.forName("org.sqlite.JDBC")
-                val dbFile = File("${plugin.dataPath}/storage.db")
+                val dbFile = plugin.dataPath/"storage.db"
 
                 if (!dbFile.exists()) {
-                    dbFile.parentFile.mkdirs()
-                    dbFile.createNewFile()
+                    dbFile.createDirectories()
+                    dbFile.createFile()
                 }
-                Database.connect("jdbc:sqlite:file:${dbFile.absolutePath}", "org.sqlite.JDBC")
+                Database.connect("jdbc:sqlite:file:${dbFile.absolutePathString()}", "org.sqlite.JDBC")
 
                 logger.info(MessageBuilder().withPrefix().success("Successfully connected to database with sqlite!").build())
             }
         }
 
-        transaction {
+        newSuspendedTransaction {
             SchemaUtils.create(
                 Users,
                 Parkours
