@@ -196,6 +196,10 @@ object DatabaseProvider {
         }
     }
 
+    fun invalidate(uuid: UUID) {
+        dataCache.synchronous().invalidate(uuid)
+    }
+
 
 
     suspend fun loadPlayer(uuid: UUID): PlayerData {

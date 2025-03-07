@@ -9,6 +9,7 @@ import dev.slne.surf.parkour.command.subcommand.ParkourStatsCommand
 import dev.slne.surf.parkour.database.DatabaseProvider
 import dev.slne.surf.parkour.listener.PlayerKickListener
 import dev.slne.surf.parkour.listener.PlayerParkourListener
+import dev.slne.surf.parkour.listener.PlayerQuitListener
 
 import dev.slne.surf.parkour.util.Colors
 import dev.slne.surf.parkour.util.MessageBuilder
@@ -32,6 +33,7 @@ class SurfParkour : SuspendingJavaPlugin() {
 
         Bukkit.getPluginManager().registerSuspendingEvents(PlayerParkourListener(), this)
         Bukkit.getPluginManager().registerEvents(PlayerKickListener(), this)
+        Bukkit.getPluginManager().registerEvents(PlayerQuitListener(), this)
 
         DatabaseProvider.connect()
         DatabaseProvider.fetchParkours()
