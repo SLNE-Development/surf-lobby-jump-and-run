@@ -84,7 +84,7 @@ class ParkourScoreboardMenu(player: Player, sorting: LeaderboardSortingType) : C
             }
 
             for (playerData in DatabaseProvider.getEveryPlayerData(sortingType)) {
-                items.add(GuiItem(ItemBuilder(HeadUtil.getPlayerHead(playerData.name))
+                items.add(GuiItem(ItemBuilder(HeadUtil.getPlayerHead(playerData.uuid))
                     .setName(MessageBuilder(playerData.name).build())
                     .addLoreLine(Component.empty())
                     .addLoreLine(MessageBuilder().info("Statistiken:").build())

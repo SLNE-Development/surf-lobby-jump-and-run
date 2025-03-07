@@ -5,8 +5,10 @@ import com.destroystokyo.paper.profile.ProfileProperty
 import com.github.benmanes.caffeine.cache.Caffeine
 import dev.hsbrysk.caffeine.CoroutineLoadingCache
 import dev.hsbrysk.caffeine.buildCoroutine
+import dev.slne.surf.surfapi.core.api.util.logger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import net.kyori.adventure.text.logger.slf4j.ComponentLogger
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.inventory.ItemStack
@@ -19,18 +21,16 @@ import java.util.UUID
 import java.util.concurrent.TimeUnit
 
 object HeadUtil {
+    private val logger = ComponentLogger.logger(this.javaClass)
     private val textureCache: CoroutineLoadingCache<UUID, String> = Caffeine.newBuilder().expireAfterWrite(1, TimeUnit.HOURS).buildCoroutine(this::getSkinTexture)
     private const val DEFAULT_TEXTURE = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZGE5OWIwNWI5YTFkYjRkMjliNWU2NzNkNzdhZTU0YTc3ZWFiNjY4MTg1ODYwMzVjOGEyMDA1YWViODEwNjAyYSJ9fX0="
 
-    suspend fun getPlayerHead(playerName: String): ItemStack = withContext(Dispatchers.IO) {
+    suspend fun getPlayerHead(uuid: UUID): ItemStack = withContext(Dispatchers.IO) {
         val itemStack = ItemStack(Material.PLAYER_HEAD)
         val skullMeta = Bukkit.getItemFactory().getItemMeta(Material.PLAYER_HEAD) as SkullMeta
-        val offlinePlayer = Bukkit.getOfflinePlayer(playerName)
-        val uuid = offlinePlayer.uniqueId
-
         val texture = textureCache.get(uuid)
 
-        val profile: PlayerProfile = Bukkit.createProfile(uuid, playerName)
+        val profile: PlayerProfile = Bukkit.createProfile(uuid, "Unknown")
         profile.setProperty(ProfileProperty("textures", texture))
         skullMeta.playerProfile = profile
 
@@ -62,7 +62,6 @@ object HeadUtil {
                 }
                 DEFAULT_TEXTURE
             } catch (e: Exception) {
-                e.printStackTrace()
                 DEFAULT_TEXTURE
             }
         }
