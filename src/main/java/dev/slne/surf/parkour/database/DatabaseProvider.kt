@@ -277,7 +277,13 @@ object DatabaseProvider {
         return withContext(Dispatchers.IO) {
             val uuids = transaction {
                 Users.select(Users.uuid).map { UUID.fromString(it[Users.uuid]) }
+            }.toObjectSet()
+
+            for (mutableEntry in dataCache.synchronous().asMap()) {
+                uuids.add(mutableEntry.key)
             }
+
+
 
             val playerDataList = uuids.map { async { getPlayerData(it) } }.awaitAll().toMutableList()
 
