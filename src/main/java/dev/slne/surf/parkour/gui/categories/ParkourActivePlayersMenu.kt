@@ -63,13 +63,13 @@ class ParkourActivePlayersMenu(player: Player, parkour: Parkour) : ChestGui(
                 }
             }
 
-            if(pages.page > 1) {
+            if(pages.page > 0) {
                 outlinePane.addItem(backButton, 2, 4)
             } else {
                 outlinePane.addItem(outlineItem, 2, 4)
             }
 
-            if(pages.page < pages.pages - 1) {
+            if(pages.page < pages.pages -1) {
                 outlinePane.addItem(continueButton, 6, 4)
             } else {
                 outlinePane.addItem(outlineItem, 6, 4)

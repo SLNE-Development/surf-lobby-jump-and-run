@@ -71,7 +71,7 @@ class ParkourSettingsMenu(player: Player) : ChestGui(
                         MessageBuilder().primary("Die Parkour-Sounds sind nun ").error("deaktiviert").primary(".")
                     )
                 }
-                ParkourSettingsMenu(player) // needed to update also the lore with the togglestate
+                ParkourSettingsMenu(player)
             }
             settingsPane.addItem(soundSettingsItem, 0, 0)
 
