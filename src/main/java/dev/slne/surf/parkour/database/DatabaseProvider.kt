@@ -275,9 +275,11 @@ object DatabaseProvider {
 
     suspend fun getEveryPlayerData(sortType: LeaderboardSortingType): ObjectList<PlayerData> {
         return withContext(Dispatchers.IO) {
-            val uuids = transaction {
-                Users.select(Users.uuid).map { UUID.fromString(it[Users.uuid]) }
-            }.toObjectSet()
+            val uuids = ObjectArraySet<UUID>()
+
+            transaction {
+                uuids.addAll(Users.select(Users.uuid).map { UUID.fromString(it[Users.uuid]) })
+            }
 
             for (mutableEntry in dataCache.synchronous().asMap()) {
                 uuids.add(mutableEntry.key)
