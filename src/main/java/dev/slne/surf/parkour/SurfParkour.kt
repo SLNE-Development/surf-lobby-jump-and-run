@@ -22,11 +22,11 @@ import org.bukkit.plugin.java.JavaPlugin
 val plugin get() = JavaPlugin.getPlugin(SurfParkour::class.java)
 class SurfParkour : SuspendingJavaPlugin() {
 
-    var blockApi: GlowingBlocks? = null
+    lateinit var blockApi: GlowingBlocks
 
     override suspend fun onEnableAsync() {
-
         this.saveDefaultConfig()
+        this.blockApi = GlowingBlocks(this)
 
         ParkourCommand("parkour").register()
         ParkourStatsCommand("stats").register()
@@ -38,7 +38,6 @@ class SurfParkour : SuspendingJavaPlugin() {
         DatabaseProvider.connect()
         DatabaseProvider.fetchParkours()
 
-        this.blockApi = GlowingBlocks(this)
     }
 
     override suspend fun onDisableAsync() {
