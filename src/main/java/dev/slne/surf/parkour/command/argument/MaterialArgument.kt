@@ -23,8 +23,6 @@ object MaterialArgument {
             }
 
             material
-        }.replaceSuggestions(ArgumentSuggestions.strings<CommandSender?> { _: SuggestionInfo<CommandSender?>? ->
-            Material.entries.filter { it.isSolid }.map { it.name }.toTypedArray()
-        })
+        }
     }
 }
