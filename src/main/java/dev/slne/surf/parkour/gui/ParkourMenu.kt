@@ -90,7 +90,7 @@ class ParkourMenu(player: Player) :
                     return@GuiItem
                 }
 
-                ParkourSelectMenu(player, RedirectType.START_PARKOUR)
+                ParkourSelectMenu(RedirectType.START_PARKOUR).show(player)
             }
 
             val settingsItem = GuiItem(
@@ -125,7 +125,7 @@ class ParkourMenu(player: Player) :
                     return@GuiItem
                 }
 
-                ParkourSelectMenu(player, RedirectType.PARKOUR_ACTIVES)
+                ParkourSelectMenu(RedirectType.PARKOUR_ACTIVES).show(player)
             }
 
             taskbarPane.addItem(statsItem, 1, 0)
