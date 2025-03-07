@@ -7,7 +7,6 @@ import com.github.stefvanschie.inventoryframework.gui.type.ChestGui
 import com.github.stefvanschie.inventoryframework.pane.PaginatedPane
 import com.github.stefvanschie.inventoryframework.pane.StaticPane
 import dev.slne.surf.parkour.gui.ParkourMenu
-import dev.slne.surf.parkour.instance
 import dev.slne.surf.parkour.parkour.Parkour
 import dev.slne.surf.parkour.util.ItemBuilder
 import dev.slne.surf.parkour.util.MessageBuilder
@@ -22,7 +21,7 @@ class ParkourActivePlayersMenu(player: Player, parkour: Parkour) : ChestGui(
     ComponentHolder.of(MessageBuilder().primary("ᴀᴋᴛɪᴠᴇ sᴘɪᴇʟᴇʀ").build().decorate(TextDecoration.BOLD))
 ) {
     init {
-        instance.launch {
+        plugin.launch {
             val playerList = ObjectArrayList<GuiItem>()
             val outlinePane = StaticPane(0, 0, 9, 5)
             val pages = PaginatedPane(1, 1, 7, 3)

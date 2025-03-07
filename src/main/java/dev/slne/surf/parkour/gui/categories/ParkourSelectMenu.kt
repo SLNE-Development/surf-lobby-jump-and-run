@@ -9,7 +9,6 @@ import com.github.stefvanschie.inventoryframework.pane.StaticPane
 import dev.slne.surf.parkour.database.DatabaseProvider
 import dev.slne.surf.parkour.gui.ParkourMenu
 import dev.slne.surf.parkour.gui.RedirectType
-import dev.slne.surf.parkour.instance
 import dev.slne.surf.parkour.util.ItemBuilder
 import dev.slne.surf.parkour.util.MessageBuilder
 import it.unimi.dsi.fastutil.objects.ObjectArrayList
@@ -109,9 +108,16 @@ class ParkourSelectMenu(private val redirect: RedirectType) :
 
         addPane(outlinePane)
         addPane(pages)
-
+        
         setOnGlobalClick { event ->
             event.isCancelled = true
+                    RedirectType.START_PARKOUR -> {
+                        plugin.launch {
+                            parkour.startParkour(player)
+                        }
+                    }
+                }
+            })
         }
         setOnGlobalDrag { event ->
             event.isCancelled = true

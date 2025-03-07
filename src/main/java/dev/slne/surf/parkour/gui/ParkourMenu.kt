@@ -7,7 +7,6 @@ import com.github.stefvanschie.inventoryframework.gui.type.ChestGui
 import com.github.stefvanschie.inventoryframework.pane.StaticPane
 import dev.slne.surf.parkour.database.DatabaseProvider
 import dev.slne.surf.parkour.gui.categories.*
-import dev.slne.surf.parkour.instance
 import dev.slne.surf.parkour.leaderboard.LeaderboardSortingType
 import dev.slne.surf.parkour.util.ItemBuilder
 import dev.slne.surf.parkour.util.MessageBuilder
@@ -20,7 +19,7 @@ import org.bukkit.entity.Player
 class ParkourMenu(player: Player) :
     ChestGui(5, ComponentHolder.of(MessageBuilder().primary("ᴘᴀʀᴋᴏᴜʀ").build().decorate(TextDecoration.BOLD))) {
     init {
-        instance.launch {
+        plugin.launch {
             val playerData = DatabaseProvider.getPlayerData(player.uniqueId)
             val jumps = playerData.points
             val tries = playerData.trys
@@ -85,7 +84,7 @@ class ParkourMenu(player: Player) :
                 }
 
                 if(DatabaseProvider.getParkours().size == 1) {
-                    instance.launch {
+                    plugin.launch {
                         DatabaseProvider.getParkours().first().startParkour(player)
                     }
                     return@GuiItem

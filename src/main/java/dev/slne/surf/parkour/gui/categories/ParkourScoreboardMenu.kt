@@ -8,7 +8,6 @@ import com.github.stefvanschie.inventoryframework.pane.PaginatedPane
 import com.github.stefvanschie.inventoryframework.pane.StaticPane
 import dev.slne.surf.parkour.database.DatabaseProvider
 import dev.slne.surf.parkour.gui.ParkourMenu
-import dev.slne.surf.parkour.instance
 import dev.slne.surf.parkour.leaderboard.LeaderboardSortingType
 import dev.slne.surf.parkour.util.ItemBuilder
 import dev.slne.surf.parkour.util.MessageBuilder
@@ -17,7 +16,6 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList
 import it.unimi.dsi.fastutil.objects.ObjectList
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.TextDecoration
-import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.entity.Player
 
@@ -28,7 +26,7 @@ class ParkourScoreboardMenu(player: Player, sorting: LeaderboardSortingType) : C
     private var sortingType = sorting
 
     init {
-        instance.launch {
+        plugin.launch {
             val items: ObjectList<GuiItem> = ObjectArrayList()
             val outlinePane = StaticPane(0, 0, 9, 5)
             val pages = PaginatedPane(1, 1, 7, 3)

@@ -8,7 +8,6 @@ import com.github.stefvanschie.inventoryframework.pane.StaticPane
 import dev.slne.surf.parkour.SurfParkour
 import dev.slne.surf.parkour.database.DatabaseProvider
 import dev.slne.surf.parkour.gui.ParkourMenu
-import dev.slne.surf.parkour.instance
 import dev.slne.surf.parkour.util.ItemBuilder
 import dev.slne.surf.parkour.util.MessageBuilder
 import net.kyori.adventure.text.Component
@@ -21,7 +20,7 @@ class ParkourSettingsMenu(player: Player) : ChestGui(
     ComponentHolder.of(MessageBuilder().primary("ᴇɪɴsᴛᴇʟʟᴜɴɢᴇɴ").build().decorate(TextDecoration.BOLD))
 ) {
     init {
-        instance.launch {
+        plugin.launch {
             val playerData = DatabaseProvider.getPlayerData(player.uniqueId)
             val outlinePane = StaticPane(0, 0, 9, 5)
             val outlineItem = GuiItem(ItemBuilder(Material.GRAY_STAINED_GLASS_PANE).setName(Component.text(" ")).build())

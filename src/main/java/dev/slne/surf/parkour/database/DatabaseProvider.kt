@@ -9,12 +9,10 @@ import dev.hsbrysk.caffeine.buildCoroutine
 
 import dev.slne.surf.parkour.parkour.Parkour
 import dev.slne.surf.parkour.player.PlayerData
-import dev.slne.surf.parkour.instance
+import dev.slne.surf.parkour.plugin
 import dev.slne.surf.parkour.leaderboard.LeaderboardSortingType
 import dev.slne.surf.parkour.util.Area
 import dev.slne.surf.parkour.util.MessageBuilder
-import dev.slne.surf.surfapi.core.api.util.toObjectList
-import dev.slne.surf.surfapi.core.api.util.toObjectSet
 import it.unimi.dsi.fastutil.objects.ObjectArrayList
 
 import it.unimi.dsi.fastutil.objects.ObjectArraySet
@@ -25,7 +23,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.withContext
-import net.kyori.adventure.text.Component
 
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger
 
@@ -43,7 +40,7 @@ import java.util.UUID
 import java.util.concurrent.TimeUnit
 
 object DatabaseProvider {
-    private val config = instance.config
+    private val config = plugin.config
     private val logger = ComponentLogger.logger(this.javaClass)
     private val gson = Gson()
 
@@ -55,7 +52,7 @@ object DatabaseProvider {
         .newBuilder()
         .expireAfterWrite(30L, TimeUnit.DAYS)
         .removalListener<UUID, PlayerData> { uuid, data, _ ->
-            instance.launch {
+            plugin.launch {
                 if (uuid != null && data != null) {
                     savePlayer(data)
                 }
@@ -112,7 +109,7 @@ object DatabaseProvider {
         when (method.lowercase()) {
             "local" -> {
                 Class.forName("org.sqlite.JDBC")
-                val dbFile = File("${instance.dataPath}/storage.db")
+                val dbFile = File("${plugin.dataPath}/storage.db")
 
                 if (!dbFile.exists()) {
                     dbFile.parentFile.mkdirs()
@@ -138,7 +135,7 @@ object DatabaseProvider {
                 logger.warn(MessageBuilder().withPrefix().info("Unknown storage method \"$method\". Using local storage...").build())
 
                 Class.forName("org.sqlite.JDBC")
-                val dbFile = File("${instance.dataPath}/storage.db")
+                val dbFile = File("${plugin.dataPath}/storage.db")
 
                 if (!dbFile.exists()) {
                     dbFile.parentFile.mkdirs()

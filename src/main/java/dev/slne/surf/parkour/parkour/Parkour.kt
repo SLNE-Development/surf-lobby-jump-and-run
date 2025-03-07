@@ -3,7 +3,7 @@ package dev.slne.surf.parkour.parkour
 import dev.jorel.commandapi.wrappers.Rotation
 import dev.slne.surf.parkour.SurfParkour
 import dev.slne.surf.parkour.database.DatabaseProvider
-import dev.slne.surf.parkour.instance
+import dev.slne.surf.parkour.plugin
 import dev.slne.surf.parkour.util.Area
 import dev.slne.surf.parkour.util.Colors
 import dev.slne.surf.parkour.util.MessageBuilder
@@ -85,7 +85,7 @@ data class Parkour(
         val latest = latestJumps[player] ?: return
 
         for (block in latest) {
-            val blockApi = instance.blockApi ?: return
+            val blockApi = plugin.blockApi ?: return
             if (block == null) continue
 
             blockApi.unsetGlowing(block, player)
@@ -102,7 +102,7 @@ data class Parkour(
     }
 
     private suspend fun generateInitial(player: Player) {
-        val blockApi = instance.blockApi ?: return
+        val blockApi = plugin.blockApi ?: return
         val randomLocation = getRandomLocationInRegion(player, world) ?: return
 
         val start = randomLocation.add(0.0, 1.0, 0.0)
@@ -133,7 +133,7 @@ data class Parkour(
     }
 
     fun generate(player: Player) {
-        val blockApi = instance.blockApi ?: return
+        val blockApi = plugin.blockApi ?: return
         val jumps = latestJumps[player] ?: return
         val material = blocks[player] ?: return
 
