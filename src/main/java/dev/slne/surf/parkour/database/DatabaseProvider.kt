@@ -11,6 +11,7 @@ import dev.slne.surf.parkour.player.PlayerData
 import dev.slne.surf.parkour.plugin
 import dev.slne.surf.parkour.util.Area
 import dev.slne.surf.parkour.util.MessageBuilder
+import dev.slne.surf.surfapi.core.api.util.mutableObjectSetOf
 import it.unimi.dsi.fastutil.objects.ObjectArrayList
 import it.unimi.dsi.fastutil.objects.ObjectArraySet
 import it.unimi.dsi.fastutil.objects.ObjectList
@@ -28,7 +29,6 @@ import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.io.File
 import java.util.*
-import java.util.concurrent.TimeUnit
 import kotlin.time.Duration.Companion.days
 
 object DatabaseProvider {
@@ -52,20 +52,18 @@ object DatabaseProvider {
     /**
      * Cache for parkours
      */
-
-    private val parkourList = ObjectArraySet<Parkour>()
+    private val parkourList = mutableObjectSetOf<Parkour>()
 
     /**
      * Player Data Table
      */
-
     object Users: Table() {
-        val uuid: Column<String> = text("uuid")
-        val name: Column<String> = varchar("name", 16)
-        val highScore: Column<Int> = integer("high_score")
-        val points: Column<Int> = integer("points")
-        val trys: Column<Int> = integer("trys")
-        val likesSound: Column<Boolean> = bool("likes_sound")
+        val uuid = char("uuid", 36)
+        val name = char("name", 16)
+        val highScore = integer("high_score")
+        val points = integer("points")
+        val trys = integer("trys")
+        val likesSound = bool("likes_sound")
 
         override val primaryKey = PrimaryKey(uuid)
     }
@@ -75,15 +73,15 @@ object DatabaseProvider {
      */
 
     object Parkours: Table() {
-        val uuid: Column<String> = text("uuid")
-        val name: Column<String> = text("name")
+        val uuid = char("uuid", 36)
+        val name = text("name")
 
-        val world: Column<String> = text("world")
-        val area: Column<String> = text("area")
-        val start: Column<String> = text("start")
-        val respawn: Column<String> = text("respawn")
+        val worldUuid = char("world", 36)
+        val area = text("area")
+        val start = text("start")
+        val respawn = text("respawn")
 
-        val availableMaterials: Column<String> = text("available_materials")
+        val availableMaterials = text("available_materials")
 
         override val primaryKey = PrimaryKey(uuid)
     }
@@ -219,7 +217,8 @@ object DatabaseProvider {
                         Parkour(
                             uuid = UUID.fromString(it[Parkours.uuid]),
                             name = it[Parkours.name],
-                            world = Bukkit.getWorld(it[Parkours.world]) ?: Bukkit.getWorlds().first(),
+                            world = Bukkit.getWorld(UUID.fromString(it[Parkours.worldUuid]))
+                                ?: Bukkit.getWorlds().first(),
                             area = Area.fromString(it[Parkours.area]),
                             start = deserializeVector(it[Parkours.start]),
                             respawn = deserializeVector(it[Parkours.respawn]),
@@ -246,7 +245,7 @@ object DatabaseProvider {
                     Parkours.insert { it ->
                         it[uuid] = parkour.uuid.toString()
                         it[name] = parkour.name
-                        it[world] = parkour.world.name
+                        it[worldUuid] = parkour.world.uid.toString()
                         it[area] = parkour.area.toString()
                         it[start] = serializeVector(parkour.start)
                         it[respawn] = serializeVector(parkour.respawn)
