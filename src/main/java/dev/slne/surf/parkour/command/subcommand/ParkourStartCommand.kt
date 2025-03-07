@@ -32,7 +32,7 @@ class ParkourStartCommand(commandName: String) : CommandAPICommand(commandName) 
                 return@PlayerCommandExecutor
             }
 
-            dev.slne.surf.parkour.instance.launch {
+            dev.slne.surf.parkour.plugin.launch {
                 parkour.startParkour(player)
                 parkour.announceNewParkourStarted(player, parkour.name)
             }

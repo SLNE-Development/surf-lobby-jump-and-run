@@ -7,7 +7,7 @@ import dev.jorel.commandapi.executors.CommandArguments
 import dev.jorel.commandapi.executors.PlayerCommandExecutor
 import dev.slne.surf.parkour.database.DatabaseProvider
 import dev.slne.surf.parkour.parkour.Parkour
-import dev.slne.surf.parkour.instance
+import dev.slne.surf.parkour.plugin
 import dev.slne.surf.parkour.util.Colors
 import dev.slne.surf.parkour.util.Permission
 import net.kyori.adventure.text.Component
@@ -21,7 +21,7 @@ class ParkourStatsCommand(commandName: String) : CommandAPICommand(commandName) 
         executesPlayer(PlayerCommandExecutor { player: Player, args: CommandArguments ->
             val target = args.getOrDefaultUnchecked("target", player)
 
-            instance.launch {
+            plugin.launch {
                 val playerData = DatabaseProvider.getPlayerData(target.uniqueId)
 
 
