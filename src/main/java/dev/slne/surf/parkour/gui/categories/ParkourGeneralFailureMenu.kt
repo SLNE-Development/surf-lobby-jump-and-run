@@ -37,7 +37,6 @@ class ParkourGeneralFailureMenu(player: Player, title: MessageBuilder) : ChestGu
         
         failurePane.addItem(failureItem, 0, 0)
 
-
         addPane(outlinePane)
         addPane(failurePane)
 

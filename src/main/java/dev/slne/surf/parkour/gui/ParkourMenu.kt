@@ -110,7 +110,7 @@ class ParkourMenu(player: Player) :
                     .build()
             ) {
                 if(DatabaseProvider.getParkours().isEmpty()) {
-                    ParkourGeneralFailureMenu(player, MessageBuilder().error("Es gibt keine verfügbaren Parkours!"))
+                    ParkourGeneralFailureMenu(player, MessageBuilder().error("Es gibt derzeit keine verfügbaren Parkours!"))
                     return@GuiItem
                 }
 
