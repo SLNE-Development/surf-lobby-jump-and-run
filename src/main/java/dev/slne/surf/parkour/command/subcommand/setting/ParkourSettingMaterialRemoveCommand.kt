@@ -6,8 +6,8 @@ import dev.jorel.commandapi.executors.CommandArguments
 import dev.jorel.commandapi.executors.PlayerCommandExecutor
 
 import dev.slne.surf.parkour.SurfParkour
-import dev.slne.surf.parkour.command.argument.MaterialArgument.argument
 import dev.slne.surf.parkour.command.argument.ParkourArgument
+import dev.slne.surf.parkour.command.argument.SolidMaterialArgument
 import dev.slne.surf.parkour.parkour.Parkour
 import dev.slne.surf.parkour.util.MessageBuilder
 import dev.slne.surf.parkour.util.Permission
@@ -18,7 +18,7 @@ import org.bukkit.entity.Player
 class ParkourSettingMaterialRemoveCommand(commandName: String) : CommandAPICommand(commandName) {
     init {
         withPermission(Permission.COMMAND_PARKOUR_SETTING_MATERIAL_REMOVE)
-        withArguments(argument("material"))
+        withArguments(SolidMaterialArgument("material"))
         withArguments(ParkourArgument("parkour"))
 
         executesPlayer(PlayerCommandExecutor { player: Player, args: CommandArguments ->
