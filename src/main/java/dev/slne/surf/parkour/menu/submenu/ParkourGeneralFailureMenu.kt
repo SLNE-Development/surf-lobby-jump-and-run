@@ -1,11 +1,11 @@
-package dev.slne.surf.parkour.gui.categories
+package dev.slne.surf.parkour.menu.submenu
 
 import com.github.stefvanschie.inventoryframework.adventuresupport.ComponentHolder
 import com.github.stefvanschie.inventoryframework.gui.GuiItem
 import com.github.stefvanschie.inventoryframework.gui.type.ChestGui
 import com.github.stefvanschie.inventoryframework.pane.StaticPane
 
-import dev.slne.surf.parkour.gui.ParkourMenu
+import dev.slne.surf.parkour.menu.ParkourMenu
 import dev.slne.surf.parkour.util.ItemBuilder
 import dev.slne.surf.parkour.util.MessageBuilder
 

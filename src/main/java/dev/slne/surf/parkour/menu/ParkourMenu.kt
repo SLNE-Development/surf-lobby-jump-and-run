@@ -1,4 +1,4 @@
-package dev.slne.surf.parkour.gui
+package dev.slne.surf.parkour.menu
 
 import com.github.shynixn.mccoroutine.bukkit.launch
 import com.github.stefvanschie.inventoryframework.adventuresupport.ComponentHolder
@@ -6,8 +6,9 @@ import com.github.stefvanschie.inventoryframework.gui.GuiItem
 import com.github.stefvanschie.inventoryframework.gui.type.ChestGui
 import com.github.stefvanschie.inventoryframework.pane.StaticPane
 import dev.slne.surf.parkour.database.DatabaseProvider
-import dev.slne.surf.parkour.gui.categories.*
+import dev.slne.surf.parkour.menu.submenu.*
 import dev.slne.surf.parkour.leaderboard.LeaderboardSortingType
+import dev.slne.surf.parkour.menu.type.RedirectType
 import dev.slne.surf.parkour.util.ItemBuilder
 import dev.slne.surf.parkour.util.MessageBuilder
 import net.kyori.adventure.text.Component
