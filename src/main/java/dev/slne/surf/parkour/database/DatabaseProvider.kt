@@ -14,6 +14,7 @@ import dev.slne.surf.parkour.leaderboard.LeaderboardSortingType
 import dev.slne.surf.parkour.util.Area
 import dev.slne.surf.parkour.util.MessageBuilder
 import dev.slne.surf.surfapi.core.api.util.toObjectList
+import dev.slne.surf.surfapi.core.api.util.toObjectSet
 import it.unimi.dsi.fastutil.objects.ObjectArrayList
 
 import it.unimi.dsi.fastutil.objects.ObjectArraySet
@@ -205,12 +206,7 @@ object DatabaseProvider {
     suspend fun loadPlayer(uuid: UUID): PlayerData {
         return withContext(Dispatchers.IO) {
             transaction {
-                val result = Users.selectAll().where(Users.uuid.eq(uuid.toString())).firstOrNull()
-
-                if (result == null) {
-                    logger.warn(MessageBuilder().withPrefix().error("Player with uuid $uuid not found in database!").build())
-                    return@transaction PlayerData(uuid, name = Bukkit.getOfflinePlayer(uuid).name ?: "Unknown")
-                }
+                val result = Users.selectAll().where(Users.uuid.eq(uuid.toString())).firstOrNull() ?: return@transaction PlayerData(uuid, name = Bukkit.getOfflinePlayer(uuid).name ?: "Unknown")
 
                 return@transaction PlayerData(
                     UUID.fromString(result[Users.uuid]),
