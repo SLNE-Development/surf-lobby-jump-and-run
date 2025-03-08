@@ -11,25 +11,20 @@ import dev.slne.surf.parkour.player.PlayerData
 import dev.slne.surf.parkour.plugin
 import dev.slne.surf.parkour.util.Area
 import dev.slne.surf.parkour.util.MessageBuilder
+import dev.slne.surf.surfapi.core.api.util.mutableObjectListOf
 import dev.slne.surf.surfapi.core.api.util.mutableObjectSetOf
-import it.unimi.dsi.fastutil.objects.ObjectArrayList
-import it.unimi.dsi.fastutil.objects.ObjectArraySet
 import it.unimi.dsi.fastutil.objects.ObjectList
 import it.unimi.dsi.fastutil.objects.ObjectSet
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.withContext
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.util.Vector
 import org.jetbrains.exposed.sql.*
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
-import org.jetbrains.exposed.sql.transactions.transaction
 import java.util.*
 import kotlin.io.path.*
+import kotlin.system.measureTimeMillis
 import kotlin.time.Duration.Companion.days
 
 object DatabaseProvider {
@@ -59,7 +54,7 @@ object DatabaseProvider {
      * Player Data Table
      */
     object Users : Table() {
-        val uuid = char("uuid", 36)
+        val uuid = char("uuid", 36).transform({ UUID.fromString(it) }, { it.toString() })
         val name = char("name", 16)
         val highScore = integer("high_score")
         val points = integer("points")
@@ -74,15 +69,27 @@ object DatabaseProvider {
      */
 
     object Parkours : Table() {
-        val uuid = char("uuid", 36)
+        val uuid = char("uuid", 36).transform({ UUID.fromString(it) }, { it.toString() })
         val name = text("name")
 
-        val worldUuid = char("world", 36)
-        val area = text("area")
-        val start = text("start")
-        val respawn = text("respawn")
+        val world = char("world", 36).transform(
+            wrap = { Bukkit.getWorld(UUID.fromString(it)) ?: Bukkit.getWorlds().first() },
+            unwrap = { it.uid.toString() }
+        )
+        val area = text("area").transform({ Area.fromString(it) }, { it.toString() })
+        val start = text("start").transform({ deserializeVector(it) }, { serializeVector(it) })
+        val respawn = text("respawn").transform({ deserializeVector(it) }, { serializeVector(it) })
 
-        val availableMaterials = text("available_materials")
+        val availableMaterials = text("available_materials").transform(
+            {
+                deserializeList(it).mapTo(mutableObjectSetOf<Material>() as ObjectSet<Material>) {
+                    Material.valueOf(
+                        it
+                    )
+                }
+            },
+            { serializeList(it.map { it.name }) }
+        )
 
         override val primaryKey = PrimaryKey(uuid)
     }
@@ -169,43 +176,51 @@ object DatabaseProvider {
     }
 
     private suspend fun savePlayer(data: PlayerData) {
-        withContext(Dispatchers.IO) {
-            transaction {
-                Users.replace {
-                    it[uuid] = data.uuid.toString()
-                    it[name] = data.name
-                    it[highScore] = data.highScore
-                    it[points] = data.points
-                    it[trys] = data.trys
-                    it[likesSound] = data.likesSound
-                }
-            }
+        newSuspendedTransaction(Dispatchers.IO) {
+            replaceUser(data)
         }
     }
 
     suspend fun savePlayers() {
-        withContext(Dispatchers.IO) {
-            val begin = System.currentTimeMillis()
-            transaction {
-                dataCache.synchronous().asMap().values.forEach { data ->
-                    Users.replace {
-                        it[uuid] = data.uuid.toString()
-                        it[name] = data.name
-                        it[highScore] = data.highScore
-                        it[points] = data.points
-                        it[trys] = data.trys
-                        it[likesSound] = data.likesSound
-                    }
-                }
-            }
+        val duration = measureTimeMillis {
+            newSuspendedTransaction(Dispatchers.IO) {
+//                dataCache.synchronous().asMap().values.forEach { data ->
+//                    replaceUser(data)
+//                }
 
-            logger.info(
-                MessageBuilder().withPrefix().info(
-                    "Saved ${
-                        dataCache.asynchronous().asMap().values.size
-                    } player-data in ${System.currentTimeMillis() - begin}ms!"
-                ).build()
-            )
+                val values = dataCache.synchronous().asMap().values
+                val result =
+                    Users.batchReplace(
+                        values,
+                        false
+                    ) { // TODO: 08.03.2025 09:34 - verify that batchReplace works
+                        this[Users.uuid] = it.uuid
+                        this[Users.name] = it.name
+                        this[Users.highScore] = it.highScore
+                        this[Users.points] = it.points
+                        this[Users.trys] = it.trys
+                        this[Users.likesSound] = it.likesSound
+                    }
+            }
+        }
+
+        logger.info(
+            MessageBuilder().withPrefix().info(
+                "Saved ${
+                    dataCache.asynchronous().asMap().values.size
+                } player-data in ${duration}ms!"
+            ).build()
+        )
+    }
+
+    private fun replaceUser(data: PlayerData) {
+        Users.replace {
+            it[uuid] = data.uuid
+            it[name] = data.name
+            it[highScore] = data.highScore
+            it[points] = data.points
+            it[trys] = data.trys
+            it[likesSound] = data.likesSound
         }
     }
 
@@ -213,121 +228,88 @@ object DatabaseProvider {
         dataCache.synchronous().invalidate(uuid)
     }
 
-
-    suspend fun loadPlayer(uuid: UUID): PlayerData {
-        return withContext(Dispatchers.IO) {
-            transaction {
-                val result = Users.selectAll().where(Users.uuid.eq(uuid.toString())).firstOrNull()
-                    ?: return@transaction PlayerData(
-                        uuid,
-                        name = Bukkit.getOfflinePlayer(uuid).name ?: "Unknown"
-                    )
-
-                return@transaction PlayerData(
-                    UUID.fromString(result[Users.uuid]),
-                    result[Users.name],
-                    result[Users.highScore],
-                    result[Users.points],
-                    result[Users.trys],
-                    result[Users.likesSound]
+    suspend fun loadPlayer(uuid: UUID) = newSuspendedTransaction(Dispatchers.IO) {
+        Users.selectAll()
+            .where { Users.uuid eq uuid }
+            .singleOrNull()
+            ?.let {
+                PlayerData(
+                    it[Users.uuid],
+                    it[Users.name],
+                    it[Users.highScore],
+                    it[Users.points],
+                    it[Users.trys],
+                    it[Users.likesSound]
                 )
-            }
-        }
+            } ?: PlayerData(uuid, name = Bukkit.getOfflinePlayer(uuid).name ?: "Unknown")
     }
 
 
     suspend fun fetchParkours() {
-        val parkours = ObjectArraySet<Parkour>()
+        val parkours = mutableObjectSetOf<Parkour>()
 
-        withContext(Dispatchers.IO) {
-            val begin = System.currentTimeMillis()
-
-            transaction {
-                Parkours.selectAll().map { it ->
-                    parkours.add(
-                        Parkour(
-                            uuid = UUID.fromString(it[Parkours.uuid]),
-                            name = it[Parkours.name],
-                            world = Bukkit.getWorld(UUID.fromString(it[Parkours.worldUuid]))
-                                ?: Bukkit.getWorlds().first(),
-                            area = Area.fromString(it[Parkours.area]),
-                            start = deserializeVector(it[Parkours.start]),
-                            respawn = deserializeVector(it[Parkours.respawn]),
-                            availableMaterials = ObjectArraySet(deserializeList(it[Parkours.availableMaterials]).map {
-                                Material.valueOf(
-                                    it
-                                )
-                            }),
-                            activePlayers = ObjectArraySet()
-                        )
+        val duration = measureTimeMillis {
+            newSuspendedTransaction(Dispatchers.IO) {
+                Parkours.selectAll().mapTo(parkours) {
+                    Parkour(
+                        uuid = it[Parkours.uuid],
+                        name = it[Parkours.name],
+                        world = it[Parkours.world],
+                        area = it[Parkours.area],
+                        start = it[Parkours.start],
+                        respawn = it[Parkours.respawn],
+                        availableMaterials = it[Parkours.availableMaterials]
                     )
                 }
             }
-
-            logger.info(
-                MessageBuilder().withPrefix()
-                    .info("Fetched ${parkours.size} parkours in ${System.currentTimeMillis() - begin}ms!")
-                    .build()
-            )
         }
+
+        logger.info(
+            MessageBuilder()
+                .withPrefix()
+                .info("Fetched ${parkours.size} parkours in ${duration}ms!")
+                .build()
+        )
 
         this.parkourList.addAll(parkours)
     }
 
     suspend fun saveParkours() {
-        withContext(Dispatchers.IO) {
-            val begin = System.currentTimeMillis()
-            transaction {
+        val duration = measureTimeMillis {
+            newSuspendedTransaction(Dispatchers.IO) {
                 Parkours.deleteAll()
-
-                parkourList.forEach { parkour ->
-                    Parkours.insert { it ->
-                        it[uuid] = parkour.uuid.toString()
-                        it[name] = parkour.name
-                        it[worldUuid] = parkour.world.uid.toString()
-                        it[area] = parkour.area.toString()
-                        it[start] = serializeVector(parkour.start)
-                        it[respawn] = serializeVector(parkour.respawn)
-                        it[availableMaterials] =
-                            serializeList(parkour.availableMaterials.map { it.name })
-                    }
+                Parkours.batchInsert(parkourList, false) {
+                    this[Parkours.uuid] = it.uuid
+                    this[Parkours.name] = it.name
+                    this[Parkours.world] = it.world
+                    this[Parkours.area] = it.area
+                    this[Parkours.start] = it.start
+                    this[Parkours.respawn] = it.respawn
+                    this[Parkours.availableMaterials] = it.availableMaterials
                 }
             }
-
-            logger.info(
-                MessageBuilder().withPrefix()
-                    .info("Saved ${parkourList.size} parkours in ${System.currentTimeMillis() - begin}ms!")
-                    .build()
-            )
         }
+
+        logger.info(
+            MessageBuilder()
+                .withPrefix()
+                .info("Saved ${parkourList.size} parkours in ${duration}ms!")
+                .build()
+        )
     }
 
     suspend fun getEveryPlayerData(sortType: LeaderboardSortingType): ObjectList<PlayerData> {
-        return withContext(Dispatchers.IO) {
-            val uuids = ObjectArraySet<UUID>()
+        val uuids = mutableObjectSetOf<UUID>()
 
-            transaction {
-                uuids.addAll(Users.select(Users.uuid).map { UUID.fromString(it[Users.uuid]) })
-            }
-
-            for (mutableEntry in dataCache.synchronous().asMap()) {
-                uuids.add(mutableEntry.key)
-            }
-
-
-            val playerDataList =
-                uuids.map { async { getPlayerData(it) } }.awaitAll().toMutableList()
-
-            when (sortType) {
-                LeaderboardSortingType.POINTS_HIGHEST -> playerDataList.sortByDescending { it.points }
-                LeaderboardSortingType.POINTS_LOWEST -> playerDataList.sortBy { it.points }
-                LeaderboardSortingType.HIGHSCORE_HIGHEST -> playerDataList.sortByDescending { it.highScore }
-                LeaderboardSortingType.HIGHSCORE_LOWEST -> playerDataList.sortBy { it.highScore }
-                LeaderboardSortingType.NAME -> playerDataList.sortBy { it.name }
-            }
-
-            return@withContext ObjectArrayList(playerDataList)
+        newSuspendedTransaction(Dispatchers.IO) {
+            Users.select(Users.uuid).mapTo(uuids) { it[Users.uuid] }
         }
+
+        uuids.addAll(dataCache.synchronous().asMap().keys)
+        val playerDataList = mutableObjectListOf(dataCache.getAll(uuids).values)
+        sortType.sort(playerDataList)
+
+        return playerDataList
     }
 
 

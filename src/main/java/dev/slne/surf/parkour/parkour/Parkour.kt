@@ -7,6 +7,7 @@ import dev.slne.surf.parkour.plugin
 import dev.slne.surf.parkour.util.Area
 import dev.slne.surf.parkour.util.Colors
 import dev.slne.surf.parkour.util.MessageBuilder
+import dev.slne.surf.surfapi.core.api.util.mutableObjectSetOf
 import dev.slne.surf.surfapi.core.api.util.random
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap
@@ -37,7 +38,7 @@ data class Parkour(
     var respawn: Vector,
 
     val availableMaterials: ObjectSet<Material>,
-    val activePlayers: ObjectSet<Player>
+    val activePlayers: ObjectSet<Player> = mutableObjectSetOf()
 ) {
     val blocks: Object2ObjectMap<Player, Material> = Object2ObjectOpenHashMap()
     val latestJumps: Object2ObjectMap<Player, Array<Block?>> = Object2ObjectOpenHashMap()
