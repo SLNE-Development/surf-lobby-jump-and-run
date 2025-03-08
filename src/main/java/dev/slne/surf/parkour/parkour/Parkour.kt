@@ -1,5 +1,7 @@
 package dev.slne.surf.parkour.parkour
 
+import com.github.shynixn.mccoroutine.folia.entityDispatcher
+import com.github.shynixn.mccoroutine.folia.regionDispatcher
 import dev.jorel.commandapi.wrappers.Rotation
 import dev.slne.surf.parkour.SurfParkour
 import dev.slne.surf.parkour.database.DatabaseProvider
@@ -12,6 +14,7 @@ import dev.slne.surf.surfapi.core.api.util.random
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap
 import it.unimi.dsi.fastutil.objects.ObjectSet
+import kotlinx.coroutines.withContext
 import net.kyori.adventure.sound.Sound
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.title.Title
@@ -86,7 +89,7 @@ data class Parkour(
         val latest = latestJumps[player] ?: return
 
         for (block in latest) {
-            val blockApi = plugin.blockApi ?: return
+            val blockApi = plugin.blockApi
             if (block == null) continue
 
             blockApi.unsetGlowing(block, player)
@@ -133,8 +136,8 @@ data class Parkour(
         blocks[player] = material
     }
 
-    fun generate(player: Player) {
-        val blockApi = plugin.blockApi ?: return
+    suspend fun generate(player: Player) {
+        val blockApi = plugin.blockApi
         val jumps = latestJumps[player] ?: return
         val material = blocks[player] ?: return
 
@@ -181,10 +184,12 @@ data class Parkour(
         val jumpCount = currentPoints[player] ?: 1
         val highscore = playerData.highScore
         if (playerData.likesSound) {
-            player.playSound(
-                Sound.sound(org.bukkit.Sound.ENTITY_CHICKEN_EGG, Sound.Source.MASTER, 10f, 1f),
-                Sound.Emitter.self()
-            )
+            withContext(plugin.entityDispatcher(player)) {
+                player.playSound(
+                    Sound.sound(org.bukkit.Sound.ENTITY_CHICKEN_EGG, Sound.Source.MASTER, 10f, 1f),
+                    Sound.Emitter.self()
+                )
+            }
         }
         player.sendActionBar(
             Component.text("Rekord: $highscore Sprünge", Colors.GOLD).append(Component.text(" | ", Colors.SPACER))
@@ -197,10 +202,12 @@ data class Parkour(
         val currentScore = currentPoints[player] ?: return
 
         if (playerData.likesSound) {
-            player.playSound(
-                Sound.sound(org.bukkit.Sound.ENTITY_VILLAGER_NO, Sound.Source.MASTER, 10f, 1f),
-                Sound.Emitter.self()
-            )
+            withContext(plugin.entityDispatcher(player)) {
+                player.playSound(
+                    Sound.sound(org.bukkit.Sound.ENTITY_VILLAGER_NO, Sound.Source.MASTER, 10f, 1f),
+                    Sound.Emitter.self()
+                )
+            }
         }
         SurfParkour.send(
             player,
@@ -221,10 +228,17 @@ data class Parkour(
         }
 
         if (playerData.likesSound) {
-            player.playSound(
-                Sound.sound(org.bukkit.Sound.ENTITY_PLAYER_LEVELUP, Sound.Source.MASTER, 10f, 1f),
-                Sound.Emitter.self()
-            )
+            withContext(plugin.entityDispatcher(player)) {
+                player.playSound(
+                    Sound.sound(
+                        org.bukkit.Sound.ENTITY_PLAYER_LEVELUP,
+                        Sound.Source.MASTER,
+                        10f,
+                        1f
+                    ),
+                    Sound.Emitter.self()
+                )
+            }
         }
 
         player.showTitle(
@@ -262,7 +276,7 @@ data class Parkour(
     suspend fun increasePoints(player: Player) {
         val playerData = DatabaseProvider.getPlayerData(player.uniqueId)
 
-        currentPoints.compute(player) { _: Player?, curPts: Int? -> if (curPts == null) 1 else curPts + 1 }
+        currentPoints.compute(player) { _, curPts -> if (curPts == null) 1 else curPts + 1 }
 
         playerData.edit {points++}
 
@@ -341,17 +355,17 @@ data class Parkour(
             }
         }
 
-        val minX = min(posOne.blockX.toDouble(), posTwo.blockX.toDouble()).toInt()
-        val maxX = max(posOne.blockX.toDouble(), posTwo.blockX.toDouble()).toInt()
-        val minY = min(posOne.blockY.toDouble(), posTwo.blockY.toDouble()).toInt()
-        val maxY = max(posOne.blockY.toDouble(), posTwo.blockY.toDouble()).toInt()
-        val minZ = min(posOne.blockZ.toDouble(), posTwo.blockZ.toDouble()).toInt()
-        val maxZ = max(posOne.blockZ.toDouble(), posTwo.blockZ.toDouble()).toInt()
+        val minX = min(posOne.blockX, posTwo.blockX)
+        val maxX = max(posOne.blockX, posTwo.blockX)
+        val minY = min(posOne.blockY, posTwo.blockY)
+        val maxY = max(posOne.blockY, posTwo.blockY)
+        val minZ = min(posOne.blockZ, posTwo.blockZ)
+        val maxZ = max(posOne.blockZ, posTwo.blockZ)
 
         return location.blockX in minX..maxX && location.blockY >= minY && location.blockY <= maxY && location.blockZ >= minZ && location.blockZ <= maxZ
     }
 
-    private fun getValidBlock(previousLocation: Location, player: Player): Block {
+    private suspend fun getValidBlock(previousLocation: Location, player: Player): Block {
         val maxAttempts = offsets.size * 2
         var attempts = 0
 
@@ -365,62 +379,58 @@ data class Parkour(
                 continue
             }
 
-            if (nextLocation.block.type != Material.AIR || nextLocation.clone()
-                    .add(0.0, 1.0, 0.0).block.type != Material.AIR || nextLocation.clone()
-                    .add(0.0, 2.0, 0.0).block.type != Material.AIR
-            ) {
+            if (!isLocationFree(nextLocation)) {
                 attempts++
                 continue
             }
 
-            val latestPlayerJumps: Array<Block?> =
-                latestJumps[player] ?: return previousLocation.clone().add(offsets[0]).block
+            val previousWithOffset = previousLocation.clone().add(offsets[0])
 
-            val block0: Block = latestPlayerJumps[0] ?: return previousLocation.clone().add(offsets[0]).block
-            val block1: Block = latestPlayerJumps[1] ?: return previousLocation.clone().add(offsets[0]).block
-            val block2: Block = latestPlayerJumps[2] ?: return previousLocation.clone().add(offsets[0]).block
-
-            if (block0.location.clone().add(0.0, 1.0, 0.0) == nextLocation) {
-                attempts++
-                continue
-            }
-            if (block1.location.clone().add(0.0, 1.0, 0.0) == nextLocation) {
-                attempts++
-                continue
-            }
-            if (block2.location.clone().add(0.0, 1.0, 0.0) == nextLocation) {
+            if (!isValidJump(previousWithOffset, nextLocation, player)) {
                 attempts++
                 continue
             }
 
-            if (block0.location.clone().add(0.0, 2.0, 0.0) == nextLocation) {
-                attempts++
-                continue
-            }
-
-            if (block1.location.clone().add(0.0, 2.0, 0.0) == nextLocation) {
-                attempts++
-                continue
-            }
-
-            if (block2.location.clone().add(0.0, 2.0, 0.0) == nextLocation) {
-                attempts++
-                continue
-            }
-
-            if (abs(nextLocation.y - previousLocation.y) > 1) {
-                attempts++
-                continue
-            }
-
-            if (nextLocation == player.location || nextLocation == player.location.clone().add(0.0, 1.0, 0.0)) {
-                attempts++
-                continue
-            }
-
-            return nextLocation.block
+            return withContext(plugin.regionDispatcher(nextLocation)) { nextLocation.block }
         }
-        return previousLocation.clone().add(offsets[0]).block
+
+        val previousWithOffset = previousLocation.clone().add(offsets[0])
+
+        return withContext(plugin.regionDispatcher(previousWithOffset)) { previousWithOffset.block }
+    }
+
+    private suspend fun isLocationFree(loc: Location) = withContext(plugin.regionDispatcher(loc)) {
+        loc.block.type == Material.AIR
+                && loc.clone().add(0.0, 1.0, 0.0).block.type == Material.AIR
+                && loc.clone().add(0.0, 2.0, 0.0).block.type == Material.AIR
+    }
+
+    private suspend fun isValidJump(
+        previousLocation: Location,
+        nextLocation: Location,
+        player: Player
+    ): Boolean = withContext(plugin.regionDispatcher(previousLocation)) {
+        val latestPlayerJumps: Array<Block?> = latestJumps[player] ?: return@withContext true
+
+        for (block in latestPlayerJumps.filterNotNull()) {
+            if (block.location.clone().add(0.0, 1.0, 0.0) == nextLocation ||
+                block.location.clone().add(0.0, 2.0, 0.0) == nextLocation
+            ) {
+                return@withContext false
+            }
+        }
+
+        if (abs(nextLocation.y - previousLocation.y) > 1) {
+            return@withContext false
+        }
+
+        if (nextLocation == player.location || nextLocation == player.location.clone()
+                .add(0.0, 1.0, 0.0)
+        ) {
+            return@withContext false
+        }
+
+        return@withContext true
     }
 
     fun edit(block: Parkour.() -> Unit) {
