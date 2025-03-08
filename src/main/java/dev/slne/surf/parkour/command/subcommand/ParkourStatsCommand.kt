@@ -39,7 +39,7 @@ class ParkourStatsCommand(commandName: String) : CommandAPICommand(commandName) 
                     player.sendMessage(createStatisticMessage(
                         playerData.points.toString(),
                         playerData.highScore.toString(),
-                        parkour.currentPoints[target].toString(),
+                        parkour.currentPoints.getInt(target.uniqueId).toString(),
                         playerData.trys.toString()
                     )
                     )

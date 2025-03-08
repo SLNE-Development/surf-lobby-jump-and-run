@@ -10,6 +10,7 @@ import dev.slne.surf.parkour.parkour.Parkour
 import dev.slne.surf.parkour.util.MessageBuilder
 import dev.slne.surf.parkour.util.PageableMessageBuilder
 import dev.slne.surf.parkour.util.Permission
+import dev.slne.surf.parkour.util.playerName
 import org.bukkit.entity.Player
 
 class ParkourListCommand(commandName: String) : CommandAPICommand(commandName) {
@@ -31,7 +32,7 @@ class ParkourListCommand(commandName: String) : CommandAPICommand(commandName) {
             message.setTitle(MessageBuilder().primary("Spieler in ").info(parkour.name).build())
 
             for (activePlayer in parkour.activePlayers) {
-                message.addLine(MessageBuilder().darkSpacer("- ").variableValue(activePlayer.name).darkSpacer(" (${parkour.currentPoints[activePlayer]})").build())
+                message.addLine(MessageBuilder().darkSpacer("- ").variableValue(activePlayer.playerName()).darkSpacer(" (${parkour.currentPoints.getInt(activePlayer)})").build())
             }
 
             message.send(player, page)

@@ -6,10 +6,12 @@ import com.github.stefvanschie.inventoryframework.gui.GuiItem
 import com.github.stefvanschie.inventoryframework.gui.type.ChestGui
 import com.github.stefvanschie.inventoryframework.pane.PaginatedPane
 import com.github.stefvanschie.inventoryframework.pane.StaticPane
+import dev.slne.surf.parkour.database.DatabaseProvider.Users.points
 import dev.slne.surf.parkour.menu.ParkourMenu
 import dev.slne.surf.parkour.parkour.Parkour
 import dev.slne.surf.parkour.util.ItemBuilder
 import dev.slne.surf.parkour.util.MessageBuilder
+import dev.slne.surf.parkour.util.playerName
 import it.unimi.dsi.fastutil.objects.ObjectArrayList
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.TextDecoration
@@ -88,13 +90,13 @@ class ParkourActivePlayersMenu(player: Player, parkour: Parkour) : ChestGui(
 
 
             for (activePlayer in parkour.activePlayers) {
-                val points = parkour.currentPoints[player]
+                val points = parkour.currentPoints.getInt(player.uniqueId)
 
                 playerList.add(
                     GuiItem(
                         ItemBuilder(Material.PLAYER_HEAD)
                             .setSkullOwner(activePlayer)
-                            .setName(MessageBuilder(activePlayer.name).build())
+                            .setName(MessageBuilder(activePlayer.playerName()).build())
                             .addLoreLine(
                                 MessageBuilder().darkSpacer("  - ").variableKey("ᴀᴋᴛᴜᴇʟʟᴇ ѕᴘʀüɴɢᴇ: ")
                                     .variableValue("$points").build()

@@ -1,7 +1,9 @@
 package dev.slne.surf.parkour.util
 
+import dev.slne.surf.surfapi.bukkit.api.builder.meta
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.TextDecoration
+import org.bukkit.Bukkit
 import org.bukkit.Color
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
@@ -231,6 +233,10 @@ class ItemBuilder {
         }
 
         return this
+    }
+
+    fun setSkullOwner(ownerUuid: UUID) = apply {
+        itemStack.meta<SkullMeta> { owningPlayer = Bukkit.getOfflinePlayer(ownerUuid) }
     }
 
     /**

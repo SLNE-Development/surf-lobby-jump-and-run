@@ -22,7 +22,7 @@ class PlayerParkourListener : Listener {
 
         val player = event.player
         val parkour = Parkour.getParkour(player) ?: return
-        val jumps = parkour.latestJumps[player] ?: return
+        val jumps = parkour.latestJumps[player.uniqueId] ?: return
 
         if (jumps.isEmpty() || jumps.size < 2) {
             return
@@ -46,7 +46,7 @@ class PlayerParkourListener : Listener {
             val to = event.to
             withContext(plugin.regionDispatcher(to)) {
                 if (to.block.getRelative(BlockFace.DOWN) == jumps[1]) {
-                    val material = parkour.blocks[player] ?: return@withContext
+                    val material = parkour.blocks[player.uniqueId] ?: return@withContext
 
                     player.sendBlockChange(jump2.location, material.createBlockData())
 

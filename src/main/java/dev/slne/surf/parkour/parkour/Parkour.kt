@@ -9,27 +9,30 @@ import dev.slne.surf.parkour.plugin
 import dev.slne.surf.parkour.util.Area
 import dev.slne.surf.parkour.util.Colors
 import dev.slne.surf.parkour.util.MessageBuilder
+import dev.slne.surf.surfapi.core.api.messages.adventure.Sound
+import dev.slne.surf.surfapi.core.api.messages.adventure.Title
+import dev.slne.surf.surfapi.core.api.messages.adventure.appendText
+import dev.slne.surf.surfapi.core.api.util.mutableObject2IntMapOf
+import dev.slne.surf.surfapi.core.api.util.mutableObject2ObjectMapOf
 import dev.slne.surf.surfapi.core.api.util.mutableObjectSetOf
 import dev.slne.surf.surfapi.core.api.util.random
-import it.unimi.dsi.fastutil.objects.Object2ObjectMap
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap
 import it.unimi.dsi.fastutil.objects.ObjectSet
 import kotlinx.coroutines.withContext
 import net.kyori.adventure.sound.Sound
 import net.kyori.adventure.text.Component
-import net.kyori.adventure.title.Title
 import org.bukkit.*
 import org.bukkit.block.Block
-
 import org.bukkit.entity.Player
 import org.bukkit.util.Vector
-import java.time.Duration
 import java.util.*
 import kotlin.math.abs
 import kotlin.math.atan2
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.random.asKotlinRandom
+import kotlin.time.Duration.Companion.seconds
+
+private const val NO_CURRENT_POINTS = -1
 
 data class Parkour(
     val uuid: UUID,
@@ -41,11 +44,12 @@ data class Parkour(
     var respawn: Vector,
 
     val availableMaterials: ObjectSet<Material>,
-    val activePlayers: ObjectSet<Player> = mutableObjectSetOf()
+    val activePlayers: ObjectSet<UUID> = mutableObjectSetOf()
 ) {
-    val blocks: Object2ObjectMap<Player, Material> = Object2ObjectOpenHashMap()
-    val latestJumps: Object2ObjectMap<Player, Array<Block?>> = Object2ObjectOpenHashMap()
-    val currentPoints: Object2ObjectMap<Player, Int> = Object2ObjectOpenHashMap()
+    val blocks = mutableObject2ObjectMapOf<UUID, Material>()
+    val latestJumps = mutableObject2ObjectMapOf<UUID, Array<Block?>>()
+    val currentPoints =
+        mutableObject2IntMapOf<UUID>().apply { defaultReturnValue(NO_CURRENT_POINTS) }
 
     private val offsets = arrayOf(
         Vector(3, 0, 0),
@@ -70,23 +74,24 @@ data class Parkour(
      * Main parkour functions
      *
      */
-
     suspend fun startParkour(player: Player) {
         this.cancelParkour(player)
 
         val jumps = arrayOfNulls<Block>(3)
 
-        activePlayers.add(player)
+        val uuid = player.uniqueId
+        activePlayers.add(uuid)
 
-        latestJumps[player] = jumps
-        currentPoints[player] = 0
+        latestJumps[uuid] = jumps
+        currentPoints[uuid] = 0
 
         increaseTries(player)
         generateInitial(player)
     }
 
     suspend fun cancelParkour(player: Player) {
-        val latest = latestJumps[player] ?: return
+        val uuid = player.uniqueId
+        val latest = latestJumps[uuid] ?: return
 
         for (block in latest) {
             val blockApi = plugin.blockApi
@@ -95,51 +100,58 @@ data class Parkour(
             blockApi.unsetGlowing(block, player)
             updateBlock(player, block.location, Material.AIR)
         }
+
         player.teleportAsync(Location(world, respawn.x, respawn.y, respawn.z))
 
         updateHighscore(player)
         announceNewHighscore(player)
 
-        currentPoints.remove(player)
-        latestJumps.remove(player)
-        activePlayers.remove(player)
+        currentPoints.removeInt(uuid)
+        latestJumps.remove(uuid)
+        activePlayers.remove(uuid)
     }
 
     private suspend fun generateInitial(player: Player) {
-        val blockApi = plugin.blockApi ?: return
+        val blockApi = plugin.blockApi
         val randomLocation = getRandomLocationInRegion(player, world) ?: return
+        val uuid = player.uniqueId
 
         val start = randomLocation.add(0.0, 1.0, 0.0)
-        val block = start.block
-        val material = availableMaterials.random(random.asKotlinRandom())
+        withContext(plugin.regionDispatcher(start)) {
+            val block = start.block
+            val material = availableMaterials.random(random.asKotlinRandom())
 
-        updateBlock(player, block.location, material)
-        latestJumps[player]!![0] = block
+            updateBlock(player, block.location, material)
+            latestJumps[uuid]!![0] = block
 
-        val next = getValidBlock(start, player)
+            val next = getValidBlock(start, player)
 
-        updateBlock(player, next.location, material)
-        blockApi.setGlowing(next.location, player, ChatColor.WHITE)
+            updateBlock(player, next.location, material)
+            blockApi.setGlowing(next.location, player, ChatColor.WHITE)
 
-        latestJumps[player]!![1] = next
+            latestJumps[uuid]!![1] = next
 
-        val next2 = getValidBlock(next.location, player)
+            val next2 = getValidBlock(next.location, player)
 
-        updateBlock(player, next2.location, material)
-        latestJumps[player]!![2] = next2
+            updateBlock(player, next2.location, material)
+            latestJumps[uuid]!![2] = next2
 
-        // scored point
+            // scored point
 
-        val rotation = this.getRotation(next.location)
+            val rotation = getRotation(next.location)
 
-        player.teleportAsync(block.location.add(0.5, 1.0, 0.5).setRotation(rotation.yaw, rotation.pitch))
-        blocks[player] = material
+            player.teleportAsync(
+                block.location.add(0.5, 1.0, 0.5).setRotation(rotation.yaw, rotation.pitch)
+            )
+            blocks[uuid] = material
+        }
     }
 
     suspend fun generate(player: Player) {
         val blockApi = plugin.blockApi
-        val jumps = latestJumps[player] ?: return
-        val material = blocks[player] ?: return
+        val uuid = player.uniqueId
+        val jumps = latestJumps[uuid] ?: return
+        val material = blocks[uuid] ?: return
 
         if (jumps[0] != null) {
             val jump0 = jumps[0] ?: return
@@ -167,30 +179,39 @@ data class Parkour(
      * player feedback
      *
      */
-
     suspend fun announceNewParkourStarted(player: Player, parkour: String) {
         val playerData = DatabaseProvider.getPlayerData(player.uniqueId)
         if (playerData.likesSound) {
-            player.playSound(
-                Sound.sound(org.bukkit.Sound.BLOCK_NOTE_BLOCK_PLING, Sound.Source.MASTER, 10f, 1f),
-                Sound.Emitter.self()
-            )
+            withContext(plugin.entityDispatcher(player)) {
+                player.playSound(Sound {
+                    type(org.bukkit.Sound.BLOCK_NOTE_BLOCK_PLING)
+                    source(Sound.Source.MASTER)
+                    volume(10f)
+                    pitch(1f)
+                }, Sound.Emitter.self())
+            }
+
         }
         SurfParkour.send(player, MessageBuilder().primary("Du hast den Parkour ").info(parkour).success(" gestartet").primary("!"))
     }
 
     suspend fun announceNewScoredPoint(player: Player) {
-        val playerData = DatabaseProvider.getPlayerData(player.uniqueId)
-        val jumpCount = currentPoints[player] ?: 1
+        val uuid = player.uniqueId
+        val playerData = DatabaseProvider.getPlayerData(uuid)
+        val jumpCount = currentPoints.getOrDefault(uuid, 1)
         val highscore = playerData.highScore
+
         if (playerData.likesSound) {
             withContext(plugin.entityDispatcher(player)) {
-                player.playSound(
-                    Sound.sound(org.bukkit.Sound.ENTITY_CHICKEN_EGG, Sound.Source.MASTER, 10f, 1f),
-                    Sound.Emitter.self()
-                )
+                player.playSound(Sound {
+                    type(org.bukkit.Sound.ENTITY_CHICKEN_EGG)
+                    source(Sound.Source.MASTER)
+                    volume(10f)
+                    pitch(1f)
+                }, Sound.Emitter.self())
             }
         }
+
         player.sendActionBar(
             Component.text("Rekord: $highscore Sprünge", Colors.GOLD).append(Component.text(" | ", Colors.SPACER))
                 .append(Component.text("Aktuelle Sprünge: $jumpCount", Colors.GOLD))
@@ -198,15 +219,19 @@ data class Parkour(
     }
 
     suspend fun announceParkourLoose(player: Player) {
-        val playerData = DatabaseProvider.getPlayerData(player.uniqueId)
-        val currentScore = currentPoints[player] ?: return
+        val uuid = player.uniqueId
+        val playerData = DatabaseProvider.getPlayerData(uuid)
+        val currentScore = currentPoints.getInt(uuid)
+        if (currentScore == NO_CURRENT_POINTS) return
 
         if (playerData.likesSound) {
             withContext(plugin.entityDispatcher(player)) {
-                player.playSound(
-                    Sound.sound(org.bukkit.Sound.ENTITY_VILLAGER_NO, Sound.Source.MASTER, 10f, 1f),
-                    Sound.Emitter.self()
-                )
+                player.playSound(Sound {
+                    type(org.bukkit.Sound.ENTITY_VILLAGER_NO)
+                    source(Sound.Source.MASTER)
+                    volume(10f)
+                    pitch(1f)
+                }, Sound.Emitter.self())
             }
         }
         SurfParkour.send(
@@ -219,8 +244,11 @@ data class Parkour(
     }
 
     private suspend fun announceNewHighscore(player: Player) {
-        val playerData = DatabaseProvider.getPlayerData(player.uniqueId)
-        val currentScore = currentPoints[player] ?: return
+        val uuid = player.uniqueId
+        val playerData = DatabaseProvider.getPlayerData(uuid)
+        val currentScore = currentPoints.getInt(uuid)
+        if (currentScore == NO_CURRENT_POINTS) return
+
         val highscore = playerData.highScore
 
         if (currentScore < highscore) {
@@ -229,25 +257,29 @@ data class Parkour(
 
         if (playerData.likesSound) {
             withContext(plugin.entityDispatcher(player)) {
-                player.playSound(
-                    Sound.sound(
-                        org.bukkit.Sound.ENTITY_PLAYER_LEVELUP,
-                        Sound.Source.MASTER,
-                        10f,
-                        1f
-                    ),
-                    Sound.Emitter.self()
-                )
+                player.playSound(Sound {
+                    type(org.bukkit.Sound.ENTITY_PLAYER_LEVELUP)
+                    source(Sound.Source.MASTER)
+                    volume(10f)
+                    pitch(1f)
+                }, Sound.Emitter.self())
             }
         }
 
-        player.showTitle(
-            Title.title(
-                MessageBuilder().component(Component.text("Herzlichen Glückwunsch!", Colors.GOLD)).build(),
-                MessageBuilder().info("Du hast einen neuen Rekord aufgestellt!").build(),
-                Title.Times.times(Duration.ofSeconds(1), Duration.ofSeconds(2), Duration.ofSeconds(1))
-            )
-        )
+        player.showTitle(Title {
+            title {
+                appendText("Herzlichen Glückwunsch!", Colors.GOLD)
+            }
+            subtitle {
+                appendText("Du hast einen neuen Rekord aufgestellt!", Colors.INFO)
+            }
+            times {
+                fadeIn(1.seconds)
+                stay(2.seconds)
+                fadeOut(1.seconds)
+            }
+        })
+
         SurfParkour.send(
             player, MessageBuilder()
                 .primary("Du hast deinen Highscore gebrochen! ")
@@ -268,24 +300,22 @@ data class Parkour(
     private suspend fun increaseTries(player: Player) {
         val playerData = DatabaseProvider.getPlayerData(player.uniqueId)
 
-        playerData.edit {
-            trys += 1
-        }
+        playerData.edit { trys += 1 }
     }
 
     suspend fun increasePoints(player: Player) {
-        val playerData = DatabaseProvider.getPlayerData(player.uniqueId)
+        val uuid = player.uniqueId
+        val playerData = DatabaseProvider.getPlayerData(uuid)
 
-        currentPoints.compute(player) { _, curPts -> if (curPts == null) 1 else curPts + 1 }
-
-        playerData.edit {points++}
-
-
+        currentPoints.computeInt(uuid) { _, curPts -> if (curPts == NO_CURRENT_POINTS) 1 else curPts + 1 }
+        playerData.edit { points++ }
     }
 
     private suspend fun updateHighscore(player: Player) {
-        val currentScore = currentPoints[player] ?: return
-        val playerData = DatabaseProvider.getPlayerData(player.uniqueId)
+        val uuid = player.uniqueId
+        val currentScore = currentPoints.getInt(uuid)
+        if (currentScore == NO_CURRENT_POINTS) return
+        val playerData = DatabaseProvider.getPlayerData(uuid)
 
         if (currentScore <= playerData.highScore) {
             return
@@ -301,17 +331,16 @@ data class Parkour(
      * Utility functions
      *
      */
-
     private suspend fun getRandomLocationInRegion(player: Player, world: World): Location? {
         val posOne = area.max
         val posTwo = area.min
 
-        var minX = min(posOne.blockX.toDouble(), posTwo.blockX.toDouble()).toInt()
-        var maxX = max(posOne.blockX.toDouble(), posTwo.blockX.toDouble()).toInt()
-        val minY = min(posOne.blockY.toDouble(), posTwo.blockY.toDouble()).toInt()
-        val maxY = max(posOne.blockY.toDouble(), posTwo.blockY.toDouble()).toInt()
-        var minZ = min(posOne.blockZ.toDouble(), posTwo.blockZ.toDouble()).toInt()
-        var maxZ = max(posOne.blockZ.toDouble(), posTwo.blockZ.toDouble()).toInt()
+        var minX = min(posOne.blockX, posTwo.blockX)
+        var maxX = max(posOne.blockX, posTwo.blockX)
+        val minY = min(posOne.blockY, posTwo.blockY)
+        val maxY = max(posOne.blockY, posTwo.blockY)
+        var minZ = min(posOne.blockZ, posTwo.blockZ)
+        var maxZ = max(posOne.blockZ, posTwo.blockZ)
 
         val widthX = maxX - minX
         val heightY = maxY - minY
@@ -410,7 +439,7 @@ data class Parkour(
         nextLocation: Location,
         player: Player
     ): Boolean = withContext(plugin.regionDispatcher(previousLocation)) {
-        val latestPlayerJumps: Array<Block?> = latestJumps[player] ?: return@withContext true
+        val latestPlayerJumps = latestJumps[player.uniqueId] ?: return@withContext true
 
         for (block in latestPlayerJumps.filterNotNull()) {
             if (block.location.clone().add(0.0, 1.0, 0.0) == nextLocation ||
@@ -445,20 +474,13 @@ data class Parkour(
 
     /**
      * Static Parkour functions
-     *
      */
-
     companion object {
-        fun getByName(name: String): Parkour? {
-            return DatabaseProvider.getParkours().firstOrNull { it.name == name }
-        }
+        fun getByName(name: String) = DatabaseProvider.getParkours().find { it.name == name }
+        fun isJumping(player: Player) =
+            DatabaseProvider.getParkours().any { it.activePlayers.contains(player.uniqueId) }
 
-        fun isJumping(player: Player): Boolean {
-            return DatabaseProvider.getParkours().any { it.activePlayers.contains(player) }
-        }
-
-        fun getParkour(player: Player): Parkour? {
-            return DatabaseProvider.getParkours().firstOrNull { it.activePlayers.contains(player) }
-        }
+        fun getParkour(player: Player) =
+            DatabaseProvider.getParkours().find { it.activePlayers.contains(player.uniqueId) }
     }
 }
