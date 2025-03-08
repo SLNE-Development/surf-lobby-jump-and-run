@@ -14,7 +14,7 @@ import org.bukkit.entity.Player
 
 class ParkourSettingStartCommand(commandName: String) : CommandAPICommand(commandName) {
     init {
-        withPermission(Permission.COMMAND_PARKOUR_START)
+        withPermission(Permission.COMMAND_PARKOUR_SETTING_START)
 
         withArguments(LocationArgument("pos"))
         withArguments(ParkourArgument("parkour"))

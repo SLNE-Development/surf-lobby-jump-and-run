@@ -1,4 +1,4 @@
-package dev.slne.surf.parkour.gui
+package dev.slne.surf.parkour.menu.type
 
 enum class RedirectType {
     MAIN,

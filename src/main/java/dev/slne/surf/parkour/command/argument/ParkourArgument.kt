@@ -11,7 +11,9 @@ import dev.slne.surf.parkour.parkour.Parkour
 class ParkourArgument(nodeName: String): CustomArgument<Parkour, String> (
     StringArgument(nodeName),
     CustomArgumentInfoParser { info: CustomArgumentInfo<String> ->
-        return@CustomArgumentInfoParser Parkour.getByName(info.input()) ?: throw CustomArgumentException.fromMessageBuilder(MessageBuilder("Unknown parkour: ").appendArgInput())
+        return@CustomArgumentInfoParser Parkour.getByName(info.input()) ?: throw CustomArgumentException.fromAdventureComponent(
+            dev.slne.surf.parkour.util.MessageBuilder().withPrefix().error("Der Parkour ").variableValue(info.input()).error(" existiert nicht.").build()
+        )
     }) {
     init {
         this.replaceSuggestions(ArgumentSuggestions.strings {

@@ -1,4 +1,4 @@
-package dev.slne.surf.parkour.gui.categories
+package dev.slne.surf.parkour.menu.submenu
 
 import com.github.shynixn.mccoroutine.bukkit.launch
 import com.github.stefvanschie.inventoryframework.adventuresupport.ComponentHolder
@@ -6,7 +6,7 @@ import com.github.stefvanschie.inventoryframework.gui.GuiItem
 import com.github.stefvanschie.inventoryframework.gui.type.ChestGui
 import com.github.stefvanschie.inventoryframework.pane.PaginatedPane
 import com.github.stefvanschie.inventoryframework.pane.StaticPane
-import dev.slne.surf.parkour.gui.ParkourMenu
+import dev.slne.surf.parkour.menu.ParkourMenu
 import dev.slne.surf.parkour.parkour.Parkour
 import dev.slne.surf.parkour.util.ItemBuilder
 import dev.slne.surf.parkour.util.MessageBuilder
@@ -25,24 +25,34 @@ class ParkourActivePlayersMenu(player: Player, parkour: Parkour) : ChestGui(
             val playerList = ObjectArrayList<GuiItem>()
             val outlinePane = StaticPane(0, 0, 9, 5)
             val pages = PaginatedPane(1, 1, 7, 3)
-            val outlineItem = GuiItem(ItemBuilder(Material.GRAY_STAINED_GLASS_PANE).setName(Component.text(" ")).build())
-            val backButton = GuiItem(ItemBuilder(Material.ARROW).setName(MessageBuilder().error("Vorherige Seite").build()).addLoreLine(MessageBuilder().info("Klicke, um die Seite zu wechseln!").build()).build()) {
+            val outlineItem =
+                GuiItem(ItemBuilder(Material.GRAY_STAINED_GLASS_PANE).setName(Component.text(" ")).build())
+            val backButton = GuiItem(
+                ItemBuilder(Material.ARROW).setName(MessageBuilder().error("Vorherige Seite").build())
+                    .addLoreLine(MessageBuilder().info("Klicke, um die Seite zu wechseln!").build()).build()
+            ) {
                 if (pages.page > 0) {
                     pages.page -= 1
                     update()
                 }
             }
 
-            val continueButton = GuiItem(ItemBuilder(Material.ARROW).setName(MessageBuilder().success("Nächste Seite").build()).addLoreLine(MessageBuilder().info("Klicke, um die Seite zu wechseln!").build()).build()) {
+            val continueButton = GuiItem(
+                ItemBuilder(Material.ARROW).setName(MessageBuilder().success("Nächste Seite").build())
+                    .addLoreLine(MessageBuilder().info("Klicke, um die Seite zu wechseln!").build()).build()
+            ) {
                 if (pages.page < pages.pages - 1) {
                     pages.page += 1
                     update()
                 }
             }
 
-            val menuButton = GuiItem(ItemBuilder(Material.BARRIER).setName(MessageBuilder().primary("Hautmenü").build()).addLoreLine(MessageBuilder().info("Klicke, um zum Hautmenü zurückzukehren!").build()).build()) {
-                    ParkourMenu(player)
-                }
+            val menuButton = GuiItem(
+                ItemBuilder(Material.BARRIER).setName(MessageBuilder().primary("Hautmenü").build())
+                    .addLoreLine(MessageBuilder().info("Klicke, um zum Hautmenü zurückzukehren!").build()).build()
+            ) {
+                ParkourMenu(player)
+            }
 
             for (y in 0 until 5) {
                 for (x in 0 until 9) {
@@ -62,13 +72,13 @@ class ParkourActivePlayersMenu(player: Player, parkour: Parkour) : ChestGui(
                 }
             }
 
-            if(pages.page > 0) {
+            if (pages.page > 0) {
                 outlinePane.addItem(backButton, 2, 4)
             } else {
                 outlinePane.addItem(outlineItem, 2, 4)
             }
 
-            if(pages.page < pages.pages -1) {
+            if (pages.page < pages.pages - 1) {
                 outlinePane.addItem(continueButton, 6, 4)
             } else {
                 outlinePane.addItem(outlineItem, 6, 4)
@@ -80,13 +90,18 @@ class ParkourActivePlayersMenu(player: Player, parkour: Parkour) : ChestGui(
             for (activePlayer in parkour.activePlayers) {
                 val points = parkour.currentPoints[player]
 
-                playerList.add(GuiItem(
-                    ItemBuilder(Material.PLAYER_HEAD)
-                        .setSkullOwner(activePlayer)
-                        .setName(MessageBuilder(activePlayer.name).build())
-                        .addLoreLine(MessageBuilder().darkSpacer("  - ").variableKey("ᴀᴋᴛᴜᴇʟʟᴇ ѕᴘʀüɴɢᴇ: ").variableValue("$points").build())
-                        .build()
-                ))
+                playerList.add(
+                    GuiItem(
+                        ItemBuilder(Material.PLAYER_HEAD)
+                            .setSkullOwner(activePlayer)
+                            .setName(MessageBuilder(activePlayer.name).build())
+                            .addLoreLine(
+                                MessageBuilder().darkSpacer("  - ").variableKey("ᴀᴋᴛᴜᴇʟʟᴇ ѕᴘʀüɴɢᴇ: ")
+                                    .variableValue("$points").build()
+                            )
+                            .build()
+                    )
+                )
             }
 
 
