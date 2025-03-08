@@ -3,9 +3,8 @@ package dev.slne.surf.parkour.util
 import com.destroystokyo.paper.profile.PlayerProfile
 import com.destroystokyo.paper.profile.ProfileProperty
 import com.github.benmanes.caffeine.cache.Caffeine
-import dev.hsbrysk.caffeine.CoroutineLoadingCache
-import dev.hsbrysk.caffeine.buildCoroutine
-import dev.slne.surf.surfapi.core.api.util.logger
+import com.sksamuel.aedile.core.asLoadingCache
+import com.sksamuel.aedile.core.expireAfterWrite
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger
@@ -19,10 +18,11 @@ import java.net.HttpURLConnection
 import java.net.URL
 import java.util.UUID
 import java.util.concurrent.TimeUnit
+import kotlin.time.Duration.Companion.hours
 
 object HeadUtil {
     private val logger = ComponentLogger.logger(this.javaClass)
-    private val textureCache: CoroutineLoadingCache<UUID, String> = Caffeine.newBuilder().expireAfterWrite(1, TimeUnit.HOURS).buildCoroutine(this::getSkinTexture)
+    private val textureCache = Caffeine.newBuilder().expireAfterWrite(1.hours).asLoadingCache(this::getSkinTexture)
     private const val DEFAULT_TEXTURE = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZGE5OWIwNWI5YTFkYjRkMjliNWU2NzNkNzdhZTU0YTc3ZWFiNjY4MTg1ODYwMzVjOGEyMDA1YWViODEwNjAyYSJ9fX0="
 
     suspend fun getPlayerHead(uuid: UUID): ItemStack = withContext(Dispatchers.IO) {

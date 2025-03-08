@@ -2,9 +2,9 @@ package dev.slne.surf.parkour.database
 
 import com.github.benmanes.caffeine.cache.Caffeine
 import com.google.gson.Gson
+import com.sksamuel.aedile.core.asLoadingCache
 import com.sksamuel.aedile.core.expireAfterWrite
 import com.sksamuel.aedile.core.withRemovalListener
-import dev.hsbrysk.caffeine.buildCoroutine
 import dev.slne.surf.parkour.leaderboard.LeaderboardSortingType
 import dev.slne.surf.parkour.parkour.Parkour
 import dev.slne.surf.parkour.player.PlayerData
@@ -54,7 +54,7 @@ object DatabaseProvider {
                 savePlayer(data as PlayerData)
             }
         }
-        .buildCoroutine<UUID, PlayerData>(DatabaseProvider::loadPlayer)
+        .asLoadingCache<UUID, PlayerData>(DatabaseProvider::loadPlayer)
 
     /**
      * Cache for parkours
@@ -203,7 +203,7 @@ object DatabaseProvider {
 //                    replaceUser(data)
 //                }
 
-                val values = dataCache.synchronous().asMap().values
+                val values = dataCache.asMap().values
                 val result =
                     Users.batchReplace(
                         values,
@@ -222,7 +222,7 @@ object DatabaseProvider {
         logger.info(
             MessageBuilder().withPrefix().info(
                 "Saved ${
-                    dataCache.asynchronous().asMap().values.size
+                    dataCache.asMap().values.size
                 } player-data in ${duration}ms!"
             ).build()
         )
@@ -240,7 +240,7 @@ object DatabaseProvider {
     }
 
     fun invalidate(uuid: UUID) {
-        dataCache.synchronous().invalidate(uuid)
+        dataCache.invalidate(uuid)
     }
 
     suspend fun loadPlayer(uuid: UUID) = newSuspendedTransaction(Dispatchers.IO) {
@@ -320,7 +320,7 @@ object DatabaseProvider {
             Users.select(Users.uuid).mapTo(uuids) { it[Users.uuid] }
         }
 
-        uuids.addAll(dataCache.synchronous().asMap().keys)
+        uuids.addAll(dataCache.asMap().keys)
         val playerDataList = mutableObjectListOf(dataCache.getAll(uuids).values)
         sortType.sort(playerDataList)
 

@@ -1,6 +1,6 @@
 package dev.slne.surf.parkour.command.subcommand
 
-import com.github.shynixn.mccoroutine.bukkit.launch
+import com.github.shynixn.mccoroutine.folia.launch
 import dev.jorel.commandapi.CommandAPICommand
 import dev.jorel.commandapi.executors.CommandArguments
 import dev.jorel.commandapi.executors.PlayerCommandExecutor
@@ -9,6 +9,7 @@ import dev.slne.surf.parkour.SurfParkour
 import dev.slne.surf.parkour.command.argument.ParkourArgument
 import dev.slne.surf.parkour.database.DatabaseProvider
 import dev.slne.surf.parkour.parkour.Parkour
+import dev.slne.surf.parkour.plugin
 import dev.slne.surf.parkour.util.MessageBuilder
 import dev.slne.surf.parkour.util.Permission
 
@@ -32,7 +33,7 @@ class ParkourStartCommand(commandName: String) : CommandAPICommand(commandName) 
                 return@PlayerCommandExecutor
             }
 
-            dev.slne.surf.parkour.plugin.launch {
+            plugin.launch {
                 parkour.startParkour(player)
                 parkour.announceNewParkourStarted(player, parkour.name)
             }

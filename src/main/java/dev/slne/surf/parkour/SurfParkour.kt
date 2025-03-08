@@ -1,8 +1,8 @@
 package dev.slne.surf.parkour
 
 
-import com.github.shynixn.mccoroutine.bukkit.SuspendingJavaPlugin
-import com.github.shynixn.mccoroutine.bukkit.registerSuspendingEvents
+import com.github.shynixn.mccoroutine.folia.SuspendingJavaPlugin
+import com.github.shynixn.mccoroutine.folia.registerSuspendingEvents
 
 import dev.slne.surf.parkour.command.ParkourCommand
 import dev.slne.surf.parkour.command.subcommand.ParkourStatsCommand
@@ -34,7 +34,7 @@ class SurfParkour : SuspendingJavaPlugin() {
         ParkourCommand("parkour").register()
         ParkourStatsCommand("stats").register()
 
-        Bukkit.getPluginManager().registerSuspendingEvents(PlayerParkourListener(), this)
+        Bukkit.getPluginManager().registerEvents(PlayerParkourListener(), this)
         Bukkit.getPluginManager().registerEvents(PlayerConnectionListener(), this)
         Bukkit.getPluginManager().registerEvents(PlayerInteractListener(), this)
 
