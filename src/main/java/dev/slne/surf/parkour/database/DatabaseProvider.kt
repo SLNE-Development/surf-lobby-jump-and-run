@@ -9,13 +9,17 @@ import dev.slne.surf.parkour.leaderboard.LeaderboardSortingType
 import dev.slne.surf.parkour.parkour.Parkour
 import dev.slne.surf.parkour.player.PlayerData
 import dev.slne.surf.parkour.plugin
+import dev.slne.surf.parkour.serialization.ParkourSerializationModule
 import dev.slne.surf.parkour.util.Area
 import dev.slne.surf.parkour.util.MessageBuilder
 import dev.slne.surf.surfapi.core.api.util.mutableObjectListOf
 import dev.slne.surf.surfapi.core.api.util.mutableObjectSetOf
+import dev.slne.surf.surfapi.core.api.util.toMutableObjectSet
 import it.unimi.dsi.fastutil.objects.ObjectList
 import it.unimi.dsi.fastutil.objects.ObjectSet
 import kotlinx.coroutines.Dispatchers
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.modules.SerializersModule
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger
 import org.bukkit.Bukkit
 import org.bukkit.Material
@@ -27,10 +31,17 @@ import kotlin.io.path.*
 import kotlin.system.measureTimeMillis
 import kotlin.time.Duration.Companion.days
 
+
 object DatabaseProvider {
     private val config = plugin.config
     private val logger = ComponentLogger.logger(this.javaClass)
     private val gson = Gson()
+    private val json = Json {
+        ignoreUnknownKeys = true
+        serializersModule = SerializersModule {
+            ParkourSerializationModule.register(this)
+        }
+    }
 
     /**
      * Cache for player data
@@ -76,19 +87,23 @@ object DatabaseProvider {
             wrap = { Bukkit.getWorld(UUID.fromString(it)) ?: Bukkit.getWorlds().first() },
             unwrap = { it.uid.toString() }
         )
-        val area = text("area").transform({ Area.fromString(it) }, { it.toString() })
-        val start = text("start").transform({ deserializeVector(it) }, { serializeVector(it) })
-        val respawn = text("respawn").transform({ deserializeVector(it) }, { serializeVector(it) })
+        val area = text("area").transform(
+            wrap = { json.decodeFromString<Area>(it) },
+            unwrap = { json.encodeToString(it) }
+        )
+        val start = text("start").transform(
+            wrap = { json.decodeFromString<Vector>(it) },
+            unwrap = { json.encodeToString(it) }
+        )
+        val respawn = text("respawn").transform(
+            wrap = { json.decodeFromString<Vector>(it) },
+            unwrap = { json.encodeToString(it) }
+        )
 
-        val availableMaterials = text("available_materials").transform(
-            {
-                deserializeList(it).mapTo(mutableObjectSetOf<Material>() as ObjectSet<Material>) {
-                    Material.valueOf(
-                        it
-                    )
-                }
-            },
-            { serializeList(it.map { it.name }) }
+        val availableMaterials =
+            text("available_materials").transform( // TODO: 08.03.2025 10:15 - check set serialization
+                wrap = { json.decodeFromString<MutableSet<Material>>(it) },
+                unwrap = { json.encodeToString(it) }
         )
 
         override val primaryKey = PrimaryKey(uuid)
@@ -258,7 +273,7 @@ object DatabaseProvider {
                         area = it[Parkours.area],
                         start = it[Parkours.start],
                         respawn = it[Parkours.respawn],
-                        availableMaterials = it[Parkours.availableMaterials]
+                        availableMaterials = it[Parkours.availableMaterials].toMutableObjectSet()
                     )
                 }
             }
