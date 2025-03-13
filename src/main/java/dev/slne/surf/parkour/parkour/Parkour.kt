@@ -98,8 +98,8 @@ data class Parkour(
             player.teleportAsync(Location(world, respawn.x, respawn.y, respawn.z)).await()
         }
 
-        updateHighscore(player)
         announceNewHighscore(player)
+        updateHighscore(player)
 
         currentPoints.removeInt(uuid)
         latestJumps.remove(uuid)
