@@ -3,7 +3,7 @@ package dev.slne.surf.parkour.command.subcommand
 import dev.jorel.commandapi.CommandAPICommand
 import dev.jorel.commandapi.kotlindsl.anyExecutor
 import dev.jorel.commandapi.kotlindsl.getValue
-import dev.jorel.commandapi.kotlindsl.literalArgument
+import dev.jorel.commandapi.kotlindsl.stringArgument
 import dev.slne.surf.parkour.command.argument.parkourArgument
 import dev.slne.surf.parkour.database.DatabaseProvider
 import dev.slne.surf.parkour.parkour.Parkour
@@ -16,29 +16,32 @@ class ParkourRemoveCommand(commandName: String) : CommandAPICommand(commandName)
         withPermission(Permission.COMMAND_PARKOUR_REMOVE)
 
         parkourArgument("parkour")
-        literalArgument("confirmed", "--confirm", optional = true)
+        stringArgument("confirm", true)
 
         anyExecutor { sender, args ->
             val parkour: Parkour by args
-            val confirmed = args.getOrDefaultUnchecked("confirmed", false)
+            val confirm = args.getOrDefaultUnchecked("confirm", "")
 
-            if (!confirmed) {
+            if (confirm.isNotEmpty() && confirm == "--confirm") {
+                DatabaseProvider.getParkours().remove(parkour)
+
                 sender.send {
-                    info("Bist du dir sicher, dass du den Parkour ")
+                    success("Der Parkour ")
                     variableValue(parkour.name)
-                    info(" löschen möchtest?")
-                    clickSuggestsCommand("/parkour delete ${parkour.name} --confirm")
+                    success(" wurde erfolgreich gelöscht.")
                 }
 
                 return@anyExecutor
             }
 
-            DatabaseProvider.getParkours().remove(parkour)
-
             sender.send {
-                success("Der Parkour ")
+                info("Bist du dir sicher, dass du den Parkour ")
                 variableValue(parkour.name)
-                success(" wurde erfolgreich gelöscht.")
+                info(" löschen möchtest?")
+                appendNewPrefixedLine()
+                error("Alle Daten des Parkours werden gelöscht und sind nicht wiederherstellbar!")
+                // hoverEvent(HoverEvent.showText(error("Klicke hier, um den Parkour endgültig zu löschen"))) // TODO: fix
+                clickSuggestsCommand("/parkour delete ${parkour.name} --confirm")
             }
         }
     }
