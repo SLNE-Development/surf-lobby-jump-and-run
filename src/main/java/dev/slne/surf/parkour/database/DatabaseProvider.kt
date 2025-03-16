@@ -205,8 +205,7 @@ object DatabaseProvider {
             }
         }
 
-        log.atInfo()
-            .log("Fetched %d parkours in %dms!", parkours.size, duration)
+        log.atInfo().log("Fetched %d parkours in %dms!", parkours.size, duration)
 
         this.parkourList.addAll(parkours)
     }
