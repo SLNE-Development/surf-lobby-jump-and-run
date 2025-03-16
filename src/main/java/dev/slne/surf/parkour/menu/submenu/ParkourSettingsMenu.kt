@@ -30,7 +30,7 @@ class ParkourSettingsMenu(playerData: PlayerData) : AbstractParkourGui(5, buildT
                 line {
                     info("Der Sound ist aktuell ")
                     append {
-                        if (playerData.likesSound) success("aktiviert") else error("deaktiviert")
+                        if (playerData.likesSound) success("aktiviert").build() else error("deaktiviert").build()
                     }
                     info(".")
                 }

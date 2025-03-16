@@ -60,7 +60,7 @@ class PageableMessageBuilder(private val linesPerPage: Int = 10) {
                 append {
                     append(lines[i])
                     appendNewline()
-                    decoration(TextDecoration.BOLD, false)
+                    decoration(TextDecoration.BOLD, false).build()
                 }
             }
 
@@ -99,7 +99,7 @@ class PageableMessageBuilder(private val linesPerPage: Int = 10) {
                     clickRunsCommand(pageCommand.replace("%page%", totalPages.toString()))
                 } else {
                     error(" [>>]")
-                }
+                }.build()
             }
         }
     }

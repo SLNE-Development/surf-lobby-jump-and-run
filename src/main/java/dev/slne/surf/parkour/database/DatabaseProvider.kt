@@ -5,6 +5,7 @@ import com.google.gson.Gson
 import com.sksamuel.aedile.core.asLoadingCache
 import com.sksamuel.aedile.core.expireAfterWrite
 import com.sksamuel.aedile.core.withRemovalListener
+import dev.slne.surf.parkour.SurfParkour
 import dev.slne.surf.parkour.leaderboard.LeaderboardSortingType
 import dev.slne.surf.parkour.parkour.Parkour
 import dev.slne.surf.parkour.player.PlayerData
@@ -107,70 +108,13 @@ object DatabaseProvider {
         override val primaryKey = PrimaryKey(uuid)
     }
 
-    /**
-     * Connect to the database with the method given in the config
-     */
     suspend fun connect() {
-        val method = config.getString("storage-method") ?: "local"
-
-        when (method.lowercase()) {
-            "local" -> {
-                Class.forName("org.sqlite.JDBC")
-                val dbFile = plugin.dataPath / "storage.db"
-
-                if (dbFile.notExists()) {
-                    dbFile.createFile()
-                }
-                Database.connect(
-                    "jdbc:sqlite:file:${dbFile.absolutePathString()}",
-                    "org.sqlite.JDBC"
-                )
-                log.atInfo()
-                    .log("Successfully connected to database with sqlite!")
-            }
-
-            "external" -> {
-                Class.forName("com.mysql.cj.jdbc.Driver")
-                Database.connect(
-                    url = "jdbc:mysql://${config.getString("database.hostname")}:${config.getInt("database.port")}/${
-                        config.getString(
-                            "database.database"
-                        )
-                    }",
-                    driver = "com.mysql.cj.jdbc.Driver",
-                    user = config.getString("database.username") ?: return,
-                    password = config.getString("database.password") ?: return
-                )
-
-                log.atInfo()
-                    .log("Successfully connected to database with mysql!")
-            }
-
-            else -> {
-                log.atWarning()
-                    .log("Unknown storage method '%s'. Using local storage...", method)
-
-                Class.forName("org.sqlite.JDBC")
-                val dbFile = plugin.dataPath / "storage.db"
-
-                if (!dbFile.exists()) {
-                    dbFile.createDirectories()
-                    dbFile.createFile()
-                }
-                Database.connect(
-                    "jdbc:sqlite:file:${dbFile.absolutePathString()}",
-                    "org.sqlite.JDBC"
-                )
-
-                log.atInfo()
-                    .log("Successfully connected to database with sqlite!")
-            }
-        }
+        dev.slne.surf.database.DatabaseProvider(plugin.dataPath, plugin.dataPath / "storage")
+            .connect()
 
         newSuspendedTransaction {
             SchemaUtils.create(
-                Users,
-                Parkours
+                Users, Parkours
             )
         }
     }
@@ -188,23 +132,21 @@ object DatabaseProvider {
     suspend fun savePlayers() {
         val duration = measureTimeMillis {
             newSuspendedTransaction(Dispatchers.IO) {
-//                dataCache.synchronous().asMap().values.forEach { data ->
-//                    replaceUser(data)
-//                }
 
                 val values = dataCache.asMap().values
-                val result =
-                    Users.batchReplace(
-                        values,
-                        false
-                    ) { // TODO: 08.03.2025 09:34 - verify that batchReplace works
-                        this[Users.uuid] = it.uuid
-                        this[Users.name] = it.name
-                        this[Users.highScore] = it.highScore
-                        this[Users.points] = it.points
-                        this[Users.trys] = it.trys
-                        this[Users.likesSound] = it.likesSound
-                    }
+
+                Users.batchReplace(
+                    values,
+                    false
+                ) {
+                    this[Users.uuid] = it.uuid
+                    this[Users.name] = it.name
+                    this[Users.highScore] = it.highScore
+                    this[Users.points] = it.points
+                    this[Users.trys] = it.trys
+                    this[Users.likesSound] = it.likesSound
+                }
+
             }
         }
 

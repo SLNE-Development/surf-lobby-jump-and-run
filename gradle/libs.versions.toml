@@ -1,6 +1,7 @@
 [versions]
 exposed = "0.60.0"
 glowingentities = "1.4.3"
+surf-database = "1.0.4-SNAPSHOT"
 
 [libraries]
 exposed-core = { module = "org.jetbrains.exposed:exposed-core", version.ref = "exposed" }
@@ -8,6 +9,8 @@ exposed-jdbc = { module = "org.jetbrains.exposed:exposed-jdbc", version.ref = "e
 exposed-dao = { module = "org.jetbrains.exposed:exposed-dao", version.ref = "exposed" }
 
 glowingentities = { module = "fr.skytasul:glowingentities", version.ref = "glowingentities" }
+
+surf-database = { module = "dev.slne.surf:surf-database", version.ref = "surf-database" }
 
 [bundles]
 exposed = ["exposed-core", "exposed-jdbc", "exposed-dao"]

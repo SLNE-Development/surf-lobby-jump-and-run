@@ -57,7 +57,7 @@ class ParkourStatsCommand(commandName: String) : CommandAPICommand(commandName) 
             append {
                 spacer("---------------- ")
                 primary("Statistik")
-                spacer(" ----------------")
+                spacer(" ----------------").build()
             }
             appendNewPrefixedLine()
             appendNewPrefixedLine()
@@ -68,20 +68,21 @@ class ParkourStatsCommand(commandName: String) : CommandAPICommand(commandName) 
                 append {
                     spacer(" - ")
                     variableKey("Sprünge: ")
-                    variableValue(points.toString())
+                    variableValue(points.toString()).build()
                 }
                 appendNewPrefixedLine()
                 append {
                     spacer(" - ")
                     variableKey("Rekord: ")
-                    variableValue(highScore.toString())
+                    variableValue(highScore.toString()).build()
                 }
+
                 appendNewPrefixedLine()
                 append {
-                    spacer(" - ")
-                    variableKey("Versuche: ")
-                    variableValue(trys.toString())
-                }
+                    spacer(" - ").build()
+                    variableKey("Versuche: ").build()
+                    variableValue(trys.toString()).build()
+                }.build()
             }
             appendNewPrefixedLine()
             appendNewPrefixedLine()
@@ -92,8 +93,8 @@ class ParkourStatsCommand(commandName: String) : CommandAPICommand(commandName) 
                 append {
                     spacer(" - ")
                     variableKey("Sprünge: ")
-                    variableValue(current)
-                }
+                    variableValue(current).build()
+                }.build()
             }
             appendNewPrefixedLine()
             appendNewPrefixedLine()

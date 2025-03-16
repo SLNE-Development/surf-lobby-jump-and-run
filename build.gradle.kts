@@ -15,6 +15,8 @@ dependencies {
         exclude("org.slf4j", "slf4j-api")
     }
 
+    api(libs.surf.database)
+
     paperLibrary(libs.glowingentities)
 }
 
