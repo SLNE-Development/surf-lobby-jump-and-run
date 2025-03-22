@@ -12,12 +12,12 @@ import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerKickEvent
 import org.bukkit.event.player.PlayerQuitEvent
 
-class PlayerConnectionListener: Listener {
+class PlayerConnectionListener : Listener {
     @EventHandler
     fun onJoin(event: PlayerJoinEvent) {
         val player = event.player
         plugin.launch(plugin.entityDispatcher(player)) {
-            player.inventory.setItem(2, SurfParkour.clickItem)
+            player.inventory.setItem(6, SurfParkour.clickItem)
         }
     }
 
