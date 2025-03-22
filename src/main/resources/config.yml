@@ -3,8 +3,8 @@ storage-method: "local"
 
 # External Storage Settings (MySQL) - Only required if storage-method is set to "external"
 database:
-    hostname: "localhost"
-    port: 3306
-    database: "database"
-    username: "username"
-    password: "password"
+  hostname: "localhost"
+  port: 3306
+  database: "database"
+  username: "username"
+  password: "password"

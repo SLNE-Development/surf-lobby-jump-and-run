@@ -1,11 +1,9 @@
 package dev.slne.surf.parkour.database
 
 import com.github.benmanes.caffeine.cache.Caffeine
-import com.google.gson.Gson
 import com.sksamuel.aedile.core.asLoadingCache
 import com.sksamuel.aedile.core.expireAfterWrite
 import com.sksamuel.aedile.core.withRemovalListener
-import dev.slne.surf.parkour.SurfParkour
 import dev.slne.surf.parkour.leaderboard.LeaderboardSortingType
 import dev.slne.surf.parkour.parkour.Parkour
 import dev.slne.surf.parkour.player.PlayerData
@@ -19,6 +17,7 @@ import dev.slne.surf.surfapi.core.api.util.toMutableObjectSet
 import it.unimi.dsi.fastutil.objects.ObjectList
 import it.unimi.dsi.fastutil.objects.ObjectSet
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.modules.SerializersModule
 import org.bukkit.Bukkit
@@ -26,8 +25,10 @@ import org.bukkit.Material
 import org.bukkit.util.Vector
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
+import java.io.File
+import java.io.IOException
 import java.util.*
-import kotlin.io.path.*
+import kotlin.io.path.div
 import kotlin.system.measureTimeMillis
 import kotlin.time.Duration.Companion.days
 
@@ -99,16 +100,30 @@ object DatabaseProvider {
             unwrap = { json.encodeToString(it) }
         )
 
-        val availableMaterials =
-            text("available_materials").transform( // TODO: 08.03.2025 10:15 - check set serialization
-                wrap = { json.decodeFromString<MutableSet<Material>>(it) },
-                unwrap = { json.encodeToString(it) }
-            )
+        val availableMaterials = text("available_materials").transform(
+            wrap = { json.decodeFromString<MutableSet<Material>>(it) },
+            unwrap = { json.encodeToString(it) }
+        )
 
         override val primaryKey = PrimaryKey(uuid)
     }
 
     suspend fun connect() {
+        val dbFile = File(plugin.dataFolder, "storage.db")
+
+        if(!dbFile.exists()) {
+            try {
+                dbFile.parentFile.mkdirs()
+
+                withContext(Dispatchers.IO) {
+                    dbFile.createNewFile()
+                }
+
+            } catch (ex: IOException) {
+                error("An error occurred while creating database file.")
+            }
+        }
+
         dev.slne.surf.database.DatabaseProvider(plugin.dataPath, plugin.dataPath / "storage")
             .connect()
 
