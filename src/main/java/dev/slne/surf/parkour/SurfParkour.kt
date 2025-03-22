@@ -2,11 +2,14 @@ package dev.slne.surf.parkour
 
 
 import com.github.shynixn.mccoroutine.folia.SuspendingJavaPlugin
+import com.github.shynixn.mccoroutine.folia.globalRegionDispatcher
+import com.github.shynixn.mccoroutine.folia.registerSuspendingEvents
 import dev.slne.surf.parkour.command.ParkourCommand
 import dev.slne.surf.parkour.command.subcommand.ParkourStatsCommand
 import dev.slne.surf.parkour.database.DatabaseProvider
 import dev.slne.surf.parkour.listener.PlayerConnectionListener
 import dev.slne.surf.parkour.listener.PlayerInteractListener
+import dev.slne.surf.parkour.listener.PlayerMoveListener
 import dev.slne.surf.parkour.listener.PlayerParkourListener
 import dev.slne.surf.surfapi.bukkit.api.builder.buildItem
 import dev.slne.surf.surfapi.bukkit.api.builder.buildLore
@@ -39,6 +42,7 @@ class SurfParkour : SuspendingJavaPlugin() {
         Bukkit.getPluginManager().registerEvents(PlayerParkourListener(), this)
         Bukkit.getPluginManager().registerEvents(PlayerConnectionListener(), this)
         Bukkit.getPluginManager().registerEvents(PlayerInteractListener(), this)
+        Bukkit.getPluginManager().registerEvents(PlayerMoveListener(), this)
 
         DatabaseProvider.connect()
         DatabaseProvider.fetchParkours()
