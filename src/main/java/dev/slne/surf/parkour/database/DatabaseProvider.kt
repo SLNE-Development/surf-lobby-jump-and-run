@@ -31,6 +31,7 @@ import java.util.*
 import kotlin.io.path.div
 import kotlin.system.measureTimeMillis
 import kotlin.time.Duration.Companion.days
+import kotlin.time.Duration.Companion.minutes
 
 
 object DatabaseProvider {
@@ -48,7 +49,7 @@ object DatabaseProvider {
      */
 
     private val dataCache = Caffeine.newBuilder()
-        .expireAfterWrite(30.days)
+        .expireAfterWrite(30.minutes)
         .withRemovalListener { uuid, data, _ ->
             if (uuid != null && data != null) {
                 savePlayer(data as PlayerData)
