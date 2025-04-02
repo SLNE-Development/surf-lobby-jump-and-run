@@ -30,13 +30,11 @@ import java.io.IOException
 import java.util.*
 import kotlin.io.path.div
 import kotlin.system.measureTimeMillis
-import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.minutes
 
 
 object DatabaseProvider {
     private val log = logger()
-    private val config = plugin.config
     private val json = Json {
         ignoreUnknownKeys = true
         serializersModule = SerializersModule {
@@ -125,8 +123,7 @@ object DatabaseProvider {
             }
         }
 
-        dev.slne.surf.database.DatabaseProvider(plugin.dataPath, plugin.dataPath / "storage")
-            .connect()
+        dev.slne.surf.database.DatabaseProvider(plugin.dataPath, dbFile.toPath()).connect()
 
         newSuspendedTransaction {
             SchemaUtils.create(
@@ -140,8 +137,15 @@ object DatabaseProvider {
     }
 
     private suspend fun savePlayer(data: PlayerData) {
-        newSuspendedTransaction(Dispatchers.IO) {
-            replaceUser(data)
+        newSuspendedTransaction {
+            Users.update {
+                it[uuid] = data.uuid
+                it[name] = data.name
+                it[highScore] = data.highScore
+                it[points] = data.points
+                it[trys] = data.trys
+                it[likesSound] = data.likesSound
+            }
         }
     }
 
@@ -166,19 +170,7 @@ object DatabaseProvider {
             }
         }
 
-        log.atInfo()
-            .log("Saved %d player-data in %dms!", dataCache.asMap().values.size, duration)
-    }
-
-    private fun replaceUser(data: PlayerData) {
-        Users.replace {
-            it[uuid] = data.uuid
-            it[name] = data.name
-            it[highScore] = data.highScore
-            it[points] = data.points
-            it[trys] = data.trys
-            it[likesSound] = data.likesSound
-        }
+        log.atInfo().log("Saved %d player-data in %dms!", dataCache.asMap().values.size, duration)
     }
 
     fun invalidate(uuid: UUID) {
@@ -230,14 +222,17 @@ object DatabaseProvider {
         val duration = measureTimeMillis {
             newSuspendedTransaction(Dispatchers.IO) {
                 Parkours.deleteAll()
-                Parkours.batchInsert(parkourList, false) {
-                    this[Parkours.uuid] = it.uuid
-                    this[Parkours.name] = it.name
-                    this[Parkours.world] = it.world
-                    this[Parkours.area] = it.area
-                    this[Parkours.start] = it.start
-                    this[Parkours.respawn] = it.respawn
-                    this[Parkours.availableMaterials] = it.availableMaterials
+
+                parkourList.forEach { parkour ->
+                    Parkours.insert {
+                        it[uuid] = parkour.uuid
+                        it[name] = parkour.name
+                        it[world] = parkour.world
+                        it[area] = parkour.area
+                        it[start] = parkour.start
+                        it[respawn] = parkour.respawn
+                        it[availableMaterials] = parkour.availableMaterials
+                    }
                 }
             }
         }
