@@ -18,7 +18,7 @@ class PlayerMoveListener : Listener {
             withContext(plugin.regionDispatcher(event.to)) {
                 val player = event.player
 
-                if (!event.hasExplicitlyChangedBlock()) {
+                if (!event.hasChangedBlock()) {
                     return@withContext
                 }
 
