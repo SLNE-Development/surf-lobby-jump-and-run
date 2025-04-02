@@ -28,7 +28,7 @@ class ParkourStatsCommand(commandName: String) : CommandAPICommand(commandName) 
                         createStatisticMessage(
                             playerData.points,
                             playerData.highScore,
-                            if (player == target) "Du spielst " else "${target.name} spielst" + " aktuell keinen Parkour",
+                            if (player == target) "Du spielst aktuell keinen Parkour." else "${target.name} spielt aktuell keinen Parkour.",
                             playerData.trys
                         )
                     )
