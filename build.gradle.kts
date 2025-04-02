@@ -1,3 +1,4 @@
+import dev.slne.surf.surfapi.gradle.util.registerRequired
 import dev.slne.surf.surfapi.gradle.util.registerSoft
 
 plugins {
