@@ -53,7 +53,7 @@ object DatabaseProvider {
                 savePlayer(data as PlayerData)
             }
         }
-        .asLoadingCache<UUID, PlayerData>(DatabaseProvider::loadPlayer)
+        .asLoadingCache(DatabaseProvider::loadPlayer)
 
     /**
      * Cache for parkours
