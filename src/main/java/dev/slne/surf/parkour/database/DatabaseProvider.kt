@@ -28,7 +28,6 @@ import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransacti
 import java.io.File
 import java.io.IOException
 import java.util.*
-import kotlin.io.path.div
 import kotlin.system.measureTimeMillis
 import kotlin.time.Duration.Companion.minutes
 
@@ -123,7 +122,8 @@ object DatabaseProvider {
             }
         }
 
-        dev.slne.surf.database.DatabaseProvider(plugin.dataPath, dbFile.toPath()).connect()
+        dev.slne.surf.database.DatabaseProvider(plugin.dataPath, dbFile.parentFile.toPath())
+            .connect()
 
         newSuspendedTransaction {
             SchemaUtils.create(
