@@ -34,7 +34,7 @@ class ParkourBetaModeCommand(commandName: String) : CommandAPICommand(commandNam
     private fun updateItems(previous: Boolean, now: Boolean) {
         Bukkit.getOnlinePlayers().forEach { player ->
             player.inventory.remove(plugin.getInventoryItem(previous))
-            player.inventory.addItem(plugin.getInventoryItem(now))
+            player.inventory.setItem(6, plugin.getInventoryItem(now))
         }
     }
 }
