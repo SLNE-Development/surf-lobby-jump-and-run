@@ -29,6 +29,9 @@ import org.bukkit.inventory.meta.SkullMeta
 
 class ParkourMenu(playerData: PlayerData) : AbstractParkourGui(5, buildText {
     primary("Parkour".toSmallCaps())
+    if (plugin.betaMode) {
+        error(" ʙᴇᴛᴀ")
+    }
     decorate(TextDecoration.BOLD)
 }, playerData) {
     companion object {
