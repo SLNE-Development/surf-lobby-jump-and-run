@@ -66,13 +66,28 @@ class SurfParkour : SuspendingJavaPlugin() {
     fun getInventoryItem(betaMode: Boolean): ItemStack = buildItem(Material.FIREWORK_ROCKET) {
         displayName(buildText {
             primary("Jump'n Run").decorate(TextDecoration.BOLD)
+            if (betaMode) {
+                error(" ʙᴇᴛᴀ")
+            }
         })
 
         addItemFlags(ItemFlag.HIDE_ADDITIONAL_TOOLTIP, ItemFlag.HIDE_ATTRIBUTES)
 
         buildLore {
             +Component.empty()
-            +Component.text("")
+            +Component.text("Endlich ist er da! ", Colors.GRAY).append(Component.text("Der Lobby Parkour.", Colors.GOLD))
+            +Component.text("Keine langeweile beim warten mehr!", Colors.GRAY)
+            +Component.empty()
+            +Component.text("Springe so weit wie möglich und stelle neue Rekorde auf!", Colors.GRAY)
+            +Component.text("Klicke mit diesem Item, um ein Menu zu öffnen. Dort", Colors.GRAY)
+            +Component.text("kannst du den Parkour starten, deine Statistiken ansehen", Colors.GRAY)
+            +Component.text("und vieles mehr!", Colors.GRAY)
+
+            if(betaMode) {
+                +Component.empty()
+                +Component.text("Bitte beachte, das der Parkour noch in der Beta-Phase ist.", Colors.GRAY)
+                    .decorate(TextDecoration.ITALIC)
+            }
         }
     }
 }
