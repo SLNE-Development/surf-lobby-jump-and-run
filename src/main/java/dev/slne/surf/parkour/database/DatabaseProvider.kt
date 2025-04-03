@@ -138,7 +138,7 @@ object DatabaseProvider {
 
     private suspend fun savePlayer(data: PlayerData) {
         newSuspendedTransaction {
-            Users.update {
+            Users.replace {
                 it[uuid] = data.uuid
                 it[name] = data.name
                 it[highScore] = data.highScore

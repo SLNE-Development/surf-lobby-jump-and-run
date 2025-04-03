@@ -25,7 +25,7 @@ class PlayerConnectionListener : Listener {
     fun onQuit(event: PlayerQuitEvent) {
         DatabaseProvider.invalidate(event.player.uniqueId)
 
-        event.player.inventory.removeItem(SurfParkour.clickItem) // TODO: 08.03.2025 10:29 - not supported / may not always work
+        event.player.inventory.removeItem(SurfParkour.clickItem)
     }
 
     @EventHandler
