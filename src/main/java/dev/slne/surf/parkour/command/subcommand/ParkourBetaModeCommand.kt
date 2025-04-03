@@ -3,7 +3,6 @@ package dev.slne.surf.parkour.command.subcommand
 import dev.jorel.commandapi.CommandAPICommand
 import dev.jorel.commandapi.kotlindsl.playerExecutor
 
-import dev.slne.surf.parkour.SurfParkour
 import dev.slne.surf.parkour.plugin
 import dev.slne.surf.parkour.send
 import dev.slne.surf.parkour.util.Permission
@@ -28,14 +27,14 @@ class ParkourBetaModeCommand(commandName: String) : CommandAPICommand(commandNam
                 }
             }
 
-            this.updateItems()
+            this.updateItems(!betaMode, betaMode)
         }
     }
 
-    private fun updateItems() {
+    private fun updateItems(previous: Boolean, now: Boolean) {
         Bukkit.getOnlinePlayers().forEach { player ->
-            player.inventory.remove(SurfParkour.clickItem)
-            player.inventory.addItem(SurfParkour.clickItem)
+            player.inventory.remove(plugin.getInventoryItem(previous))
+            player.inventory.addItem(plugin.getInventoryItem(now))
         }
     }
 }

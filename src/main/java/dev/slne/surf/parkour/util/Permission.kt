@@ -11,6 +11,7 @@ object Permission {
     const val COMMAND_PARKOUR_TOGGLE = "$PREFIX_COMMAND.toggle"
     const val COMMAND_PARKOUR_STATISTIC = "$PREFIX_COMMAND.stats"
     const val COMMAND_PARKOUR_LIST = "$PREFIX_COMMAND.list"
+    const val COMMAND_PARKOUR_BETA = "$PREFIX_COMMAND.beta"
 
     private const val PREFIX_SETTING = "$PREFIX_COMMAND.setting"
     const val COMMAND_PARKOUR_SETTING = PREFIX_SETTING

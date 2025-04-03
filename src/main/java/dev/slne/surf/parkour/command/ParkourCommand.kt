@@ -21,6 +21,7 @@ class ParkourCommand(commandName: String) : CommandAPICommand(commandName) {
         subcommand(ParkourMaterialCommand("material"))
         subcommand(ParkourCreateCommand("create"))
         subcommand(ParkourRemoveCommand("delete"))
+        subcommand(ParkourBetaModeCommand("betaMode"))
 
         playerExecutor { player, _ -> ParkourMenu.lazyOpen(player) }
     }

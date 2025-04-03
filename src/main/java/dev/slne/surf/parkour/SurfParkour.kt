@@ -26,6 +26,7 @@ import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemFlag
+import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.java.JavaPlugin
 
 val plugin get() = JavaPlugin.getPlugin(SurfParkour::class.java)
@@ -62,18 +63,16 @@ class SurfParkour : SuspendingJavaPlugin() {
         plugin.saveConfig()
     }
 
-    companion object {
-        val clickItem = buildItem(Material.FIREWORK_ROCKET) {
-            displayName(buildText {
-                primary("Jump'n Run").decorate(TextDecoration.BOLD)
-            })
+    fun getInventoryItem(betaMode: Boolean): ItemStack = buildItem(Material.FIREWORK_ROCKET) {
+        displayName(buildText {
+            primary("Jump'n Run").decorate(TextDecoration.BOLD)
+        })
 
-            addItemFlags(ItemFlag.HIDE_ADDITIONAL_TOOLTIP, ItemFlag.HIDE_ATTRIBUTES)
+        addItemFlags(ItemFlag.HIDE_ADDITIONAL_TOOLTIP, ItemFlag.HIDE_ATTRIBUTES)
 
-            buildLore {
-                +Component.empty()
-                +Component.text("")
-            }
+        buildLore {
+            +Component.empty()
+            +Component.text("")
         }
     }
 }

@@ -17,7 +17,7 @@ class PlayerConnectionListener : Listener {
     fun onJoin(event: PlayerJoinEvent) {
         val player = event.player
         plugin.launch(plugin.entityDispatcher(player)) {
-            player.inventory.setItem(6, SurfParkour.clickItem)
+            player.inventory.setItem(6, plugin.getInventoryItem(plugin.betaMode))
         }
     }
 
@@ -25,7 +25,7 @@ class PlayerConnectionListener : Listener {
     fun onQuit(event: PlayerQuitEvent) {
         DatabaseProvider.invalidate(event.player.uniqueId)
 
-        event.player.inventory.removeItem(SurfParkour.clickItem)
+        event.player.inventory.removeItem(plugin.getInventoryItem(plugin.betaMode))
     }
 
     @EventHandler
