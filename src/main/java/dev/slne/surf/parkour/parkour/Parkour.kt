@@ -34,7 +34,7 @@ import org.bukkit.Sound as BukkitSound
 
 private const val NO_CURRENT_POINTS = -1
 
-data class Parkour(
+data class Parkour (
     val uuid: UUID,
     var name: String,
 

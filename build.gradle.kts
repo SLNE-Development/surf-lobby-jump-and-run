@@ -15,10 +15,10 @@ dependencies {
         exclude("org.jetbrains.kotlinx", "kotlinx-coroutines-core")
         exclude("org.slf4j", "slf4j-api")
     }
-
     api(libs.surf.database)
-
     paperLibrary(libs.glowingentities)
+
+    compileOnly(files("libs/VulcanAPI.jar"))
 }
 
 surfPaperPluginApi {

@@ -46,7 +46,7 @@ class SurfParkour : SuspendingJavaPlugin() {
         Bukkit.getPluginManager().registerEvents(PlayerInteractListener(), this)
         Bukkit.getPluginManager().registerEvents(PlayerDropListener(), this)
         Bukkit.getPluginManager().registerEvents(PlayerInventoryListener(), this)
-        //Bukkit.getPluginManager().registerEvents(PlayerMoveListener(), this) The Start Location is currently not implemented, so the listener is not needed
+        Bukkit.getPluginManager().registerEvents(PlayerAnticheatListener(), this)
 
         DatabaseProvider.connect()
         DatabaseProvider.fetchParkours()
