@@ -24,7 +24,7 @@ dependencies {
 surfPaperPluginApi {
     mainClass("dev.slne.surf.parkour.SurfParkour")
 
-    authors.add("SLNE Development")
+    authors.add("red")
     authors.add("Jo_field (Extern)")
 
     serverDependencies {
