@@ -24,6 +24,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.Material
+import org.bukkit.event.inventory.ClickType
 
 class ParkourScoreboardMenu(playerData: PlayerData, private var sorting: LeaderboardSortingType) :
     AbstractParkourGui(5, buildText {
@@ -47,7 +48,16 @@ class ParkourScoreboardMenu(playerData: PlayerData, private var sorting: Leaderb
                 }
             }
         }) {
-            sorting = sorting.next()
+            sorting = when (it.click) {
+                ClickType.LEFT -> {
+                    sorting.next()
+                }
+
+                else -> {
+                    sorting.previous()
+                }
+            }
+
             ParkourScoreboardMenu(playerData, sorting).show(it.whoClicked)
         }, 4, 0)
     }

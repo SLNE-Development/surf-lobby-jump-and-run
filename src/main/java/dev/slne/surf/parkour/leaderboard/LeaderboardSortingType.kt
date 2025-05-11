@@ -13,4 +13,5 @@ enum class LeaderboardSortingType(
     NAME("Name (Alphabetisch)", { it.sortBy { it.name } }), ;
 
     fun next() = entries.let { it[(ordinal + 1) % it.size] }
+    fun previous() = entries.let { it[(ordinal - 1 + it.size) % it.size] }
 }
