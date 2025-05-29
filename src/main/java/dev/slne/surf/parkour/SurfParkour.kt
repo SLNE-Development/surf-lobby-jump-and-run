@@ -1,9 +1,9 @@
 package dev.slne.surf.parkour
 
 
+import com.github.retrooper.packetevents.PacketEvents
+import com.github.retrooper.packetevents.event.PacketListenerPriority
 import com.github.shynixn.mccoroutine.folia.SuspendingJavaPlugin
-import com.github.shynixn.mccoroutine.folia.globalRegionDispatcher
-import com.github.shynixn.mccoroutine.folia.registerSuspendingEvents
 import dev.slne.surf.parkour.command.ParkourCommand
 import dev.slne.surf.parkour.command.subcommand.ParkourStatsCommand
 import dev.slne.surf.parkour.database.DatabaseProvider
@@ -13,15 +13,14 @@ import dev.slne.surf.surfapi.bukkit.api.builder.buildLore
 import dev.slne.surf.surfapi.bukkit.api.builder.displayName
 import dev.slne.surf.surfapi.core.api.messages.Colors
 import dev.slne.surf.surfapi.core.api.messages.adventure.buildText
-import dev.slne.surf.surfapi.core.api.messages.adventure.text
 import dev.slne.surf.surfapi.core.api.messages.builder.SurfComponentBuilder
 import fr.skytasul.glowingentities.GlowingBlocks
+import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder
 import net.kyori.adventure.audience.Audience
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.Bukkit
 import org.bukkit.Material
-import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.java.JavaPlugin
@@ -34,13 +33,22 @@ class SurfParkour : SuspendingJavaPlugin() {
 
     var betaMode: Boolean = false
 
-    override suspend fun onEnableAsync() {
+    override fun onLoad() {
+        PacketEvents.setAPI(SpigotPacketEventsBuilder.build(this))
+        PacketEvents.getAPI().load();
+    }
+
+    override fun onEnable() {
         this.saveDefaultConfig()
         this.blockApi = GlowingBlocks(this)
 
         ParkourCommand("parkour").register()
         ParkourStatsCommand("stats").register()
 
+        DatabaseProvider.connect()
+        DatabaseProvider.fetchParkours()
+
+        betaMode = plugin.config.getBoolean("beta-mode", false)
         Bukkit.getPluginManager().registerEvents(PlayerParkourListener(), this)
         Bukkit.getPluginManager().registerEvents(PlayerConnectionListener(), this)
         Bukkit.getPluginManager().registerEvents(PlayerInteractListener(), this)
@@ -48,10 +56,11 @@ class SurfParkour : SuspendingJavaPlugin() {
         Bukkit.getPluginManager().registerEvents(PlayerInventoryListener(), this)
         Bukkit.getPluginManager().registerEvents(PlayerAnticheatListener(), this)
 
-        DatabaseProvider.connect()
-        DatabaseProvider.fetchParkours()
-
-        betaMode = plugin.config.getBoolean("beta-mode", false)
+        PacketEvents.getAPI().init();
+        PacketEvents.getAPI().eventManager.registerListener(
+            PlayerPacketListener(),
+            PacketListenerPriority.NORMAL
+        )
     }
 
     override suspend fun onDisableAsync() {

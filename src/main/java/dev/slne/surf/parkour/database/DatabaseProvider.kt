@@ -1,6 +1,7 @@
 package dev.slne.surf.parkour.database
 
 import com.github.benmanes.caffeine.cache.Caffeine
+import com.github.shynixn.mccoroutine.folia.launch
 import com.sksamuel.aedile.core.asLoadingCache
 import com.sksamuel.aedile.core.expireAfterWrite
 import com.sksamuel.aedile.core.withRemovalListener
@@ -25,6 +26,7 @@ import org.bukkit.Material
 import org.bukkit.util.Vector
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
+import org.jetbrains.exposed.sql.transactions.transaction
 import java.io.File
 import java.io.IOException
 import java.util.*
@@ -106,16 +108,13 @@ object DatabaseProvider {
         override val primaryKey = PrimaryKey(uuid)
     }
 
-    suspend fun connect() {
+    fun connect() {
         val dbFile = File(plugin.dataFolder, "storage.db")
 
         if(!dbFile.exists()) {
             try {
                 dbFile.parentFile.mkdirs()
-
-                withContext(Dispatchers.IO) {
-                    dbFile.createNewFile()
-                }
+                dbFile.createNewFile()
 
             } catch (ex: IOException) {
                 error("An error occurred while creating database file.")
@@ -125,7 +124,7 @@ object DatabaseProvider {
         dev.slne.surf.database.DatabaseProvider(plugin.dataPath, dbFile.parentFile.toPath())
             .connect()
 
-        newSuspendedTransaction {
+        transaction {
             SchemaUtils.create(
                 Users, Parkours
             )
@@ -194,28 +193,30 @@ object DatabaseProvider {
     }
 
 
-    suspend fun fetchParkours() {
-        val parkours = mutableObjectSetOf<Parkour>()
+    fun fetchParkours() {
+        plugin.launch {
+            val parkours = mutableObjectSetOf<Parkour>()
 
-        val duration = measureTimeMillis {
-            newSuspendedTransaction(Dispatchers.IO) {
-                Parkours.selectAll().mapTo(parkours) {
-                    Parkour(
-                        uuid = it[Parkours.uuid],
-                        name = it[Parkours.name],
-                        world = it[Parkours.world],
-                        area = it[Parkours.area],
-                        start = it[Parkours.start],
-                        respawn = it[Parkours.respawn],
-                        availableMaterials = it[Parkours.availableMaterials].toMutableObjectSet()
-                    )
+            val duration = measureTimeMillis {
+                newSuspendedTransaction(Dispatchers.IO) {
+                    Parkours.selectAll().mapTo(parkours) {
+                        Parkour(
+                            uuid = it[Parkours.uuid],
+                            name = it[Parkours.name],
+                            world = it[Parkours.world],
+                            area = it[Parkours.area],
+                            start = it[Parkours.start],
+                            respawn = it[Parkours.respawn],
+                            availableMaterials = it[Parkours.availableMaterials].toMutableObjectSet()
+                        )
+                    }
                 }
             }
+
+            log.atInfo().log("Fetched %d parkours in %dms!", parkours.size, duration)
+
+            this@DatabaseProvider.parkourList.addAll(parkours)
         }
-
-        log.atInfo().log("Fetched %d parkours in %dms!", parkours.size, duration)
-
-        this.parkourList.addAll(parkours)
     }
 
     suspend fun saveParkours() {

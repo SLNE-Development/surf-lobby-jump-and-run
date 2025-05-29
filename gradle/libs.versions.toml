@@ -1,15 +1,16 @@
 [versions]
 exposed = "0.60.0"
 glowingentities = "1.4.3"
-surf-database = "1.0.4-SNAPSHOT"
+surf-database = "1.0.5-SNAPSHOT"
+packetevents-spigot = "2.8.0"
 
 [libraries]
 exposed-core = { module = "org.jetbrains.exposed:exposed-core", version.ref = "exposed" }
 exposed-jdbc = { module = "org.jetbrains.exposed:exposed-jdbc", version.ref = "exposed" }
 exposed-dao = { module = "org.jetbrains.exposed:exposed-dao", version.ref = "exposed" }
 
+packetevents-spigot = { module = "com.github.retrooper:packetevents-spigot", version.ref = "packetevents-spigot" }
 glowingentities = { module = "fr.skytasul:glowingentities", version.ref = "glowingentities" }
-
 surf-database = { module = "dev.slne.surf:surf-database", version.ref = "surf-database" }
 
 [bundles]

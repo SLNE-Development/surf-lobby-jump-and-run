@@ -5,18 +5,13 @@ plugins {
     id("dev.slne.surf.surfapi.gradle.paper-plugin")
 }
 
-group = "dev.slne.surf.jnr"
+group = "dev.slne.surf.parkour"
 version = "1.21.4-2.0.0-SNAPSHOT"
 
 dependencies {
-    implementation(libs.bundles.exposed) {
-        exclude("org.jetbrains.kotlin", "kotlin-stdlib")
-        exclude("org.jetbrains.kotlin", "kotlin-reflect")
-        exclude("org.jetbrains.kotlinx", "kotlinx-coroutines-core")
-        exclude("org.slf4j", "slf4j-api")
-    }
     api(libs.surf.database)
     paperLibrary(libs.glowingentities)
+    paperLibrary(libs.packetevents.spigot)
 
     compileOnly(files("libs/VulcanAPI.jar"))
 }
@@ -28,6 +23,7 @@ surfPaperPluginApi {
     authors.add("Jo_field (Extern)")
 
     serverDependencies {
+        registerRequired("packetevents")
         registerSoft("PlaceholderAPI")
     }
 
