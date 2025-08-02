@@ -1,7 +1,6 @@
 package dev.slne.surf.parkour.core.model.jump
 
 import dev.slne.surf.parkour.api.model.Jump
-import org.bukkit.Material
 import org.bukkit.block.Block
 import org.bukkit.entity.Player
 import org.bukkit.util.Vector
@@ -10,7 +9,7 @@ abstract class DirectionalJump(
     private val forward: Int,
     private val lateral: Int
 ) : Jump {
-    override fun generate(previous: Block?, player: Player, material: Material): Block {
+    override fun generate(previous: Block?, player: Player): Block {
         val baseLocation = previous?.location ?: player.location.clone().add(0.0, -1.0, 0.0)
 
         val yaw = ((player.location.yaw % 360) + 360) % 360
@@ -23,8 +22,6 @@ abstract class DirectionalJump(
         }
 
         val final = baseLocation.clone().add(offset)
-
-        player.sendBlockChange(final, material.createBlockData())
         return final.block
     }
 }

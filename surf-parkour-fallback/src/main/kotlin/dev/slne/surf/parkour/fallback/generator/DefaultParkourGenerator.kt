@@ -3,12 +3,15 @@ package dev.slne.surf.parkour.fallback.generator
 import dev.slne.surf.parkour.api.entity.ParkourPlayer
 import dev.slne.surf.parkour.api.model.ParkourGenerator
 import dev.slne.surf.parkour.core.model.jump.Jumps
+import dev.slne.surf.parkour.fallback.extension.sendBlockChange
+import dev.slne.surf.parkour.fallback.extension.sendBlockChanges
 import dev.slne.surf.surfapi.bukkit.api.glow.glowingApi
 import dev.slne.surf.surfapi.core.api.messages.adventure.sendText
 import dev.slne.surf.surfapi.core.api.util.mutableObjectSetOf
 import dev.slne.surf.surfapi.core.api.util.random
 import it.unimi.dsi.fastutil.objects.ObjectSet
 import net.kyori.adventure.text.format.NamedTextColor
+import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.block.Block
@@ -53,8 +56,6 @@ class DefaultParkourGenerator(
             return
         }
 
-        player.sendBlockChange(currentBlock, Material.RED_CONCRETE.createBlockData())
-
         val targetJump = Jumps.entries.randomOrNull()?.jump ?: run {
             player.sendText {
                 appendPrefix()
@@ -62,7 +63,7 @@ class DefaultParkourGenerator(
             }
             return
         }
-        val targetBlock = targetJump.generate(currentBlock.block, player, Material.RED_CONCRETE)
+        val targetBlock = targetJump.generate(currentBlock.block, player)
 
         val nextJump = Jumps.entries.randomOrNull()?.jump ?: run {
             player.sendText {
@@ -71,7 +72,13 @@ class DefaultParkourGenerator(
             }
             return
         }
-        val nextBlock = nextJump.generate(targetBlock, player, Material.RED_CONCRETE)
+        val nextBlock = nextJump.generate(targetBlock, player)
+
+        Bukkit.getServer().sendBlockChanges(
+            currentBlock to Material.RED_CONCRETE,
+            targetBlock.location to Material.RED_CONCRETE,
+            nextBlock.location to Material.RED_CONCRETE
+        )
 
         this.currentBlock = currentBlock.block
         this.targetBlock = targetBlock
@@ -99,10 +106,10 @@ class DefaultParkourGenerator(
             }
             return
         }
-        val nextBlock = nextJump.generate(nextBlock, player, Material.RED_CONCRETE)
+        val nextBlock = nextJump.generate(nextBlock, player)
 
         currentBlock?.location?.let {
-            player.sendBlockChange(it, Material.AIR.createBlockData())
+            Bukkit.getServer().sendBlockChange(it, Material.AIR)
         }
 
         targetBlock?.let {
@@ -113,6 +120,7 @@ class DefaultParkourGenerator(
         targetBlock = this@DefaultParkourGenerator.nextBlock
         this.nextBlock = nextBlock
 
+        Bukkit.getServer().sendBlockChange(nextBlock.location, Material.AIR)
         glowingApi.makeGlowing(nextBlock, player, NamedTextColor.WHITE)
     }
 
