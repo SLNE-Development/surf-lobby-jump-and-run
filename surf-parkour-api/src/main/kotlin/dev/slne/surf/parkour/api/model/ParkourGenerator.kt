@@ -9,6 +9,9 @@ import org.bukkit.block.Block
 interface ParkourGenerator {
     val player: ParkourPlayer
     val material: Material
+    val corner1: Location
+    val corner2: Location
+    val fallback: Location
 
     fun currentBlock(): Block?
     fun targetBlock(): Block?
@@ -19,5 +22,5 @@ interface ParkourGenerator {
     suspend fun start()
     suspend fun stop()
     suspend fun generate()
-    suspend fun generateInitial(corner1: Location, corner2: Location)
+    suspend fun generateInitial()
 }

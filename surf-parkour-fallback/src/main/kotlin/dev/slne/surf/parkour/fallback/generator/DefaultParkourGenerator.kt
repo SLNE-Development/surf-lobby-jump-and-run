@@ -18,7 +18,10 @@ import org.bukkit.block.Block
 
 class DefaultParkourGenerator(
     override val player: ParkourPlayer,
-    override val material: Material
+    override val material: Material,
+    override val corner1: Location,
+    override val corner2: Location,
+    override val fallback: Location
 ) : ParkourGenerator {
     var currentBlock: Block? = null
     var targetBlock: Block? = null
@@ -38,17 +41,48 @@ class DefaultParkourGenerator(
     override suspend fun start() {
         val player = player.player() ?: return
 
-        TODO("Not yet implemented")
+        if (currentBlock != null || targetBlock != null || nextBlock != null) {
+            player.sendText {
+                appendPrefix()
+                error("Ein Fehler ist aufgetreten. (PARKOUR_START_ALREADY_STARTED)")
+            }
+            return
+        }
+
+        if (corner1.world != corner2.world) {
+            player.sendText {
+                appendPrefix()
+                error("Ein Fehler ist aufgetreten. (PARKOUR_START_DIFFERENT_WORLDS)")
+            }
+            return
+        }
+
+        this.generateInitial()
+
+        currentBlock?.let {
+            player.teleport(it.location.clone().add(0.5, 1.0, 0.5))
+        }
     }
 
     override suspend fun stop() {
-        TODO("Not yet implemented")
+        currentBlock?.let {
+            Bukkit.getServer().sendBlockChange(it.location, Material.AIR)
+        }
+
+        targetBlock?.let {
+            glowingApi.removeGlowing(it, player.player() ?: return)
+            Bukkit.getServer().sendBlockChange(it.location, Material.AIR)
+        }
+
+        nextBlock?.let {
+            Bukkit.getServer().sendBlockChange(it.location, Material.AIR)
+        }
     }
 
-    override suspend fun generateInitial(corner1: Location, corner2: Location) {
+    override suspend fun generateInitial() {
         val player = player.player() ?: return
 
-        val currentBlock = findSafeBlockLocationInArea(corner1, corner2) ?: run {
+        val currentBlock = findSafeBlockLocationInArea() ?: run {
             player.sendText {
                 appendPrefix()
                 error("Ein Fehler ist aufgetreten. (PARKOUR_INITIAL_NO_BLOCK)")
@@ -84,7 +118,6 @@ class DefaultParkourGenerator(
         this.targetBlock = targetBlock
         this.nextBlock = nextBlock
 
-        player.teleport(currentBlock.clone().add(0.5, 1.0, 0.5))
         glowingApi.makeGlowing(targetBlock, player, NamedTextColor.WHITE)
     }
 
@@ -125,8 +158,6 @@ class DefaultParkourGenerator(
     }
 
     fun findSafeBlockLocationInArea(
-        corner1: Location,
-        corner2: Location,
         maxTries: Int = 100
     ): Location? {
         val world = corner1.world ?: return null
