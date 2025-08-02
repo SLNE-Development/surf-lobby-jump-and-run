@@ -15,7 +15,8 @@ surfPaperPluginApi {
 dependencies {
     api(project(":surf-parkour-core"))
     compileOnly(libs.packetevents.api)
-    compileOnly(files("libs/VulcanApi.jar"))
+    compileOnly(libs.polar.api)
+    compileOnly(files("libs/VulcanAPI.jar"))
 }
 
 tasks.shadowJar {
