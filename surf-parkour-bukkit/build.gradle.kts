@@ -11,3 +11,7 @@ surfPaperPluginApi {
     generateLibraryLoader(false)
 }
 
+dependencies {
+    api(project(":surf-parkour-core"))
+}
+

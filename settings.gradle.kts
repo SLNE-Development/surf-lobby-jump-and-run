@@ -1,4 +1,4 @@
-rootProject.name = "surf-lobby-jump-and-run"
+rootProject.name = "surf-parkour"
 
 
 include("surf-parkour-api")
