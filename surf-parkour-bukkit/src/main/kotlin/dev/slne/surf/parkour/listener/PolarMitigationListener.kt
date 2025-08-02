@@ -9,7 +9,6 @@ import top.polar.api.user.event.type.CheckType
 import java.util.function.Consumer
 import kotlin.jvm.optionals.getOrNull
 
-
 class PolarMitigationListener : Consumer<MitigationEvent> {
     override fun accept(event: MitigationEvent) {
         val player = event.user().bukkitPlayer().getOrNull() ?: return
@@ -21,7 +20,7 @@ class PolarMitigationListener : Consumer<MitigationEvent> {
         if (event.check().type() != CheckType.MOVEMENT) {
             return
         }
-        
+
         event.cancelled(true)
     }
 
