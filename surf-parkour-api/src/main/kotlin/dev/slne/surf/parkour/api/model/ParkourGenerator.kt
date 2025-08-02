@@ -1,6 +1,7 @@
 package dev.slne.surf.parkour.api.model
 
 import dev.slne.surf.parkour.api.entity.ParkourPlayer
+import it.unimi.dsi.fastutil.objects.ObjectSet
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.block.Block
@@ -12,6 +13,8 @@ interface ParkourGenerator {
     fun currentBlock(): Block?
     fun targetBlock(): Block?
     fun nextBlock(): Block?
+
+    fun getRegisteredBlocks(): ObjectSet<Block>
 
     suspend fun start()
     suspend fun stop()

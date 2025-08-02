@@ -4,5 +4,4 @@ plugins {
 
 dependencies {
     api(project(":surf-parkour-core"))
-    api(libs.surf.database)
 }

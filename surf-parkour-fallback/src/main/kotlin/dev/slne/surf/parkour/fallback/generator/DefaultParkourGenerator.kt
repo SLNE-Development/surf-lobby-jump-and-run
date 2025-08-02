@@ -5,7 +5,9 @@ import dev.slne.surf.parkour.api.model.ParkourGenerator
 import dev.slne.surf.parkour.core.model.jump.Jumps
 import dev.slne.surf.surfapi.bukkit.api.glow.glowingApi
 import dev.slne.surf.surfapi.core.api.messages.adventure.sendText
+import dev.slne.surf.surfapi.core.api.util.mutableObjectSetOf
 import dev.slne.surf.surfapi.core.api.util.random
+import it.unimi.dsi.fastutil.objects.ObjectSet
 import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.Location
 import org.bukkit.Material
@@ -22,6 +24,13 @@ class DefaultParkourGenerator(
     override fun currentBlock() = currentBlock
     override fun targetBlock() = targetBlock
     override fun nextBlock() = nextBlock
+    override fun getRegisteredBlocks(): ObjectSet<Block> {
+        val blocks = mutableObjectSetOf<Block>()
+        currentBlock?.let { blocks.add(it) }
+        targetBlock?.let { blocks.add(it) }
+        nextBlock?.let { blocks.add(it) }
+        return blocks
+    }
 
     override suspend fun start() {
         val player = player.player() ?: return
