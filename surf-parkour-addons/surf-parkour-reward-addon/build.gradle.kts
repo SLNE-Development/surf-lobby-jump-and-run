@@ -3,7 +3,7 @@ plugins {
 }
 
 surfPaperPluginApi {
-    mainClass("dev.slne.surf.parkour.BukkitMain")
+    mainClass("dev.slne.surf.parkour.addon.rewards.RewardsBukkitMain")
 
     authors.add("red")
 
