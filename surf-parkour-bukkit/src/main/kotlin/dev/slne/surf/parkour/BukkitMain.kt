@@ -8,7 +8,7 @@ class BukkitMain : SuspendingJavaPlugin() {
     override fun onEnable() {
         BukkitCommandManager.registerCommands()
         BukkitListenerManager.registerBukkitListeners()
-        BukkitListenerManager.registerPacketListeners()
+        BukkitListenerManager.registerExternalListeners()
     }
 
     override fun onDisable() {
