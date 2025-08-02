@@ -12,6 +12,12 @@ import java.util.*
 @AutoService(ParkourFactory::class)
 class FallbackParkourFactory : ParkourFactory, Services.Fallback {
     override fun createParkour(parkourData: ParkourCreationData) = FallbackParkour(
-        UUID.randomUUID(), parkourData.name, mutableObjectSetOf(), mutableObject2ObjectMapOf()
+        UUID.randomUUID(),
+        parkourData.name,
+        mutableObjectSetOf(),
+        mutableObject2ObjectMapOf(),
+        parkourData.spawn,
+        parkourData.corner1,
+        parkourData.corner2
     )
 }
