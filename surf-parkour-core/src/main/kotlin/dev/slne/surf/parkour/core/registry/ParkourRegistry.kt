@@ -1,0 +1,21 @@
+package dev.slne.surf.parkour.core.registry
+
+import dev.slne.surf.parkour.api.model.Parkour
+import dev.slne.surf.surfapi.core.api.util.requiredService
+import it.unimi.dsi.fastutil.objects.ObjectSet
+import java.util.*
+
+interface ParkourRegistry {
+    fun registerParkour(parkour: Parkour)
+    fun unregisterParkour(parkour: Parkour)
+
+    fun getParkour(name: String): Parkour?
+    fun getParkour(uuid: UUID): Parkour?
+    fun getParkours(): ObjectSet<Parkour>
+
+    companion object {
+        val INSTANCE = requiredService<ParkourRegistry>()
+    }
+}
+
+val parkourRegistry get() = ParkourRegistry.INSTANCE

@@ -1,3 +1,7 @@
 [versions]
+packetevents-api = "2.9.5-SNAPSHOT"
+surf-database = "2.0.4-SNAPSHOT"
 
 [libraries]
+packetevents-api = { module = "com.github.retrooper:packetevents-api", version.ref = "packetevents-api" }
+surf-database = { module = "dev.slne.surf:surf-database", version.ref = "surf-database" }
