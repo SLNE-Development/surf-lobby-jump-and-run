@@ -9,4 +9,5 @@ object ParkourPermissionRegistry : PermissionRegistry() {
     val COMMAND_PARKOUR = create("$COMMAND_PREFIX.parkour")
     val COMMAND_PARKOUR_RELOAD = create("$COMMAND_PREFIX.parkour.reload")
     val COMMAND_PARKOUR_PLAY = create("$COMMAND_PREFIX.parkour.play")
+    val COMMAND_PARKOUR_CREATE = create("$COMMAND_PREFIX.parkour.create")
 }

@@ -6,8 +6,8 @@ import it.unimi.dsi.fastutil.objects.ObjectSet
 import java.util.*
 
 interface ParkourRegistry {
-    fun registerParkour(parkour: Parkour)
-    fun unregisterParkour(parkour: Parkour)
+    fun registerParkour(parkour: Parkour): Parkour?
+    fun unregisterParkour(parkour: Parkour): Parkour?
 
     fun getParkour(name: String): Parkour?
     fun getParkour(uuid: UUID): Parkour?
