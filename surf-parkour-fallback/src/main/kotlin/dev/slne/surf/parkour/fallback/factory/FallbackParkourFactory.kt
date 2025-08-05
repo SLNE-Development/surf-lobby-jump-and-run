@@ -1,7 +1,7 @@
 package dev.slne.surf.parkour.fallback.factory
 
 import com.google.auto.service.AutoService
-import dev.slne.surf.parkour.api.model.ParkourCreationData
+import dev.slne.surf.parkour.api.model.parkour.ParkourCreationData
 import dev.slne.surf.parkour.core.factory.ParkourFactory
 import dev.slne.surf.parkour.fallback.model.FallbackParkour
 import dev.slne.surf.surfapi.core.api.util.mutableObject2ObjectMapOf

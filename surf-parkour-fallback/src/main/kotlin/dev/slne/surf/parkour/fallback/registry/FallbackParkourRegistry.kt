@@ -1,7 +1,7 @@
 package dev.slne.surf.parkour.fallback.registry
 
 import com.google.auto.service.AutoService
-import dev.slne.surf.parkour.api.model.Parkour
+import dev.slne.surf.parkour.api.model.parkour.Parkour
 import dev.slne.surf.parkour.core.registry.ParkourRegistry
 import dev.slne.surf.surfapi.core.api.util.mutableObject2ObjectMapOf
 import dev.slne.surf.surfapi.core.api.util.toObjectSet

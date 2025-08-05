@@ -5,7 +5,7 @@ import dev.jorel.commandapi.CommandAPICommand
 import dev.jorel.commandapi.kotlindsl.getValue
 import dev.jorel.commandapi.kotlindsl.playerExecutor
 import dev.jorel.commandapi.kotlindsl.subcommand
-import dev.slne.surf.parkour.api.model.Parkour
+import dev.slne.surf.parkour.api.model.parkour.Parkour
 import dev.slne.surf.parkour.command.argument.parkourArgument
 import dev.slne.surf.parkour.plugin
 import dev.slne.surf.parkour.util.ParkourPermissionRegistry

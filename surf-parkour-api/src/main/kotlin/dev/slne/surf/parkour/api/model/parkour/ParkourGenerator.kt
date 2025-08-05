@@ -1,4 +1,4 @@
-package dev.slne.surf.parkour.api.model
+package dev.slne.surf.parkour.api.model.parkour
 
 import dev.slne.surf.parkour.api.entity.ParkourPlayer
 import it.unimi.dsi.fastutil.objects.ObjectSet

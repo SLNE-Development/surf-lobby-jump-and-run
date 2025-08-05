@@ -1,7 +1,7 @@
 package dev.slne.surf.parkour.api
 
 import dev.slne.surf.parkour.api.entity.ParkourPlayer
-import dev.slne.surf.parkour.api.model.Parkour
+import dev.slne.surf.parkour.api.model.parkour.Parkour
 import dev.slne.surf.surfapi.core.api.util.requiredService
 import it.unimi.dsi.fastutil.objects.ObjectSet
 import java.util.*

@@ -1,6 +1,6 @@
 package dev.slne.surf.parkour.core.registry
 
-import dev.slne.surf.parkour.api.model.Parkour
+import dev.slne.surf.parkour.api.model.parkour.Parkour
 import dev.slne.surf.surfapi.core.api.util.requiredService
 import it.unimi.dsi.fastutil.objects.ObjectSet
 import java.util.*

@@ -1,7 +1,7 @@
 package dev.slne.surf.parkour.fallback.generator
 
 import dev.slne.surf.parkour.api.entity.ParkourPlayer
-import dev.slne.surf.parkour.api.model.ParkourGenerator
+import dev.slne.surf.parkour.api.model.parkour.ParkourGenerator
 import dev.slne.surf.parkour.core.model.jump.Jumps
 import dev.slne.surf.parkour.fallback.extension.sendBlockChange
 import dev.slne.surf.parkour.fallback.extension.sendBlockChanges

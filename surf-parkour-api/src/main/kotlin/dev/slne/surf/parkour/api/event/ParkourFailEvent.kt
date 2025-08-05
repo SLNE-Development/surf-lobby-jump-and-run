@@ -1,7 +1,7 @@
 package dev.slne.surf.parkour.api.event
 
 import dev.slne.surf.parkour.api.entity.ParkourPlayer
-import dev.slne.surf.parkour.api.model.Parkour
+import dev.slne.surf.parkour.api.model.parkour.Parkour
 import org.bukkit.event.Event
 import org.bukkit.event.HandlerList
 

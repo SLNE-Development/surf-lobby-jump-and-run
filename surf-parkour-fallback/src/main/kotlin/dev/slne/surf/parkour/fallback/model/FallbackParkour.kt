@@ -3,8 +3,8 @@ package dev.slne.surf.parkour.fallback.model
 import dev.slne.surf.parkour.api.entity.ParkourPlayer
 import dev.slne.surf.parkour.api.event.ParkourFailEvent
 import dev.slne.surf.parkour.api.event.ParkourSuccessEvent
-import dev.slne.surf.parkour.api.model.Parkour
-import dev.slne.surf.parkour.api.model.ParkourGenerator
+import dev.slne.surf.parkour.api.model.parkour.Parkour
+import dev.slne.surf.parkour.api.model.parkour.ParkourGenerator
 import dev.slne.surf.parkour.fallback.generator.DefaultParkourGenerator
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap
 import it.unimi.dsi.fastutil.objects.ObjectSet

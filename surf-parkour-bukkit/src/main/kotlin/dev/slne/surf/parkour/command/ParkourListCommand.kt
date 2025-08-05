@@ -4,7 +4,7 @@ import dev.jorel.commandapi.CommandAPICommand
 import dev.jorel.commandapi.kotlindsl.anyExecutor
 import dev.jorel.commandapi.kotlindsl.integerArgument
 import dev.jorel.commandapi.kotlindsl.subcommand
-import dev.slne.surf.parkour.api.model.Parkour
+import dev.slne.surf.parkour.api.model.parkour.Parkour
 import dev.slne.surf.parkour.core.registry.parkourRegistry
 import dev.slne.surf.parkour.util.ParkourPermissionRegistry
 import dev.slne.surf.surfapi.core.api.font.toSmallCaps

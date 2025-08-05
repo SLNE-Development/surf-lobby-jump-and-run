@@ -1,4 +1,4 @@
-package dev.slne.surf.parkour.api.model
+package dev.slne.surf.parkour.api.model.parkour
 
 import org.bukkit.Location
 
