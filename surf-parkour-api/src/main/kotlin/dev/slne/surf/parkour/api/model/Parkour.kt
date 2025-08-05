@@ -18,5 +18,5 @@ interface Parkour {
 
     suspend fun start(player: ParkourPlayer)
     suspend fun onFailure(player: ParkourPlayer)
-    suspend fun onSuccess(player: ParkourPlayer)
+    suspend fun onSuccess(player: ParkourPlayer, index: Int)
 }

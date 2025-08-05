@@ -5,7 +5,7 @@ import dev.slne.surf.parkour.api.model.Parkour
 import org.bukkit.event.Event
 import org.bukkit.event.HandlerList
 
-class ParkourJumpGenerateEvent(
+class ParkourSuccessEvent(
     val parkour: Parkour,
     val player: ParkourPlayer,
     val jumpIndex: Int

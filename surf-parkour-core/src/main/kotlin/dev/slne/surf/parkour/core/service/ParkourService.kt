@@ -17,7 +17,7 @@ interface ParkourService {
     fun getParkours(): ObjectSet<Parkour>
 
     suspend fun onFailure(parkour: Parkour, player: ParkourPlayer)
-    suspend fun onSuccess(parkour: Parkour, player: ParkourPlayer)
+    suspend fun onSuccess(parkour: Parkour, player: ParkourPlayer, index: Int)
 
     companion object {
         val INSTANCE = requiredService<ParkourService>()

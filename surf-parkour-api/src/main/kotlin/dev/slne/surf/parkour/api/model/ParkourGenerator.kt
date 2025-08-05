@@ -13,6 +13,8 @@ interface ParkourGenerator {
     val corner2: Location
     val fallback: Location
 
+    fun currentIndex(): Int = 0
+
     fun currentBlock(): Block?
     fun targetBlock(): Block?
     fun nextBlock(): Block?

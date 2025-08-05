@@ -1,6 +1,8 @@
 package dev.slne.surf.parkour.fallback.model
 
 import dev.slne.surf.parkour.api.entity.ParkourPlayer
+import dev.slne.surf.parkour.api.event.ParkourFailEvent
+import dev.slne.surf.parkour.api.event.ParkourSuccessEvent
 import dev.slne.surf.parkour.api.model.Parkour
 import dev.slne.surf.parkour.api.model.ParkourGenerator
 import dev.slne.surf.parkour.fallback.generator.DefaultParkourGenerator
@@ -33,10 +35,19 @@ class FallbackParkour(
     }
 
     override suspend fun onFailure(player: ParkourPlayer) {
-        TODO("Not yet implemented")
+        val bukkitPlayer = player.player() ?: return
+
+        bukkitPlayer.teleportAsync(spawnLocation).thenRun {
+            generator.remove(player.uuid)
+            players.remove(player)
+        }
+
+        ParkourFailEvent(this, player).callEvent()
     }
 
-    override suspend fun onSuccess(player: ParkourPlayer) {
-        TODO("Not yet implemented")
+    override suspend fun onSuccess(player: ParkourPlayer, index: Int) {
+        val bukkitPlayer = player.player() ?: return
+
+        ParkourSuccessEvent(this, player, index).callEvent()
     }
 }

@@ -41,6 +41,7 @@ class FallbackParkourService : ParkourService, Services.Fallback {
 
     override suspend fun onSuccess(
         parkour: Parkour,
-        player: ParkourPlayer
-    ) = parkour.onSuccess(player)
+        player: ParkourPlayer,
+        index: Int
+    ) = parkour.onSuccess(player, index)
 }

@@ -25,7 +25,7 @@ class SuccessListener : Listener {
             if (generator.getRegisteredBlocks()
                     .any { it.location.equalsBlockLocation(event.to.subtract(0.0, 1.0, 0.0)) }
             ) {
-                parkour.onSuccess(player)
+                parkour.onSuccess(player, generator.currentIndex())
             }
         }
     }

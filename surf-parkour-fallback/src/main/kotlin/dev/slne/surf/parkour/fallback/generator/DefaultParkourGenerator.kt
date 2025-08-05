@@ -26,6 +26,9 @@ class DefaultParkourGenerator(
     var currentBlock: Block? = null
     var targetBlock: Block? = null
     var nextBlock: Block? = null
+    var currentIndex = 0
+
+    override fun currentIndex() = currentIndex
 
     override fun currentBlock() = currentBlock
     override fun targetBlock() = targetBlock
