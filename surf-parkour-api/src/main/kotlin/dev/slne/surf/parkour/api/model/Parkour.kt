@@ -17,4 +17,6 @@ interface Parkour {
     val generator: Object2ObjectMap<UUID, ParkourGenerator>
 
     suspend fun start(player: ParkourPlayer)
+    suspend fun onFailure(player: ParkourPlayer)
+    suspend fun onSuccess(player: ParkourPlayer)
 }

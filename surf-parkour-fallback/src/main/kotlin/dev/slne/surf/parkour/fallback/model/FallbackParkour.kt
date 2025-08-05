@@ -31,4 +31,12 @@ class FallbackParkour(
         this@FallbackParkour.generator[player.uuid] = generator
         generator.start()
     }
+
+    override suspend fun onFailure(player: ParkourPlayer) {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun onSuccess(player: ParkourPlayer) {
+        TODO("Not yet implemented")
+    }
 }

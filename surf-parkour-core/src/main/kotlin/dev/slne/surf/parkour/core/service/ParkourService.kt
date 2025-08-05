@@ -4,6 +4,7 @@ import dev.slne.surf.parkour.api.entity.ParkourPlayer
 import dev.slne.surf.parkour.api.model.Parkour
 import dev.slne.surf.parkour.api.model.ParkourCreationData
 import dev.slne.surf.surfapi.core.api.util.requiredService
+import it.unimi.dsi.fastutil.objects.ObjectSet
 import java.util.*
 
 interface ParkourService {
@@ -12,6 +13,11 @@ interface ParkourService {
     fun getParkour(player: ParkourPlayer): Parkour?
     fun getParkour(name: String): Parkour?
     fun getParkour(uuid: UUID): Parkour?
+    fun inParkour(player: ParkourPlayer): Boolean
+    fun getParkours(): ObjectSet<Parkour>
+
+    suspend fun onFailure(parkour: Parkour, player: ParkourPlayer)
+    suspend fun onSuccess(parkour: Parkour, player: ParkourPlayer)
 
     companion object {
         val INSTANCE = requiredService<ParkourService>()

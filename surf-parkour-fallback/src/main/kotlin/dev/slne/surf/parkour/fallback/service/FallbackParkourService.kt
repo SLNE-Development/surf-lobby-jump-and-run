@@ -30,4 +30,17 @@ class FallbackParkourService : ParkourService, Services.Fallback {
 
     override fun getParkour(name: String) = parkourRegistry.getParkour(name)
     override fun getParkour(uuid: UUID) = parkourRegistry.getParkour(uuid)
+    override fun inParkour(player: ParkourPlayer) =
+        parkourRegistry.getParkours().any { it.players.contains(player) }
+
+    override fun getParkours() = parkourRegistry.getParkours()
+    override suspend fun onFailure(
+        parkour: Parkour,
+        player: ParkourPlayer
+    ) = parkour.onFailure(player)
+
+    override suspend fun onSuccess(
+        parkour: Parkour,
+        player: ParkourPlayer
+    ) = parkour.onSuccess(player)
 }
