@@ -1,8 +1,20 @@
 package dev.slne.surf.parkour.core.service
 
+import dev.slne.surf.parkour.api.model.parkour.Parkour
+import dev.slne.surf.parkour.api.model.parkour.statistic.ParkourStatistic
 import dev.slne.surf.parkour.core.util.ServiceWithDatabase
+import dev.slne.surf.surfapi.core.api.util.requiredService
+import java.util.*
 
 interface ParkourStatisticsService : ServiceWithDatabase {
-    fun
+    suspend fun getStatistic(uuid: UUID): ParkourStatistic
+    suspend fun getParkourStatistic(uuid: UUID, parkour: Parkour): ParkourStatistic
 
+    suspend fun addStatistic(uuid: UUID, parkour: Parkour, statistic: ParkourStatistic)
+
+    companion object {
+        val INSTANCE = requiredService<ParkourStatisticsService>()
+    }
 }
+
+val parkourStatisticsService get() = ParkourStatisticsService.INSTANCE
