@@ -1,17 +1,22 @@
 package dev.slne.surf.parkour.fallback.service
 
+import dev.slne.surf.database.DatabaseManager
+import dev.slne.surf.database.database.DatabaseProvider
 import dev.slne.surf.parkour.core.service.DatabaseService
+import dev.slne.surf.parkour.core.service.parkourStatisticsService
+import java.nio.file.Path
 
 class FallbackDatabaseService : DatabaseService {
-    override fun connect() {
-
+    private lateinit var databaseProvider: DatabaseProvider
+    override fun connect(path: Path) {
+        databaseProvider = DatabaseManager(path, path).databaseProvider
     }
 
     override fun createTables() {
-        TODO("Not yet implemented")
+        parkourStatisticsService.createTable()
     }
 
     override fun disconnect() {
-        TODO("Not yet implemented")
+        databaseProvider.disconnect()
     }
 }

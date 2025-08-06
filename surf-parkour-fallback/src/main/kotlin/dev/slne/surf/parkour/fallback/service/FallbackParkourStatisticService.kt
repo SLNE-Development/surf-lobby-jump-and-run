@@ -5,10 +5,15 @@ import dev.slne.surf.parkour.api.model.parkour.Parkour
 import dev.slne.surf.parkour.api.model.parkour.statistic.ParkourStatistic
 import dev.slne.surf.parkour.core.service.ParkourStatisticsService
 import net.kyori.adventure.util.Services
+import org.jetbrains.exposed.sql.Table
 import java.util.*
 
 @AutoService(ParkourStatisticsService::class)
 class FallbackParkourStatisticService : ParkourStatisticsService, Services.Fallback {
+    object ParkourStatistics : Table("parkour_statistics") {
+        val uuid
+    }
+
     override fun createTable() {
 
     }
