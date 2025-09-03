@@ -7,7 +7,6 @@ import dev.slne.surf.surfapi.bukkit.api.event.register
 
 object BukkitListenerManager {
     fun registerBukkitListeners() {
-        VulcanEventListener().register()
         FailureListener().register()
         SuccessListener().register()
     }
@@ -18,6 +17,7 @@ object BukkitListenerManager {
             PacketListenerPriority.NORMAL
         )
 
+        VulcanEventListener.register()
         PolarMitigationListener().register()
     }
 }

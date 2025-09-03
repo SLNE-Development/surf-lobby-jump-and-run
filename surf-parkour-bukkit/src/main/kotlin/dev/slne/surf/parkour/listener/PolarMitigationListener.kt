@@ -1,7 +1,11 @@
 package dev.slne.surf.parkour.listener
 
 import dev.slne.surf.parkour.core.service.parkourService
+import dev.slne.surf.parkour.plugin
+import dev.slne.surf.parkour.util.appendLocalPrefix
 import dev.slne.surf.parkour.util.parkourPlayer
+import dev.slne.surf.surfapi.core.api.messages.adventure.buildText
+import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import top.polar.api.PolarApiAccessor
 import top.polar.api.user.event.MitigationEvent
@@ -25,12 +29,21 @@ class PolarMitigationListener : Consumer<MitigationEvent> {
     }
 
     fun register() {
+        if (!Bukkit.getPluginManager().isPluginEnabled("Polar")) {
+            return
+        }
+
         val api = PolarApiAccessor.access().get() ?: return
 
         api.events().repository().registerListener(
             MitigationEvent::class.java,
             this::accept
         )
+
+        plugin.componentLogger.info(buildText {
+            appendLocalPrefix()
+            success("Hooked into the Polar Bear!")
+        })
     }
 
     private fun isStandingOnJumpBlock(player: Player): Boolean {
