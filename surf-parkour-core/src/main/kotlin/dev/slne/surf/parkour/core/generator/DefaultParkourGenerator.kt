@@ -1,10 +1,10 @@
-package dev.slne.surf.parkour.fallback.generator
+package dev.slne.surf.parkour.core.generator
 
 import dev.slne.surf.parkour.api.entity.ParkourPlayer
 import dev.slne.surf.parkour.api.model.parkour.ParkourGenerator
 import dev.slne.surf.parkour.core.model.jump.Jumps
-import dev.slne.surf.parkour.fallback.extension.sendBlockChange
-import dev.slne.surf.parkour.fallback.extension.sendBlockChanges
+import dev.slne.surf.parkour.core.util.sendBlockChange
+import dev.slne.surf.parkour.core.util.sendBlockChanges
 import dev.slne.surf.surfapi.bukkit.api.glow.glowingApi
 import dev.slne.surf.surfapi.core.api.messages.adventure.sendText
 import dev.slne.surf.surfapi.core.api.util.mutableObjectSetOf

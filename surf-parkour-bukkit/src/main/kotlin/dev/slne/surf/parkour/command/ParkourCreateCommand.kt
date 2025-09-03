@@ -2,7 +2,10 @@ package dev.slne.surf.parkour.command
 
 import dev.jorel.commandapi.CommandAPICommand
 import dev.jorel.commandapi.kotlindsl.*
+import dev.slne.surf.parkour.core.model.CoreParkourCreationData
+import dev.slne.surf.parkour.core.service.parkourService
 import dev.slne.surf.parkour.util.ParkourPermissionRegistry
+import dev.slne.surf.surfapi.core.api.messages.adventure.sendText
 import org.bukkit.Location
 
 fun CommandAPICommand.parkourCreateCommand() = subcommand("create") {
@@ -17,8 +20,21 @@ fun CommandAPICommand.parkourCreateCommand() = subcommand("create") {
         val corner1: Location by args
         val corner2: Location by args
         val spawn: Location by args
-        val respawn: Location by args
 
+        parkourService.createParkour(
+            CoreParkourCreationData(
+                name,
+                corner1,
+                corner2,
+                spawn
+            )
+        )
 
+        executor.sendText {
+            appendPrefix()
+            success("Du hast den Parkour ")
+            variableValue(name)
+            success(" erstellt.")
+        }
     }
 }

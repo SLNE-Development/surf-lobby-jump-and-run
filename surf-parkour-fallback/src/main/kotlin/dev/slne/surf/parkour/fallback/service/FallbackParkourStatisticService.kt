@@ -11,7 +11,7 @@ import java.util.*
 @AutoService(ParkourStatisticsService::class)
 class FallbackParkourStatisticService : ParkourStatisticsService, Services.Fallback {
     object ParkourStatistics : Table("parkour_statistics") {
-        val uuid
+        val uuid = varchar("user_uuid", 36)
     }
 
     override fun createTable() {

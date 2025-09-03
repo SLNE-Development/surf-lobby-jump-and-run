@@ -1,4 +1,4 @@
-package dev.slne.surf.parkour.fallback.extension
+package dev.slne.surf.parkour.core.util
 
 import org.bukkit.Bukkit
 import org.bukkit.Location
