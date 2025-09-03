@@ -4,4 +4,5 @@ plugins {
 
 dependencies {
     api(project(":surf-parkour-api"))
+    runtimeOnly(project(":surf-parkour-fallback"))
 }
