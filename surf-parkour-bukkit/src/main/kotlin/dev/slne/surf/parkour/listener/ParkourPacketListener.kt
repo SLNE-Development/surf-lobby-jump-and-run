@@ -19,7 +19,7 @@ class ParkourPacketListener : PacketListener {
 
         val packet = WrapperPlayClientPlayerBlockPlacement(event)
         val playerParkour = parkourService.getParkour(player.parkourPlayer()) ?: return
-        val generator = playerParkour.generator[player.uniqueId] ?: return
+        val generator = playerParkour.generators[player.uniqueId] ?: return
 
         if (generator.getRegisteredBlocks().any { it.equalsVector3i(packet.blockPosition) }) {
             event.isCancelled = true

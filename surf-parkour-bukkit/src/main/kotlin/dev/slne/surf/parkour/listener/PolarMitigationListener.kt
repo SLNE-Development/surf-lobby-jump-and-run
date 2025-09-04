@@ -48,7 +48,7 @@ class PolarMitigationListener : Consumer<MitigationEvent> {
 
     private fun isStandingOnJumpBlock(player: Player): Boolean {
         val playerParkour = parkourService.getParkour(player.parkourPlayer()) ?: return false
-        val generator = playerParkour.generator[player.uniqueId] ?: return false
+        val generator = playerParkour.generators[player.uniqueId] ?: return false
 
         return generator.getRegisteredBlocks()
             .any { it.equals(player.location.clone().add(0.0, -1.0, 0.0).block) }

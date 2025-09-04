@@ -14,7 +14,7 @@ interface Parkour {
     val corner2: Location
 
     val players: ObjectSet<ParkourPlayer>
-    val generator: Object2ObjectMap<UUID, ParkourGenerator>
+    val generators: Object2ObjectMap<UUID, ParkourGenerator>
 
     suspend fun start(player: ParkourPlayer)
     suspend fun onFailure(player: ParkourPlayer)

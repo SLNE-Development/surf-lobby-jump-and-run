@@ -21,12 +21,15 @@ class FailureListener : Listener {
             val parkour = parkourService.getParkour(player) ?: run {
                 return@launch
             }
-            val generator = parkour.generator[player.uuid] ?: run {
+            val generator = parkour.generators[player.uuid] ?: run {
                 return@launch
             }
 
-            generator.currentBlock()?.let {
-                if (it.y > event.to.y) {
+            generator.currentBlock()?.let { block ->
+                val playerY = event.to.y
+                val blockY = block.y.toDouble()
+
+                if (playerY < blockY) {
                     parkour.onFailure(player)
                 }
             }

@@ -20,7 +20,7 @@ class SuccessListener : Listener {
         plugin.launch(plugin.entityDispatcher(event.player)) {
             val player = event.parkourPlayer()
             val parkour = parkourService.getParkour(player) ?: return@launch
-            val generator = parkour.generator[player.uuid] ?: return@launch
+            val generator = parkour.generators[player.uuid] ?: return@launch
 
             if (generator.getNextBlocks()
                     .any { it.location.equalsBlockLocation(event.to.subtract(0.0, 1.0, 0.0)) }

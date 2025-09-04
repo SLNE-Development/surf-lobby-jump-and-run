@@ -7,6 +7,7 @@ import dev.slne.surf.parkour.api.model.parkour.Parkour
 import dev.slne.surf.parkour.api.model.parkour.ParkourGenerator
 import dev.slne.surf.parkour.core.generator.DefaultParkourGenerator
 import dev.slne.surf.parkour.core.registry.parkourRegistry
+import dev.slne.surf.surfapi.core.api.messages.adventure.sendText
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap
 import it.unimi.dsi.fastutil.objects.ObjectSet
 import org.bukkit.Location
@@ -17,7 +18,7 @@ class FallbackParkour(
     override val uuid: UUID,
     override val name: String,
     override val players: ObjectSet<ParkourPlayer>,
-    override val generator: Object2ObjectMap<UUID, ParkourGenerator>,
+    override val generators: Object2ObjectMap<UUID, ParkourGenerator>,
     override val spawnLocation: Location,
     override val corner1: Location,
     override val corner2: Location
@@ -32,16 +33,24 @@ class FallbackParkour(
         )
 
         players.add(player)
-        this@FallbackParkour.generator[player.uuid] = generator
+        this@FallbackParkour.generators[player.uuid] = generator
         generator.start()
     }
 
     override suspend fun onFailure(player: ParkourPlayer) {
         val bukkitPlayer = player.player() ?: return
+        val generator = generators[player.uuid] ?: return
+
+        generator.stop()
 
         bukkitPlayer.teleportAsync(spawnLocation).thenRun {
-            generator.remove(player.uuid)
+            generators.remove(player.uuid)
             players.remove(player)
+        }
+
+        player.sendText {
+            appendPrefix()
+            error("Failed!")
         }
 
         ParkourFailEvent(this, player).callEvent()
@@ -49,6 +58,11 @@ class FallbackParkour(
 
     override suspend fun onSuccess(player: ParkourPlayer, index: Int) {
         val bukkitPlayer = player.player() ?: return
+
+        bukkitPlayer.sendText {
+            appendPrefix()
+            success("Success!")
+        }
 
         ParkourSuccessEvent(this, player, index).callEvent()
     }
