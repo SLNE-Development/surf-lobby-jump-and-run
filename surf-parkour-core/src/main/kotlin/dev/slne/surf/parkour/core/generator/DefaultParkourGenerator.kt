@@ -184,10 +184,8 @@ class DefaultParkourGenerator(
                 val above2 = world.getBlockAt(x, y + 2, z)
 
                 if (block.type.isAir && above.type.isAir && above2.type.isAir) {
-                    println("Found safe block at $x, $y, $z")
                     return block.location
                 }
-                println("Block at $x, $y, $z is not safe: ${block.type}, ${above.type}, ${above2.type}")
             }
         }
 
