@@ -23,11 +23,11 @@ enum class Jumps(val jump: Jump) {
     THREE_FORWARD_THREE_LEFT(object : DirectionalJump(3, 3) {}),
     THREE_FORWARD_THREE_RIGHT(object : DirectionalJump(3, -3) {}),
 
-    FOUR_FORWARD(object : DirectionalJump(4, 0) {}),
-    FOUR_FORWARD_ONE_LEFT(object : DirectionalJump(4, 1) {}),
-    FOUR_FORWARD_ONE_RIGHT(object : DirectionalJump(4, -1) {}),
-    FOUR_FORWARD_TWO_LEFT(object : DirectionalJump(4, 2) {}),
-    FOUR_FORWARD_TWO_RIGHT(object : DirectionalJump(4, -2) {}),
-    FOUR_FORWARD_THREE_LEFT(object : DirectionalJump(4, 3) {}),
-    FOUR_FORWARD_THREE_RIGHT(object : DirectionalJump(4, -3) {});
+//    FOUR_FORWARD(object : DirectionalJump(4, 0) {}),
+//    FOUR_FORWARD_ONE_LEFT(object : DirectionalJump(4, 1) {}),
+//    FOUR_FORWARD_ONE_RIGHT(object : DirectionalJump(4, -1) {}),
+//    FOUR_FORWARD_TWO_LEFT(object : DirectionalJump(4, 2) {}),
+//    FOUR_FORWARD_TWO_RIGHT(object : DirectionalJump(4, -2) {}),
+//    FOUR_FORWARD_THREE_LEFT(object : DirectionalJump(4, 3) {}),
+//    FOUR_FORWARD_THREE_RIGHT(object : DirectionalJump(4, -3) {});
 }

@@ -58,6 +58,9 @@ class FallbackParkour(
 
     override suspend fun onSuccess(player: ParkourPlayer, index: Int) {
         val bukkitPlayer = player.player() ?: return
+        val generator = generators[player.uuid] ?: return
+
+        generator.generate()
 
         bukkitPlayer.sendText {
             appendPrefix()

@@ -161,7 +161,9 @@ class DefaultParkourGenerator(
         targetBlock = this@DefaultParkourGenerator.nextBlock
         this.nextBlock = nextBlock
 
-        Bukkit.getServer().sendBlockChange(nextBlock.location, Material.AIR)
+        Bukkit.getServer().sendBlockChange(nextBlock.location, Material.RED_CONCRETE)
+
+        currentIndex++
         //glowingApi.makeGlowing(nextBlock, player, NamedTextColor.WHITE)
     }
 

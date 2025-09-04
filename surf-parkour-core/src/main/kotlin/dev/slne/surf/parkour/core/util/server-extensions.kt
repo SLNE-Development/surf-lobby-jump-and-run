@@ -10,3 +10,12 @@ fun Server.sendBlockChange(location: Location, material: Material) =
 
 fun Server.sendBlockChanges(vararg changes: Pair<Location, Material>) =
     changes.forEach { this.sendBlockChange(it.first, it.second) }
+
+fun Server.sendNullableBlockChanges(vararg changes: Pair<Location?, Material>) =
+    changes.forEach { pair ->
+        pair.first?.let {
+            this.sendBlockChange(it, pair.second)
+        }
+    }
+
+fun Location.asSimpleString() = "(${x.toInt()}, ${y.toInt()}, ${z.toInt()})"
