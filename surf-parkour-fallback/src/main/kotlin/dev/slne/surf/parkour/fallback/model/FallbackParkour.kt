@@ -72,4 +72,10 @@ class FallbackParkour(
         block(this)
         parkourRegistry.registerParkour(this)
     }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is Parkour) return false
+        return uuid == other.uuid
+    }
 }
