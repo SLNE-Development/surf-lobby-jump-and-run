@@ -7,7 +7,6 @@ import org.bukkit.Location
 import java.util.*
 
 interface Parkour {
-    val uuid: UUID
     val name: String
     val spawnLocation: Location
     val corner1: Location

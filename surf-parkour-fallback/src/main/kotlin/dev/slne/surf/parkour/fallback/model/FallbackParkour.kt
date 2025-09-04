@@ -17,7 +17,6 @@ import org.bukkit.Material
 import java.util.*
 
 class FallbackParkour(
-    override val uuid: UUID,
     override val name: String,
     override val players: ObjectSet<ParkourPlayer> = mutableObjectSetOf(),
     override val generators: Object2ObjectMap<UUID, ParkourGenerator> = mutableObject2ObjectMapOf(),
@@ -76,11 +75,5 @@ class FallbackParkour(
     override fun modifySaving(block: Parkour.() -> Unit) {
         block(this)
         parkourRegistry.registerParkour(this)
-    }
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other !is Parkour) return false
-        return uuid == other.uuid
     }
 }

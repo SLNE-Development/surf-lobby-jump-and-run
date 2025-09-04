@@ -7,10 +7,8 @@ import dev.slne.surf.surfapi.core.api.util.requiredService
 import java.util.*
 
 interface ParkourStatisticsService : ServiceWithDatabase {
-    suspend fun getStatistic(uuid: UUID): ParkourStatistic
-    suspend fun getParkourStatistic(uuid: UUID, parkour: Parkour): ParkourStatistic
-
-    suspend fun addStatistic(uuid: UUID, parkour: Parkour, statistic: ParkourStatistic)
+    suspend fun getStatistic(userUuid: UUID, parkour: Parkour): ParkourStatistic
+    suspend fun addStatistic(userUuid: UUID, parkour: Parkour, statistic: ParkourStatistic)
 
     companion object {
         val INSTANCE = requiredService<ParkourStatisticsService>()

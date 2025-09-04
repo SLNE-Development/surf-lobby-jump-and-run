@@ -15,4 +15,9 @@ class ParkourSpawnEntity(id: EntityID<Int>) : IntEntity(id) {
     var z by ParkourSpawnsTable.z
     var yaw by ParkourSpawnsTable.yaw
     var pitch by ParkourSpawnsTable.pitch
+
+    fun toDto() = org.bukkit.Location(
+        org.bukkit.Bukkit.getWorld(world) ?: error("World $world not found"),
+        x, y, z, yaw, pitch
+    )
 }

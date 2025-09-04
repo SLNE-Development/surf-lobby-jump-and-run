@@ -5,7 +5,9 @@ import dev.slne.surf.parkour.api.model.parkour.statistic.ParkourSpecificStatisti
 
 class CoreParkourSpecificStatistic(
     override val parkour: Parkour,
-    override val jumpCount: Int,
-    override val recordCount: Int,
-    override val triesCount: Int
+    override val tries: Int,
+    override val overallJumps: Int,
+    override val failures: Int,
+    override val bestTry: Int
+
 ) : ParkourSpecificStatistic

@@ -9,4 +9,5 @@ object ParkourStatisticsTable : IntIdTable("parkour_statistics") {
     val tries = integer("tries").default(0)
     val failures = integer("failures").default(0)
     val bestTry = integer("best_try").default(0)
+    val overallJumps = integer("overall_jumps").default(0)
 }
