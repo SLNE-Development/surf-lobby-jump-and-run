@@ -11,7 +11,7 @@ class ParkourConfiguration {
         surfConfigApi.createSpongeYmlConfig(
             GeneralParkourConfig::class.java,
             plugin.dataPath,
-            "general.yml"
+            "config.yml"
         )
         configManager =
             surfConfigApi.getSpongeConfigManagerForConfig(GeneralParkourConfig::class.java)

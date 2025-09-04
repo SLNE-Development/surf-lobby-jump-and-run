@@ -4,5 +4,5 @@ import org.spongepowered.configurate.objectmapping.ConfigSerializable
 
 @ConfigSerializable
 data class GeneralParkourConfig(
-    val betaMode: Boolean
+    val betaMode: Boolean = false
 )

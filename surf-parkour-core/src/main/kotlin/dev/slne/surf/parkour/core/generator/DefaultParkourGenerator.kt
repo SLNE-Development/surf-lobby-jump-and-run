@@ -5,12 +5,10 @@ import dev.slne.surf.parkour.api.model.parkour.ParkourGenerator
 import dev.slne.surf.parkour.core.model.jump.Jumps
 import dev.slne.surf.parkour.core.util.sendBlockChange
 import dev.slne.surf.parkour.core.util.sendBlockChanges
-import dev.slne.surf.surfapi.bukkit.api.glow.glowingApi
 import dev.slne.surf.surfapi.core.api.messages.adventure.sendText
 import dev.slne.surf.surfapi.core.api.util.mutableObjectSetOf
 import dev.slne.surf.surfapi.core.api.util.random
 import it.unimi.dsi.fastutil.objects.ObjectSet
-import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Material
@@ -63,7 +61,7 @@ class DefaultParkourGenerator(
         this.generateInitial()
 
         currentBlock?.let {
-            player.teleport(it.location.clone().add(0.5, 1.0, 0.5))
+            player.teleportAsync(it.location.clone().add(0.5, 1.0, 0.5))
         }
     }
 
@@ -73,7 +71,7 @@ class DefaultParkourGenerator(
         }
 
         targetBlock?.let {
-            glowingApi.removeGlowing(it, player.player() ?: return)
+            //glowingApi.removeGlowing(it, player.player() ?: return)
             Bukkit.getServer().sendBlockChange(it.location, Material.AIR)
         }
 
@@ -121,7 +119,7 @@ class DefaultParkourGenerator(
         this.targetBlock = targetBlock
         this.nextBlock = nextBlock
 
-        glowingApi.makeGlowing(targetBlock, player, NamedTextColor.WHITE)
+        //glowingApi.makeGlowing(targetBlock, player, NamedTextColor.WHITE)
     }
 
     override suspend fun generate() {
@@ -149,7 +147,7 @@ class DefaultParkourGenerator(
         }
 
         targetBlock?.let {
-            glowingApi.removeGlowing(it, player)
+            //glowingApi.removeGlowing(it, player)
         }
 
         currentBlock = targetBlock
@@ -157,16 +155,16 @@ class DefaultParkourGenerator(
         this.nextBlock = nextBlock
 
         Bukkit.getServer().sendBlockChange(nextBlock.location, Material.AIR)
-        glowingApi.makeGlowing(nextBlock, player, NamedTextColor.WHITE)
+        //glowingApi.makeGlowing(nextBlock, player, NamedTextColor.WHITE)
     }
 
     fun findSafeBlockLocationInArea(
         maxTries: Int = 100
     ): Location? {
-        val world = corner1.world ?: return null
+        val world = corner1.world
 
         if (corner2.world != world) {
-            return null
+            error("Corners must be in the same world")
         }
 
         val minX = minOf(corner1.blockX, corner2.blockX)
@@ -185,9 +183,11 @@ class DefaultParkourGenerator(
                 val above = world.getBlockAt(x, y + 1, z)
                 val above2 = world.getBlockAt(x, y + 2, z)
 
-                if (block.type.isSolid && above.type.isAir && above2.type.isAir) {
+                if (block.type.isAir && above.type.isAir && above2.type.isAir) {
+                    println("Found safe block at $x, $y, $z")
                     return block.location
                 }
+                println("Block at $x, $y, $z is not safe: ${block.type}, ${above.type}, ${above2.type}")
             }
         }
 
