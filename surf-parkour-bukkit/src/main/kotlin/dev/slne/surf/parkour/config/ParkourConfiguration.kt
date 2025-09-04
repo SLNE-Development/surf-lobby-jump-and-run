@@ -5,16 +5,16 @@ import dev.slne.surf.surfapi.core.api.config.manager.SpongeConfigManager
 import dev.slne.surf.surfapi.core.api.config.surfConfigApi
 
 class ParkourConfiguration {
-    private val configManager: SpongeConfigManager<GeneralParkourConfig>
+    private val configManager: SpongeConfigManager<ParkourConfig>
 
     init {
         surfConfigApi.createSpongeYmlConfig(
-            GeneralParkourConfig::class.java,
+            ParkourConfig::class.java,
             plugin.dataPath,
             "config.yml"
         )
         configManager =
-            surfConfigApi.getSpongeConfigManagerForConfig(GeneralParkourConfig::class.java)
+            surfConfigApi.getSpongeConfigManagerForConfig(ParkourConfig::class.java)
         reload()
     }
 

@@ -12,6 +12,7 @@ class ParkourEntity(id: EntityID<Int>) : IntEntity(id) {
     companion object : IntEntityClass<ParkourEntity>(ParkourTable)
 
     var name by ParkourTable.name
+    var serverUuid by ParkourTable.serverUuid
     val areas by ParkourAreaEntity referrersOn ParkourAreasTable.parkourId
     val spawns by ParkourSpawnEntity referrersOn ParkourSpawnsTable.parkourId
     val statistics by ParkourStatisticEntity referrersOn ParkourStatisticsTable.parkourId
