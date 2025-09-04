@@ -17,5 +17,4 @@ class BukkitMain : SuspendingJavaPlugin() {
 }
 
 val plugin get() = JavaPlugin.getPlugin(BukkitMain::class.java)
-
 val parkourConfig = ParkourConfiguration()

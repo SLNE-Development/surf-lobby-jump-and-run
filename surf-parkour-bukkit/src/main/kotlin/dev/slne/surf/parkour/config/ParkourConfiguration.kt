@@ -22,5 +22,5 @@ class ParkourConfiguration {
         configManager.reloadFromFile()
     }
 
-    fun config() = configManager.config
+    val config get() = configManager.config
 }
