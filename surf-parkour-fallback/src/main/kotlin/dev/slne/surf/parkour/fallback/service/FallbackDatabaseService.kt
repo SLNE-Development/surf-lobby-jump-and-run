@@ -1,12 +1,16 @@
 package dev.slne.surf.parkour.fallback.service
 
+import com.google.auto.service.AutoService
 import dev.slne.surf.database.DatabaseManager
 import dev.slne.surf.database.database.DatabaseProvider
 import dev.slne.surf.parkour.core.service.DatabaseService
+import dev.slne.surf.parkour.core.service.parkourService
 import dev.slne.surf.parkour.core.service.parkourStatisticsService
+import net.kyori.adventure.util.Services
 import java.nio.file.Path
 
-class FallbackDatabaseService : DatabaseService {
+@AutoService(DatabaseService::class)
+class FallbackDatabaseService : DatabaseService, Services.Fallback {
     private lateinit var databaseProvider: DatabaseProvider
     override fun connect(path: Path) {
         databaseProvider = DatabaseManager(path, path).databaseProvider
@@ -15,6 +19,7 @@ class FallbackDatabaseService : DatabaseService {
 
     override fun createTables() {
         parkourStatisticsService.createTable()
+        parkourService.createTable()
     }
 
     override fun disconnect() {
