@@ -15,6 +15,7 @@ interface Parkour {
 
     val players: ObjectSet<ParkourPlayer>
     val generators: Object2ObjectMap<UUID, ParkourGenerator>
+    val playerTimes: Object2ObjectMap<UUID, Long>
 
     suspend fun start(player: ParkourPlayer)
     suspend fun onFailure(player: ParkourPlayer)
