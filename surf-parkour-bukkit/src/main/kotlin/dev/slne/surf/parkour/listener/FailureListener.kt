@@ -25,12 +25,16 @@ class FailureListener : Listener {
                 return@launch
             }
 
-            generator.currentBlock()?.let { block ->
-                val playerY = event.to.y
-                val blockY = block.y.toDouble()
+            generator.nextBlock()?.let {
+                generator.currentBlock()?.let { block ->
+                    val playerY = event.to.y
+                    val blockY = block.y.toDouble()
+                    val nextBlockY = it.y.toDouble()
 
-                if (playerY < blockY) {
-                    parkour.onFailure(player)
+                    if (playerY < blockY && playerY < nextBlockY) {
+                        println("Player ${player.name} failed at block index ${generator.currentIndex()}: $playerY IS BELOW $blockY and BELOW $nextBlockY")
+                        parkour.onFailure(player)
+                    }
                 }
             }
         }
