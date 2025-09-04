@@ -68,7 +68,7 @@ class FallbackParkourService : ParkourService, Services.Fallback {
 
             ParkourAreaEntity.new {
                 this.parkour = parkourEntity
-                world = parkour.corner1.world.uid
+                world = parkour.corner1.world.name
                 firstX = parkour.corner1.x
                 firstY = parkour.corner1.y
                 firstZ = parkour.corner1.z

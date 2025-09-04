@@ -5,7 +5,7 @@ import org.jetbrains.exposed.sql.ReferenceOption
 
 object ParkourAreasTable : IntIdTable("parkour_areas") {
     val parkourId = reference("parkour_id", ParkourTable.id, ReferenceOption.CASCADE)
-    val world = uuid("world")
+    val world = varchar("world", 256)
     val firstX = double("first_x")
     val firstY = double("first_y")
     val firstZ = double("first_z")
