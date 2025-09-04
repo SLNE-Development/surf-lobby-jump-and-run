@@ -9,6 +9,8 @@ import dev.slne.surf.parkour.core.generator.DefaultParkourGenerator
 import dev.slne.surf.parkour.core.model.CoreParkourStatistic
 import dev.slne.surf.parkour.core.registry.parkourRegistry
 import dev.slne.surf.parkour.core.service.parkourStatisticsService
+import dev.slne.surf.surfapi.core.api.messages.CommonComponents
+import dev.slne.surf.surfapi.core.api.messages.adventure.buildText
 import dev.slne.surf.surfapi.core.api.util.mutableObject2ObjectMapOf
 import dev.slne.surf.surfapi.core.api.util.mutableObjectSetOf
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap
@@ -70,6 +72,16 @@ class FallbackParkour(
     override suspend fun onSuccess(player: ParkourPlayer, index: Int) {
         val bukkitPlayer = player.player() ?: return
         val generator = generators[player.uuid] ?: return
+
+        bukkitPlayer.sendActionBar {
+            buildText {
+                variableValue(generator.currentIndex())
+                appendSpace()
+                append(CommonComponents.EM_DASH)
+                appendSpace()
+                success("+1")
+            }
+        }
 
         generator.generate()
         ParkourSuccessEvent(this, player, index).callEvent()
