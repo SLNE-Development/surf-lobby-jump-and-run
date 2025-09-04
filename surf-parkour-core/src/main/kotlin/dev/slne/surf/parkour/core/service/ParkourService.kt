@@ -17,6 +17,9 @@ interface ParkourService : ServiceWithDatabase {
     fun inParkour(player: ParkourPlayer): Boolean
     fun getParkours(): ObjectSet<Parkour>
 
+    suspend fun pushParkour(parkour: Parkour, serverUuid: UUID): Unit
+    suspend fun fetchParkours(serverUuid: UUID)
+
     suspend fun onFailure(parkour: Parkour, player: ParkourPlayer)
     suspend fun onSuccess(parkour: Parkour, player: ParkourPlayer, index: Int)
 

@@ -7,11 +7,20 @@ import dev.slne.surf.parkour.api.model.parkour.ParkourCreationData
 import dev.slne.surf.parkour.core.factory.parkourFactory
 import dev.slne.surf.parkour.core.registry.parkourRegistry
 import dev.slne.surf.parkour.core.service.ParkourService
+import dev.slne.surf.parkour.fallback.entity.ParkourAreaEntity
+import dev.slne.surf.parkour.fallback.entity.ParkourEntity
+import dev.slne.surf.parkour.fallback.entity.ParkourSpawnEntity
+import dev.slne.surf.parkour.fallback.model.FallbackParkour
 import dev.slne.surf.parkour.fallback.table.ParkourAreasTable
 import dev.slne.surf.parkour.fallback.table.ParkourSpawnsTable
 import dev.slne.surf.parkour.fallback.table.ParkourTable
+import dev.slne.surf.surfapi.core.api.util.mutableObject2ObjectMapOf
+import dev.slne.surf.surfapi.core.api.util.mutableObjectSetOf
+import kotlinx.coroutines.Dispatchers
 import net.kyori.adventure.util.Services
 import org.jetbrains.exposed.sql.SchemaUtils
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.util.*
 
@@ -39,6 +48,60 @@ class FallbackParkourService : ParkourService, Services.Fallback {
         parkourRegistry.getParkours().any { it.players.contains(player) }
 
     override fun getParkours() = parkourRegistry.getParkours()
+    override suspend fun pushParkour(parkour: Parkour, serverUuid: UUID) =
+        newSuspendedTransaction(Dispatchers.IO) {
+            val parkourEntity = ParkourEntity.new {
+                uuid = parkour.uuid
+                name = parkour.name
+                this.serverUuid = serverUuid
+            }
+
+            ParkourSpawnEntity.new {
+                this.parkour = parkourEntity
+                world = parkour.spawnLocation.world.uid
+                x = parkour.spawnLocation.x
+                y = parkour.spawnLocation.y
+                z = parkour.spawnLocation.z
+                yaw = parkour.spawnLocation.yaw
+                pitch = parkour.spawnLocation.pitch
+            }
+
+            ParkourAreaEntity.new {
+                this.parkour = parkourEntity
+                world = parkour.corner1.world.uid
+                firstX = parkour.corner1.x
+                firstY = parkour.corner1.y
+                firstZ = parkour.corner1.z
+                secondX = parkour.corner2.x
+                secondY = parkour.corner2.y
+                secondZ = parkour.corner2.z
+            }
+            return@newSuspendedTransaction
+        }
+
+    override suspend fun fetchParkours(serverUuid: UUID) = newSuspendedTransaction(Dispatchers.IO) {
+        ParkourEntity.find(ParkourTable.serverUuid eq serverUuid).map {
+            val spawnEntity = it.spawn
+            val areaEntity = it.area
+
+            FallbackParkour(
+                it.uuid,
+                it.name,
+                mutableObjectSetOf(),
+                mutableObject2ObjectMapOf(),
+                mutableObject2ObjectMapOf(),
+                spawnEntity.firstOrNull()?.toDto()
+                    ?: error("Parkour ${it.name} has no spawn defined"),
+                areaEntity.firstOrNull()?.toDto()?.firstLocation
+                    ?: error("Parkour ${it.name} has no area defined"),
+                areaEntity.firstOrNull()?.toDto()?.secondLocation
+                    ?: error("Parkour ${it.name} has no area defined")
+            )
+        }.forEach {
+            parkourRegistry.registerParkour(it)
+        }
+    }
+
     override suspend fun onFailure(
         parkour: Parkour,
         player: ParkourPlayer

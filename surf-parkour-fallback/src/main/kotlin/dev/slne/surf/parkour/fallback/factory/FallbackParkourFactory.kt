@@ -1,6 +1,7 @@
 package dev.slne.surf.parkour.fallback.factory
 
 import com.google.auto.service.AutoService
+import dev.slne.surf.parkour.api.model.parkour.Parkour
 import dev.slne.surf.parkour.api.model.parkour.ParkourCreationData
 import dev.slne.surf.parkour.core.factory.ParkourFactory
 import dev.slne.surf.parkour.fallback.model.FallbackParkour
@@ -11,7 +12,7 @@ import java.util.*
 
 @AutoService(ParkourFactory::class)
 class FallbackParkourFactory : ParkourFactory, Services.Fallback {
-    override fun createParkour(parkourData: ParkourCreationData) = FallbackParkour(
+    override fun createParkour(parkourData: ParkourCreationData): Parkour = FallbackParkour(
         UUID.randomUUID(),
         parkourData.name,
         mutableObjectSetOf(),

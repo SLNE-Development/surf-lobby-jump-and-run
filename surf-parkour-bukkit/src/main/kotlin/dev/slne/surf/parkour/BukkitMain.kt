@@ -3,6 +3,7 @@ package dev.slne.surf.parkour
 import com.github.shynixn.mccoroutine.folia.SuspendingJavaPlugin
 import dev.slne.surf.parkour.config.ParkourConfiguration
 import dev.slne.surf.parkour.core.service.databaseService
+import dev.slne.surf.parkour.core.service.parkourService
 import dev.slne.surf.surfapi.bukkit.api.metrics.Metrics
 import org.bukkit.plugin.java.JavaPlugin
 
@@ -16,12 +17,14 @@ class BukkitMain : SuspendingJavaPlugin() {
         databaseService.createTables()
     }
 
-    override fun onEnable() {
+    override suspend fun onEnableAsync() {
         BukkitCommandManager.registerCommands()
         BukkitListenerManager.registerBukkitListeners()
         BukkitListenerManager.registerExternalListeners()
 
         metrics = Metrics(this, 27168)
+
+        parkourService.fetchParkours(parkourConfig.config.serverUuid)
     }
 
     override fun onDisable() {
