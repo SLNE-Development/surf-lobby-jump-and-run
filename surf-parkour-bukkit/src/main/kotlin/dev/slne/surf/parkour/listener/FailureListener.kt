@@ -18,8 +18,21 @@ class FailureListener : Listener {
 
         plugin.launch(plugin.entityDispatcher(event.player)) {
             val player = event.parkourPlayer()
-            val parkour = parkourService.getParkour(player) ?: return@launch
-            val generator = parkour.generator[player.uuid] ?: return@launch
+            val parkour = parkourService.getParkour(player) ?: run {
+                println("Player is not in a parkour")
+                println("Parkours: ${parkourService.getParkours().map { it.name }}")
+                println(
+                    "Parkour players: ${
+                        parkourService.getParkours()
+                            .map { it.players.joinToString(", ") { it.name } }
+                    }"
+                )
+                return@launch
+            }
+            val generator = parkour.generator[player.uuid] ?: run {
+                println("No generator for player")
+                return@launch
+            }
 
             generator.currentBlock()?.let {
                 if (it.y < event.to.y) {

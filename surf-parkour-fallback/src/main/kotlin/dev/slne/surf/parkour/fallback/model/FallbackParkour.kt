@@ -6,6 +6,7 @@ import dev.slne.surf.parkour.api.event.ParkourSuccessEvent
 import dev.slne.surf.parkour.api.model.parkour.Parkour
 import dev.slne.surf.parkour.api.model.parkour.ParkourGenerator
 import dev.slne.surf.parkour.core.generator.DefaultParkourGenerator
+import dev.slne.surf.parkour.core.registry.parkourRegistry
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap
 import it.unimi.dsi.fastutil.objects.ObjectSet
 import org.bukkit.Location
@@ -30,6 +31,7 @@ class FallbackParkour(
             spawnLocation
         )
 
+        players.add(player)
         this@FallbackParkour.generator[player.uuid] = generator
         generator.start()
     }
@@ -49,5 +51,11 @@ class FallbackParkour(
         val bukkitPlayer = player.player() ?: return
 
         ParkourSuccessEvent(this, player, index).callEvent()
+    }
+
+    override fun modify(block: Parkour.() -> Unit) = block(this)
+    override fun modifySaving(block: Parkour.() -> Unit) {
+        block(this)
+        parkourRegistry.registerParkour(this)
     }
 }

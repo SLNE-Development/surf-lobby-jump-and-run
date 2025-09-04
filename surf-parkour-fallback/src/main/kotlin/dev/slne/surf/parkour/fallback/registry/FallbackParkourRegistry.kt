@@ -1,6 +1,7 @@
 package dev.slne.surf.parkour.fallback.registry
 
 import com.google.auto.service.AutoService
+import dev.slne.surf.parkour.api.entity.ParkourPlayer
 import dev.slne.surf.parkour.api.model.parkour.Parkour
 import dev.slne.surf.parkour.core.registry.ParkourRegistry
 import dev.slne.surf.surfapi.core.api.util.mutableObject2ObjectMapOf
@@ -19,4 +20,17 @@ class FallbackParkourRegistry : ParkourRegistry, Services.Fallback {
 
     override fun getParkour(uuid: UUID) = parkours[uuid]
     override fun getParkours() = parkours.values.toObjectSet()
+    override fun addPlayer(
+        player: ParkourPlayer,
+        parkour: Parkour
+    ) = parkour.modifySaving {
+        players.add(player)
+    }
+
+    override fun removePlayer(
+        player: ParkourPlayer,
+        parkour: Parkour
+    ) = parkour.modifySaving {
+        players.remove(player)
+    }
 }

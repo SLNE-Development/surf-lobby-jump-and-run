@@ -19,4 +19,7 @@ interface Parkour {
     suspend fun start(player: ParkourPlayer)
     suspend fun onFailure(player: ParkourPlayer)
     suspend fun onSuccess(player: ParkourPlayer, index: Int)
+
+    fun modify(block: Parkour.() -> Unit)
+    fun modifySaving(block: Parkour.() -> Unit)
 }
