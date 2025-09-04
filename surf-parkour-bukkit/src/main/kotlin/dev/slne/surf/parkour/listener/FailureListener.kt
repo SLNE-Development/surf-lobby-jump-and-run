@@ -26,7 +26,7 @@ class FailureListener : Listener {
             }
 
             generator.currentBlock()?.let {
-                if (it.y < event.to.y) {
+                if (it.y > event.to.y) {
                     parkour.onFailure(player)
                 }
             }

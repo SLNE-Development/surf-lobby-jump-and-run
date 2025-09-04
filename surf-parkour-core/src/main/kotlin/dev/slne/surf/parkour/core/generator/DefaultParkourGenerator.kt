@@ -39,6 +39,13 @@ class DefaultParkourGenerator(
         return blocks
     }
 
+    override fun getNextBlocks(): ObjectSet<Block> {
+        val blocks = mutableObjectSetOf<Block>()
+        targetBlock?.let { blocks.add(it) }
+        nextBlock?.let { blocks.add(it) }
+        return blocks
+    }
+
     override suspend fun start() {
         val player = player.player() ?: return
 

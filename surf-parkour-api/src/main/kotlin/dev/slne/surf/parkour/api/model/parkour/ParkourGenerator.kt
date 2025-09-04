@@ -20,6 +20,7 @@ interface ParkourGenerator {
     fun nextBlock(): Block?
 
     fun getRegisteredBlocks(): ObjectSet<Block>
+    fun getNextBlocks(): ObjectSet<Block>
 
     suspend fun start()
     suspend fun stop()
