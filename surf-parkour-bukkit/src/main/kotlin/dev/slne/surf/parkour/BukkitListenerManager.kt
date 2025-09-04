@@ -17,6 +17,11 @@ object BukkitListenerManager {
             PacketListenerPriority.NORMAL
         )
 
+        PacketEvents.getAPI().eventManager.registerListener(
+            PlayerPacketListener(),
+            PacketListenerPriority.NORMAL
+        )
+
         VulcanEventListener.register()
         PolarMitigationListener().register()
     }
