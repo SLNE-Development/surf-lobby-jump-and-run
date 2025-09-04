@@ -16,6 +16,7 @@ class FallbackParkourFactory : ParkourFactory, Services.Fallback {
         parkourData.name,
         mutableObjectSetOf(),
         mutableObject2ObjectMapOf(),
+        mutableObject2ObjectMapOf(),
         parkourData.spawn,
         parkourData.corner1,
         parkourData.corner2

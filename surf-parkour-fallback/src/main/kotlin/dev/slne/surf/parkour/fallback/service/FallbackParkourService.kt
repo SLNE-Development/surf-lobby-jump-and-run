@@ -7,7 +7,12 @@ import dev.slne.surf.parkour.api.model.parkour.ParkourCreationData
 import dev.slne.surf.parkour.core.factory.parkourFactory
 import dev.slne.surf.parkour.core.registry.parkourRegistry
 import dev.slne.surf.parkour.core.service.ParkourService
+import dev.slne.surf.parkour.fallback.table.ParkourAreasTable
+import dev.slne.surf.parkour.fallback.table.ParkourSpawnsTable
+import dev.slne.surf.parkour.fallback.table.ParkourTable
 import net.kyori.adventure.util.Services
+import org.jetbrains.exposed.sql.SchemaUtils
+import org.jetbrains.exposed.sql.transactions.transaction
 import java.util.*
 
 @AutoService(ParkourService::class)
@@ -44,4 +49,10 @@ class FallbackParkourService : ParkourService, Services.Fallback {
         player: ParkourPlayer,
         index: Int
     ) = parkour.onSuccess(player, index)
+
+    override fun createTable() {
+        transaction {
+            SchemaUtils.create(ParkourAreasTable, ParkourTable, ParkourSpawnsTable)
+        }
+    }
 }

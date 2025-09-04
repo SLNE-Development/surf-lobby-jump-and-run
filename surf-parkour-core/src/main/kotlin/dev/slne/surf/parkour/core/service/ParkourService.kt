@@ -3,11 +3,12 @@ package dev.slne.surf.parkour.core.service
 import dev.slne.surf.parkour.api.entity.ParkourPlayer
 import dev.slne.surf.parkour.api.model.parkour.Parkour
 import dev.slne.surf.parkour.api.model.parkour.ParkourCreationData
+import dev.slne.surf.parkour.core.util.ServiceWithDatabase
 import dev.slne.surf.surfapi.core.api.util.requiredService
 import it.unimi.dsi.fastutil.objects.ObjectSet
 import java.util.*
 
-interface ParkourService {
+interface ParkourService : ServiceWithDatabase {
     fun createParkour(parkourData: ParkourCreationData): Parkour
     fun deleteParkour(parkour: Parkour)
     fun getParkour(player: ParkourPlayer): Parkour?
