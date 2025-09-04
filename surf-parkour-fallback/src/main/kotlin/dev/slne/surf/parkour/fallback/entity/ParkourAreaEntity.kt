@@ -20,7 +20,7 @@ class ParkourAreaEntity(id: EntityID<Int>) : IntEntity(id) {
     var secondY by ParkourAreasTable.secondY
     var secondZ by ParkourAreasTable.secondZ
 
-    val bukkitWorld = Bukkit.getWorld(world) ?: error("World $world not found")
+    val bukkitWorld = Bukkit.getWorld(world) ?: error("World $world for area not found")
 
     fun toDto() = CoreParkourArea(
         bukkitWorld,

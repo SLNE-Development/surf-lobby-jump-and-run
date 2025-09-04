@@ -1,6 +1,7 @@
 package dev.slne.surf.parkour.fallback.entity
 
 import dev.slne.surf.parkour.fallback.table.ParkourSpawnsTable
+import org.bukkit.Bukkit
 import org.jetbrains.exposed.dao.IntEntity
 import org.jetbrains.exposed.dao.IntEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
@@ -17,7 +18,7 @@ class ParkourSpawnEntity(id: EntityID<Int>) : IntEntity(id) {
     var pitch by ParkourSpawnsTable.pitch
 
     fun toDto() = org.bukkit.Location(
-        org.bukkit.Bukkit.getWorld(world) ?: error("World $world not found"),
+        Bukkit.getWorld(world) ?: error("World $world for spawn not found"),
         x, y, z, yaw, pitch
     )
 }
