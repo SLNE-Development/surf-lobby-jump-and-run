@@ -29,7 +29,7 @@ class FallbackParkourStatisticService : ParkourStatisticsService, Services.Fallb
         userUuid: UUID,
         parkour: Parkour
     ) = newSuspendedTransaction(Dispatchers.IO) {
-        val parkourEntity = ParkourEntity.find { ParkourTable.name eq parkour.name }
+        val parkourEntity = ParkourEntity.find { ParkourTable.uuid eq parkour.uuid }
             .firstOrNull() ?: return@newSuspendedTransaction CoreParkourStatistic.empty(
             userUuid,
             parkour
@@ -45,7 +45,7 @@ class FallbackParkourStatisticService : ParkourStatisticsService, Services.Fallb
         statistic: ParkourStatistic
     ) = newSuspendedTransaction(Dispatchers.IO) {
         ParkourStatisticEntity.new {
-            val parkourEntity = ParkourEntity.find { ParkourTable.name eq statistic.parkour.name }
+            val parkourEntity = ParkourEntity.find { ParkourTable.uuid eq statistic.parkour.uuid }
                 .firstOrNull()
                 ?: error("Parkour ${statistic.parkour.name} does not exist in database!")
 
