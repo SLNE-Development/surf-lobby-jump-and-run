@@ -8,7 +8,7 @@ import java.util.*
 
 interface ParkourStatisticsService : ServiceWithDatabase {
     suspend fun getStatistic(userUuid: UUID, parkour: Parkour): ParkourStatistic
-    suspend fun addStatistic(userUuid: UUID, parkour: Parkour, statistic: ParkourStatistic)
+    suspend fun addStatistic(statistic: ParkourStatistic)
 
     companion object {
         val INSTANCE = requiredService<ParkourStatisticsService>()

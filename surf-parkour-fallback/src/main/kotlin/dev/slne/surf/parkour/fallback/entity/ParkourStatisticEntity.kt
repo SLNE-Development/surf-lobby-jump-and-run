@@ -1,6 +1,6 @@
 package dev.slne.surf.parkour.fallback.entity
 
-import dev.slne.surf.parkour.core.model.statistic.CoreParkourSpecificStatistic
+import dev.slne.surf.parkour.core.model.CoreParkourStatistic
 import dev.slne.surf.parkour.fallback.table.ParkourStatisticsTable
 import org.jetbrains.exposed.dao.IntEntity
 import org.jetbrains.exposed.dao.IntEntityClass
@@ -11,16 +11,13 @@ class ParkourStatisticEntity(id: EntityID<Int>) : IntEntity(id) {
 
     var parkour by ParkourEntity referencedOn ParkourStatisticsTable.parkourId
     var userUuid by ParkourStatisticsTable.userUuid
-    var tries by ParkourStatisticsTable.tries
-    var failures by ParkourStatisticsTable.failures
-    var bestTry by ParkourStatisticsTable.bestTry
-    var overallJumps by ParkourStatisticsTable.overallJumps
+    var time by ParkourStatisticsTable.time
+    var jumps by ParkourStatisticsTable.jumps
 
-    fun toDto() = CoreParkourSpecificStatistic(
+    fun toDto() = CoreParkourStatistic(
+        userUuid,
         parkour.toDto(),
-        tries,
-        overallJumps,
-        failures,
-        bestTry
+        time,
+        jumps
     )
 }

@@ -3,7 +3,7 @@ package dev.slne.surf.parkour.fallback.service
 import com.google.auto.service.AutoService
 import dev.slne.surf.parkour.api.model.parkour.Parkour
 import dev.slne.surf.parkour.api.model.parkour.statistic.ParkourStatistic
-import dev.slne.surf.parkour.core.model.statistic.CoreParkourStatistic
+import dev.slne.surf.parkour.core.model.CoreParkourStatistic
 import dev.slne.surf.parkour.core.service.ParkourStatisticsService
 import dev.slne.surf.parkour.fallback.entity.ParkourEntity
 import dev.slne.surf.parkour.fallback.entity.ParkourStatisticEntity
@@ -30,42 +30,30 @@ class FallbackParkourStatisticService : ParkourStatisticsService, Services.Fallb
         parkour: Parkour
     ) = newSuspendedTransaction(Dispatchers.IO) {
         val parkourEntity = ParkourEntity.find { ParkourTable.name eq parkour.name }
-            .firstOrNull() ?: return@newSuspendedTransaction CoreParkourStatistic.empty()
+            .firstOrNull() ?: return@newSuspendedTransaction CoreParkourStatistic.empty(
+            userUuid,
+            parkour
+        )
 
         ParkourStatisticEntity.find {
             (ParkourStatisticsTable.parkourId eq parkourEntity.id) and
                     (ParkourStatisticsTable.userUuid eq userUuid)
-        }.firstOrNull()?.toDto() ?: CoreParkourStatistic.empty()
+        }.firstOrNull()?.toDto() ?: CoreParkourStatistic.empty(userUuid, parkour)
     }
 
     override suspend fun addStatistic(
-        userUuid: UUID,
-        parkour: Parkour,
         statistic: ParkourStatistic
     ) = newSuspendedTransaction(Dispatchers.IO) {
-        val parkourEntity = ParkourEntity.find { ParkourTable.name eq parkour.name }
-            .firstOrNull() ?: error("Parkour ${parkour.name} not found")
-
-        val existing = ParkourStatisticEntity.find {
-            (ParkourStatisticsTable.parkourId eq parkourEntity.id) and
-                    (ParkourStatisticsTable.userUuid eq userUuid)
-        }.firstOrNull()
-
-        if (existing != null) {
-            existing.tries = statistic.tries
-            existing.failures = statistic.failures
-            existing.bestTry = statistic.bestTry
-            existing.overallJumps = statistic.overallJumps
-            return@newSuspendedTransaction
-        }
-
         ParkourStatisticEntity.new {
-            this.parkour = parkourEntity
-            this.userUuid = userUuid
-            this.tries = statistic.tries
-            this.failures = statistic.failures
-            this.bestTry = statistic.bestTry
-            this.overallJumps = statistic.overallJumps
+            val parkourEntity = ParkourEntity.find { ParkourTable.name eq statistic.parkour.name }
+                .firstOrNull()
+                ?: error("Parkour ${statistic.parkour.name} does not exist in database!")
+
+            parkour = parkourEntity
+            userUuid = statistic.userUuid
+            time = statistic.time
+            jumps = statistic.jumps
         }
+        return@newSuspendedTransaction
     }
 }
