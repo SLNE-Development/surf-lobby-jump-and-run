@@ -10,6 +10,7 @@ class FallbackDatabaseService : DatabaseService {
     private lateinit var databaseProvider: DatabaseProvider
     override fun connect(path: Path) {
         databaseProvider = DatabaseManager(path, path).databaseProvider
+        databaseProvider.connect()
     }
 
     override fun createTables() {
