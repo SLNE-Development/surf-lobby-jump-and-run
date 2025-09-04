@@ -1,5 +1,6 @@
 package dev.slne.surf.parkour.fallback.entity
 
+import dev.slne.surf.parkour.fallback.model.FallbackParkour
 import dev.slne.surf.parkour.fallback.table.ParkourAreasTable
 import dev.slne.surf.parkour.fallback.table.ParkourSpawnsTable
 import dev.slne.surf.parkour.fallback.table.ParkourStatisticsTable
@@ -16,4 +17,8 @@ class ParkourEntity(id: EntityID<Int>) : IntEntity(id) {
     val areas by ParkourAreaEntity referrersOn ParkourAreasTable.parkourId
     val spawns by ParkourSpawnEntity referrersOn ParkourSpawnsTable.parkourId
     val statistics by ParkourStatisticEntity referrersOn ParkourStatisticsTable.parkourId
+
+    fun toDto() = FallbackParkour(
+
+    )
 }

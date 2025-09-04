@@ -8,6 +8,8 @@ import dev.slne.surf.parkour.api.model.parkour.ParkourGenerator
 import dev.slne.surf.parkour.core.generator.DefaultParkourGenerator
 import dev.slne.surf.parkour.core.registry.parkourRegistry
 import dev.slne.surf.surfapi.core.api.messages.adventure.sendText
+import dev.slne.surf.surfapi.core.api.util.mutableObject2ObjectMapOf
+import dev.slne.surf.surfapi.core.api.util.mutableObjectSetOf
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap
 import it.unimi.dsi.fastutil.objects.ObjectSet
 import org.bukkit.Location
@@ -17,8 +19,8 @@ import java.util.*
 class FallbackParkour(
     override val uuid: UUID,
     override val name: String,
-    override val players: ObjectSet<ParkourPlayer>,
-    override val generators: Object2ObjectMap<UUID, ParkourGenerator>,
+    override val players: ObjectSet<ParkourPlayer> = mutableObjectSetOf(),
+    override val generators: Object2ObjectMap<UUID, ParkourGenerator> = mutableObject2ObjectMapOf(),
     override val spawnLocation: Location,
     override val corner1: Location,
     override val corner2: Location
