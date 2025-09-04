@@ -14,6 +14,7 @@ import org.jetbrains.exposed.dao.id.EntityID
 class ParkourEntity(id: EntityID<Int>) : IntEntity(id) {
     companion object : IntEntityClass<ParkourEntity>(ParkourTable)
 
+    var uuid by ParkourTable.uuid
     var name by ParkourTable.name
     var serverUuid by ParkourTable.serverUuid
     val area by ParkourAreaEntity referrersOn ParkourAreasTable.parkourId
@@ -21,6 +22,7 @@ class ParkourEntity(id: EntityID<Int>) : IntEntity(id) {
     val statistics by ParkourStatisticEntity referrersOn ParkourStatisticsTable.parkourId
 
     fun toDto() = FallbackParkour(
+        uuid,
         name,
         mutableObjectSetOf(),
         mutableObject2ObjectMapOf(),

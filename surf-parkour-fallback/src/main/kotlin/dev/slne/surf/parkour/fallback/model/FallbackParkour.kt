@@ -17,6 +17,7 @@ import org.bukkit.Material
 import java.util.*
 
 class FallbackParkour(
+    override val uuid: UUID,
     override val name: String,
     override val players: ObjectSet<ParkourPlayer> = mutableObjectSetOf(),
     override val generators: Object2ObjectMap<UUID, ParkourGenerator> = mutableObject2ObjectMapOf(),
