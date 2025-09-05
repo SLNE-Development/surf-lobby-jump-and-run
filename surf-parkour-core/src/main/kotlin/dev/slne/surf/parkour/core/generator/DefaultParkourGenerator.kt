@@ -188,6 +188,8 @@ class DefaultParkourGenerator(
             val z = random.nextInt(minZ, maxZ + 1)
             val y = random.nextInt(minY, maxY + 1)
 
+            println("Trying to find safe block at $x, $y, $z")
+
             val block = world.getBlockAt(x, y, z)
             val above = world.getBlockAt(x, y + 1, z)
             val above2 = world.getBlockAt(x, y + 2, z)

@@ -49,11 +49,11 @@ fun CommandAPICommand.parkourCreateCommand() = subcommand("create") {
 
             executor.sendText {
                 appendPrefix()
-                info("Der Parkour ist nun für den Server")
+                success("Der Parkour ist nun für den Server")
                 appendSpace()
                 variableValue(plugin.parkourConfig.config.serverUuid.toString())
                 appendSpace()
-                info("gespeichert.")
+                success("gespeichert.")
             }
         }
     }
