@@ -186,15 +186,14 @@ class DefaultParkourGenerator(
         repeat(maxTries) {
             val x = random.nextInt(minX, maxX + 1)
             val z = random.nextInt(minZ, maxZ + 1)
+            val y = random.nextInt(minY, maxY + 1)
 
-            for (y in maxY downTo minY) {
-                val block = world.getBlockAt(x, y, z)
-                val above = world.getBlockAt(x, y + 1, z)
-                val above2 = world.getBlockAt(x, y + 2, z)
+            val block = world.getBlockAt(x, y, z)
+            val above = world.getBlockAt(x, y + 1, z)
+            val above2 = world.getBlockAt(x, y + 2, z)
 
-                if (block.type.isAir && above.type.isAir && above2.type.isAir) {
-                    return block.location
-                }
+            if (block.type.isAir && above.type.isAir && above2.type.isAir) {
+                return block.location
             }
         }
 
