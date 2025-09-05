@@ -10,12 +10,12 @@ class ParkourStatisticEntity(id: EntityID<Int>) : IntEntity(id) {
     companion object : IntEntityClass<ParkourStatisticEntity>(ParkourStatisticsTable)
 
     var parkour by ParkourEntity referencedOn ParkourStatisticsTable.parkourId
-    var userUuid by ParkourStatisticsTable.userUuid
+    var userUuid by ParkourPlayerEntity referencedOn ParkourStatisticsTable.userUuid
     var time by ParkourStatisticsTable.time
     var jumps by ParkourStatisticsTable.jumps
 
     fun toDto() = CoreParkourStatistic(
-        userUuid,
+        userUuid.uuid,
         parkour.toDto(),
         time,
         jumps

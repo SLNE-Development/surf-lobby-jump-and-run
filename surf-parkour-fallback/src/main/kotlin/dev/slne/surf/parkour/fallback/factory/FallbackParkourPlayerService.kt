@@ -55,7 +55,6 @@ class FallbackParkourPlayerService : ParkourPlayerService, Services.Fallback {
             ParkourPlayerEntity.new {
                 uuid = player.uuid
                 name = player.name
-                profileTexture = player.profileTexture
             }
             return@newSuspendedTransaction
         }
