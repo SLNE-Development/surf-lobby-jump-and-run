@@ -5,10 +5,12 @@ import dev.slne.surf.parkour.api.model.parkour.ParkourGenerator
 import dev.slne.surf.parkour.core.model.jump.Jumps
 import dev.slne.surf.parkour.core.util.sendBlockChange
 import dev.slne.surf.parkour.core.util.sendBlockChanges
+import dev.slne.surf.surfapi.bukkit.api.glow.glowingApi
 import dev.slne.surf.surfapi.core.api.messages.adventure.sendText
 import dev.slne.surf.surfapi.core.api.util.mutableObjectSetOf
 import dev.slne.surf.surfapi.core.api.util.random
 import it.unimi.dsi.fastutil.objects.ObjectSet
+import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Material
@@ -78,7 +80,7 @@ class DefaultParkourGenerator(
         }
 
         targetBlock?.let {
-            //glowingApi.removeGlowing(it, player.player() ?: return)
+            glowingApi.removeGlowing(it, player.player() ?: return)
             Bukkit.getServer().sendBlockChange(it.location, Material.AIR)
         }
 
@@ -126,7 +128,7 @@ class DefaultParkourGenerator(
         this.targetBlock = targetBlock
         this.nextBlock = nextBlock
 
-        //glowingApi.makeGlowing(targetBlock, player, NamedTextColor.WHITE)
+        glowingApi.makeGlowing(targetBlock, player, NamedTextColor.WHITE)
     }
 
     override suspend fun generate() {
@@ -154,7 +156,7 @@ class DefaultParkourGenerator(
         }
 
         targetBlock?.let {
-            //glowingApi.removeGlowing(it, player)
+            glowingApi.removeGlowing(it, player)
         }
 
         currentBlock = targetBlock
@@ -164,7 +166,7 @@ class DefaultParkourGenerator(
         Bukkit.getServer().sendBlockChange(nextBlock.location, Material.RED_CONCRETE)
 
         currentIndex++
-        //glowingApi.makeGlowing(nextBlock, player, NamedTextColor.WHITE)
+        glowingApi.makeGlowing(nextBlock, player, NamedTextColor.WHITE)
     }
 
     fun findSafeBlockLocationInArea(
@@ -183,12 +185,16 @@ class DefaultParkourGenerator(
         val minZ = minOf(corner1.blockZ, corner2.blockZ)
         val maxZ = maxOf(corner1.blockZ, corner2.blockZ)
 
+        val midY = (minY + maxY) / 2
+        val rangeY = maxY - minY
+
+        val halfRange = (rangeY * 0.5).toInt()
+
         repeat(maxTries) {
             val x = random.nextInt(minX, maxX + 1)
             val z = random.nextInt(minZ, maxZ + 1)
-            val y = random.nextInt(minY, maxY + 1)
-
-            println("Trying to find safe block at $x, $y, $z")
+            val y = (midY + random.nextInt(-halfRange, halfRange + 1))
+                .coerceIn(minY, maxY)
 
             val block = world.getBlockAt(x, y, z)
             val above = world.getBlockAt(x, y + 1, z)

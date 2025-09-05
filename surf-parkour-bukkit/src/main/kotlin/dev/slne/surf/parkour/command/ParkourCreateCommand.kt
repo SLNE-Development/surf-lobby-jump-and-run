@@ -16,7 +16,6 @@ fun CommandAPICommand.parkourCreateCommand() = subcommand("create") {
     locationArgument("corner1")
     locationArgument("corner2")
     locationArgument("spawn")
-    locationArgument("respawn")
     anyExecutor { executor, args ->
         val name: String by args
         val corner1: Location by args
