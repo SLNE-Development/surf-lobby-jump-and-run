@@ -15,6 +15,7 @@ import dev.slne.surf.surfapi.core.api.messages.adventure.buildText
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.Material
+import org.bukkit.entity.Player
 
 class ParkourGeneralFailureMenu(
     override val statistics: ParkourStatisticSummary,
@@ -33,7 +34,11 @@ class ParkourGeneralFailureMenu(
             val failureItem = GuiItem(buildItem(Material.BARRIER) {
                 displayName(title)
                 lore { info("Klicke, um zum Hautmenü zurückzukehren!") }
-            }) { ParkourMenu(statistics).show(it.whoClicked) }
+            }) {
+                ParkourMenu.lazyOpen(
+                    it.whoClicked as? Player ?: error("Clicker must be a player")
+                )
+            }
 
             addItem(failureItem, 0, 0)
         }

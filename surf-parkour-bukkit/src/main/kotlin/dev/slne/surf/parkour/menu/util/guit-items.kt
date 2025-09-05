@@ -10,6 +10,7 @@ import dev.slne.surf.surfapi.bukkit.api.builder.displayName
 import dev.slne.surf.surfapi.bukkit.api.builder.lore
 import dev.slne.surf.surfapi.core.api.messages.adventure.text
 import org.bukkit.Material
+import org.bukkit.entity.Player
 
 fun Gui.backButton(pages: PaginatedPane) = GuiItem(buildItem(Material.ARROW) {
     displayName { primary("Vorherige Seite") }
@@ -28,4 +29,4 @@ fun Gui.outlineItem() = GuiItem(buildItem(Material.GRAY_STAINED_GLASS_PANE) {
 fun PlayerDataHolderGui.menuButton() = GuiItem(buildItem(Material.BARRIER) {
     displayName { primary("Hautmenü") }
     lore { info("Klicke, um zum Hautmenü zurückzukehren!") }
-}) { ParkourMenu(statistics).show(it.whoClicked) }
+}) { ParkourMenu.lazyOpen(it.whoClicked as? Player ?: error("Clicker must be a player")) }
