@@ -6,6 +6,7 @@ surfPaperPluginApi {
     mainClass("dev.slne.surf.parkour.BukkitMain")
 
     authors.add("red")
+    authors.add("Jo_field")
 
     foliaSupported(false)
     generateLibraryLoader(false)
