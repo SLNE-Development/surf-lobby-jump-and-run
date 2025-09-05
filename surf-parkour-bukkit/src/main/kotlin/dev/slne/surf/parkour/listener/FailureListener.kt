@@ -32,7 +32,6 @@ class FailureListener : Listener {
                     val nextBlockY = it.y.toDouble()
 
                     if (playerY < blockY && playerY < nextBlockY) {
-                        println("Player ${player.name} failed at block index ${generator.currentIndex()}: $playerY IS BELOW $blockY and BELOW $nextBlockY")
                         parkour.onFailure(player)
                     }
                 }
