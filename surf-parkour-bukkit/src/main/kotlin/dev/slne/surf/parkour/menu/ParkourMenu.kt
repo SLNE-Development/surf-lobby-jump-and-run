@@ -13,23 +13,21 @@ import dev.slne.surf.parkour.menu.submenu.ParkourScoreboardMenu
 import dev.slne.surf.parkour.menu.submenu.ParkourSelectMenu
 import dev.slne.surf.parkour.menu.type.LeaderboardSortingType
 import dev.slne.surf.parkour.menu.type.RedirectType
-import dev.slne.surf.parkour.menu.util.fillLeftRightColumns
-import dev.slne.surf.parkour.menu.util.fillTopAndBottomRows
-import dev.slne.surf.parkour.menu.util.outlineItem
-import dev.slne.surf.parkour.menu.util.parkourPlayer
+import dev.slne.surf.parkour.menu.util.*
 import dev.slne.surf.parkour.plugin
-import dev.slne.surf.surfapi.bukkit.api.builder.*
+import dev.slne.surf.surfapi.bukkit.api.builder.buildItem
+import dev.slne.surf.surfapi.bukkit.api.builder.buildLore
+import dev.slne.surf.surfapi.bukkit.api.builder.displayName
+import dev.slne.surf.surfapi.bukkit.api.builder.lore
 import dev.slne.surf.surfapi.core.api.font.toSmallCaps
 import dev.slne.surf.surfapi.core.api.messages.adventure.buildText
 import dev.slne.surf.surfapi.core.api.messages.adventure.text
 import dev.slne.surf.surfapi.core.api.util.int2ObjectMapOf
 import kotlinx.coroutines.withContext
 import net.kyori.adventure.text.format.TextDecoration
-import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.InventoryClickEvent
-import org.bukkit.inventory.meta.SkullMeta
 
 class ParkourMenu(override val statistics: ParkourStatisticSummary) :
     AbstractParkourGui(5, buildText {
@@ -78,50 +76,53 @@ class ParkourMenu(override val statistics: ParkourStatisticSummary) :
     }) { it.handleActivePlayers() }
 
     init {
-        val outlineItem = outlineItem()
-        val outlinePane = StaticPane(0, 0, 9, 5).apply {
-            fillTopAndBottomRows(outlineItem, bottomCustom = int2ObjectMapOf(4 to closeMenuItem))
-            fillLeftRightColumns(outlineItem)
-        }
-
-        val playerHeadPane = StaticPane(4, 1, 1, 1).apply {
-            val profileHead = buildItem(Material.PLAYER_HEAD) {
-                displayName(text(statistics.name))
-                buildLore {
-                    line {
-                        spacer(" - ")
-                        variableKey("Sprünge: ".toSmallCaps())
-                        variableValue(statistics.totalJumps.toString())
-                    }
-                    line {
-                        spacer(" - ")
-                        variableKey("Versuche: ".toSmallCaps())
-                        variableValue(statistics.totalTries.toString())
-                    }
-                    line {
-                        spacer(" - ")
-                        variableKey("Highscore: ".toSmallCaps())
-                        variableValue(statistics.bestJumps.toString())
-                    }
-                }
-
-                meta<SkullMeta> { owningPlayer = Bukkit.getOfflinePlayer(uuid) }
+        plugin.launch {
+            val outlineItem = outlineItem()
+            val outlinePane = StaticPane(0, 0, 9, 5).apply {
+                fillTopAndBottomRows(
+                    outlineItem,
+                    bottomCustom = int2ObjectMapOf(4 to closeMenuItem)
+                )
+                fillLeftRightColumns(outlineItem)
             }
 
-            addItem(GuiItem(profileHead), 0, 0)
+            val playerHeadPane = StaticPane(4, 1, 1, 1).apply {
+                val profileHead = HeadUtil.getPlayerHead(statistics.uuid).apply {
+                    displayName(text(statistics.name))
+                    buildLore {
+                        line {
+                            spacer(" - ")
+                            variableKey("Sprünge: ".toSmallCaps())
+                            variableValue(statistics.totalJumps.toString())
+                        }
+                        line {
+                            spacer(" - ")
+                            variableKey("Versuche: ".toSmallCaps())
+                            variableValue(statistics.totalTries.toString())
+                        }
+                        line {
+                            spacer(" - ")
+                            variableKey("Highscore: ".toSmallCaps())
+                            variableValue(statistics.bestJumps.toString())
+                        }
+                    }
+
+                }
+                addItem(GuiItem(profileHead), 0, 0)
+            }
+
+
+            val taskbarPane = StaticPane(0, 3, 9, 1).apply {
+                addItem(statsItem, 1, 0)
+                addItem(startItem, 3, 0)
+                addItem(settingsItem, 5, 0)
+                addItem(activePlayersItem, 7, 0)
+            }
+
+            addPane(taskbarPane)
+            addPane(outlinePane)
+            addPane(playerHeadPane)
         }
-
-
-        val taskbarPane = StaticPane(0, 3, 9, 1).apply {
-            addItem(statsItem, 1, 0)
-            addItem(startItem, 3, 0)
-            addItem(settingsItem, 5, 0)
-            addItem(activePlayersItem, 7, 0)
-        }
-
-        addPane(taskbarPane)
-        addPane(outlinePane)
-        addPane(playerHeadPane)
     }
 
     private fun InventoryClickEvent.handleStart() {
