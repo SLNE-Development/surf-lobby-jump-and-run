@@ -30,8 +30,12 @@ enum class Jumps(val jump: Jump) {
 //    FOUR_FORWARD_TWO_RIGHT(object : DirectionalJump(4, -2, 0) {}),
 //    FOUR_FORWARD_THREE_LEFT(object : DirectionalJump(4, 3, 0) {}),
 //    FOUR_FORWARD_THREE_RIGHT(object : DirectionalJump(4, -3, 0) {}),
-    ONE_FORWARD_ONE_LEFT_UP(object : DirectionalJump(1, 1, 1) {}),
-    ONE_FORWARD_ONE_RIGHT_UP(object : DirectionalJump(1, -1, 1) {}),
-    ONE_FORWARD_ONE_LEFT_DOWN(object : DirectionalJump(1, 1, -1) {}),
-    ONE_FORWARD_ONE_RIGHT_DOWN(object : DirectionalJump(1, -1, -1) {})
+    TWO_FORWARD_TWO_LEFT_UP(object : DirectionalJump(2, 2, 1) {}),
+    TWO_FORWARD_TWO_RIGHT_UP(object : DirectionalJump(2, -2, 1) {}),
+    TWO_FORWARD_TWO_LEFT_DOWN(object : DirectionalJump(2, 2, -1) {}),
+    TWO_FORWARD_TWO_RIGHT_DOWN(object : DirectionalJump(2, -2, -1) {}),
+    THREE_FORWARD_TWO_LEFT_UP(object : DirectionalJump(3, 2, 1) {}),
+    THREE_FORWARD_TWO_RIGHT_UP(object : DirectionalJump(3, -2, 1) {}),
+    THREE_FORWARD_TWO_LEFT_DOWN(object : DirectionalJump(3, 2, -1) {}),
+    THREE_FORWARD_TWO_RIGHT_DOWN(object : DirectionalJump(3, -2, -1) {})
 }
