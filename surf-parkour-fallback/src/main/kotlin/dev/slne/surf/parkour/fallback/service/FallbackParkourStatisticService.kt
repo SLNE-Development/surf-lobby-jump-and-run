@@ -8,7 +8,9 @@ import dev.slne.surf.parkour.core.model.statistic.CoreParkourStatistic
 import dev.slne.surf.parkour.core.model.statistic.CoreParkourStatisticSummary
 import dev.slne.surf.parkour.core.service.ParkourStatisticsService
 import dev.slne.surf.parkour.fallback.entity.ParkourEntity
+import dev.slne.surf.parkour.fallback.entity.ParkourPlayerEntity
 import dev.slne.surf.parkour.fallback.entity.ParkourStatisticEntity
+import dev.slne.surf.parkour.fallback.table.ParkourPlayerTable
 import dev.slne.surf.parkour.fallback.table.ParkourStatisticsTable
 import dev.slne.surf.parkour.fallback.table.ParkourTable
 import dev.slne.surf.surfapi.core.api.service.PlayerLookupService
@@ -17,6 +19,7 @@ import it.unimi.dsi.fastutil.objects.ObjectSet
 import kotlinx.coroutines.Dispatchers
 import net.kyori.adventure.util.Services
 import org.jetbrains.exposed.sql.SchemaUtils
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -125,8 +128,13 @@ class FallbackParkourStatisticService : ParkourStatisticsService, Services.Fallb
                 .firstOrNull()
                 ?: error("Parkour ${statistic.parkour.name} does not exist in database!")
 
+            val playerEntity =
+                ParkourPlayerEntity.find(ParkourPlayerTable.uuid eq statistic.userUuid)
+                    .firstOrNull()
+                    ?: error("Player with UUID ${statistic.userUuid} does not exist in database!")
+
             parkour = parkourEntity
-            userUuid = statistic.userUuid
+            userUuid = playerEntity
             time = statistic.time
             jumps = statistic.jumps
         }

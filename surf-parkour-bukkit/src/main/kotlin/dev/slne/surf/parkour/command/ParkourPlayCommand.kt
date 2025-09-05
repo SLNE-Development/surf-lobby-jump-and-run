@@ -17,21 +17,21 @@ fun CommandAPICommand.parkourPlayCommand() = subcommand("play") {
     parkourArgument("parkour")
     playerExecutor { player, args ->
         val parkour: Parkour by args
-        val parkourPlayer = player.parkourPlayer()
-
-        parkourService.getParkour(parkourPlayer)?.let {
-            parkourPlayer.sendText {
-                appendPrefix()
-                error("Du bist bereits in dem Parkour ")
-                variableValue(it.name)
-                error(".")
-            }
-            return@playerExecutor
-        }
 
         plugin.launch {
-            parkour.start(parkourPlayer)
+            val parkourPlayer = player.parkourPlayer()
 
+            parkourService.getParkour(parkourPlayer)?.let {
+                parkourPlayer.sendText {
+                    appendPrefix()
+                    error("Du bist bereits in dem Parkour ")
+                    variableValue(it.name)
+                    error(".")
+                }
+                return@launch
+            }
+
+            parkour.start(parkourPlayer)
             parkourPlayer.sendText {
                 appendPrefix()
                 success("Du hast den Parkour ")

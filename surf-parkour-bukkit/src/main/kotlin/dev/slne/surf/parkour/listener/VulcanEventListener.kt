@@ -3,7 +3,6 @@ package dev.slne.surf.parkour.listener
 import dev.slne.surf.parkour.core.service.parkourService
 import dev.slne.surf.parkour.plugin
 import dev.slne.surf.parkour.util.appendLocalPrefix
-import dev.slne.surf.parkour.util.parkourPlayer
 import dev.slne.surf.surfapi.bukkit.api.event.register
 import dev.slne.surf.surfapi.core.api.messages.adventure.buildText
 import me.frep.vulcan.api.event.VulcanGhostBlockEvent
@@ -34,7 +33,7 @@ object VulcanEventListener : Listener {
     }
 
     private fun isStandingOnJumpBlock(player: Player): Boolean {
-        val playerParkour = parkourService.getParkour(player.parkourPlayer()) ?: return false
+        val playerParkour = parkourService.getParkour(player.uniqueId) ?: return false
         val generator = playerParkour.generators[player.uniqueId] ?: return false
 
         return generator.getRegisteredBlocks()
