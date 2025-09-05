@@ -22,13 +22,10 @@ class SuccessListener : Listener {
             val parkour = parkourService.getParkour(player) ?: return@launch
             val generator = parkour.generators[player.uuid] ?: return@launch
 
-            if (generator.getNextBlocks()
-                    .any {
-                        it.location.equalsBlockLocation(
-                            event.to.clone().subtract(0.0, 1.0, 0.0)
-                        )
-                    }
-            ) {
+            generator.targetBlock()?.let {
+                it.location.equalsBlockLocation(
+                    event.to.clone().subtract(0.0, 1.0, 0.0)
+                )
                 parkour.onSuccess(player, generator.currentIndex())
             }
         }
