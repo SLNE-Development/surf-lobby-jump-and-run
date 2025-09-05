@@ -13,7 +13,7 @@ interface Parkour {
     val corner1: Location
     val corner2: Location
 
-    val players: ObjectSet<ParkourPlayer>
+    val players: ObjectSet<UUID>
     val generators: Object2ObjectMap<UUID, ParkourGenerator>
     val playerTimes: Object2ObjectMap<UUID, Long>
 

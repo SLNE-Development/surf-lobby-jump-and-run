@@ -18,6 +18,7 @@ import dev.slne.surf.surfapi.core.api.util.mutableObject2ObjectMapOf
 import dev.slne.surf.surfapi.core.api.util.mutableObjectSetOf
 import kotlinx.coroutines.Dispatchers
 import net.kyori.adventure.util.Services
+import org.bukkit.Bukkit
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
@@ -35,17 +36,17 @@ class FallbackParkourService : ParkourService, Services.Fallback {
 
     override fun deleteParkour(parkour: Parkour) {
         parkour.players.forEach {
-            it.player()?.teleportAsync(parkour.spawnLocation)
+            Bukkit.getPlayer(it)?.teleportAsync(parkour.spawnLocation)
         }
     }
 
     override fun getParkour(player: ParkourPlayer) =
-        parkourRegistry.getParkours().find { it.players.map { it.uuid }.contains(player.uuid) }
+        parkourRegistry.getParkours().find { it.players.contains(player.uuid) }
 
     override fun getParkour(name: String) = parkourRegistry.getParkour(name)
     override fun getParkour(uuid: UUID) = parkourRegistry.getParkour(uuid)
     override fun inParkour(player: ParkourPlayer) =
-        parkourRegistry.getParkours().any { it.players.contains(player) }
+        parkourRegistry.getParkours().any { it.players.contains(player.uuid) }
 
     override fun getParkours() = parkourRegistry.getParkours()
     override suspend fun pushParkour(parkour: Parkour, serverUuid: UUID) =

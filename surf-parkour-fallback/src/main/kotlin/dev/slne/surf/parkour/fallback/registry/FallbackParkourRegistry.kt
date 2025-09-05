@@ -24,13 +24,13 @@ class FallbackParkourRegistry : ParkourRegistry, Services.Fallback {
         player: ParkourPlayer,
         parkour: Parkour
     ) = parkour.modifySaving {
-        players.add(player)
+        players.add(player.uuid)
     }
 
     override fun removePlayer(
         player: ParkourPlayer,
         parkour: Parkour
     ) = parkour.modifySaving {
-        players.remove(player)
+        players.remove(player.uuid)
     }
 }

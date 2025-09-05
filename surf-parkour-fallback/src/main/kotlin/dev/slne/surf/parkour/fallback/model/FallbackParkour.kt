@@ -22,7 +22,7 @@ import java.util.*
 class FallbackParkour(
     override val uuid: UUID,
     override val name: String,
-    override val players: ObjectSet<ParkourPlayer> = mutableObjectSetOf(),
+    override val players: ObjectSet<UUID> = mutableObjectSetOf(),
     override val generators: Object2ObjectMap<UUID, ParkourGenerator> = mutableObject2ObjectMapOf(),
     override val playerTimes: Object2ObjectMap<UUID, Long>,
     override val spawnLocation: Location,
@@ -38,7 +38,7 @@ class FallbackParkour(
             spawnLocation
         )
 
-        players.add(player)
+        players.add(player.uuid)
         playerTimes[player.uuid] = System.currentTimeMillis()
         this@FallbackParkour.generators[player.uuid] = generator
         generator.start()
@@ -54,7 +54,7 @@ class FallbackParkour(
         bukkitPlayer.teleportAsync(spawnLocation)
 
         generators.remove(player.uuid)
-        players.remove(player)
+        players.remove(player.uuid)
         playerTimes.remove(player.uuid)
 
         ParkourFailEvent(this, player).callEvent()
