@@ -7,7 +7,7 @@ surfPaperPluginApi {
 
     authors.add("red")
 
-    foliaSupported(true)
+    foliaSupported(false)
     generateLibraryLoader(false)
 }
 

@@ -9,6 +9,7 @@ object BukkitListenerManager {
     fun registerBukkitListeners() {
         FailureListener().register()
         SuccessListener().register()
+        ParkourItemListener().register()
     }
 
     fun registerExternalListeners() {

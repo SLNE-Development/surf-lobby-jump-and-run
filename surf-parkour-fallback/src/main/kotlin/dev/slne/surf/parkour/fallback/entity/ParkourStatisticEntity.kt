@@ -1,6 +1,6 @@
 package dev.slne.surf.parkour.fallback.entity
 
-import dev.slne.surf.parkour.core.model.CoreParkourStatistic
+import dev.slne.surf.parkour.core.model.statistic.CoreParkourStatistic
 import dev.slne.surf.parkour.fallback.table.ParkourStatisticsTable
 import org.jetbrains.exposed.dao.IntEntity
 import org.jetbrains.exposed.dao.IntEntityClass
