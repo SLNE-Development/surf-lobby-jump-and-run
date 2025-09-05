@@ -1,6 +1,7 @@
 package dev.slne.surf.parkour.core.generator
 
 import dev.slne.surf.parkour.api.entity.ParkourPlayer
+import dev.slne.surf.parkour.api.model.parkour.ParkourArea
 import dev.slne.surf.parkour.api.model.parkour.ParkourGenerator
 import dev.slne.surf.parkour.core.model.jump.Jumps
 import dev.slne.surf.parkour.core.util.sendBlockChange
@@ -19,9 +20,7 @@ import org.bukkit.block.Block
 class DefaultParkourGenerator(
     override val player: ParkourPlayer,
     override val material: Material,
-    override val corner1: Location,
-    override val corner2: Location,
-    override val fallback: Location
+    override val area: ParkourArea,
 ) : ParkourGenerator {
     var currentBlock: Block? = null
     var targetBlock: Block? = null
@@ -55,14 +54,6 @@ class DefaultParkourGenerator(
             player.sendText {
                 appendPrefix()
                 error("Ein Fehler ist aufgetreten. (PARKOUR_START_ALREADY_STARTED)")
-            }
-            return
-        }
-
-        if (corner1.world != corner2.world) {
-            player.sendText {
-                appendPrefix()
-                error("Ein Fehler ist aufgetreten. (PARKOUR_START_DIFFERENT_WORLDS)")
             }
             return
         }
@@ -107,7 +98,7 @@ class DefaultParkourGenerator(
             }
             return
         }
-        val targetBlock = targetJump.generate(currentBlock.block, player)
+        val targetBlock = targetJump.generate(currentBlock.block, player, area)
 
         val nextJump = Jumps.entries.randomOrNull()?.jump ?: run {
             player.sendText {
@@ -116,7 +107,7 @@ class DefaultParkourGenerator(
             }
             return
         }
-        val nextBlock = nextJump.generate(targetBlock, player)
+        val nextBlock = nextJump.generate(targetBlock, player, area)
 
         Bukkit.getServer().sendBlockChanges(
             currentBlock to Material.RED_CONCRETE,
@@ -149,7 +140,7 @@ class DefaultParkourGenerator(
             }
             return
         }
-        val nextBlock = nextJump.generate(nextBlock, player)
+        val nextBlock = nextJump.generate(nextBlock, player, area)
 
         currentBlock?.location?.let {
             Bukkit.getServer().sendBlockChange(it, Material.AIR)
@@ -174,32 +165,36 @@ class DefaultParkourGenerator(
     fun findSafeBlockLocationInArea(
         maxTries: Int = 100
     ): Location? {
-        val world = corner1.world
+        val minX = minOf(area.firstLocation.blockX, area.secondLocation.blockX)
+        val maxX = maxOf(area.firstLocation.blockX, area.secondLocation.blockX)
+        val minY = minOf(area.firstLocation.blockY, area.secondLocation.blockY)
+        val maxY = maxOf(area.firstLocation.blockY, area.secondLocation.blockY)
+        val minZ = minOf(area.firstLocation.blockZ, area.secondLocation.blockZ)
+        val maxZ = maxOf(area.firstLocation.blockZ, area.secondLocation.blockZ)
 
-        if (corner2.world != world) {
-            error("Corners must be in the same world")
-        }
-
-        val minX = minOf(corner1.blockX, corner2.blockX)
-        val maxX = maxOf(corner1.blockX, corner2.blockX)
-        val minY = minOf(corner1.blockY, corner2.blockY)
-        val maxY = maxOf(corner1.blockY, corner2.blockY)
-        val minZ = minOf(corner1.blockZ, corner2.blockZ)
-        val maxZ = maxOf(corner1.blockZ, corner2.blockZ)
-
+        val midX = (minX + maxX) / 2
         val midY = (minY + maxY) / 2
+        val midZ = (minZ + maxZ) / 2
+
+        val rangeX = maxX - minX
         val rangeY = maxY - minY
-        val halfRange = (rangeY * 0.5).toInt()
+        val rangeZ = maxZ - minZ
+
+        val halfRangeX = (rangeX * 0.75 * 0.5).toInt()
+        val halfRangeY = (rangeY * 0.75 * 0.5).toInt()
+        val halfRangeZ = (rangeZ * 0.75 * 0.5).toInt()
 
         repeat(maxTries) {
-            val x = random.nextInt(minX, maxX + 1)
-            val z = random.nextInt(minZ, maxZ + 1)
-            val y = (midY + random.nextInt(-halfRange, halfRange + 1))
+            val x = (midX + random.nextInt(-halfRangeX, halfRangeX + 1))
+                .coerceIn(minX, maxX)
+            val y = (midY + random.nextInt(-halfRangeY, halfRangeY + 1))
                 .coerceIn(minY, maxY)
+            val z = (midZ + random.nextInt(-halfRangeZ, halfRangeZ + 1))
+                .coerceIn(minZ, maxZ)
 
-            val block = world.getBlockAt(x, y, z)
-            val above = world.getBlockAt(x, y + 1, z)
-            val above2 = world.getBlockAt(x, y + 2, z)
+            val block = area.world.getBlockAt(x, y, z)
+            val above = area.world.getBlockAt(x, y + 1, z)
+            val above2 = area.world.getBlockAt(x, y + 2, z)
 
             if (block.type.isAir && above.type.isAir && above2.type.isAir) {
                 return block.location
@@ -208,4 +203,5 @@ class DefaultParkourGenerator(
 
         return null
     }
+
 }

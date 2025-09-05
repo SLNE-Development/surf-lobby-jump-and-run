@@ -4,6 +4,7 @@ import dev.slne.surf.parkour.api.entity.ParkourPlayer
 import dev.slne.surf.parkour.api.event.ParkourFailEvent
 import dev.slne.surf.parkour.api.event.ParkourSuccessEvent
 import dev.slne.surf.parkour.api.model.parkour.Parkour
+import dev.slne.surf.parkour.api.model.parkour.ParkourArea
 import dev.slne.surf.parkour.api.model.parkour.ParkourGenerator
 import dev.slne.surf.parkour.core.generator.DefaultParkourGenerator
 import dev.slne.surf.parkour.core.model.CoreParkourStatistic
@@ -26,16 +27,13 @@ class FallbackParkour(
     override val generators: Object2ObjectMap<UUID, ParkourGenerator> = mutableObject2ObjectMapOf(),
     override val playerTimes: Object2ObjectMap<UUID, Long>,
     override val spawnLocation: Location,
-    override val corner1: Location,
-    override val corner2: Location
+    override val area: ParkourArea,
 ) : Parkour {
     override suspend fun start(player: ParkourPlayer) {
         val generator = DefaultParkourGenerator(
             player,
             Material.RED_CONCRETE,
-            corner1,
-            corner2,
-            spawnLocation
+            area
         )
 
         players.add(player.uuid)

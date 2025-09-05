@@ -10,8 +10,7 @@ interface Parkour {
     val uuid: UUID
     val name: String
     val spawnLocation: Location
-    val corner1: Location
-    val corner2: Location
+    val area: ParkourArea
 
     val players: ObjectSet<UUID>
     val generators: Object2ObjectMap<UUID, ParkourGenerator>

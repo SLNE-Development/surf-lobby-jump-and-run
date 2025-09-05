@@ -69,13 +69,13 @@ class FallbackParkourService : ParkourService, Services.Fallback {
 
             ParkourAreaEntity.new {
                 this.parkour = parkourEntity
-                world = parkour.corner1.world.uid
-                firstX = parkour.corner1.x
-                firstY = parkour.corner1.y
-                firstZ = parkour.corner1.z
-                secondX = parkour.corner2.x
-                secondY = parkour.corner2.y
-                secondZ = parkour.corner2.z
+                world = parkour.area.firstLocation.world.uid
+                firstX = parkour.area.firstLocation.x
+                firstY = parkour.area.firstLocation.y
+                firstZ = parkour.area.firstLocation.z
+                secondX = parkour.area.secondLocation.x
+                secondY = parkour.area.secondLocation.y
+                secondZ = parkour.area.secondLocation.z
             }
             return@newSuspendedTransaction
         }
@@ -93,10 +93,7 @@ class FallbackParkourService : ParkourService, Services.Fallback {
                 mutableObject2ObjectMapOf(),
                 spawnEntity.firstOrNull()?.toDto()
                     ?: error("Parkour ${it.name} has no spawn defined"),
-                areaEntity.firstOrNull()?.toDto()?.firstLocation
-                    ?: error("Parkour ${it.name} has no area defined"),
-                areaEntity.firstOrNull()?.toDto()?.secondLocation
-                    ?: error("Parkour ${it.name} has no area defined")
+                areaEntity.firstOrNull()?.toDto() ?: error("Parkour ${it.name} has no area defined")
             )
         }.forEach {
             parkourRegistry.registerParkour(it)

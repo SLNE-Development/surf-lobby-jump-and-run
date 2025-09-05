@@ -28,7 +28,6 @@ class ParkourEntity(id: EntityID<Int>) : IntEntity(id) {
         mutableObject2ObjectMapOf(),
         mutableObject2ObjectMapOf(),
         spawn.firstOrNull()?.toDto() ?: error("Parkour $name has no spawn defined"),
-        area.firstOrNull()?.toDto()?.firstLocation ?: error("Parkour $name has no are defined"),
-        area.firstOrNull()?.toDto()?.secondLocation ?: error("Parkour $name has no area defined")
+        area.firstOrNull()?.toDto() ?: error("Parkour $name has no area defined")
     )
 }
