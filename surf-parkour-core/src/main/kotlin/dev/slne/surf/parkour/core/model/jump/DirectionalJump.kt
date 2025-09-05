@@ -45,7 +45,7 @@ abstract class DirectionalJump(
             }
 
             if (!found) {
-                finalLocation = baseLocation.clone().subtract(forwardVec.multiply(3))
+                finalLocation = baseLocation.clone().subtract(forwardVec)
             }
         }
 
