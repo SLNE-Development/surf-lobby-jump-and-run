@@ -166,7 +166,9 @@ class DefaultParkourGenerator(
         Bukkit.getServer().sendBlockChange(nextBlock.location, Material.RED_CONCRETE)
 
         currentIndex++
-        glowingApi.makeGlowing(nextBlock, player, NamedTextColor.WHITE)
+        targetBlock?.let {
+            glowingApi.makeGlowing(it, player, NamedTextColor.WHITE)
+        }
     }
 
     fun findSafeBlockLocationInArea(
@@ -190,11 +192,15 @@ class DefaultParkourGenerator(
 
         val halfRange = (rangeY * 0.5).toInt()
 
+        println("Finding safe block in area: X[$minX-$maxX], Y[$minY-$maxY], Z[$minZ-$maxZ], midY: $midY, halfRange: $halfRange")
+
         repeat(maxTries) {
             val x = random.nextInt(minX, maxX + 1)
             val z = random.nextInt(minZ, maxZ + 1)
             val y = (midY + random.nextInt(-halfRange, halfRange + 1))
                 .coerceIn(minY, maxY)
+
+            println("Trying position: X[$x], Y[$y], Z[$z]")
 
             val block = world.getBlockAt(x, y, z)
             val above = world.getBlockAt(x, y + 1, z)
