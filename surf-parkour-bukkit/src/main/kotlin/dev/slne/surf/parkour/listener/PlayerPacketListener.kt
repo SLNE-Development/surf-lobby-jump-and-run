@@ -5,7 +5,6 @@ import com.github.retrooper.packetevents.event.PacketReceiveEvent
 import com.github.retrooper.packetevents.protocol.packettype.PacketType
 import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientPlayerBlockPlacement
 import dev.slne.surf.parkour.core.service.parkourService
-import dev.slne.surf.parkour.util.parkourPlayer
 import org.bukkit.entity.Player
 
 class PlayerPacketListener : PacketListener {
@@ -17,8 +16,7 @@ class PlayerPacketListener : PacketListener {
         }
 
         val packet = WrapperPlayClientPlayerBlockPlacement(event)
-        val parkourPlayer = player.parkourPlayer()
-        val parkour = parkourService.getParkour(parkourPlayer) ?: return
+        val parkour = parkourService.getParkour(player.uniqueId) ?: return
         val generator = parkour.generators[player.uniqueId] ?: return
 
         generator.getRegisteredBlocks().any {
