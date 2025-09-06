@@ -24,6 +24,12 @@ private val client = HttpClient(OkHttp) {
     }
 }
 
+// Ensure the HttpClient is closed when the JVM shuts down to prevent resource leaks
+init {
+    Runtime.getRuntime().addShutdownHook(Thread {
+        client.close()
+    })
+}
 private const val DEFAULT_TEXTURE =
     "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZGE5OWIwNWI5YTFkYjRkMjliNWU2NzNkNzdhZTU0YTc3ZWFiNjY4MTg1ODYwMzVjOGEyMDA1YWViODEwNjAyYSJ9fX0="
 
