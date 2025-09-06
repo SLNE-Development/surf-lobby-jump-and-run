@@ -74,7 +74,9 @@ class ParkourSelectMenu(
                     ).show(whoClicked)
                     return
                 }
-                ParkourActivePlayersMenu(statistics, parkour).show(whoClicked)
+                plugin.launch(plugin.entityDispatcher(player)) {
+                    ParkourActivePlayersMenu(parkour, statistics).open(player)
+                }
             }
 
             RedirectType.START_PARKOUR -> plugin.launch { parkour.start(player.parkourPlayer()) }

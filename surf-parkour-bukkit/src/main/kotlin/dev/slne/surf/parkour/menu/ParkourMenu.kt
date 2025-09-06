@@ -1,5 +1,6 @@
 package dev.slne.surf.parkour.menu
 
+import com.github.shynixn.mccoroutine.folia.entityDispatcher
 import com.github.shynixn.mccoroutine.folia.launch
 import com.github.stefvanschie.inventoryframework.adventuresupport.ComponentHolder
 import com.github.stefvanschie.inventoryframework.gui.GuiItem
@@ -150,7 +151,10 @@ class ParkourMenu(override val statistics: ParkourStatisticSummary) : PlayerData
                         buildText { error("Dieser Parkour ist leer!") }
                     ).show(whoClicked)
                 } else {
-                    ParkourActivePlayersMenu(statistics, parkour).show(whoClicked)
+                    plugin.launch(plugin.entityDispatcher(player)) {
+                        ParkourActivePlayersMenu(parkour, statistics).open(player)
+                    }
+
                 }
             }
 
