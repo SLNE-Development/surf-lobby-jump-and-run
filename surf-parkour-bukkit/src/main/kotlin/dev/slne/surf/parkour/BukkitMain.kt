@@ -59,7 +59,7 @@ class BukkitMain : SuspendingJavaPlugin() {
                 +Component.empty()
                 +Component.text("Endlich ist er da! ", Colors.WHITE)
                     .append(Component.text("Der Lobby Parkour.", Colors.GOLD))
-                +Component.text("Keine langeweile beim warten mehr!", Colors.WHITE)
+                +Component.text("Keine Langeweile beim Warten mehr!", Colors.WHITE)
                 +Component.empty()
                 +Component.text(
                     "Springe so weit wie möglich und stelle neue Rekorde auf!",
