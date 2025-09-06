@@ -11,6 +11,7 @@ import dev.slne.surf.parkour.menu.AbstractParkourGui
 import dev.slne.surf.parkour.menu.ParkourMenu
 import dev.slne.surf.parkour.menu.type.RedirectType
 import dev.slne.surf.parkour.menu.util.*
+import dev.slne.surf.parkour.util.parkourPlayer
 import dev.slne.surf.surfapi.bukkit.api.builder.buildItem
 import dev.slne.surf.surfapi.bukkit.api.builder.displayName
 import dev.slne.surf.surfapi.bukkit.api.builder.lore
@@ -60,7 +61,10 @@ class ParkourSelectMenu(
 
     private fun InventoryClickEvent.handleParkourSelect(parkour: Parkour) {
         when (redirect) {
-            RedirectType.MAIN -> ParkourMenu.lazyOpen(player)
+            RedirectType.MAIN -> plugin.launch {
+                ParkourMenu(statistics).open(player.parkourPlayer())
+            }
+
             RedirectType.PARKOUR_ACTIVES -> {
                 if (parkour.players.isEmpty()) {
                     ParkourGeneralFailureMenu(
@@ -72,7 +76,7 @@ class ParkourSelectMenu(
                 ParkourActivePlayersMenu(statistics, parkour).show(whoClicked)
             }
 
-            RedirectType.START_PARKOUR -> plugin.launch { parkour.start(parkourPlayer) }
+            RedirectType.START_PARKOUR -> plugin.launch { parkour.start(player.parkourPlayer()) }
         }
     }
 }

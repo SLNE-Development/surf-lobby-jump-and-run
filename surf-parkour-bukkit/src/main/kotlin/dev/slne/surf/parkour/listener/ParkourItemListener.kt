@@ -2,8 +2,10 @@ package dev.slne.surf.parkour.listener
 
 import com.github.shynixn.mccoroutine.folia.entityDispatcher
 import com.github.shynixn.mccoroutine.folia.launch
+import dev.slne.surf.parkour.core.service.parkourStatisticsService
 import dev.slne.surf.parkour.menu.ParkourMenu
 import dev.slne.surf.parkour.plugin
+import dev.slne.surf.parkour.util.parkourPlayer
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.inventory.InventoryClickEvent
@@ -48,7 +50,9 @@ class ParkourItemListener : Listener {
         val item = event.item ?: return
 
         if (item == plugin.inventoryItem) {
-            ParkourMenu.lazyOpen(player)
+            plugin.launch {
+                ParkourMenu(parkourStatisticsService.getSummary(player.uniqueId)).open(player.parkourPlayer())
+            }
             event.isCancelled = true
         }
     }

@@ -70,7 +70,7 @@ class FallbackParkourStatisticService : ParkourStatisticsService, Services.Fallb
 
     override suspend fun getEverySummary(): ObjectSet<ParkourStatisticSummary> =
         newSuspendedTransaction(Dispatchers.IO) {
-            ParkourStatisticEntity.all().groupBy { it.userUuid }.map { (userUuid, stats) ->
+            ParkourStatisticEntity.all().groupBy { it.userUuid }.map { (user, stats) ->
                 val totalCompletions = stats.size
                 val totalJumps = stats.sumOf { it.jumps }
 
@@ -86,11 +86,9 @@ class FallbackParkourStatisticService : ParkourStatisticsService, Services.Fallb
                     stats.map { it.jumps }.average().roundToInt()
                 } else 0
 
-                val name = PlayerLookupService.getUsername(userUuid) ?: "Error"
-
-                userUuid to CoreParkourStatisticSummary(
-                    name = name,
-                    uuid = userUuid,
+                user to CoreParkourStatisticSummary(
+                    name = user.name,
+                    uuid = user.uuid,
                     totalTries = totalCompletions,
                     totalJumps = totalJumps,
                     averageTime = averageTime,

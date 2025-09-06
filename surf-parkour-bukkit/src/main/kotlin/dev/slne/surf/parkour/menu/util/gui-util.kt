@@ -4,7 +4,6 @@ import com.github.stefvanschie.inventoryframework.gui.GuiItem
 import com.github.stefvanschie.inventoryframework.gui.type.util.Gui
 import com.github.stefvanschie.inventoryframework.pane.PaginatedPane
 import com.github.stefvanschie.inventoryframework.pane.StaticPane
-import dev.slne.surf.parkour.util.parkourPlayer
 import dev.slne.surf.surfapi.core.api.service.PlayerLookupService
 import dev.slne.surf.surfapi.core.api.util.emptyInt2ObjectMap
 import dev.slne.surf.surfapi.core.api.util.emptyIntSet
@@ -16,8 +15,6 @@ import java.util.*
 
 val InventoryClickEvent.player
     get() = whoClicked as? Player ?: error("No player has clicked on the inventory.")
-
-val InventoryClickEvent.parkourPlayer get() = this.player.parkourPlayer()
 
 suspend fun UUID.name() = PlayerLookupService.getUsername(this) ?: "Error"
 

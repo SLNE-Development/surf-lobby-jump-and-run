@@ -1,10 +1,13 @@
 package dev.slne.surf.parkour.menu.util
 
+import com.github.shynixn.mccoroutine.folia.launch
 import com.github.stefvanschie.inventoryframework.gui.GuiItem
 import com.github.stefvanschie.inventoryframework.gui.type.util.Gui
 import com.github.stefvanschie.inventoryframework.pane.PaginatedPane
 import dev.slne.surf.parkour.menu.ParkourMenu
 import dev.slne.surf.parkour.menu.PlayerDataHolderGui
+import dev.slne.surf.parkour.plugin
+import dev.slne.surf.parkour.util.parkourPlayer
 import dev.slne.surf.surfapi.bukkit.api.builder.buildItem
 import dev.slne.surf.surfapi.bukkit.api.builder.displayName
 import dev.slne.surf.surfapi.bukkit.api.builder.lore
@@ -27,6 +30,11 @@ fun Gui.outlineItem() = GuiItem(buildItem(Material.GRAY_STAINED_GLASS_PANE) {
 })
 
 fun PlayerDataHolderGui.menuButton() = GuiItem(buildItem(Material.BARRIER) {
-    displayName { primary("Hautmenü") }
-    lore { info("Klicke, um zum Hautmenü zurückzukehren!") }
-}) { ParkourMenu.lazyOpen(it.whoClicked as? Player ?: error("Clicker must be a player")) }
+    displayName { primary("Hauptmenü") }
+    lore { info("Klicke, um zum Hauptmenü zurückzukehren!") }
+}) {
+    plugin.launch {
+        val player = (it.whoClicked as? Player)?.parkourPlayer() ?: return@launch
+        ParkourMenu(statistics).open(player)
+    }
+}
