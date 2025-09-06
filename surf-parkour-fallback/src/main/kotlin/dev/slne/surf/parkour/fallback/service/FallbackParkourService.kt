@@ -44,7 +44,9 @@ class FallbackParkourService : ParkourService, Services.Fallback {
         parkourRegistry.getParkours().find { it.players.contains(player.uuid) }
 
     override fun getParkour(name: String) = parkourRegistry.getParkour(name)
-    override fun getParkour(uuid: UUID) = parkourRegistry.getParkour(uuid)
+    override fun getParkour(uuid: UUID) =
+        parkourRegistry.getParkours().find { it.players.contains(uuid) }
+
     override fun inParkour(player: ParkourPlayer) =
         parkourRegistry.getParkours().any { it.players.contains(player.uuid) }
 

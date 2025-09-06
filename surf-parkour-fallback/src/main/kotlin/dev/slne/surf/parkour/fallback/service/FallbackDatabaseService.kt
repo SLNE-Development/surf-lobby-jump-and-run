@@ -4,6 +4,7 @@ import com.google.auto.service.AutoService
 import dev.slne.surf.database.DatabaseManager
 import dev.slne.surf.database.database.DatabaseProvider
 import dev.slne.surf.parkour.core.service.DatabaseService
+import dev.slne.surf.parkour.core.service.parkourPlayerService
 import dev.slne.surf.parkour.core.service.parkourService
 import dev.slne.surf.parkour.core.service.parkourStatisticsService
 import net.kyori.adventure.util.Services
@@ -20,6 +21,7 @@ class FallbackDatabaseService : DatabaseService, Services.Fallback {
     override fun createTables() {
         parkourStatisticsService.createTable()
         parkourService.createTable()
+        parkourPlayerService.createTable()
     }
 
     override fun disconnect() {

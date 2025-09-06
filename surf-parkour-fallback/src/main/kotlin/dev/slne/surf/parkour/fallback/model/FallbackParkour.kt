@@ -7,7 +7,7 @@ import dev.slne.surf.parkour.api.model.parkour.Parkour
 import dev.slne.surf.parkour.api.model.parkour.ParkourArea
 import dev.slne.surf.parkour.api.model.parkour.ParkourGenerator
 import dev.slne.surf.parkour.core.generator.DefaultParkourGenerator
-import dev.slne.surf.parkour.core.model.CoreParkourStatistic
+import dev.slne.surf.parkour.core.model.statistic.CoreParkourStatistic
 import dev.slne.surf.parkour.core.registry.parkourRegistry
 import dev.slne.surf.parkour.core.service.parkourStatisticsService
 import dev.slne.surf.surfapi.core.api.messages.CommonComponents
@@ -84,6 +84,9 @@ class FallbackParkour(
         generator.generate()
         ParkourSuccessEvent(this, player, index).callEvent()
     }
+
+    override fun currentIndex(player: ParkourPlayer) = generators[player.uuid]?.currentIndex() ?: 0
+    override fun currentIndex(uuid: UUID) = generators[uuid]?.currentIndex() ?: 0
 
     override fun modify(block: Parkour.() -> Unit) = block(this)
     override fun modifySaving(block: Parkour.() -> Unit) {

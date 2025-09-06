@@ -4,30 +4,30 @@ import com.google.auto.service.AutoService
 import dev.slne.surf.parkour.api.entity.ParkourPlayer
 import dev.slne.surf.parkour.core.entity.CoreParkourPlayer
 import dev.slne.surf.parkour.core.factory.ParkourPlayerFactory
+import dev.slne.surf.parkour.core.service.parkourPlayerService
+import dev.slne.surf.parkour.core.util.loadProfileTexture
+import dev.slne.surf.surfapi.core.api.service.PlayerLookupService
 import net.kyori.adventure.util.Services
-import org.bukkit.Bukkit
-import org.bukkit.OfflinePlayer
-import org.bukkit.entity.Player
 import java.util.*
 
 @AutoService(ParkourPlayerFactory::class)
 class FallbackParkourPlayerFactory : ParkourPlayerFactory, Services.Fallback {
-    override fun createPlayer(
-        uuid: UUID,
-        name: String
-    ) = CoreParkourPlayer(uuid, name)
+    override suspend fun createPlayer(uuid: UUID): ParkourPlayer {
+        val name =
+            PlayerLookupService.getUsername(uuid) ?: error("Player with UUID $uuid not found")
+        val texture = loadProfileTexture(uuid)
+        val player = CoreParkourPlayer(uuid, name, texture)
 
-    override fun from(player: Player) = CoreParkourPlayer(player.uniqueId, player.name)
-    override fun from(offlinePlayer: OfflinePlayer) =
-        CoreParkourPlayer(offlinePlayer.uniqueId, offlinePlayer.name ?: "Unknown")
-
-    override fun from(name: String): ParkourPlayer? {
-        val player = Bukkit.getPlayer(name) ?: return null
-        return CoreParkourPlayer(player.uniqueId, player.name)
+        parkourPlayerService.insertPlayer(player)
+        return player
     }
 
-    override fun from(uuid: UUID): ParkourPlayer? {
-        val player = Bukkit.getPlayer(uuid) ?: return null
-        return CoreParkourPlayer(player.uniqueId, player.name)
+    override suspend fun createPlayer(name: String): ParkourPlayer {
+        val uuid = PlayerLookupService.getUuid(name) ?: error("Player with name $name not found")
+        val texture = loadProfileTexture(uuid)
+        val player = CoreParkourPlayer(uuid, name, texture)
+
+        parkourPlayerService.insertPlayer(player)
+        return player
     }
 }

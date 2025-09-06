@@ -1,5 +1,5 @@
 package dev.slne.surf.parkour.core.util
 
-interface ServiceWithDatabase {
+interface TableHolder {
     fun createTable()
 }
