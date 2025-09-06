@@ -12,13 +12,16 @@ import dev.slne.surf.parkour.menu.util.*
 import dev.slne.surf.surfapi.bukkit.api.builder.buildItem
 import dev.slne.surf.surfapi.bukkit.api.builder.displayName
 import dev.slne.surf.surfapi.bukkit.api.builder.lore
+import dev.slne.surf.surfapi.bukkit.api.builder.meta
 import dev.slne.surf.surfapi.core.api.font.toSmallCaps
 import dev.slne.surf.surfapi.core.api.messages.adventure.buildText
 import dev.slne.surf.surfapi.core.api.messages.adventure.text
 import dev.slne.surf.surfapi.core.api.util.mutableObjectListOf
 import net.kyori.adventure.text.format.TextDecoration
+import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.entity.Player
+import org.bukkit.inventory.meta.SkullMeta
 
 class ParkourActivePlayersMenu(
     val parkour: Parkour,
@@ -48,6 +51,7 @@ class ParkourActivePlayersMenu(
                     variableKey("Aktuelle Sprünge: ".toSmallCaps())
                     variableValue(parkour.currentIndex(it).toString())
                 }
+                meta<SkullMeta> { owningPlayer = Bukkit.getPlayer(it) }
             })
         }
 
