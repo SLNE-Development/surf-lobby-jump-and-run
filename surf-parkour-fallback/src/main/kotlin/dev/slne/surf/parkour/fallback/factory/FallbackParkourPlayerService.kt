@@ -13,8 +13,10 @@ import dev.slne.surf.parkour.fallback.entity.ParkourPlayerEntity
 import dev.slne.surf.parkour.fallback.table.ParkourPlayerTable
 import kotlinx.coroutines.Dispatchers
 import net.kyori.adventure.util.Services
+import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
+import org.jetbrains.exposed.sql.transactions.transaction
 import java.util.*
 import kotlin.time.Duration.Companion.hours
 
@@ -61,4 +63,9 @@ class FallbackParkourPlayerService : ParkourPlayerService, Services.Fallback {
 
     override suspend fun getPlayer(uuid: UUID) = uuidToPlayerCache.get(uuid)
     override suspend fun getPlayer(name: String) = nameToPlayerCache.get(name)
+    override fun createTable() {
+        transaction {
+            SchemaUtils.create(ParkourPlayerTable)
+        }
+    }
 }

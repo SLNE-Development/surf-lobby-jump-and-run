@@ -5,7 +5,7 @@ import org.jetbrains.exposed.sql.ReferenceOption
 
 object ParkourStatisticsTable : IntIdTable("parkour_statistics") {
     val parkourId = reference("parkour_id", ParkourTable.id, ReferenceOption.CASCADE)
-    val userUuid = reference("uuid", ParkourTable.uuid)
+    val userUuid = reference("uuid", ParkourPlayerTable.uuid)
     val time = long("time").default(0)
     val jumps = integer("jumps").default(0)
 }
