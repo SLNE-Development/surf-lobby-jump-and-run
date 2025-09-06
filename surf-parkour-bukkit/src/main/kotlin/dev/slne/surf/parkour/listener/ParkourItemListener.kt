@@ -5,7 +5,8 @@ import com.github.shynixn.mccoroutine.folia.launch
 import dev.slne.surf.parkour.core.service.parkourStatisticsService
 import dev.slne.surf.parkour.menu.ParkourMenu
 import dev.slne.surf.parkour.plugin
-import dev.slne.surf.parkour.util.parkourPlayer
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.inventory.InventoryClickEvent
@@ -50,8 +51,12 @@ class ParkourItemListener : Listener {
         val item = event.item ?: return
 
         if (item == plugin.inventoryItem) {
-            plugin.launch {
-                ParkourMenu(parkourStatisticsService.getSummary(player.uniqueId)).open(player.parkourPlayer())
+            plugin.launch(Dispatchers.IO) {
+                val menu = ParkourMenu(parkourStatisticsService.getSummary(player.uniqueId))
+
+                withContext(plugin.entityDispatcher(player)) {
+                    menu.open(player)
+                }
             }
             event.isCancelled = true
         }

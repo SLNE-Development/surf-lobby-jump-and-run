@@ -1,10 +1,8 @@
 package dev.slne.surf.parkour.fallback.service
 
 import com.google.auto.service.AutoService
-import dev.slne.surf.parkour.api.model.parkour.Parkour
 import dev.slne.surf.parkour.api.model.parkour.statistic.ParkourStatistic
 import dev.slne.surf.parkour.api.model.parkour.statistic.ParkourStatisticSummary
-import dev.slne.surf.parkour.core.model.statistic.CoreParkourStatistic
 import dev.slne.surf.parkour.core.model.statistic.CoreParkourStatisticSummary
 import dev.slne.surf.parkour.core.service.ParkourStatisticsService
 import dev.slne.surf.parkour.fallback.entity.ParkourEntity
@@ -20,7 +18,6 @@ import kotlinx.coroutines.Dispatchers
 import net.kyori.adventure.util.Services
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.util.*
@@ -35,7 +32,9 @@ class FallbackParkourStatisticService : ParkourStatisticsService, Services.Fallb
     }
 
     override suspend fun getSummary(userUuid: UUID) = newSuspendedTransaction(Dispatchers.IO) {
-        val statistics = ParkourStatisticEntity.find { ParkourStatisticsTable.userUuid eq userUuid }
+        val userId = ParkourPlayerEntity.find { ParkourPlayerTable.uuid eq userUuid }
+            .firstOrNull()?.id ?: return@newSuspendedTransaction CoreParkourStatisticSummary.empty()
+        val statistics = ParkourStatisticEntity.find { ParkourStatisticsTable.userId eq userId }
             .map { it.toDto() }
         val totalCompletions = statistics.size
         val totalJumps = statistics.sumOf { it.jumps }
@@ -101,23 +100,6 @@ class FallbackParkourStatisticService : ParkourStatisticsService, Services.Fallb
             }.map { it.second }.toObjectSet()
         }
 
-
-    override suspend fun getStatistic(
-        userUuid: UUID,
-        parkour: Parkour
-    ) = newSuspendedTransaction(Dispatchers.IO) {
-        val parkourEntity = ParkourEntity.find { ParkourTable.uuid eq parkour.uuid }
-            .firstOrNull() ?: return@newSuspendedTransaction CoreParkourStatistic.empty(
-            userUuid,
-            parkour
-        )
-
-        ParkourStatisticEntity.find {
-            (ParkourStatisticsTable.parkourId eq parkourEntity.id) and
-                    (ParkourStatisticsTable.userUuid eq userUuid)
-        }.firstOrNull()?.toDto() ?: CoreParkourStatistic.empty(userUuid, parkour)
-    }
-
     override suspend fun addStatistic(
         statistic: ParkourStatistic
     ) = newSuspendedTransaction(Dispatchers.IO) {
@@ -129,7 +111,7 @@ class FallbackParkourStatisticService : ParkourStatisticsService, Services.Fallb
             val playerEntity =
                 ParkourPlayerEntity.find(ParkourPlayerTable.uuid eq statistic.userUuid)
                     .firstOrNull()
-                    ?: error("Player with UUID ${statistic.userUuid} does not exist in database!")
+                    ?: return@new
 
             parkour = parkourEntity
             userUuid = playerEntity

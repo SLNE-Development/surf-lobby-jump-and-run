@@ -1,5 +1,6 @@
 package dev.slne.surf.parkour.menu.submenu
 
+import com.github.shynixn.mccoroutine.folia.entityDispatcher
 import com.github.shynixn.mccoroutine.folia.launch
 import com.github.stefvanschie.inventoryframework.gui.GuiItem
 import com.github.stefvanschie.inventoryframework.pane.PaginatedPane
@@ -61,8 +62,8 @@ class ParkourSelectMenu(
 
     private fun InventoryClickEvent.handleParkourSelect(parkour: Parkour) {
         when (redirect) {
-            RedirectType.MAIN -> plugin.launch {
-                ParkourMenu(statistics).open(player.parkourPlayer())
+            RedirectType.MAIN -> plugin.launch(plugin.entityDispatcher(player)) {
+                ParkourMenu(statistics).open(player)
             }
 
             RedirectType.PARKOUR_ACTIVES -> {

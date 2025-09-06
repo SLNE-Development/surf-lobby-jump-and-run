@@ -1,5 +1,6 @@
 package dev.slne.surf.parkour.menu.submenu
 
+import com.github.shynixn.mccoroutine.folia.entityDispatcher
 import com.github.shynixn.mccoroutine.folia.launch
 import com.github.stefvanschie.inventoryframework.gui.GuiItem
 import com.github.stefvanschie.inventoryframework.pane.StaticPane
@@ -9,7 +10,6 @@ import dev.slne.surf.parkour.menu.ParkourMenu
 import dev.slne.surf.parkour.menu.util.fillOuterBorder
 import dev.slne.surf.parkour.menu.util.outlineItem
 import dev.slne.surf.parkour.menu.util.player
-import dev.slne.surf.parkour.util.parkourPlayer
 import dev.slne.surf.surfapi.bukkit.api.builder.buildItem
 import dev.slne.surf.surfapi.bukkit.api.builder.displayName
 import dev.slne.surf.surfapi.bukkit.api.builder.lore
@@ -37,8 +37,8 @@ class ParkourGeneralFailureMenu(
                 displayName(title)
                 lore { info("Klicke, um zum Hauptmenü zurückzukehren!") }
             }) {
-                plugin.launch {
-                    ParkourMenu(statistics).open(it.player.parkourPlayer())
+                plugin.launch(plugin.entityDispatcher(it.player)) {
+                    ParkourMenu(statistics).open(it.player)
                 }
             }
 

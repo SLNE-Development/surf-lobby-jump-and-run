@@ -5,7 +5,6 @@ import com.github.stefvanschie.inventoryframework.adventuresupport.ComponentHold
 import com.github.stefvanschie.inventoryframework.gui.GuiItem
 import com.github.stefvanschie.inventoryframework.gui.type.ChestGui
 import com.github.stefvanschie.inventoryframework.pane.StaticPane
-import dev.slne.surf.parkour.api.entity.ParkourPlayer
 import dev.slne.surf.parkour.api.model.parkour.statistic.ParkourStatisticSummary
 import dev.slne.surf.parkour.core.registry.parkourRegistry
 import dev.slne.surf.parkour.menu.submenu.ParkourActivePlayersMenu
@@ -27,6 +26,7 @@ import dev.slne.surf.surfapi.core.api.messages.adventure.text
 import dev.slne.surf.surfapi.core.api.util.int2ObjectMapOf
 import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.Material
+import org.bukkit.entity.Player
 import org.bukkit.event.inventory.InventoryClickEvent
 
 class ParkourMenu(override val statistics: ParkourStatisticSummary) : PlayerDataHolderGui {
@@ -57,7 +57,7 @@ class ParkourMenu(override val statistics: ParkourStatisticSummary) : PlayerData
         lore { info("Klicke, um dir die aktiven Spieler anzusehen!") }
     }) { it.handleActivePlayers() }
 
-    suspend fun open(parkourPlayer: ParkourPlayer) {
+    suspend fun open(player: Player) {
         val gui = ChestGui(5, ComponentHolder.of(buildText {
             primary("Parkour".toSmallCaps(), TextDecoration.BOLD)
 
@@ -114,6 +114,8 @@ class ParkourMenu(override val statistics: ParkourStatisticSummary) : PlayerData
         gui.addPane(taskbarPane)
         gui.addPane(outlinePane)
         gui.addPane(playerHeadPane)
+
+        gui.show(player)
     }
 
     private fun InventoryClickEvent.handleStart() {

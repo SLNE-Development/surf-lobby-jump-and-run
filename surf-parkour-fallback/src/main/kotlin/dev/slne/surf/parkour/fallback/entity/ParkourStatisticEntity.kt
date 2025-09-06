@@ -10,7 +10,7 @@ class ParkourStatisticEntity(id: EntityID<Int>) : IntEntity(id) {
     companion object : IntEntityClass<ParkourStatisticEntity>(ParkourStatisticsTable)
 
     var parkour by ParkourEntity referencedOn ParkourStatisticsTable.parkourId
-    var userUuid by ParkourPlayerEntity referencedOn ParkourStatisticsTable.userUuid
+    var userUuid by ParkourPlayerEntity referencedOn ParkourStatisticsTable.userId
     var time by ParkourStatisticsTable.time
     var jumps by ParkourStatisticsTable.jumps
 

@@ -1,5 +1,6 @@
 package dev.slne.surf.parkour.menu.util
 
+import com.github.shynixn.mccoroutine.folia.entityDispatcher
 import com.github.shynixn.mccoroutine.folia.launch
 import com.github.stefvanschie.inventoryframework.gui.GuiItem
 import com.github.stefvanschie.inventoryframework.gui.type.util.Gui
@@ -7,13 +8,11 @@ import com.github.stefvanschie.inventoryframework.pane.PaginatedPane
 import dev.slne.surf.parkour.menu.ParkourMenu
 import dev.slne.surf.parkour.menu.PlayerDataHolderGui
 import dev.slne.surf.parkour.plugin
-import dev.slne.surf.parkour.util.parkourPlayer
 import dev.slne.surf.surfapi.bukkit.api.builder.buildItem
 import dev.slne.surf.surfapi.bukkit.api.builder.displayName
 import dev.slne.surf.surfapi.bukkit.api.builder.lore
 import dev.slne.surf.surfapi.core.api.messages.adventure.text
 import org.bukkit.Material
-import org.bukkit.entity.Player
 
 fun Gui.backButton(pages: PaginatedPane) = GuiItem(buildItem(Material.ARROW) {
     displayName { primary("Vorherige Seite") }
@@ -33,8 +32,7 @@ fun PlayerDataHolderGui.menuButton() = GuiItem(buildItem(Material.BARRIER) {
     displayName { primary("Hauptmenü") }
     lore { info("Klicke, um zum Hauptmenü zurückzukehren!") }
 }) {
-    plugin.launch {
-        val player = (it.whoClicked as? Player)?.parkourPlayer() ?: return@launch
-        ParkourMenu(statistics).open(player)
+    plugin.launch(plugin.entityDispatcher(it.player)) {
+        ParkourMenu(statistics).open(it.player)
     }
 }
