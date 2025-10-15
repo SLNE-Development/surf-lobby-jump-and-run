@@ -1,9 +1,7 @@
 [versions]
-packetevents-api = "2.9.5-SNAPSHOT"
 polar-api = "2.2.0"
 surf-database = "2.0.4-SNAPSHOT"
 
 [libraries]
-packetevents-api = { module = "com.github.retrooper:packetevents-api", version.ref = "packetevents-api" }
 polar-api = { module = "top.polar:api", version.ref = "polar-api" }
 surf-database = { module = "dev.slne.surf:surf-database", version.ref = "surf-database" }
