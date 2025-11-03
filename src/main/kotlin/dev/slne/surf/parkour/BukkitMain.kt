@@ -1,4 +1,9 @@
 package dev.slne.surf.parkour
 
-class BukkitMain {
+import com.github.shynixn.mccoroutine.folia.SuspendingJavaPlugin
+import org.bukkit.plugin.java.JavaPlugin
+
+val plugin get() = JavaPlugin.getPlugin(BukkitMain::class.java)
+
+class BukkitMain : SuspendingJavaPlugin() {
 }
