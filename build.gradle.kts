@@ -1,14 +1,11 @@
-buildscript {
-    repositories {
-        gradlePluginPortal()
-        maven("https://repo.slne.dev/repository/maven-public/") { name = "maven-public" }
-    }
-    dependencies {
-        classpath("dev.slne.surf:surf-api-gradle-plugin:1.21.10+")
-    }
+plugins {
+    id("dev.slne.surf.surfapi.gradle.paper-plugin")
 }
 
-allprojects {
-    group = "dev.slne.surf.parkour"
-    version = "1.21.10-2.0.0-SNAPSHOT"
+surfPaperPluginApi {
+    mainClass("dev.slne.surf.parkour.BukkitMain")
+    foliaSupported(true)
+    generateLibraryLoader(false)
+
+    authors.add("red")
 }

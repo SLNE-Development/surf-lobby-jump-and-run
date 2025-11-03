@@ -1,9 +1,11 @@
 rootProject.name = "surf-parkour"
 
-
-include("surf-parkour-api")
-include("surf-parkour-core")
-include("surf-parkour-bukkit")
-include("surf-parkour-fallback")
-include("surf-parkour-addons")
-include("surf-parkour-addons:surf-parkour-reward-addon")
+buildscript {
+    repositories {
+        gradlePluginPortal()
+        maven("https://repo.slne.dev/repository/maven-public/") { name = "maven-public" }
+    }
+    dependencies {
+        classpath("dev.slne.surf:surf-api-gradle-plugin:1.21.10+")
+    }
+}

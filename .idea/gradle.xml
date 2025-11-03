@@ -9,12 +9,6 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
-            <option value="$PROJECT_DIR$/surf-parkour-addons" />
-            <option value="$PROJECT_DIR$/surf-parkour-addons/surf-parkour-reward-addon" />
-            <option value="$PROJECT_DIR$/surf-parkour-api" />
-            <option value="$PROJECT_DIR$/surf-parkour-bukkit" />
-            <option value="$PROJECT_DIR$/surf-parkour-core" />
-            <option value="$PROJECT_DIR$/surf-parkour-fallback" />
           </set>
         </option>
       </GradleProjectSettings>
