@@ -12,3 +12,8 @@ surfPaperPluginApi {
 
     authors.add("red")
 }
+
+dependencies {
+    compileOnly(libs.polar.api)
+    compileOnly(files("libs/vulcan-api-v1.jar"))
+}
