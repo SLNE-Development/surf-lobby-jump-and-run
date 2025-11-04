@@ -75,7 +75,7 @@ data class ParkourGenerator(
         glowingApi.makeGlowing(nextLocation.location, player, color)
     }
 
-    private suspend fun generate() = withContext(Dispatchers.IO) {
+    suspend fun generate() = withContext(Dispatchers.IO) {
         val player = associatedPlayer.getPlayer() ?: return@withContext
 
         if (!::blockLocations.isInitialized) {

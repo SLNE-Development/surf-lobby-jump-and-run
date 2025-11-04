@@ -26,11 +26,9 @@ class ParkourService {
 
     suspend fun triggerSuccess(player: Player) {
         val parkour = getParkour(player) ?: return
+        val generator = parkour.getGenerator(player) ?: return
 
-        player.sendText {
-            appendPrefix()
-            success("completed the parkour")
-        }
+        generator.generate()
     }
 
     fun getParkour(player: Player) = _parkours.find { it.players.contains(player.uniqueId) }
