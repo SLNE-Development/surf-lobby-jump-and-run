@@ -1,6 +1,6 @@
 package dev.slne.surf.parkour.listener
 
-import com.github.retrooper.packetevents.event.PacketListener
+import com.github.retrooper.packetevents.event.PacketListenerAbstract
 import com.github.retrooper.packetevents.event.PacketReceiveEvent
 import com.github.retrooper.packetevents.protocol.packettype.PacketType
 import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientPlayerBlockPlacement
@@ -9,7 +9,7 @@ import dev.slne.surf.parkour.util.anyOfType
 import org.bukkit.entity.Player
 import org.bukkit.util.Vector
 
-class ParkourPacketListener : PacketListener {
+class ParkourPacketListener : PacketListenerAbstract() {
     override fun onPacketReceive(event: PacketReceiveEvent) {
         val player = event.getPlayer<Player>()
 

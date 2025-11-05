@@ -12,6 +12,27 @@ class ParkourService {
         parkour.start(player.uniqueId)
     }
 
+    fun createParkour(
+        identifier: String,
+        displayName: String,
+        boundingBox: org.bukkit.util.BoundingBox,
+        world: org.bukkit.World,
+        startLocation: org.bukkit.Location,
+        respawnLocation: org.bukkit.Location
+    ): Parkour {
+        val parkour = Parkour(
+            identifier = identifier,
+            displayName = displayName,
+            boundingBox = boundingBox,
+            world = world,
+            startLocation = startLocation,
+            respawnLocation = respawnLocation
+        )
+
+        _parkours.add(parkour)
+        return parkour
+    }
+
     fun isInParkour(player: Player) = getParkour(player) != null
 
     suspend fun triggerFailure(player: Player) {
@@ -32,6 +53,9 @@ class ParkourService {
     }
 
     fun getParkour(player: Player) = _parkours.find { it.players.contains(player.uniqueId) }
+    fun getParkours() = _parkours
+    fun getParkour(identifier: String) = _parkours.find { it.identifier == identifier }
+    fun exists(identifier: String) = _parkours.any { it.identifier == identifier }
 
     companion object {
         val INSTANCE = ParkourService()

@@ -1,13 +1,17 @@
 package dev.slne.surf.parkour
 
+import com.github.retrooper.packetevents.PacketEvents
 import com.github.shynixn.mccoroutine.folia.SuspendingJavaPlugin
+import dev.slne.surf.parkour.command.parkourCommand
 import dev.slne.surf.parkour.config.ParkourConfiguration
+import dev.slne.surf.parkour.hook.PolarHook
+import dev.slne.surf.parkour.hook.VulcanHook
+import dev.slne.surf.parkour.listener.*
 import dev.slne.surf.surfapi.bukkit.api.builder.buildItem
 import dev.slne.surf.surfapi.bukkit.api.builder.buildLore
 import dev.slne.surf.surfapi.bukkit.api.builder.displayName
+import dev.slne.surf.surfapi.bukkit.api.event.register
 import dev.slne.surf.surfapi.core.api.font.toSmallCaps
-import dev.slne.surf.surfapi.core.api.messages.Colors
-import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.Material
 import org.bukkit.inventory.ItemFlag
@@ -16,6 +20,19 @@ import org.bukkit.plugin.java.JavaPlugin
 val plugin get() = JavaPlugin.getPlugin(BukkitMain::class.java)
 
 class BukkitMain : SuspendingJavaPlugin() {
+    override fun onEnable() {
+        FailureListener().register()
+        SuccessListener().register()
+        ParkourItemListener().register()
+
+        PolarHook().register()
+        VulcanHook().register()
+
+        PacketEvents.getAPI().eventManager.registerListener(ParkourPacketListener())
+        PacketEvents.getAPI().eventManager.registerListener(PlayerPacketListener())
+
+        parkourCommand()
+    }
 
     val inventoryItem
         get() = buildItem(Material.FIREWORK_ROCKET) {
@@ -29,29 +46,37 @@ class BukkitMain : SuspendingJavaPlugin() {
             addItemFlags(ItemFlag.HIDE_ADDITIONAL_TOOLTIP, ItemFlag.HIDE_ATTRIBUTES)
 
             buildLore {
-                +Component.empty()
-                +Component.text("Endlich ist er da! ", Colors.WHITE)
-                    .append(Component.text("Der Lobby Parkour.", Colors.GOLD))
-                +Component.text("Keine Langeweile beim Warten mehr!", Colors.WHITE)
-                +Component.empty()
-                +Component.text(
-                    "Springe so weit wie möglich und stelle neue Rekorde auf!",
-                    Colors.WHITE
-                )
-                +Component.text("Klicke mit diesem Item, um ein Menu zu öffnen. Dort", Colors.WHITE)
-                +Component.text(
-                    "kannst du den Parkour starten, deine Statistiken ansehen",
-                    Colors.WHITE
-                )
-                +Component.text("und vieles mehr!", Colors.WHITE)
-
+                emptyLine()
+                line {
+                    text("Endlich ist er da! ")
+                }
+                line {
+                    variableValue("Der Lobby Parkour.")
+                }
+                line {
+                    text("Keine Langeweile beim Warten mehr!")
+                }
+                emptyLine()
+                line {
+                    text("Springe so weit wie möglich und stelle neue Rekorde auf!")
+                }
+                line {
+                    text("Klicke mit diesem Item, um ein Menu zu öffnen. Dort")
+                }
+                line {
+                    text("kannst du den Parkour starten, deine Statistiken ansehen")
+                }
+                line {
+                    text("und vieles mehr!")
+                }
                 if (parkourConfig.config.betaMode) {
-                    +Component.empty()
-                    +Component.text(
-                        "Bitte beachte, das der Parkour noch in der Beta-Phase ist.",
-                        Colors.GRAY
-                    )
-                        .decorate(TextDecoration.ITALIC)
+                    emptyLine()
+                    line {
+                        spacer(
+                            "Bitte beachte, das der Parkour noch in der Beta-Phase ist.",
+                            TextDecoration.ITALIC
+                        )
+                    }
                 }
             }
         }

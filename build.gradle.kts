@@ -1,3 +1,5 @@
+import dev.slne.surf.surfapi.gradle.util.registerRequired
+
 plugins {
     id("dev.slne.surf.surfapi.gradle.paper-plugin")
 }
@@ -11,9 +13,20 @@ surfPaperPluginApi {
     generateLibraryLoader(false)
 
     authors.add("red")
+
+    serverDependencies {
+        registerRequired("FastAsyncWorldEdit")
+    }
+}
+
+repositories {
+    maven("https://maven.enginehub.org/repo/")
 }
 
 dependencies {
     compileOnly(libs.polar.api)
     compileOnly(files("libs/vulcan-api-v1.jar"))
+
+    compileOnly(libs.worldedit.core) { isTransitive = false }
+    compileOnly(libs.worldedit.bukkit) { isTransitive = false }
 }

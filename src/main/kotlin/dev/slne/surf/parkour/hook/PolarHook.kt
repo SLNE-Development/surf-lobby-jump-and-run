@@ -1,9 +1,7 @@
-package dev.slne.surf.parkour.listener
+package dev.slne.surf.parkour.hook
 
-import dev.slne.surf.parkour.plugin
 import dev.slne.surf.parkour.service.parkourService
 import dev.slne.surf.parkour.util.anyOfType
-import dev.slne.surf.surfapi.core.api.messages.adventure.buildText
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import org.bukkit.util.Vector
@@ -13,7 +11,7 @@ import top.polar.api.user.event.type.CheckType
 import java.util.function.Consumer
 import kotlin.jvm.optionals.getOrNull
 
-class PolarMitigationListener : Consumer<MitigationEvent> {
+class PolarHook : Consumer<MitigationEvent> {
     override fun accept(event: MitigationEvent) {
         val player = event.user().bukkitPlayer().getOrNull() ?: return
 
@@ -39,11 +37,6 @@ class PolarMitigationListener : Consumer<MitigationEvent> {
             MitigationEvent::class.java,
             this::accept
         )
-
-        plugin.componentLogger.info(buildText {
-            appendPrefix()
-            success("Hooked into the Polar Bear!")
-        })
     }
 
     private fun isStandingOnJumpBlock(player: Player): Boolean {

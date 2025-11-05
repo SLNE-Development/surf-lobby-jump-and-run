@@ -10,7 +10,6 @@ import org.bukkit.util.BoundingBox
 import java.util.*
 
 data class Parkour(
-    val uid: UUID,
     val identifier: String,
     val displayName: String,
     val boundingBox: BoundingBox,
@@ -22,7 +21,7 @@ data class Parkour(
     val players = mutableObjectSetOf<UUID>()
 
     suspend fun start(player: UUID) {
-        val generator = ParkourGenerator(player.uniqueId, this, Material.RED_CONCRETE)
+        val generator = ParkourGenerator(player, this, Material.RED_CONCRETE)
 
         players.add(player)
         generators.add(generator)

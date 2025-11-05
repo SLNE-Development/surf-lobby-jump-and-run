@@ -3,8 +3,8 @@ package dev.slne.surf.parkour.`object`.jump
 enum class JumpType(val jump: Jump) {
     //    ONE_FORWARD_TWO_LEFT(Jump(1, 2, 0)),
 //    ONE_FORWARD_TWO_RIGHT(Jump(1, -2, 0)),
-    ONE_FORWARD_THREE_LEFT(Jump(1, 3, 0)),
-    ONE_FORWARD_THREE_RIGHT(Jump(1, -3, 0)),
+//    ONE_FORWARD_THREE_LEFT(Jump(1, 3, 0)),
+//    ONE_FORWARD_THREE_RIGHT(Jump(1, -3, 0)),
 
     //TWO_FORWARD(Jump(2, 0, 0)),
 //    TWO_FORWARD_ONE_LEFT(Jump(2, 1, 0)),
@@ -13,8 +13,8 @@ enum class JumpType(val jump: Jump) {
 //    TWO_FORWARD_TWO_RIGHT(Jump(2, -2, 0)),
 
     //    THREE_FORWARD(Jump(3, 0, 0)),
-    THREE_FORWARD_ONE_LEFT(Jump(3, 1, 0)),
-    THREE_FORWARD_ONE_RIGHT(Jump(3, -1, 0)),
+//    THREE_FORWARD_ONE_LEFT(Jump(3, 1, 0)),
+//    THREE_FORWARD_ONE_RIGHT(Jump(3, -1, 0)),
     THREE_FORWARD_TWO_LEFT(Jump(3, 2, 0)),
     THREE_FORWARD_TWO_RIGHT(Jump(3, -2, 0)),
 //    THREE_FORWARD_THREE_LEFT(Jump(3, 3, 0)),

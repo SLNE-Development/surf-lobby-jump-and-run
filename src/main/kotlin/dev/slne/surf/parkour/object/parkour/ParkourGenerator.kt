@@ -6,17 +6,18 @@ import dev.slne.surf.parkour.plugin
 import dev.slne.surf.parkour.util.getPlayer
 import dev.slne.surf.surfapi.bukkit.api.glow.glowingApi
 import dev.slne.surf.surfapi.bukkit.api.util.forEachPlayer
+import dev.slne.surf.surfapi.core.api.messages.adventure.playSound
+import dev.slne.surf.surfapi.core.api.messages.adventure.sendText
 import dev.slne.surf.surfapi.core.api.util.random
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.withTimeout
 import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.Location
 import org.bukkit.Material
+import org.bukkit.Sound
 import org.bukkit.block.BlockFace
 import org.bukkit.util.Vector
 import java.util.*
-import kotlin.time.Duration.Companion.seconds
 
 data class ParkourGenerator(
     val associatedPlayer: UUID,
@@ -36,7 +37,7 @@ data class ParkourGenerator(
         val player = associatedPlayer.getPlayer() ?: return@withContext
 
         generateInitial()
-        player.teleportAsync(blockLocations.first.location)
+        player.teleportAsync(blockLocations.first.location.block.getRelative(BlockFace.UP).location)
     }
 
     suspend fun stop() = withContext(Dispatchers.IO) {
@@ -75,6 +76,8 @@ data class ParkourGenerator(
         glowingApi.makeGlowing(nextLocation.location, player, color)
     }
 
+    private var oldNextOne: JumpType? = null
+
     suspend fun generate() = withContext(Dispatchers.IO) {
         val player = associatedPlayer.getPlayer() ?: return@withContext
 
@@ -82,8 +85,15 @@ data class ParkourGenerator(
             error("ParkourGenerator not started yet.")
         }
 
-        val newNextOne =
-            JumpType.entries.random().jump.generate(blockLocations.third, player, boundingBox)
+        player.sendText {
+            appendPrefix()
+            success("${oldNextOne?.jump}")
+        }
+
+        val newJump = JumpType.entries.random()
+        val newNextOne = newJump.jump.generate(blockLocations.third, player, boundingBox)
+
+        oldNextOne = newJump
 
         forEachPlayer {
             it.sendBlockChange(blockLocations.first.location, airData)
@@ -91,13 +101,17 @@ data class ParkourGenerator(
         }
 
         glowingApi.removeGlowing(blockLocations.second.location, player)
-        glowingApi.makeGlowing(blockLocations.first.location, player, color)
+        glowingApi.makeGlowing(blockLocations.third.location, player, color)
 
         blockLocations = Triple(
             blockLocations.second,
             blockLocations.third,
             newNextOne
         )
+
+        player.playSound {
+            type(Sound.BLOCK_NOTE_BLOCK_PLING)
+        }
     }
 
     private suspend fun findBock(): Location = withContext(Dispatchers.IO) {
@@ -122,23 +136,21 @@ data class ParkourGenerator(
 
         var tries = 0
 
-        withTimeout(3.seconds) {
-            while (true) {
-                tries++
-                val x = (midX + random.nextInt(-halfRangeX, halfRangeX + 1))
-                    .coerceIn(minX, maxX)
-                val y = (midY + random.nextInt(-halfRangeY, halfRangeY + 1))
-                    .coerceIn(minY, maxY)
-                val z = (midZ + random.nextInt(-halfRangeZ, halfRangeZ + 1))
-                    .coerceIn(minZ, maxZ)
+        while (tries < 100) {
+            tries++
+            val x = (midX + random.nextInt(-halfRangeX, halfRangeX + 1))
+                .coerceIn(minX, maxX)
+            val y = (midY + random.nextInt(-halfRangeY, halfRangeY + 1))
+                .coerceIn(minY, maxY)
+            val z = (midZ + random.nextInt(-halfRangeZ, halfRangeZ + 1))
+                .coerceIn(minZ, maxZ)
 
-                val block = Location(_world, x, y, z).getContextBlock()
-                val above = block.getRelative(BlockFace.UP, 1)
-                val above2 = block.getRelative(BlockFace.UP, 2)
+            val block = Location(_world, x, y, z).getContextBlock()
+            val above = block.getRelative(BlockFace.UP, 1)
+            val above2 = block.getRelative(BlockFace.UP, 2)
 
-                if (above.isEmpty && above2.isEmpty) {
-                    return@withTimeout block.location
-                }
+            if (above.isEmpty && above2.isEmpty) {
+                return@withContext block.location
             }
         }
 

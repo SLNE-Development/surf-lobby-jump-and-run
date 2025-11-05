@@ -1,10 +1,9 @@
-package dev.slne.surf.parkour.listener
+package dev.slne.surf.parkour.hook
 
 import dev.slne.surf.parkour.plugin
 import dev.slne.surf.parkour.service.parkourService
 import dev.slne.surf.parkour.util.anyOfType
 import dev.slne.surf.surfapi.bukkit.api.event.register
-import dev.slne.surf.surfapi.core.api.messages.adventure.buildText
 import me.frep.vulcan.api.event.VulcanGhostBlockEvent
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
@@ -12,7 +11,7 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.util.Vector
 
-object VulcanEventListener : Listener {
+class VulcanHook : Listener {
     @EventHandler
     fun onPlayerGhostBlock(event: VulcanGhostBlockEvent) {
         if (this.isStandingOnJumpBlock(event.player)) {
@@ -26,11 +25,6 @@ object VulcanEventListener : Listener {
         }
 
         this.register(plugin)
-
-        plugin.componentLogger.info(buildText {
-            appendPrefix()
-            success("Hooked into the Vulcanic Eruption!")
-        })
     }
 
     private fun isStandingOnJumpBlock(player: Player): Boolean {
