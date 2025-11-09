@@ -41,7 +41,7 @@ class ParkourService {
 
         player.sendText {
             appendPrefix()
-            error("Der Parkour wurde abgebrochen")
+            error("Der Parkour wurde abgebrochen.")
         }
         SoundService.playFailure(player)
     }

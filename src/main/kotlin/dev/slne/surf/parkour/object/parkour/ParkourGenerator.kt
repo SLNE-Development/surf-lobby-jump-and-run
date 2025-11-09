@@ -108,10 +108,6 @@ data class ParkourGenerator(
             blockLocations.third,
             newNextOne
         )
-
-        player.playSound {
-            type(Sound.BLOCK_NOTE_BLOCK_PLING)
-        }
     }
 
     private suspend fun findBock(): Location = withContext(Dispatchers.IO) {
