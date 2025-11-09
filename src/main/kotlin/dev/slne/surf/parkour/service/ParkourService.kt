@@ -41,8 +41,9 @@ class ParkourService {
 
         player.sendText {
             appendPrefix()
-            success("failed")
+            error("Der Parkour wurde abgebrochen")
         }
+        SoundService.playFailure(player)
     }
 
     suspend fun triggerSuccess(player: Player) {
@@ -50,6 +51,8 @@ class ParkourService {
         val generator = parkour.getGenerator(player) ?: return
 
         generator.generate()
+
+        SoundService.playSuccess(player)
     }
 
     fun getParkour(player: Player) = _parkours.find { it.players.contains(player.uniqueId) }
