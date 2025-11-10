@@ -43,7 +43,7 @@ class ParkourService {
             appendPrefix()
             error("Der Parkour wurde abgebrochen.")
         }
-        SoundService.playFailure(player)
+        soundService.playFailure(player)
     }
 
     suspend fun triggerSuccess(player: Player) {
@@ -52,7 +52,7 @@ class ParkourService {
 
         generator.generate()
 
-        SoundService.playSuccess(player)
+        soundService.playSuccess(player)
     }
 
     fun getParkour(player: Player) = _parkours.find { it.players.contains(player.uniqueId) }
