@@ -7,7 +7,7 @@ import org.bukkit.Sound as BukkitSound
 
 class SoundService {
     fun playSuccess(player: Player) {
-        player.playSound {
+        player.playSound(true) {
             type(BukkitSound.ENTITY_CHICKEN_EGG)
             source(AdventureSound.Source.NEUTRAL)
             pitch(1.0f)
@@ -15,7 +15,7 @@ class SoundService {
     }
 
     fun playFailure(player: Player) {
-        player.playSound {
+        player.playSound(true) {
             type(BukkitSound.ENTITY_ITEM_BREAK)
             source(AdventureSound.Source.AMBIENT)
             pitch(1.0f)
@@ -23,7 +23,7 @@ class SoundService {
     }
 
     fun playHighscore(player: Player) {
-        player.playSound {
+        player.playSound(true) {
             type(BukkitSound.ENTITY_ENDER_DRAGON_GROWL)
             source(AdventureSound.Source.HOSTILE)
             pitch(1.0f)
@@ -31,7 +31,7 @@ class SoundService {
     }
 
     fun playInfo(player: Player) {
-        player.playSound {
+        player.playSound(true) {
             type(BukkitSound.ENTITY_VILLAGER_YES)
             source(AdventureSound.Source.NEUTRAL)
             pitch(1.0f)
