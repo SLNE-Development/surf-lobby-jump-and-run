@@ -10,6 +10,7 @@ import org.bukkit.util.BoundingBox
 import java.util.*
 
 data class Parkour(
+    val uuid: UUID,
     val identifier: String,
     val displayName: String,
     val boundingBox: BoundingBox,
