@@ -6,7 +6,6 @@ import dev.slne.surf.parkour.plugin
 import dev.slne.surf.parkour.util.getPlayer
 import dev.slne.surf.surfapi.bukkit.api.glow.glowingApi
 import dev.slne.surf.surfapi.bukkit.api.util.forEachPlayer
-import dev.slne.surf.surfapi.core.api.messages.adventure.playSound
 import dev.slne.surf.surfapi.core.api.messages.adventure.sendText
 import dev.slne.surf.surfapi.core.api.util.random
 import kotlinx.coroutines.Dispatchers
@@ -14,7 +13,6 @@ import kotlinx.coroutines.withContext
 import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.Location
 import org.bukkit.Material
-import org.bukkit.Sound
 import org.bukkit.block.BlockFace
 import org.bukkit.util.Vector
 import java.util.*
@@ -31,10 +29,13 @@ data class ParkourGenerator(
     private val color = NamedTextColor.WHITE
     private val airData = Material.AIR.createBlockData()
 
+    var startTime: Long = -1L
     var currentIndex = 0
 
     suspend fun start() = withContext(Dispatchers.IO) {
         val player = associatedPlayer.getPlayer() ?: return@withContext
+
+        startTime = System.currentTimeMillis()
 
         generateInitial()
         player.teleportAsync(blockLocations.first.location.block.getRelative(BlockFace.UP).location)

@@ -1,5 +1,6 @@
 package dev.slne.surf.parkour.`object`.parkour
 
+import dev.slne.surf.parkour.service.parkourService
 import dev.slne.surf.surfapi.core.api.util.mutableObjectSetOf
 import org.bukkit.Bukkit
 import org.bukkit.Location
@@ -32,6 +33,19 @@ data class Parkour(
 
     fun getGenerator(player: UUID) = generators.find { it.associatedPlayer == player }
     fun getGenerator(player: Player) = getGenerator(player.uniqueId)
+
+    suspend fun processRun(player: UUID) {
+        val generator = generators.find { it.associatedPlayer == player } ?: return
+
+        parkourService.addRun(
+            ParkourRun(
+                this,
+                player,
+                generator.currentIndex,
+                System.currentTimeMillis() - generator.startTime
+            )
+        )
+    }
 
     suspend fun exit(player: UUID) {
         val generator = generators.find { it.associatedPlayer == player } ?: return

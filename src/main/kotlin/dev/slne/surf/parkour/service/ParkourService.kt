@@ -3,7 +3,6 @@ package dev.slne.surf.parkour.service
 import dev.slne.surf.parkour.database.ParkourRunsTable
 import dev.slne.surf.parkour.`object`.parkour.Parkour
 import dev.slne.surf.parkour.`object`.parkour.ParkourRun
-import dev.slne.surf.surfapi.core.api.messages.adventure.sendText
 import dev.slne.surf.surfapi.core.api.util.mutableObjectSetOf
 import kotlinx.coroutines.Dispatchers
 import org.bukkit.entity.Player
@@ -48,13 +47,11 @@ class ParkourService {
 
     suspend fun triggerFailure(player: Player) {
         val parkour = getParkour(player) ?: return
-        parkour.exit(player.uniqueId)
 
-        player.sendText {
-            appendPrefix()
-            error("Der Parkour wurde abgebrochen.")
-        }
         soundService.playFailure(player)
+
+        parkour.processRun(player.uniqueId)
+        parkour.exit(player.uniqueId)
     }
 
     suspend fun triggerSuccess(player: Player) {

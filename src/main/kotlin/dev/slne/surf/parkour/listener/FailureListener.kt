@@ -4,6 +4,7 @@ import com.github.shynixn.mccoroutine.folia.entityDispatcher
 import com.github.shynixn.mccoroutine.folia.launch
 import dev.slne.surf.parkour.plugin
 import dev.slne.surf.parkour.service.parkourService
+import dev.slne.surf.surfapi.core.api.messages.adventure.sendText
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerMoveEvent
@@ -33,6 +34,11 @@ class FailureListener : Listener {
 
             if (playerY < current.y && playerY < next.y) {
                 parkourService.triggerFailure(player)
+
+                player.sendText {
+                    appendPrefix()
+                    info("Du bist runtergefallen...")
+                }
             }
         }
     }
