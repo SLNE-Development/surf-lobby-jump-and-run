@@ -7,6 +7,7 @@ import dev.slne.surf.parkour.permission.ParkourPermissionRegistry
 import dev.slne.surf.parkour.service.parkourService
 import dev.slne.surf.surfapi.core.api.messages.adventure.sendText
 import org.bukkit.Location
+import java.util.*
 
 fun CommandAPICommand.parkourCreateCommand() = subcommand("create") {
     withPermission(ParkourPermissionRegistry.COMMAND_PARKOUR_CREATE)
@@ -47,6 +48,7 @@ fun CommandAPICommand.parkourCreateCommand() = subcommand("create") {
         }
 
         parkourService.createParkour(
+            UUID.randomUUID(),
             identifier,
             displayname,
             selection,

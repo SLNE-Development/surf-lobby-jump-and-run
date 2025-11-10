@@ -1,13 +1,18 @@
 package dev.slne.surf.parkour.service
 
+import com.github.shynixn.mccoroutine.folia.launch
 import dev.slne.surf.parkour.database.ParkourRunsTable
+import dev.slne.surf.parkour.database.ParkourTable
 import dev.slne.surf.parkour.`object`.parkour.Parkour
 import dev.slne.surf.parkour.`object`.parkour.ParkourRun
+import dev.slne.surf.parkour.parkourConfig
+import dev.slne.surf.parkour.plugin
 import dev.slne.surf.surfapi.core.api.util.mutableObjectSetOf
 import kotlinx.coroutines.Dispatchers
 import org.bukkit.entity.Player
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.and
+import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
@@ -21,7 +26,7 @@ class ParkourService {
     }
 
     fun createParkour(
-        uuid: UUID = UUID.randomUUID(),
+        uuid: UUID,
         identifier: String,
         displayName: String,
         boundingBox: org.bukkit.util.BoundingBox,
@@ -40,6 +45,11 @@ class ParkourService {
         )
 
         _parkours.add(parkour)
+
+        plugin.launch {
+            registerParkour(parkourConfig.config.serverUuid, parkour)
+        }
+
         return parkour
     }
 
@@ -59,7 +69,6 @@ class ParkourService {
         val generator = parkour.getGenerator(player) ?: return
 
         generator.generate()
-
         soundService.playSuccess(player)
     }
 
@@ -118,6 +127,27 @@ class ParkourService {
                     jumps = it[ParkourRunsTable.runJumps],
                     time = it[ParkourRunsTable.runTime]
                 )
+            }
+        }
+
+    suspend fun registerParkour(serverUuid: UUID, parkour: Parkour) =
+        newSuspendedTransaction(Dispatchers.IO) {
+            ParkourTable.insert {
+                it[parkourUuid] = parkour.uuid
+                it[this.serverUuid] = serverUuid
+                it[identifier] = parkour.identifier
+                it[displayName] = parkour.displayName
+                it[world] = parkour.world
+                it[boundingBox] = parkour.boundingBox
+                it[startLocation] = parkour.startLocation
+                it[respawnLocation] = parkour.respawnLocation
+            }
+        }
+
+    suspend fun unregisterParkour(serverUuid: UUID, parkour: Parkour) =
+        newSuspendedTransaction(Dispatchers.IO) {
+            ParkourTable.deleteWhere {
+                (parkourUuid eq parkour.uuid) and (this.serverUuid eq serverUuid)
             }
         }
 

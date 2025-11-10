@@ -7,6 +7,7 @@ import org.jetbrains.exposed.dao.id.LongIdTable
 
 object ParkourTable : LongIdTable("parkour_parkours") {
     val parkourUuid = uuid("uuid").uniqueIndex()
+    val serverUuid = uuid("server_uuid")
     val identifier = varchar("identifier", 100).uniqueIndex()
     val displayName = varchar("display_name", 100)
     val world = world("world")
