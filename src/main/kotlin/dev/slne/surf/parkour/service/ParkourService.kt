@@ -60,6 +60,8 @@ class ParkourService {
     fun getParkour(identifier: String) = _parkours.find { it.identifier == identifier }
     fun exists(identifier: String) = _parkours.any { it.identifier == identifier }
 
+    suspend fun addRun()
+
     companion object {
         val INSTANCE = ParkourService()
     }
