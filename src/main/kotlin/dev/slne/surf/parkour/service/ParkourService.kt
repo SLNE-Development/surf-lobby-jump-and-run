@@ -168,6 +168,33 @@ class ParkourService {
             }
         }
 
+    suspend fun getParkours(serverUUid: UUID) = newSuspendedTransaction(Dispatchers.IO) {
+        ParkourTable.selectAll().where(
+            (ParkourTable.serverUuid eq serverUUid)
+        ).map {
+            Parkour(
+                uuid = it[ParkourTable.parkourUuid],
+                identifier = it[ParkourTable.identifier],
+                displayName = it[ParkourTable.displayName],
+                boundingBox = it[ParkourTable.boundingBox],
+                world = it[ParkourTable.world],
+                startLocation = it[ParkourTable.startLocation],
+                respawnLocation = it[ParkourTable.respawnLocation]
+            )
+        }
+    }
+
+    fun loadParkours() {
+        val serverUuid = parkourConfig.config.serverUuid
+
+        plugin.launch {
+            val parkours = getParkours(serverUuid)
+
+            _parkours.clear()
+            _parkours.addAll(parkours)
+        }
+    }
+
     companion object {
         val INSTANCE = ParkourService()
     }
