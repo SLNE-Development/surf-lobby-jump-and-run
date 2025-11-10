@@ -9,4 +9,5 @@ fun parkourCommand() = commandAPICommand("parkour") {
     parkourListCommand()
     parkourReloadCommand()
     parkourCreateCommand()
+    parkourStatsCommand()
 }

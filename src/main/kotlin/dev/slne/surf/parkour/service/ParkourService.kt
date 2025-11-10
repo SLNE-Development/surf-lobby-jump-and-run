@@ -75,6 +75,7 @@ class ParkourService {
     fun getParkour(player: Player) = _parkours.find { it.players.contains(player.uniqueId) }
     fun getParkours() = _parkours
     fun getParkour(identifier: String) = _parkours.find { it.identifier == identifier }
+    fun getParkour(uuid: UUID) = _parkours.find { it.uuid == uuid }
     fun exists(identifier: String) = _parkours.any { it.identifier == identifier }
 
     suspend fun addRun(run: ParkourRun) = newSuspendedTransaction(Dispatchers.IO) {
@@ -85,6 +86,22 @@ class ParkourService {
             it[runTime] = run.time
         }
     }
+
+    suspend fun getRuns(player: Player) =
+        newSuspendedTransaction(Dispatchers.IO) {
+            ParkourRunsTable.selectAll().where(
+                (ParkourRunsTable.playerUuid eq player.uniqueId)
+            ).mapNotNull { row ->
+                val parkour =
+                    getParkour(row[ParkourRunsTable.parkourUuid]) ?: return@mapNotNull null
+                ParkourRun(
+                    playerUuid = player.uniqueId,
+                    parkour = parkour,
+                    jumps = row[ParkourRunsTable.runJumps],
+                    time = row[ParkourRunsTable.runTime]
+                )
+            }
+        }
 
     suspend fun getRuns(player: Player, parkour: Parkour) =
         newSuspendedTransaction(Dispatchers.IO) {
