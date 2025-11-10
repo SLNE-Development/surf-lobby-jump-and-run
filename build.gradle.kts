@@ -27,6 +27,8 @@ dependencies {
     compileOnly(libs.polar.api)
     compileOnly(files("libs/vulcan-api-v1.jar"))
 
+    api(libs.surf.database)
+
     compileOnly(libs.worldedit.core) { isTransitive = false }
     compileOnly(libs.worldedit.bukkit) { isTransitive = false }
 }
