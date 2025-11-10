@@ -61,6 +61,8 @@ data class ParkourGenerator(
         val nextOneJump = JumpType.entries.random()
         val nextOneLocation = nextOneJump.jump.generate(nextLocation, player, boundingBox)
 
+        currentIndex++
+
 
         forEachPlayer {
             it.sendBlockChange(currentBlock, material.createBlockData())
@@ -81,6 +83,8 @@ data class ParkourGenerator(
 
     suspend fun generate() = withContext(Dispatchers.IO) {
         val player = associatedPlayer.getPlayer() ?: return@withContext
+
+        currentIndex++
 
         if (!::blockLocations.isInitialized) {
             error("ParkourGenerator not started yet.")

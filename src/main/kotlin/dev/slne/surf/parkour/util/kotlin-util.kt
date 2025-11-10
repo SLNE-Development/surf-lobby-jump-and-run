@@ -1,9 +1,10 @@
 package dev.slne.surf.parkour.util
 
 import com.github.retrooper.packetevents.util.Vector3i
-import dev.slne.surf.surfapi.core.api.util.dateTimeFormatter
 import org.bukkit.util.Vector
 import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 inline fun <reified T> Triple<*, *, *>.anyOfType(predicate: (T) -> Boolean): Boolean {
     return listOf(first, second, third)
@@ -17,4 +18,9 @@ fun Vector.equalsVector3i(other: Vector3i): Boolean {
             this.blockZ == other.z
 }
 
-val Long.formattedMillis: String get() = dateTimeFormatter.format(Instant.ofEpochMilli(this))
+private val formatter = DateTimeFormatter.ofPattern("HH:mm:ss.SSS")
+
+val Long.formattedTimeEpoch: String
+    get() = Instant.ofEpochMilli(this)
+        .atZone(ZoneId.systemDefault())
+        .format(formatter)

@@ -7,6 +7,7 @@ import dev.slne.surf.parkour.`object`.parkour.Parkour
 import dev.slne.surf.parkour.`object`.parkour.ParkourRun
 import dev.slne.surf.parkour.parkourConfig
 import dev.slne.surf.parkour.plugin
+import dev.slne.surf.surfapi.core.api.messages.adventure.sendText
 import dev.slne.surf.surfapi.core.api.util.mutableObjectSetOf
 import kotlinx.coroutines.Dispatchers
 import org.bukkit.entity.Player
@@ -62,6 +63,11 @@ class ParkourService {
 
         parkour.processRun(player.uniqueId)
         parkour.exit(player.uniqueId)
+
+        player.sendText {
+            appendPrefix()
+            info("Du bist runtergefallen...")
+        }
     }
 
     suspend fun triggerSuccess(player: Player) {
