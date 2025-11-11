@@ -11,26 +11,27 @@ data class Jump(
 ) {
     fun generate(previous: Vector, player: Player, area: BoundingBox): Vector {
         val yawRad = Math.toRadians(player.location.yaw.toDouble())
-
         val forwardVec = Vector(-kotlin.math.sin(yawRad), 0.0, kotlin.math.cos(yawRad)).normalize()
         val lateralVec = Vector(forwardVec.z, 0.0, -forwardVec.x).normalize()
 
-        val offset = forwardVec.clone().multiply(forward.toDouble())
-        offset.add(lateralVec.clone().multiply(lateral.toDouble()))
+        var target: Vector
+        var tries = 0
 
-        offset.y = vertical.toDouble()
+        do {
+            val f = forward.coerceIn(2..4)
+            val l = lateral.coerceIn(-2..2)
+            val v = vertical.coerceIn(-1..1)
 
-        var target = previous.clone().add(offset)
+            target = previous.clone().add(forwardVec.clone().multiply(f.toDouble()))
+            target.add(lateralVec.clone().multiply(l.toDouble()))
+            target.y += v
 
-        if (!area.contains(target)) {
-            target = area.clamp(target)
-        }
+            target.x = target.x.coerceIn(area.minX, area.maxX)
+            target.y = target.y.coerceIn(area.minY, area.maxY)
+            target.z = target.z.coerceIn(area.minZ, area.maxZ)
 
-        if (previous.distance(target) < 2.0) {
-            val direction = (target.clone().subtract(previous)).normalize()
-            target = previous.clone().add(direction.multiply(2.0))
-        }
-
+            tries++
+        } while (previous.distance(target) < 2.0 && tries < 10)
         return target
     }
 
