@@ -121,9 +121,9 @@ data class ParkourGenerator(
         val rangeY = maxY - minY
         val rangeZ = maxZ - minZ
 
-        val halfRangeX = (rangeX * 0.75 * 0.5).toInt()
-        val halfRangeY = (rangeY * 0.75 * 0.5).toInt()
-        val halfRangeZ = (rangeZ * 0.75 * 0.5).toInt()
+        val halfRangeX = (rangeX * 0.25 * 0.5).toInt()
+        val halfRangeY = (rangeY * 0.25 * 0.5).toInt()
+        val halfRangeZ = (rangeZ * 0.25 * 0.5).toInt()
 
         var tries = 0
 
