@@ -6,7 +6,6 @@ import dev.slne.surf.parkour.plugin
 import dev.slne.surf.parkour.util.getPlayer
 import dev.slne.surf.surfapi.bukkit.api.glow.glowingApi
 import dev.slne.surf.surfapi.bukkit.api.util.forEachPlayer
-import dev.slne.surf.surfapi.core.api.messages.adventure.sendText
 import dev.slne.surf.surfapi.core.api.util.random
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -79,8 +78,6 @@ data class ParkourGenerator(
         glowingApi.makeGlowing(nextLocation.location, player, color)
     }
 
-    private var oldNextOne: JumpType? = null
-
     suspend fun generate() = withContext(Dispatchers.IO) {
         val player = associatedPlayer.getPlayer() ?: return@withContext
 
@@ -90,15 +87,8 @@ data class ParkourGenerator(
             error("ParkourGenerator not started yet.")
         }
 
-        player.sendText {
-            appendPrefix()
-            success("${oldNextOne?.jump}")
-        }
-
         val newJump = JumpType.entries.random()
         val newNextOne = newJump.jump.generate(blockLocations.third, player, boundingBox)
-
-        oldNextOne = newJump
 
         forEachPlayer {
             it.sendBlockChange(blockLocations.first.location, airData)
