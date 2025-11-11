@@ -12,6 +12,13 @@ inline fun <reified T> Triple<*, *, *>.anyOfType(predicate: (T) -> Boolean): Boo
         .any(predicate)
 }
 
+inline fun <reified T> Triple<*, *, *>.allOfType(predicate: (T) -> Boolean): Boolean {
+    val items = listOf(first, second, third).filterIsInstance<T>()
+    if (items.isEmpty()) return false
+    return items.all(predicate)
+}
+
+
 fun Vector.equalsVector3i(other: Vector3i): Boolean {
     return this.blockX == other.x &&
             this.blockY == other.y &&

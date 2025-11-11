@@ -60,9 +60,6 @@ data class ParkourGenerator(
         val nextOneJump = JumpType.entries.random()
         val nextOneLocation = nextOneJump.jump.generate(nextLocation, player, boundingBox)
 
-        currentIndex++
-
-
         forEachPlayer {
             it.sendBlockChange(currentBlock, material.createBlockData())
             it.sendBlockChange(nextLocation.toLocation(_world), material.createBlockData())

@@ -41,6 +41,7 @@ fun CommandAPICommand.parkourStatsCommand() = subcommand("stats") {
 
             player.sendText {
                 append(Pagination<ParkourRun> {
+                    resultsPerPage = 10
                     title { primary("Parkour-Statistiken".toSmallCaps(), TextDecoration.BOLD) }
                     rowRenderer { row, _ ->
                         listOf(
