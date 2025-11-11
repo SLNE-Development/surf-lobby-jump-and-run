@@ -34,8 +34,8 @@ data class Parkour(
     fun getGenerator(player: UUID) = generators.find { it.associatedPlayer == player }
     fun getGenerator(player: Player) = getGenerator(player.uniqueId)
 
-    suspend fun processRun(player: UUID): Boolean {
-        val generator = generators.find { it.associatedPlayer == player } ?: return false
+    suspend fun processRun(player: UUID): Int? {
+        val generator = generators.find { it.associatedPlayer == player } ?: return null
         val highscore = parkourService.getHighscore(player, this)
 
         parkourService.addRun(
@@ -47,7 +47,11 @@ data class Parkour(
             )
         )
 
-        return highscore != null && highscore.jumps < generator.currentIndex
+        if (highscore != null && highscore.jumps < generator.currentIndex) {
+            return generator.currentIndex
+        }
+
+        return null
     }
 
     suspend fun exit(player: UUID) {
@@ -55,9 +59,12 @@ data class Parkour(
 
         generator.stop()
         generators.remove(generator)
-        players.remove(player)
 
         val player = Bukkit.getPlayer(player) ?: return
         player.teleportAsync(respawnLocation)
+    }
+
+    fun preExit(player: UUID) {
+        players.remove(player)
     }
 }

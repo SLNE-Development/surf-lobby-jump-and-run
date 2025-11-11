@@ -25,10 +25,6 @@ import java.util.*
 class ParkourService {
     private val _parkours = mutableObjectSetOf<Parkour>()
 
-    suspend fun startParkour(player: Player, parkour: Parkour) {
-        parkour.start(player.uniqueId)
-    }
-
     fun createParkour(
         uuid: UUID,
         identifier: String,
@@ -62,11 +58,15 @@ class ParkourService {
     suspend fun triggerFailure(player: Player) {
         val parkour = getParkour(player) ?: return
 
+        parkour.preExit(player.uniqueId)
         soundService.playFailure(player)
 
-        parkour.processRun(player.uniqueId).let {
-            if (it) {
-
+        parkour.processRun(player.uniqueId)?.let {
+            player.sendText {
+                appendPrefix()
+                success("Du hast mit ")
+                variableValue(it)
+                success(" Sprüngen einen neuen Highscore aufgestellt.")
             }
         }
         parkour.exit(player.uniqueId)
