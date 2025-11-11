@@ -4,7 +4,7 @@ import com.github.shynixn.mccoroutine.folia.launch
 import dev.jorel.commandapi.CommandAPICommand
 import dev.jorel.commandapi.kotlindsl.playerExecutor
 import dev.jorel.commandapi.kotlindsl.subcommand
-import dev.slne.surf.parkour.`object`.parkour.ParkourRun
+import dev.slne.surf.parkour.model.parkour.ParkourRun
 import dev.slne.surf.parkour.permission.ParkourPermissionRegistry
 import dev.slne.surf.parkour.plugin
 import dev.slne.surf.parkour.service.parkourService

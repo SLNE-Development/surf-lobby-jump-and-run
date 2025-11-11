@@ -3,8 +3,8 @@ package dev.slne.surf.parkour.service
 import com.github.shynixn.mccoroutine.folia.launch
 import dev.slne.surf.parkour.database.ParkourRunsTable
 import dev.slne.surf.parkour.database.ParkourTable
-import dev.slne.surf.parkour.`object`.parkour.Parkour
-import dev.slne.surf.parkour.`object`.parkour.ParkourRun
+import dev.slne.surf.parkour.model.parkour.Parkour
+import dev.slne.surf.parkour.model.parkour.ParkourRun
 import dev.slne.surf.parkour.parkourConfig
 import dev.slne.surf.parkour.plugin
 import dev.slne.surf.surfapi.core.api.messages.adventure.sendText
