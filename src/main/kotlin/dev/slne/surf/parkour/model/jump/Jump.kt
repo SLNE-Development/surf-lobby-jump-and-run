@@ -12,7 +12,7 @@ data class Jump(
     fun generate(previous: Vector, player: Player, area: BoundingBox): Vector {
         val yawRad = Math.toRadians(player.location.yaw.toDouble())
         val forwardVec = Vector(-kotlin.math.sin(yawRad), 0.0, kotlin.math.cos(yawRad)).normalize()
-        val lateralVec = Vector(forwardVec.z, 0.0, -forwardVec.x).normalize()
+        val lateralVec = Vector(forwardVec.z, 0.0, -forwardVec.x)
 
         var target: Vector
         var tries = 0
