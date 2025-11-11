@@ -35,11 +35,4 @@ data class Jump(
         return target
     }
 
-    private fun BoundingBox.clamp(vector: Vector): Vector {
-        return Vector(
-            vector.x.coerceIn(this.minX, this.maxX),
-            vector.y.coerceIn(this.minY, this.maxY),
-            vector.z.coerceIn(this.minZ, this.maxZ)
-        )
-    }
 }
