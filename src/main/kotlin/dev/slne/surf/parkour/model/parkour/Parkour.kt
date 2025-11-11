@@ -1,4 +1,4 @@
-package dev.slne.surf.parkour.`object`.parkour
+package dev.slne.surf.parkour.model.parkour
 
 import dev.slne.surf.parkour.service.parkourService
 import dev.slne.surf.surfapi.core.api.util.mutableObjectSetOf

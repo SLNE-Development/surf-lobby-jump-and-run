@@ -1,4 +1,4 @@
-package dev.slne.surf.parkour.`object`.parkour
+package dev.slne.surf.parkour.model.parkour
 
 import java.util.*
 
