@@ -19,7 +19,7 @@ fun CommandAPICommand.parkourStatsCommand() = subcommand("stats") {
     withPermission(ParkourPermissionRegistry.COMMAND_PARKOUR_STATS)
     playerExecutor { player, _ ->
         plugin.launch {
-            val stats = parkourService.getRuns(player)
+            val stats = parkourService.getRuns(player.uniqueId)
 
             Pagination<ParkourRun> {
                 title { primary("Parkour-Statistiken".toSmallCaps(), TextDecoration.BOLD) }

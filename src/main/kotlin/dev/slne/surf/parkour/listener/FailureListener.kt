@@ -29,9 +29,9 @@ class FailureListener : Listener {
             val current = generator.blockLocations.first
             val next = generator.blockLocations.third
 
-            val playerY = event.to.y
+            val playerY = event.to.blockY
 
-            if (playerY < current.y && playerY < next.y) {
+            if (playerY < current.blockX && playerY < next.blockY) {
                 parkourService.triggerFailure(player)
             }
         }

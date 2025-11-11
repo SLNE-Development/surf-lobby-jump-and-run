@@ -20,7 +20,7 @@ class PlayerPacketListener : PacketListenerAbstract() {
 
         val packet = WrapperPlayClientPlayerBlockPlacement(event)
         val parkour = parkourService.getParkour(player) ?: return
-        val generator = parkour.generators[player.uniqueId] ?: return
+        val generator = parkour.getGenerator(player.uniqueId) ?: return
 
         generator.blockLocations.anyOfType<Vector> {
             it.equalsVector3i(packet.blockPosition)

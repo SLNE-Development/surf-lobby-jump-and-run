@@ -9,7 +9,10 @@ import dev.slne.surf.parkour.database.ParkourRunsTable
 import dev.slne.surf.parkour.database.ParkourTable
 import dev.slne.surf.parkour.hook.PolarHook
 import dev.slne.surf.parkour.hook.VulcanHook
-import dev.slne.surf.parkour.listener.*
+import dev.slne.surf.parkour.listener.FailureListener
+import dev.slne.surf.parkour.listener.ParkourItemListener
+import dev.slne.surf.parkour.listener.PlayerPacketListener
+import dev.slne.surf.parkour.listener.SuccessListener
 import dev.slne.surf.parkour.service.parkourService
 import dev.slne.surf.surfapi.bukkit.api.builder.buildItem
 import dev.slne.surf.surfapi.bukkit.api.builder.buildLore
@@ -34,7 +37,6 @@ class BukkitMain : SuspendingJavaPlugin() {
         PolarHook().register()
         VulcanHook().register()
 
-        PacketEvents.getAPI().eventManager.registerListener(ParkourPacketListener())
         PacketEvents.getAPI().eventManager.registerListener(PlayerPacketListener())
 
         parkourCommand()

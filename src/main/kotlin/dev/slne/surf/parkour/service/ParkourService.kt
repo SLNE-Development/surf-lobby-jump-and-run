@@ -10,7 +10,10 @@ import dev.slne.surf.parkour.plugin
 import dev.slne.surf.surfapi.core.api.messages.adventure.sendText
 import dev.slne.surf.surfapi.core.api.util.mutableObjectSetOf
 import kotlinx.coroutines.Dispatchers
+import org.bukkit.Location
+import org.bukkit.World
 import org.bukkit.entity.Player
+import org.bukkit.util.BoundingBox
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.deleteWhere
@@ -30,10 +33,10 @@ class ParkourService {
         uuid: UUID,
         identifier: String,
         displayName: String,
-        boundingBox: org.bukkit.util.BoundingBox,
-        world: org.bukkit.World,
-        startLocation: org.bukkit.Location,
-        respawnLocation: org.bukkit.Location
+        boundingBox: BoundingBox,
+        world: World,
+        startLocation: Location,
+        respawnLocation: Location
     ): Parkour {
         val parkour = Parkour(
             uuid = uuid,
@@ -61,7 +64,11 @@ class ParkourService {
 
         soundService.playFailure(player)
 
-        parkour.processRun(player.uniqueId)
+        parkour.processRun(player.uniqueId).let {
+            if (it) {
+
+            }
+        }
         parkour.exit(player.uniqueId)
 
         player.sendText {
@@ -93,15 +100,15 @@ class ParkourService {
         }
     }
 
-    suspend fun getRuns(player: Player) =
+    suspend fun getRuns(player: UUID) =
         newSuspendedTransaction(Dispatchers.IO) {
             ParkourRunsTable.selectAll().where(
-                (ParkourRunsTable.playerUuid eq player.uniqueId)
+                (ParkourRunsTable.playerUuid eq player)
             ).mapNotNull { row ->
                 val parkour =
                     getParkour(row[ParkourRunsTable.parkourUuid]) ?: return@mapNotNull null
                 ParkourRun(
-                    playerUuid = player.uniqueId,
+                    playerUuid = player,
                     parkour = parkour,
                     jumps = row[ParkourRunsTable.runJumps],
                     time = row[ParkourRunsTable.runTime]
@@ -109,14 +116,14 @@ class ParkourService {
             }
         }
 
-    suspend fun getRuns(player: Player, parkour: Parkour) =
+    suspend fun getRuns(player: UUID, parkour: Parkour) =
         newSuspendedTransaction(Dispatchers.IO) {
             ParkourRunsTable.selectAll().where(
                 (ParkourRunsTable.parkourUuid eq parkour.uuid) and
-                        (ParkourRunsTable.playerUuid eq player.uniqueId)
+                        (ParkourRunsTable.playerUuid eq player)
             ).map {
                 ParkourRun(
-                    playerUuid = player.uniqueId,
+                    playerUuid = player,
                     parkour = parkour,
                     jumps = it[ParkourRunsTable.runJumps],
                     time = it[ParkourRunsTable.runTime]
@@ -124,14 +131,14 @@ class ParkourService {
             }
         }
 
-    suspend fun getHighscore(player: Player, parkour: Parkour) =
+    suspend fun getHighscore(player: UUID, parkour: Parkour) =
         newSuspendedTransaction(Dispatchers.IO) {
             ParkourRunsTable.selectAll().where(
                 (ParkourRunsTable.parkourUuid eq parkour.uuid) and
-                        (ParkourRunsTable.playerUuid eq player.uniqueId)
+                        (ParkourRunsTable.playerUuid eq player)
             ).orderBy(ParkourRunsTable.runTime).limit(1).firstNotNullOfOrNull {
                 ParkourRun(
-                    playerUuid = player.uniqueId,
+                    playerUuid = player,
                     parkour = parkour,
                     jumps = it[ParkourRunsTable.runJumps],
                     time = it[ParkourRunsTable.runTime]
