@@ -3,6 +3,7 @@ package dev.slne.surf.parkour.listener
 import com.github.shynixn.mccoroutine.folia.entityDispatcher
 import com.github.shynixn.mccoroutine.folia.launch
 import dev.slne.surf.parkour.plugin
+import dev.slne.surf.parkour.util.inventoryItem
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.inventory.InventoryClickEvent
@@ -16,14 +17,14 @@ class ParkourItemListener : Listener {
     fun onClick(event: InventoryClickEvent) {
         val item = event.currentItem ?: return
 
-        if (item == plugin.inventoryItem) {
+        if (item == inventoryItem) {
             event.isCancelled = true
         }
     }
 
     @EventHandler
     fun onDrop(event: PlayerDropItemEvent) {
-        if (event.itemDrop.itemStack == plugin.inventoryItem) {
+        if (event.itemDrop.itemStack == inventoryItem) {
             event.isCancelled = true
         }
     }
@@ -32,13 +33,13 @@ class ParkourItemListener : Listener {
     fun onJoin(event: PlayerJoinEvent) {
         val player = event.player
         plugin.launch(plugin.entityDispatcher(player)) {
-            player.inventory.setItem(6, plugin.inventoryItem)
+            player.inventory.setItem(6, inventoryItem)
         }
     }
 
     @EventHandler
     fun onQuit(event: PlayerQuitEvent) {
-        event.player.inventory.removeItem(plugin.inventoryItem)
+        event.player.inventory.removeItem(inventoryItem)
     }
 
     @EventHandler
