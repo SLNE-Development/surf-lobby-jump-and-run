@@ -1,0 +1,8 @@
+name: SurfLobbyJumpAndRun
+version: 1.0.0
+main: net.milocodee.surf.Main
+api-version: 1.21
+authors:
+  - Milo
+commands:
+
