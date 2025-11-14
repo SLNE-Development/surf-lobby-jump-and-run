@@ -82,7 +82,15 @@ class ParkourService {
         val generator = parkour.getGenerator(player) ?: return
 
         generator.generate()
-        soundService.playSuccess(player)
+
+        val highscoreJumps = parkourService.getHighscore(player.uniqueId, parkour)?.jumps ?: 0
+        val currentJumps = generator.currentIndex
+
+        if (currentJumps == highscoreJumps + 1) {
+            soundService.playHighscore(player)
+        } else {
+            soundService.playSuccess(player)
+        }
     }
 
     fun getParkour(player: Player) = _parkours.find { it.players.contains(player.uniqueId) }
