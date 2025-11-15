@@ -18,7 +18,7 @@ class ParkourArgument(nodeName: String) : CustomArgument<Parkour, String>(
                     appendPrefix()
                     error("Der Parkour ")
                     variableValue(info.input)
-                    error("wurde nicht gefunden.")
+                    error(" wurde nicht gefunden.")
                 }
             }
     }) {
