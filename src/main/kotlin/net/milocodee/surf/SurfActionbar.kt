@@ -1,28 +1,24 @@
 package net.milocodee.surf
 
 import net.milocodee.surf.listener.ParkourListener
+import net.milocodee.surf.service.ActionbarService
 import org.bukkit.plugin.java.JavaPlugin
 
-class ActionbarPlugin : JavaPlugin() {
+val plugin get() = JavaPlugin.getPlugin(SurfActionbar::class.java)
 
-    private lateinit var actionbarDisplay: ActionbarDisplay
-    private lateinit var parkourListener: ParkourListener
+class SurfActionbar : JavaPlugin() {
 
     override fun onEnable() {
-        actionbarDisplay = ActionbarDisplay(this)
-        ActionbarDisplay.initialize(actionbarDisplay)
+        ActionbarService.init(this)
 
-        parkourListener = ParkourListener(actionbarDisplay)
+        val parkourListener = ParkourListener()
         server.pluginManager.registerEvents(parkourListener, this)
 
-        logger.info("ActionbarPlugin enabled!")
+        logger.info("ActionbarPlugin enabled")
     }
 
     override fun onDisable() {
-        if (this::actionbarDisplay.isInitialized) {
-            actionbarDisplay.cleanup()
-        }
-
-        logger.info("ActionbarPlugin disabled!")
+        ActionbarService.shutdown()
+        logger.info("ActionbarPlugin disabled")
     }
 }
