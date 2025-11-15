@@ -45,7 +45,10 @@ class BukkitMain : SuspendingJavaPlugin() {
             SchemaUtils.create(ParkourTable, ParkourRunsTable)
         }
     }
+
+    val parkourConfig = ParkourConfiguration()
 }
 
-val parkourConfig = ParkourConfiguration()
+val config get() = plugin.parkourConfig.config
+
 

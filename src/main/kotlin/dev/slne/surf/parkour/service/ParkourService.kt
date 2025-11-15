@@ -1,11 +1,11 @@
 package dev.slne.surf.parkour.service
 
 import com.github.shynixn.mccoroutine.folia.launch
+import dev.slne.surf.parkour.config
 import dev.slne.surf.parkour.database.ParkourRunsTable
 import dev.slne.surf.parkour.database.ParkourTable
 import dev.slne.surf.parkour.model.parkour.Parkour
 import dev.slne.surf.parkour.model.parkour.ParkourRun
-import dev.slne.surf.parkour.parkourConfig
 import dev.slne.surf.parkour.plugin
 import dev.slne.surf.surfapi.core.api.messages.adventure.sendText
 import dev.slne.surf.surfapi.core.api.util.mutableObjectSetOf
@@ -47,7 +47,7 @@ class ParkourService {
         _parkours.add(parkour)
 
         plugin.launch {
-            registerParkour(parkourConfig.config.serverUuid, parkour)
+            registerParkour(config.serverUuid, parkour)
         }
 
         return parkour
@@ -206,7 +206,7 @@ class ParkourService {
     }
 
     fun loadParkours() {
-        val serverUuid = parkourConfig.config.serverUuid
+        val serverUuid = config.serverUuid
 
         plugin.launch {
             val parkours = getParkours(serverUuid)

@@ -1,6 +1,6 @@
 package dev.slne.surf.parkour.util
 
-import dev.slne.surf.parkour.parkourConfig
+import dev.slne.surf.parkour.config
 import dev.slne.surf.surfapi.bukkit.api.builder.buildItem
 import dev.slne.surf.surfapi.bukkit.api.builder.buildLore
 import dev.slne.surf.surfapi.bukkit.api.builder.displayName
@@ -17,7 +17,7 @@ val inventoryItem
     get() = buildItem(Material.FIREWORK_ROCKET) {
         displayName {
             primary("Jump'n Run", TextDecoration.BOLD)
-            if (parkourConfig.config.betaMode) {
+            if (config.betaMode) {
                 error(" Beta".toSmallCaps())
             }
         }
@@ -48,7 +48,7 @@ val inventoryItem
             line {
                 white("und vieles mehr!")
             }
-            if (parkourConfig.config.betaMode) {
+            if (config.betaMode) {
                 emptyLine()
                 line {
                     spacer(
