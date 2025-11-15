@@ -1,6 +1,5 @@
 package net.milocodee.surf
 
-import com.github.benmanes.caffeine.cache.Cache
 import com.github.benmanes.caffeine.cache.Caffeine
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
@@ -16,17 +15,17 @@ class ActionbarDisplay(
     private val plugin: Plugin
 ) {
 
-    private val highscoreCache: Cache<UUID, Int> = Caffeine.newBuilder()
+    private val highscoreCache = Caffeine.newBuilder()
         .expireAfterWrite(5, TimeUnit.MINUTES)
-        .build()
+        .build<UUID, Int>()
 
-    private val activeTasks: MutableMap<UUID, BukkitTask> = mutableMapOf()
+    private val activeTasks = mutableMapOf<UUID, BukkitTask>()
 
     fun startDisplay(player: Player, currentJumps: () -> Int, highscore: Int) {
         val uuid = player.uniqueId
-        highscoreCache.put(uuid, highscore)
 
         stopDisplay(player)
+        highscoreCache.put(uuid, highscore)
 
         val scheduler: BukkitScheduler = plugin.server.scheduler
 
@@ -36,13 +35,8 @@ class ActionbarDisplay(
                 return@Runnable
             }
 
-            val jumps = try {
-                currentJumps()
-            } catch (e: Exception) {
-                0
-            }
+            val jumps = runCatching { currentJumps() }.getOrDefault(0)
             val cachedHighscore = highscoreCache.getIfPresent(uuid) ?: highscore
-
             val actionBarComponent = buildActionBarComponent(jumps, cachedHighscore)
 
             scheduler.runTask(plugin, Runnable {
@@ -50,7 +44,6 @@ class ActionbarDisplay(
                     player.sendActionBar(actionBarComponent)
                 }
             })
-
         }, 0L, 10L)
 
         activeTasks[uuid] = task
@@ -59,9 +52,7 @@ class ActionbarDisplay(
     fun stopDisplay(player: Player) {
         val uuid = player.uniqueId
 
-        activeTasks[uuid]?.cancel()
-        activeTasks.remove(uuid)
-
+        activeTasks.remove(uuid)?.cancel()
         highscoreCache.invalidate(uuid)
 
         val scheduler: BukkitScheduler = plugin.server.scheduler
@@ -76,8 +67,8 @@ class ActionbarDisplay(
         highscoreCache.put(player.uniqueId, newHighscore)
     }
 
-    private fun buildActionBarComponent(jumps: Int, highscore: Int): Component {
-        return Component.text()
+    private fun buildActionBarComponent(jumps: Int, highscore: Int): Component =
+        Component.text()
             .append(
                 Component.text("Sprünge: ", NamedTextColor.GRAY)
                     .decoration(TextDecoration.BOLD, false)
@@ -99,32 +90,10 @@ class ActionbarDisplay(
                     .decoration(TextDecoration.BOLD, true)
             )
             .build()
-    }
 
     fun cleanup() {
         activeTasks.values.forEach { it.cancel() }
         activeTasks.clear()
-
         highscoreCache.invalidateAll()
-    }
-
-    companion object {
-        private lateinit var INSTANCE: ActionbarDisplay
-
-        fun initialize(instance: ActionbarDisplay) {
-            INSTANCE = instance
-        }
-
-        fun startDisplay(player: Player, currentJumps: () -> Int, highscore: Int) {
-            INSTANCE.startDisplay(player, currentJumps, highscore)
-        }
-
-        fun stopDisplay(player: Player) {
-            INSTANCE.stopDisplay(player)
-        }
-
-        fun updateHighscore(player: Player, newHighscore: Int) {
-            INSTANCE.updateHighscore(player, newHighscore)
-        }
     }
 }
