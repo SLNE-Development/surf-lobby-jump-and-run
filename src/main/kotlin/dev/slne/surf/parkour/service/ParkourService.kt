@@ -7,7 +7,7 @@ import dev.slne.surf.parkour.database.ParkourTable
 import dev.slne.surf.parkour.model.parkour.Parkour
 import dev.slne.surf.parkour.model.parkour.ParkourRun
 import dev.slne.surf.parkour.plugin
-import dev.slne.surf.parkour.util.formattedTimeEpoch
+import dev.slne.surf.parkour.util.formattedDuration
 import dev.slne.surf.surfapi.core.api.messages.adventure.buildText
 import dev.slne.surf.surfapi.core.api.messages.adventure.sendText
 import dev.slne.surf.surfapi.core.api.util.mutableObjectSetOf
@@ -239,7 +239,7 @@ class ParkourService {
                             appendSpace()
                             variableKey("Zeit:")
                             appendSpace()
-                            variableValue((System.currentTimeMillis() - it.startTime).formattedTimeEpoch)
+                            variableValue((System.currentTimeMillis() - it.startTime).formattedDuration)
                             appendSpace()
                             darkSpacer("«")
                         })

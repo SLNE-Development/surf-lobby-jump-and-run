@@ -8,7 +8,7 @@ import dev.slne.surf.parkour.model.parkour.ParkourRun
 import dev.slne.surf.parkour.permission.ParkourPermissionRegistry
 import dev.slne.surf.parkour.plugin
 import dev.slne.surf.parkour.service.parkourService
-import dev.slne.surf.parkour.util.formattedTimeEpoch
+import dev.slne.surf.parkour.util.formattedDuration
 import dev.slne.surf.surfapi.core.api.font.toSmallCaps
 import dev.slne.surf.surfapi.core.api.messages.adventure.buildText
 import dev.slne.surf.surfapi.core.api.messages.adventure.sendText
@@ -33,7 +33,7 @@ fun CommandAPICommand.parkourStatsCommand() = subcommand("stats") {
                             appendSpace()
                             variableValue(row.jumps)
                             spacer(" in ")
-                            variableValue(row.time.formattedTimeEpoch)
+                            variableValue(row.time.formattedDuration)
                         }
                     )
                 }
@@ -53,7 +53,7 @@ fun CommandAPICommand.parkourStatsCommand() = subcommand("stats") {
                                 appendSpace()
                                 variableValue(row.jumps)
                                 spacer(" in ")
-                                variableValue(row.time.formattedTimeEpoch)
+                                variableValue(row.time.formattedDuration)
                             }
                         )
                     }
