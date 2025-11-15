@@ -3,7 +3,6 @@ package dev.slne.surf.parkour.util
 import com.github.retrooper.packetevents.util.Vector3i
 import org.bukkit.util.Vector
 import java.time.Instant
-import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 inline fun <reified T> Triple<*, *, *>.anyOfType(predicate: (T) -> Boolean): Boolean {
@@ -27,7 +26,4 @@ fun Vector.equalsVector3i(other: Vector3i): Boolean {
 
 private val formatter = DateTimeFormatter.ofPattern("HH:mm:ss")
 
-val Long.formattedTimeEpoch: String
-    get() = Instant.ofEpochMilli(this)
-        .atZone(ZoneId.systemDefault())
-        .format(formatter)
+val Long.formattedTimeEpoch: String get() = formatter.format(Instant.ofEpochMilli(this))

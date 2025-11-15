@@ -229,7 +229,7 @@ class ParkourService {
                         val player = Bukkit.getPlayer(it.associatedPlayer) ?: return@forEach
 
                         player.sendActionBar(buildText {
-                            darkSpacer(">")
+                            darkSpacer("»")
                             appendSpace()
                             variableKey("Sprünge:")
                             appendSpace()
@@ -241,7 +241,7 @@ class ParkourService {
                             appendSpace()
                             variableValue((System.currentTimeMillis() - it.startTime).formattedTimeEpoch)
                             appendSpace()
-                            darkSpacer("<")
+                            darkSpacer("«")
                         })
                     }
                 }
