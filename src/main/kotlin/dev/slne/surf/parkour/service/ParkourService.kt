@@ -7,9 +7,13 @@ import dev.slne.surf.parkour.database.ParkourTable
 import dev.slne.surf.parkour.model.parkour.Parkour
 import dev.slne.surf.parkour.model.parkour.ParkourRun
 import dev.slne.surf.parkour.plugin
+import dev.slne.surf.parkour.util.formattedTimeEpoch
+import dev.slne.surf.surfapi.core.api.messages.adventure.buildText
 import dev.slne.surf.surfapi.core.api.messages.adventure.sendText
 import dev.slne.surf.surfapi.core.api.util.mutableObjectSetOf
+import io.papermc.paper.threadedregions.scheduler.ScheduledTask
 import kotlinx.coroutines.Dispatchers
+import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.World
 import org.bukkit.entity.Player
@@ -21,6 +25,7 @@ import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 class ParkourService {
     private val _parkours = mutableObjectSetOf<Parkour>()
@@ -218,6 +223,44 @@ class ParkourService {
 
     companion object {
         val INSTANCE = ParkourService()
+
+        private lateinit var updateTask: ScheduledTask
+
+        fun startUpdating() {
+            if (::updateTask.isInitialized && !updateTask.isCancelled) {
+                return
+            }
+
+            updateTask = Bukkit.getAsyncScheduler().runAtFixedRate(plugin, {
+                parkourService.getParkours().forEach { pkr ->
+                    pkr.generators.forEach {
+                        val player = Bukkit.getPlayer(it.associatedPlayer) ?: return@forEach
+
+                        player.sendActionBar(buildText {
+                            darkSpacer(">")
+                            appendSpace()
+                            variableKey("Sprünge:")
+                            appendSpace()
+                            variableValue(it.currentIndex)
+                            appendSpace()
+                            spacer("|")
+                            appendSpace()
+                            variableKey("Zeit:")
+                            appendSpace()
+                            variableValue((System.currentTimeMillis() - it.startTime).formattedTimeEpoch)
+                            appendSpace()
+                            darkSpacer("<")
+                        })
+                    }
+                }
+            }, 0L, 1L, TimeUnit.SECONDS)
+        }
+
+        fun stopUpdating() {
+            if (::updateTask.isInitialized && !updateTask.isCancelled) {
+                updateTask.cancel()
+            }
+        }
     }
 }
 

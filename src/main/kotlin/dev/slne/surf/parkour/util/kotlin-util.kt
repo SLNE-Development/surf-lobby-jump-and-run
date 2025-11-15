@@ -25,7 +25,7 @@ fun Vector.equalsVector3i(other: Vector3i): Boolean {
             this.blockZ == other.z
 }
 
-private val formatter = DateTimeFormatter.ofPattern("HH:mm:ss.SSS")
+private val formatter = DateTimeFormatter.ofPattern("HH:mm:ss")
 
 val Long.formattedTimeEpoch: String
     get() = Instant.ofEpochMilli(this)

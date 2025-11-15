@@ -13,6 +13,7 @@ import dev.slne.surf.parkour.listener.FailureListener
 import dev.slne.surf.parkour.listener.ParkourItemListener
 import dev.slne.surf.parkour.listener.PlayerPacketListener
 import dev.slne.surf.parkour.listener.SuccessListener
+import dev.slne.surf.parkour.service.ParkourService
 import dev.slne.surf.parkour.service.parkourService
 import dev.slne.surf.surfapi.bukkit.api.event.register
 import org.bukkit.plugin.java.JavaPlugin
@@ -36,6 +37,7 @@ class BukkitMain : SuspendingJavaPlugin() {
 
         establishDatabaseConnection()
         parkourService.loadParkours()
+        ParkourService.startUpdating()
     }
 
     private fun establishDatabaseConnection() {
