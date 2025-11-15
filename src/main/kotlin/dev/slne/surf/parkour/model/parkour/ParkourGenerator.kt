@@ -16,7 +16,10 @@ import org.bukkit.Material
 import org.bukkit.block.BlockFace
 import org.bukkit.util.BoundingBox
 import org.bukkit.util.Vector
+import java.lang.Math.toDegrees
 import java.util.*
+import kotlin.math.atan2
+import kotlin.math.sqrt
 
 data class ParkourGenerator(
     val associatedPlayer: UUID,
@@ -41,8 +44,14 @@ data class ParkourGenerator(
     suspend fun start() = withContext(Dispatchers.IO) {
         val player = associatedPlayer.getPlayer() ?: return@withContext
         startTime = System.currentTimeMillis()
+
         generateInitial()
-        player.teleportAsync(blockLocations.first.location.block.getRelative(BlockFace.UP).location)
+
+        val rotation = calcRotation(blockLocations.first, blockLocations.second)
+        val toTeleport = blockLocations.first.location.block.getRelative(BlockFace.UP).location
+
+        toTeleport.setRotation(rotation.first, rotation.second)
+        player.teleportAsync(toTeleport)
     }
 
     suspend fun stop() = withContext(Dispatchers.IO) {
@@ -147,4 +156,16 @@ data class ParkourGenerator(
         lateral.random(),
         vertical.random()
     )
+
+    fun calcRotation(from: Vector, to: Vector): Pair<Float, Float> {
+        val dir = to.clone().subtract(from)
+        val dx = dir.x
+        val dy = dir.y
+        val dz = dir.z
+
+        val yaw = toDegrees(atan2(dz, dx)) - 90
+        val pitch = -toDegrees(atan2(dy, sqrt(dx * dx + dz * dz)))
+
+        return Pair(yaw.toFloat(), pitch.toFloat())
+    }
 }
