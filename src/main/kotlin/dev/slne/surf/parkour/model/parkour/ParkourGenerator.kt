@@ -37,8 +37,7 @@ data class ParkourGenerator(
     var currentIndex = 0
 
     private val jumpTypes = listOf(
-        JumpType(2..3, 2..3, -1..1),
-        JumpType(3..4, 2..4, 0..1)
+        JumpType(2..3, 2..3, -1..1)
     )
 
     suspend fun start() = withContext(Dispatchers.IO) {
