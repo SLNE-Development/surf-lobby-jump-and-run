@@ -1,6 +1,7 @@
 package dev.slne.surf.parkour.util
 
 import com.github.retrooper.packetevents.util.Vector3i
+import dev.slne.surf.surfapi.core.api.messages.builder.SurfComponentBuilder
 import org.bukkit.util.Vector
 
 inline fun <reified T> Triple<*, *, *>.anyOfType(predicate: (T) -> Boolean): Boolean {
@@ -37,4 +38,6 @@ val Long.formattedDuration: String
 
         return parts.joinToString(" ")
     }
+
+fun SurfComponentBuilder.appendLinePrefix() = darkSpacer("» ")
 
