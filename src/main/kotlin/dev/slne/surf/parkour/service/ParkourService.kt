@@ -245,7 +245,7 @@ class ParkourService {
                         })
                     }
                 }
-            }, 0L, 1L, TimeUnit.SECONDS)
+            }, 0L, 500L, TimeUnit.MILLISECONDS)
         }
 
         fun stopUpdating() {

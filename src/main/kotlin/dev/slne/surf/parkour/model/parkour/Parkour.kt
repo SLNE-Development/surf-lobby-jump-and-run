@@ -67,4 +67,8 @@ data class Parkour(
     fun preExit(player: UUID) {
         players.remove(player)
     }
+
+    companion object {
+        fun all() = parkourService.getParkours()
+    }
 }
