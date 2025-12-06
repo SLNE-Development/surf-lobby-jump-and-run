@@ -28,6 +28,10 @@ class FailureListener : Listener {
                 return@launch
             }
 
+            if (!generator.isRunning()) {
+                return@launch
+            }
+
             generator.blockLocations.allOfType<Vector> {
                 it.y > event.to.y
             }.also {

@@ -23,6 +23,10 @@ class SuccessListener : Listener {
             val parkour = parkourService.getParkour(player) ?: return@launch
             val generator = parkour.getGenerator(player) ?: return@launch
 
+            if (!generator.isRunning()) {
+                return@launch
+            }
+
             if (generator.blockLocations.second.equalsBlock(event.to.block.getRelative(BlockFace.DOWN).location.toVector())) {
                 parkourService.triggerSuccess(player)
             }

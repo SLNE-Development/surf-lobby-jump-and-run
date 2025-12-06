@@ -167,4 +167,6 @@ data class ParkourGenerator(
 
         return Pair(yaw.toFloat(), pitch.toFloat())
     }
+
+    fun isRunning() = ::blockLocations.isInitialized
 }

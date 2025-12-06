@@ -35,10 +35,19 @@ fun CommandAPICommand.parkourStatsCommand() = subcommand("stats") {
 
             val jumpHighscore = stats.maxByOrNull { it.jumps }?.jumps ?: 0
             val timeHighscore = stats.maxByOrNull { it.time }?.time ?: 0L
+            val runs = stats.size
 
             player.sendText {
+                appendNewline()
                 primary("Deine Parkour-Statistiken".toSmallCaps(), TextDecoration.BOLD)
                 appendNewline()
+
+                appendNewline {
+                    appendLinePrefix()
+                    variableKey("Gesamte Läufe:")
+                    appendSpace()
+                    variableValue(runs)
+                }
 
                 appendNewline {
                     appendLinePrefix()
