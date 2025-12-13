@@ -1,10 +1,10 @@
 package dev.slne.surf.parkour.menu.type
 
-import dev.slne.surf.parkour.api.model.parkour.statistic.ParkourStatisticSummary
+import dev.slne.surf.parkour.model.parkour.PersonalParkourSummary
 
 enum class LeaderboardSortingType(
     val displayName: String,
-    val sort: (MutableList<ParkourStatisticSummary>) -> Unit
+    val sort: (MutableList<PersonalParkourSummary>) -> Unit
 ) {
     POINTS_HIGHEST("Punkte (Absteigend)", { it.sortByDescending { it.totalJumps } }),
     POINTS_LOWEST("Punkte (Aufsteigend)", { it.sortBy { it.totalJumps } }),

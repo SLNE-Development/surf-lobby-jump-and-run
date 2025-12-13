@@ -6,17 +6,17 @@ import com.github.shynixn.mccoroutine.folia.ticks
 import com.github.stefvanschie.inventoryframework.gui.GuiItem
 import com.github.stefvanschie.inventoryframework.pane.PaginatedPane
 import com.github.stefvanschie.inventoryframework.pane.StaticPane
-import dev.slne.surf.parkour.api.model.parkour.statistic.ParkourStatisticSummary
-import dev.slne.surf.parkour.core.service.parkourStatisticsService
 import dev.slne.surf.parkour.menu.AbstractParkourGui
 import dev.slne.surf.parkour.menu.type.LeaderboardSortingType
 import dev.slne.surf.parkour.menu.util.*
+import dev.slne.surf.parkour.model.parkour.PersonalParkourSummary
+import dev.slne.surf.parkour.service.parkourService
 import dev.slne.surf.surfapi.bukkit.api.builder.buildItem
 import dev.slne.surf.surfapi.bukkit.api.builder.buildLore
 import dev.slne.surf.surfapi.bukkit.api.builder.displayName
 import dev.slne.surf.surfapi.core.api.font.toSmallCaps
 import dev.slne.surf.surfapi.core.api.messages.adventure.buildText
-import dev.slne.surf.surfapi.core.api.messages.adventure.text
+import dev.slne.surf.surfapi.core.api.service.PlayerLookupService
 import dev.slne.surf.surfapi.core.api.util.toObjectList
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -27,7 +27,7 @@ import org.bukkit.Material
 import org.bukkit.event.inventory.ClickType
 
 class ParkourScoreboardMenu(
-    override val statistics: ParkourStatisticSummary,
+    override val statistics: PersonalParkourSummary,
     private var sorting: LeaderboardSortingType
 ) :
     AbstractParkourGui(5, buildText {
@@ -82,7 +82,7 @@ class ParkourScoreboardMenu(
 
     private fun lazilyAddStatisticsItems() {
         plugin.launch {
-            val statistics = parkourStatisticsService.getEverySummary()
+            val statistics = parkourService.getSummaries()
 
             sorting.sort(statistics.toObjectList())
 
@@ -107,9 +107,11 @@ class ParkourScoreboardMenu(
         }
     }
 
-    private suspend fun ParkourStatisticSummary.asStatisticsItem() =
+    private suspend fun PersonalParkourSummary.asStatisticsItem() =
         GuiItem(HeadUtil.getPlayerHead(uuid).apply {
-            displayName(text(name))
+            displayName {
+                text(PlayerLookupService.getUsername(uuid) ?: "???")
+            }
             buildLore {
                 emptyLine()
                 line { info("Statistiken:") }

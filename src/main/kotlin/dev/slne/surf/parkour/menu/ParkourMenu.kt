@@ -6,8 +6,6 @@ import com.github.stefvanschie.inventoryframework.adventuresupport.ComponentHold
 import com.github.stefvanschie.inventoryframework.gui.GuiItem
 import com.github.stefvanschie.inventoryframework.gui.type.ChestGui
 import com.github.stefvanschie.inventoryframework.pane.StaticPane
-import dev.slne.surf.parkour.api.model.parkour.statistic.ParkourStatisticSummary
-import dev.slne.surf.parkour.core.registry.parkourRegistry
 import dev.slne.surf.parkour.menu.submenu.ParkourActivePlayersMenu
 import dev.slne.surf.parkour.menu.submenu.ParkourGeneralFailureMenu
 import dev.slne.surf.parkour.menu.submenu.ParkourScoreboardMenu
@@ -15,8 +13,9 @@ import dev.slne.surf.parkour.menu.submenu.ParkourSelectMenu
 import dev.slne.surf.parkour.menu.type.LeaderboardSortingType
 import dev.slne.surf.parkour.menu.type.RedirectType
 import dev.slne.surf.parkour.menu.util.*
+import dev.slne.surf.parkour.model.parkour.PersonalParkourSummary
 import dev.slne.surf.parkour.plugin
-import dev.slne.surf.parkour.util.parkourPlayer
+import dev.slne.surf.parkour.service.parkourService
 import dev.slne.surf.surfapi.bukkit.api.builder.buildItem
 import dev.slne.surf.surfapi.bukkit.api.builder.buildLore
 import dev.slne.surf.surfapi.bukkit.api.builder.displayName
@@ -30,7 +29,7 @@ import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.InventoryClickEvent
 
-class ParkourMenu(override val statistics: ParkourStatisticSummary) : PlayerDataHolderGui {
+class ParkourMenu(override val statistics: PersonalParkourSummary) : PlayerDataHolderGui {
     companion object {
         private val closeMenuItem = GuiItem(buildItem(Material.BARRIER) {
             displayName { primary("Schließen") }
@@ -47,11 +46,6 @@ class ParkourMenu(override val statistics: ParkourStatisticSummary) : PlayerData
         displayName { primary("Parkour starten") }
         lore { info("Klicke, um einen Parkour zu starten!") }
     }) { it.handleStart() }
-
-    private val settingsItem = GuiItem(buildItem(Material.REPEATING_COMMAND_BLOCK) {
-        displayName { primary("Einstellungen") }
-        lore { info("Klicke, um zu den Einstellungen zu gelangen!") }
-    }) { }
 
     private val activePlayersItem = GuiItem(buildItem(Material.WRITABLE_BOOK) {
         displayName { primary("Aktive Spieler") }
@@ -106,10 +100,9 @@ class ParkourMenu(override val statistics: ParkourStatisticSummary) : PlayerData
 
 
         val taskbarPane = StaticPane(0, 3, 9, 1).apply {
-            addItem(statsItem, 1, 0)
-            addItem(startItem, 3, 0)
-            addItem(settingsItem, 5, 0)
-            addItem(activePlayersItem, 7, 0)
+            addItem(statsItem, 2, 0)
+            addItem(startItem, 4, 0)
+            addItem(activePlayersItem, 6, 0)
         }
 
         gui.addPane(taskbarPane)
@@ -120,7 +113,7 @@ class ParkourMenu(override val statistics: ParkourStatisticSummary) : PlayerData
     }
 
     private fun InventoryClickEvent.handleStart() {
-        val parkours = parkourRegistry.getParkours()
+        val parkours = parkourService.getParkours()
 
         when {
             parkours.isEmpty() -> ParkourGeneralFailureMenu(
@@ -128,13 +121,13 @@ class ParkourMenu(override val statistics: ParkourStatisticSummary) : PlayerData
                 buildText { error("Es gibt keine verfügbaren Parkours!") }
             ).show(whoClicked)
 
-            parkours.size == 1 -> plugin.launch { parkours.first().start(player.parkourPlayer()) }
+            parkours.size == 1 -> plugin.launch { parkours.first().start(player.uniqueId) }
             else -> ParkourSelectMenu(statistics, RedirectType.START_PARKOUR).show(whoClicked)
         }
     }
 
     private fun InventoryClickEvent.handleActivePlayers() {
-        val parkours = parkourRegistry.getParkours()
+        val parkours = parkourService.getParkours()
 
         when {
             parkours.isEmpty() -> ParkourGeneralFailureMenu(
@@ -154,7 +147,6 @@ class ParkourMenu(override val statistics: ParkourStatisticSummary) : PlayerData
                     plugin.launch(plugin.entityDispatcher(player)) {
                         ParkourActivePlayersMenu(parkour, statistics).open(player)
                     }
-
                 }
             }
 

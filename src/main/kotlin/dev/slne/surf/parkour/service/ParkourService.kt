@@ -6,11 +6,15 @@ import dev.slne.surf.parkour.database.ParkourRunsTable
 import dev.slne.surf.parkour.database.ParkourTable
 import dev.slne.surf.parkour.model.parkour.Parkour
 import dev.slne.surf.parkour.model.parkour.ParkourRun
+import dev.slne.surf.parkour.model.parkour.PersonalParkourSummary
 import dev.slne.surf.parkour.plugin
 import dev.slne.surf.parkour.util.formattedDuration
 import dev.slne.surf.surfapi.core.api.messages.adventure.buildText
 import dev.slne.surf.surfapi.core.api.messages.adventure.sendText
+import dev.slne.surf.surfapi.core.api.util.mutableObjectListOf
 import dev.slne.surf.surfapi.core.api.util.mutableObjectSetOf
+import dev.slne.surf.surfapi.core.api.util.toObjectList
+import dev.slne.surf.surfapi.core.api.util.toObjectSet
 import io.papermc.paper.threadedregions.scheduler.ScheduledTask
 import kotlinx.coroutines.Dispatchers
 import org.bukkit.Bukkit
@@ -105,6 +109,28 @@ class ParkourService {
         }
     }
 
+    suspend fun getRuns() = newSuspendedTransaction(Dispatchers.IO) {
+        ParkourRunsTable.selectAll().mapNotNull { row ->
+            val parkour = getParkour(row[ParkourRunsTable.parkourUuid]) ?: return@mapNotNull null
+            ParkourRun(
+                playerUuid = row[ParkourRunsTable.playerUuid],
+                parkour = parkour,
+                jumps = row[ParkourRunsTable.runJumps],
+                time = row[ParkourRunsTable.runTime]
+            )
+        }
+    }
+
+    suspend fun getSummaries() = getRuns()
+        .groupBy { it.playerUuid }
+        .map { (player, runs) ->
+            PersonalParkourSummary(
+                uuid = player,
+                runs = mutableObjectListOf(runs)
+            )
+        }
+        .toObjectSet()
+
     suspend fun getRuns(player: UUID) =
         newSuspendedTransaction(Dispatchers.IO) {
             ParkourRunsTable.selectAll().where(
@@ -118,7 +144,7 @@ class ParkourService {
                     jumps = row[ParkourRunsTable.runJumps],
                     time = row[ParkourRunsTable.runTime]
                 )
-            }
+            }.toObjectList()
         }
 
     suspend fun getRuns(player: UUID, parkour: Parkour) =

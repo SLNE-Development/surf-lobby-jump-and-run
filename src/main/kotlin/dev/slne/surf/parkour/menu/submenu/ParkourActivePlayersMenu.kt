@@ -5,27 +5,22 @@ import com.github.stefvanschie.inventoryframework.gui.GuiItem
 import com.github.stefvanschie.inventoryframework.gui.type.ChestGui
 import com.github.stefvanschie.inventoryframework.pane.PaginatedPane
 import com.github.stefvanschie.inventoryframework.pane.StaticPane
-import dev.slne.surf.parkour.api.model.parkour.Parkour
-import dev.slne.surf.parkour.api.model.parkour.statistic.ParkourStatisticSummary
 import dev.slne.surf.parkour.menu.PlayerDataHolderGui
 import dev.slne.surf.parkour.menu.util.*
-import dev.slne.surf.surfapi.bukkit.api.builder.buildItem
+import dev.slne.surf.parkour.model.parkour.Parkour
+import dev.slne.surf.parkour.model.parkour.PersonalParkourSummary
 import dev.slne.surf.surfapi.bukkit.api.builder.displayName
 import dev.slne.surf.surfapi.bukkit.api.builder.lore
-import dev.slne.surf.surfapi.bukkit.api.builder.meta
 import dev.slne.surf.surfapi.core.api.font.toSmallCaps
 import dev.slne.surf.surfapi.core.api.messages.adventure.buildText
 import dev.slne.surf.surfapi.core.api.messages.adventure.text
 import dev.slne.surf.surfapi.core.api.util.mutableObjectListOf
 import net.kyori.adventure.text.format.TextDecoration
-import org.bukkit.Bukkit
-import org.bukkit.Material
 import org.bukkit.entity.Player
-import org.bukkit.inventory.meta.SkullMeta
 
 class ParkourActivePlayersMenu(
     val parkour: Parkour,
-    override val statistics: ParkourStatisticSummary
+    override val statistics: PersonalParkourSummary
 ) : PlayerDataHolderGui {
     suspend fun open(player: Player) {
         val gui = ChestGui(5, ComponentHolder.of(buildText {
@@ -44,14 +39,13 @@ class ParkourActivePlayersMenu(
 
         val activePlayers = parkour.players
         val playerList = activePlayers.mapTo(mutableObjectListOf(activePlayers.size)) {
-            GuiItem(buildItem(Material.PLAYER_HEAD) {
+            GuiItem(HeadUtil.getPlayerHead(it).apply {
                 displayName(text(it.name()))
                 lore {
                     spacer("  - ")
                     variableKey("Aktuelle Sprünge: ".toSmallCaps())
-                    variableValue(parkour.currentIndex(it).toString())
+                    variableValue(parkour.getCurrentIndex(it).toString())
                 }
-                meta<SkullMeta> { owningPlayer = Bukkit.getPlayer(it) }
             })
         }
 

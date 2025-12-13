@@ -4,12 +4,12 @@ import com.github.shynixn.mccoroutine.folia.entityDispatcher
 import com.github.shynixn.mccoroutine.folia.launch
 import com.github.stefvanschie.inventoryframework.gui.GuiItem
 import com.github.stefvanschie.inventoryframework.pane.StaticPane
-import dev.slne.surf.parkour.api.model.parkour.statistic.ParkourStatisticSummary
 import dev.slne.surf.parkour.menu.AbstractParkourGui
 import dev.slne.surf.parkour.menu.ParkourMenu
 import dev.slne.surf.parkour.menu.util.fillOuterBorder
 import dev.slne.surf.parkour.menu.util.outlineItem
 import dev.slne.surf.parkour.menu.util.player
+import dev.slne.surf.parkour.model.parkour.PersonalParkourSummary
 import dev.slne.surf.surfapi.bukkit.api.builder.buildItem
 import dev.slne.surf.surfapi.bukkit.api.builder.displayName
 import dev.slne.surf.surfapi.bukkit.api.builder.lore
@@ -20,7 +20,7 @@ import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.Material
 
 class ParkourGeneralFailureMenu(
-    override val statistics: ParkourStatisticSummary,
+    override val statistics: PersonalParkourSummary,
     title: Component
 ) :
     AbstractParkourGui(5, buildText {
