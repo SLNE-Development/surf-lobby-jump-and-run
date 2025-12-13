@@ -6,7 +6,6 @@ import dev.slne.surf.parkour.model.jump.JumpType
 import dev.slne.surf.parkour.plugin
 import dev.slne.surf.parkour.util.getPlayer
 import dev.slne.surf.surfapi.bukkit.api.glow.glowingApi
-import dev.slne.surf.surfapi.bukkit.api.util.forEachPlayer
 import dev.slne.surf.surfapi.core.api.util.random
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -33,6 +32,8 @@ data class ParkourGenerator(
     private val color = NamedTextColor.WHITE
     private val airData = Material.AIR.createBlockData()
 
+    val player get() = associatedPlayer.getPlayer()
+
     var startTime: Long = -1L
     var currentIndex = 0
 
@@ -57,11 +58,10 @@ data class ParkourGenerator(
         val player = associatedPlayer.getPlayer() ?: return@withContext
         glowingApi.removeGlowing(blockLocations.second.location, player)
 
-        forEachPlayer {
-            it.sendBlockChange(blockLocations.first.location, airData)
-            it.sendBlockChange(blockLocations.second.location, airData)
-            it.sendBlockChange(blockLocations.third.location, airData)
-        }
+        player.sendBlockChange(blockLocations.first.location, airData)
+        player.sendBlockChange(blockLocations.second.location, airData)
+        player.sendBlockChange(blockLocations.third.location, airData)
+
     }
 
     private suspend fun generateInitial() {
@@ -74,11 +74,10 @@ data class ParkourGenerator(
         val thirdJump = jumpTypes.random().randomJump()
         val thirdBlock = thirdJump.generate(secondBlock, player, boundingBox)
 
-        forEachPlayer {
-            it.sendBlockChange(firstBlock.location, material.createBlockData())
-            it.sendBlockChange(secondBlock.location, material.createBlockData())
-            it.sendBlockChange(thirdBlock.location, material.createBlockData())
-        }
+        player.sendBlockChange(firstBlock.location, material.createBlockData())
+        player.sendBlockChange(secondBlock.location, material.createBlockData())
+        player.sendBlockChange(thirdBlock.location, material.createBlockData())
+
 
         blockLocations = Triple(firstBlock, secondBlock, thirdBlock)
         glowingApi.makeGlowing(secondBlock.location, player, color)
@@ -95,10 +94,8 @@ data class ParkourGenerator(
         val newJump = jumpTypes.random().randomJump()
         val newNext = newJump.generate(blockLocations.third, player, boundingBox)
 
-        forEachPlayer {
-            it.sendBlockChange(blockLocations.first.location, airData)
-            it.sendBlockChange(newNext.location, material.createBlockData())
-        }
+        player.sendBlockChange(blockLocations.first.location, airData)
+        player.sendBlockChange(newNext.location, material.createBlockData())
 
         glowingApi.removeGlowing(blockLocations.second.location, player)
         glowingApi.makeGlowing(blockLocations.third.location, player, color)
