@@ -79,6 +79,7 @@ class ParkourSelectMenu(
             }
 
             RedirectType.START_PARKOUR -> plugin.launch { parkour.start(player.uniqueId) }
+                .also { player.closeInventory() }
         }
     }
 }

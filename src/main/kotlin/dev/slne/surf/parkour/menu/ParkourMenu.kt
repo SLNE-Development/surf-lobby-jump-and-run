@@ -122,6 +122,8 @@ class ParkourMenu(override val statistics: PersonalParkourSummary) : PlayerDataH
             ).show(whoClicked)
 
             parkours.size == 1 -> plugin.launch { parkours.first().start(player.uniqueId) }
+                .also { player.closeInventory() }
+
             else -> ParkourSelectMenu(statistics, RedirectType.START_PARKOUR).show(whoClicked)
         }
     }

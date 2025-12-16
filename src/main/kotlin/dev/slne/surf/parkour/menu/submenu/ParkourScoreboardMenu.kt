@@ -17,7 +17,7 @@ import dev.slne.surf.surfapi.bukkit.api.builder.displayName
 import dev.slne.surf.surfapi.core.api.font.toSmallCaps
 import dev.slne.surf.surfapi.core.api.messages.adventure.buildText
 import dev.slne.surf.surfapi.core.api.service.PlayerLookupService
-import dev.slne.surf.surfapi.core.api.util.toObjectList
+import dev.slne.surf.surfapi.core.api.util.toMutableObjectList
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
@@ -82,9 +82,9 @@ class ParkourScoreboardMenu(
 
     private fun lazilyAddStatisticsItems() {
         plugin.launch {
-            val statistics = parkourService.getSummaries()
+            val statistics = parkourService.getSummaries().toMutableObjectList()
 
-            sorting.sort(statistics.toObjectList())
+            sorting.sort(statistics)
 
             val guiItemsDeferred = statistics
                 .map { async { it.asStatisticsItem() } }
@@ -118,17 +118,17 @@ class ParkourScoreboardMenu(
                 line {
                     spacer("  - ")
                     variableKey("Sprünge: ".toSmallCaps())
-                    variableValue(statistics.totalJumps.toString())
+                    variableValue(totalJumps.toString())
                 }
                 line {
                     spacer("  - ")
                     variableKey("Versuche: ".toSmallCaps())
-                    variableValue(statistics.totalTries.toString())
+                    variableValue(totalTries.toString())
                 }
                 line {
                     spacer("  - ")
                     variableKey("Highscore: ".toSmallCaps())
-                    variableValue(statistics.bestJumps.toString())
+                    variableValue(bestJumps.toString())
                 }
             }
         })
