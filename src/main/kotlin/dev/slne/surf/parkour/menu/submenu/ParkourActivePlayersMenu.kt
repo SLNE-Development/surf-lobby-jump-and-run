@@ -49,6 +49,9 @@ class ParkourActivePlayersMenu(
             })
         }
 
+        gui.cancelGlobalDrag()
+        gui.cancelGlobalClick()
+
         pages.populateWithGuiItems(playerList)
 
         updatePaginationButtons(outlinePane, pages, outlineItem, backButton, continueButton)
