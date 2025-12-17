@@ -31,8 +31,12 @@ data class Jump(
             target.z = target.z.coerceIn(area.minZ, area.maxZ)
 
             tries++
-        } while (previous.distance(target) < 2.0 && tries < 10)
+        } while (
+            (
+                    previous.distance(target) < 2.0 ||
+                            (target.x == previous.x && target.z == previous.z)
+                    ) && tries < 10
+        )
         return target
     }
-
 }
