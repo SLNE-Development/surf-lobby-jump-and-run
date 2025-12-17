@@ -2,11 +2,11 @@ package dev.slne.surf.parkour.service
 
 import com.github.benmanes.caffeine.cache.Caffeine
 import com.github.shynixn.mccoroutine.folia.launch
-import com.sksamuel.aedile.core.asLoadingCache
 import com.sksamuel.aedile.core.expireAfterWrite
 import dev.slne.surf.parkour.config
 import dev.slne.surf.parkour.database.ParkourRunsTable
 import dev.slne.surf.parkour.database.ParkourTable
+import dev.slne.surf.parkour.menu.type.LeaderboardSortingType
 import dev.slne.surf.parkour.model.parkour.Parkour
 import dev.slne.surf.parkour.model.parkour.ParkourRun
 import dev.slne.surf.parkour.model.parkour.PersonalParkourSummary
@@ -16,8 +16,8 @@ import dev.slne.surf.surfapi.core.api.messages.adventure.buildText
 import dev.slne.surf.surfapi.core.api.messages.adventure.sendText
 import dev.slne.surf.surfapi.core.api.util.mutableObjectListOf
 import dev.slne.surf.surfapi.core.api.util.mutableObjectSetOf
+import dev.slne.surf.surfapi.core.api.util.toMutableObjectList
 import dev.slne.surf.surfapi.core.api.util.toObjectList
-import dev.slne.surf.surfapi.core.api.util.toObjectSet
 import io.papermc.paper.threadedregions.scheduler.ScheduledTask
 import kotlinx.coroutines.Dispatchers
 import org.bukkit.Bukkit
@@ -37,11 +37,12 @@ import kotlin.time.Duration.Companion.minutes
 
 class ParkourService {
     private val _parkours = mutableObjectSetOf<Parkour>()
+    private val summaryCache =
+        Caffeine.newBuilder()
+            .expireAfterWrite(30.minutes)
+            .build<Pair<LeaderboardSortingType, Int>, List<PersonalParkourSummary>>()
 
-    private val summaryCache = Caffeine.newBuilder().expireAfterWrite(30.minutes)
-        .asLoadingCache<UUID, PersonalParkourSummary> {
-
-        }
+    private val loadingPages = mutableSetOf<Pair<LeaderboardSortingType, Int>>()
 
     fun createParkour(
         uuid: UUID,
@@ -68,8 +69,6 @@ class ParkourService {
 
         return parkour
     }
-
-    fun isInParkour(player: Player) = getParkour(player) != null
 
     suspend fun triggerFailure(player: Player) {
         val parkour = getParkour(player) ?: return
@@ -116,28 +115,6 @@ class ParkourService {
         }
     }
 
-    suspend fun getRuns() = newSuspendedTransaction(Dispatchers.IO) {
-        ParkourRunsTable.selectAll().mapNotNull { row ->
-            val parkour = getParkour(row[ParkourRunsTable.parkourUuid]) ?: return@mapNotNull null
-            ParkourRun(
-                playerUuid = row[ParkourRunsTable.playerUuid],
-                parkour = parkour,
-                jumps = row[ParkourRunsTable.runJumps],
-                time = row[ParkourRunsTable.runTime]
-            )
-        }
-    }
-
-    suspend fun getSummaries() = getRuns()
-        .groupBy { it.playerUuid }
-        .map { (player, runs) ->
-            PersonalParkourSummary(
-                uuid = player,
-                runs = mutableObjectListOf(runs)
-            )
-        }
-        .toObjectSet()
-
     suspend fun getRuns(player: UUID) =
         newSuspendedTransaction(Dispatchers.IO) {
             ParkourRunsTable.selectAll().where(
@@ -154,21 +131,6 @@ class ParkourService {
             }.toObjectList()
         }
 
-    suspend fun getRuns(player: UUID, parkour: Parkour) =
-        newSuspendedTransaction(Dispatchers.IO) {
-            ParkourRunsTable.selectAll().where(
-                (ParkourRunsTable.parkourUuid eq parkour.uuid) and
-                        (ParkourRunsTable.playerUuid eq player)
-            ).map {
-                ParkourRun(
-                    playerUuid = player,
-                    parkour = parkour,
-                    jumps = it[ParkourRunsTable.runJumps],
-                    time = it[ParkourRunsTable.runTime]
-                )
-            }
-        }
-
     suspend fun getHighscore(player: UUID, parkour: Parkour) =
         newSuspendedTransaction(Dispatchers.IO) {
             ParkourRunsTable.selectAll().where(
@@ -177,20 +139,6 @@ class ParkourService {
             ).orderBy(ParkourRunsTable.runTime).limit(1).firstNotNullOfOrNull {
                 ParkourRun(
                     playerUuid = player,
-                    parkour = parkour,
-                    jumps = it[ParkourRunsTable.runJumps],
-                    time = it[ParkourRunsTable.runTime]
-                )
-            }
-        }
-
-    suspend fun getHighscore(parkour: Parkour) =
-        newSuspendedTransaction(Dispatchers.IO) {
-            ParkourRunsTable.selectAll().where(
-                (ParkourRunsTable.parkourUuid eq parkour.uuid)
-            ).orderBy(ParkourRunsTable.runTime).limit(1).firstNotNullOfOrNull {
-                ParkourRun(
-                    playerUuid = it[ParkourRunsTable.playerUuid],
                     parkour = parkour,
                     jumps = it[ParkourRunsTable.runJumps],
                     time = it[ParkourRunsTable.runTime]
@@ -243,6 +191,69 @@ class ParkourService {
             _parkours.addAll(parkours)
         }
     }
+
+    fun getSummaryPage(
+        sorting: LeaderboardSortingType,
+        page: Int
+    ) = summaryCache.getIfPresent(sorting to page)
+
+    fun loadSummaryPage(
+        sorting: LeaderboardSortingType,
+        page: Int,
+        pageSize: Int,
+        onLoaded: (List<PersonalParkourSummary>) -> Unit = {}
+    ) {
+        val key = sorting to page
+
+        if (summaryCache.getIfPresent(key) != null) return
+        if (!loadingPages.add(key)) return
+
+        plugin.launch {
+            val data = loadSummaryPage(sorting, page, pageSize)
+
+            summaryCache.put(key, data)
+            loadingPages.remove(key)
+
+            val nextPage = sorting to (page + 1)
+            if (summaryCache.getIfPresent(nextPage) == null) {
+                loadSummaryPage(sorting, page + 1, pageSize)
+            }
+
+            onLoaded(data)
+        }
+    }
+
+
+    private suspend fun loadSummaryPage(
+        sorting: LeaderboardSortingType,
+        page: Int,
+        pageSize: Int
+    ): List<PersonalParkourSummary> = newSuspendedTransaction(Dispatchers.IO) {
+        val offset = page * pageSize
+        val stats = ParkourRunsTable
+            .selectAll()
+            .toList()
+            .groupBy { it[ParkourRunsTable.playerUuid] }
+            .map { (player, rows) ->
+                PersonalParkourSummary(
+                    uuid = player,
+                    runs = mutableObjectListOf(
+                        rows.map {
+                            ParkourRun(
+                                playerUuid = player,
+                                parkour = getParkour(it[ParkourRunsTable.parkourUuid])!!,
+                                jumps = it[ParkourRunsTable.runJumps],
+                                time = it[ParkourRunsTable.runTime]
+                            )
+                        }
+                    )
+                )
+            }.toMutableObjectList()
+
+        sorting.sort(stats)
+        stats.drop(offset).take(pageSize)
+    }
+
 
     companion object {
         val INSTANCE = ParkourService()

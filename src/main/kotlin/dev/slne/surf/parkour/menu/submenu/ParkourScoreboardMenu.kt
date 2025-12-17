@@ -2,7 +2,6 @@ package dev.slne.surf.parkour.menu.submenu
 
 import com.github.shynixn.mccoroutine.folia.globalRegionDispatcher
 import com.github.shynixn.mccoroutine.folia.launch
-import com.github.shynixn.mccoroutine.folia.ticks
 import com.github.stefvanschie.inventoryframework.gui.GuiItem
 import com.github.stefvanschie.inventoryframework.pane.PaginatedPane
 import com.github.stefvanschie.inventoryframework.pane.StaticPane
@@ -17,11 +16,7 @@ import dev.slne.surf.surfapi.bukkit.api.builder.displayName
 import dev.slne.surf.surfapi.core.api.font.toSmallCaps
 import dev.slne.surf.surfapi.core.api.messages.adventure.buildText
 import dev.slne.surf.surfapi.core.api.service.PlayerLookupService
-import dev.slne.surf.surfapi.core.api.util.toMutableObjectList
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.runBlocking
 import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.Material
 import org.bukkit.event.inventory.ClickType
@@ -29,40 +24,51 @@ import org.bukkit.event.inventory.ClickType
 class ParkourScoreboardMenu(
     override val statistics: PersonalParkourSummary,
     private var sorting: LeaderboardSortingType
-) :
-    AbstractParkourGui(5, buildText {
+) : AbstractParkourGui(
+    5,
+    buildText {
         primary("Bestenliste".toSmallCaps())
         decorate(TextDecoration.BOLD)
-    }, statistics) {
+    },
+    statistics
+) {
+
+    private val pageSize = 21 // 7×3
 
     private val outlineItem = outlineItem()
+
     private val outlinePane = StaticPane(0, 0, 9, 5).apply {
         fillBorder(outlineItem)
+
         addItem(menuButton(), 4, 4)
-        addItem(GuiItem(buildItem(Material.COMPASS) {
-            displayName { primary("Sortieren nach: ${sorting.displayName}") }
-            buildLore {
-                line { info("Klicke, um die Sortierung zu ändern!") }
-                LeaderboardSortingType.entries.forEach { type ->
-                    line {
-                        darkSpacer(if (type == sorting) "> " else "  ")
-                        info(type.displayName)
+
+        addItem(
+            GuiItem(
+                buildItem(Material.COMPASS) {
+                    displayName {
+                        primary("Sortieren nach: ${sorting.displayName}")
+                    }
+                    buildLore {
+                        line { info("Klicke, um die Sortierung zu ändern!") }
+                        LeaderboardSortingType.entries.forEach { type ->
+                            line {
+                                darkSpacer(if (type == sorting) "> " else "  ")
+                                info(type.displayName)
+                            }
+                        }
                     }
                 }
-            }
-        }) {
-            sorting = when (it.click) {
-                ClickType.LEFT -> {
-                    sorting.next()
+            ) {
+                sorting = when (it.click) {
+                    ClickType.LEFT -> sorting.next()
+                    else -> sorting.previous()
                 }
 
-                else -> {
-                    sorting.previous()
-                }
-            }
-
-            ParkourScoreboardMenu(statistics, sorting).show(it.whoClicked)
-        }, 4, 0)
+                ParkourScoreboardMenu(statistics, sorting).show(it.whoClicked)
+            },
+            4,
+            0
+        )
     }
 
     private val pages = PaginatedPane(1, 1, 7, 3)
@@ -70,66 +76,85 @@ class ParkourScoreboardMenu(
     private val continueButton = nextButton(pages)
 
     init {
-        lazilyAddStatisticsItems()
         addPane(outlinePane)
         addPane(pages)
     }
 
     override fun update() {
-        updatePaginationButtons(outlinePane, pages, outlineItem, backButton, continueButton)
+        val page = pages.page
+
+        val cached = parkourService.getSummaryPage(sorting, page)
+
+        if (cached != null) {
+            pages.clear()
+            pages.populateWithGuiItems(
+                cached.map { runBlocking { it.asStatisticsItem() } }
+            )
+        } else {
+            pages.clear()
+            pages.populateWithGuiItems(listOf(loadingItem()))
+
+            parkourService.loadSummaryPage(sorting, page, pageSize) { data ->
+                plugin.launch(plugin.globalRegionDispatcher) {
+                    if (pages.page != page) {
+                        return@launch
+                    }
+
+                    pages.clear()
+                    pages.populateWithGuiItems(
+                        data.map { it.asStatisticsItem() }
+                    )
+                    update()
+                }
+            }
+        }
+
+        updatePaginationButtons(
+            outlinePane,
+            pages,
+            outlineItem,
+            backButton,
+            continueButton
+        )
+
         super.update()
     }
 
-    private fun lazilyAddStatisticsItems() {
-        plugin.launch {
-            val statistics = parkourService.getSummaries().toMutableObjectList()
+    private suspend fun PersonalParkourSummary.asStatisticsItem(): GuiItem =
+        GuiItem(
+            HeadUtil.getPlayerHead(uuid).apply {
+                displayName {
+                    text(PlayerLookupService.getUsername(uuid) ?: "???")
+                }
+                buildLore {
+                    emptyLine()
+                    line { info("Statistiken:") }
 
-            sorting.sort(statistics)
+                    line {
+                        spacer("  - ")
+                        variableKey("Sprünge: ".toSmallCaps())
+                        variableValue(totalJumps.toString())
+                    }
 
-            val guiItemsDeferred = statistics
-                .map { async { it.asStatisticsItem() } }
-                .toMutableList()
+                    line {
+                        spacer("  - ")
+                        variableKey("Versuche: ".toSmallCaps())
+                        variableValue(totalTries.toString())
+                    }
 
-            while (guiItemsDeferred.isNotEmpty()) {
-                val completedItems = guiItemsDeferred.filter { it.isCompleted }
-                guiItemsDeferred -= completedItems.toSet()
-
-                val guiItems = completedItems.awaitAll()
-                if (guiItems.isNotEmpty()) {
-                    withContext(plugin.globalRegionDispatcher) {
-                        pages.populateWithGuiItems(guiItems)
-                        update()
+                    line {
+                        spacer("  - ")
+                        variableKey("Highscore: ".toSmallCaps())
+                        variableValue(bestJumps.toString())
                     }
                 }
+            }
+        )
 
-                delay(10.ticks)
+    private fun loadingItem() =
+        GuiItem(
+            buildItem(Material.CLOCK) {
+                displayName { info("Lade Statistiken...") }
             }
-        }
-    }
-
-    private suspend fun PersonalParkourSummary.asStatisticsItem() =
-        GuiItem(HeadUtil.getPlayerHead(uuid).apply {
-            displayName {
-                text(PlayerLookupService.getUsername(uuid) ?: "???")
-            }
-            buildLore {
-                emptyLine()
-                line { info("Statistiken:") }
-                line {
-                    spacer("  - ")
-                    variableKey("Sprünge: ".toSmallCaps())
-                    variableValue(totalJumps.toString())
-                }
-                line {
-                    spacer("  - ")
-                    variableKey("Versuche: ".toSmallCaps())
-                    variableValue(totalTries.toString())
-                }
-                line {
-                    spacer("  - ")
-                    variableKey("Highscore: ".toSmallCaps())
-                    variableValue(bestJumps.toString())
-                }
-            }
-        })
+        )
 }
