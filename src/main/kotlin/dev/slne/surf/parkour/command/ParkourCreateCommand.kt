@@ -13,12 +13,10 @@ fun CommandAPICommand.parkourCreateCommand() = subcommand("create") {
     withPermission(ParkourPermissionRegistry.COMMAND_PARKOUR_CREATE)
     stringArgument("identifier")
     textArgument("displayname")
-    locationArgument("startStanding")
     locationArgument("respawnStanding")
     playerExecutor { player, args ->
         val identifier: String by args
         val displayname: String by args
-        val startStanding: Location by args
         val respawnStanding: Location by args
 
         if (identifier.contains(" ")) {
@@ -53,7 +51,6 @@ fun CommandAPICommand.parkourCreateCommand() = subcommand("create") {
             displayname,
             selection,
             player.world,
-            startStanding,
             respawnStanding
         )
 

@@ -16,7 +16,6 @@ data class Parkour(
     val displayName: String,
     val boundingBox: BoundingBox,
     val world: World,
-    val startLocation: Location,
     val respawnLocation: Location
 ) {
     val generators = mutableObjectSetOf<ParkourGenerator>()

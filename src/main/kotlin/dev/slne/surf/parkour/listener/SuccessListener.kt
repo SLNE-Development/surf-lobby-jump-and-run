@@ -13,11 +13,9 @@ import org.bukkit.util.Vector
 class SuccessListener : Listener {
     @EventHandler
     fun onMove(event: PlayerMoveEvent) {
-        if (!event.hasChangedBlock()) {
-            return
-        }
-
         val player = event.player
+
+        // TODO: Test performance. Optimize if needed.
 
         plugin.launch(plugin.entityDispatcher(event.player)) {
             val parkour = parkourService.getParkour(player) ?: return@launch

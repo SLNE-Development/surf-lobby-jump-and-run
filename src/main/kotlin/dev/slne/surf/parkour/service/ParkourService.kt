@@ -1,6 +1,9 @@
 package dev.slne.surf.parkour.service
 
+import com.github.benmanes.caffeine.cache.Caffeine
 import com.github.shynixn.mccoroutine.folia.launch
+import com.sksamuel.aedile.core.asLoadingCache
+import com.sksamuel.aedile.core.expireAfterWrite
 import dev.slne.surf.parkour.config
 import dev.slne.surf.parkour.database.ParkourRunsTable
 import dev.slne.surf.parkour.database.ParkourTable
@@ -30,9 +33,15 @@ import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import java.util.*
 import java.util.concurrent.TimeUnit
+import kotlin.time.Duration.Companion.minutes
 
 class ParkourService {
     private val _parkours = mutableObjectSetOf<Parkour>()
+
+    private val summaryCache = Caffeine.newBuilder().expireAfterWrite(30.minutes)
+        .asLoadingCache<UUID, PersonalParkourSummary> {
+
+        }
 
     fun createParkour(
         uuid: UUID,
@@ -40,7 +49,6 @@ class ParkourService {
         displayName: String,
         boundingBox: BoundingBox,
         world: World,
-        startLocation: Location,
         respawnLocation: Location
     ): Parkour {
         val parkour = Parkour(
@@ -49,7 +57,6 @@ class ParkourService {
             displayName = displayName,
             boundingBox = boundingBox,
             world = world,
-            startLocation = startLocation,
             respawnLocation = respawnLocation
         )
 
@@ -200,7 +207,6 @@ class ParkourService {
                 it[displayName] = parkour.displayName
                 it[world] = parkour.world
                 it[boundingBox] = parkour.boundingBox
-                it[startLocation] = parkour.startLocation
                 it[respawnLocation] = parkour.respawnLocation
             }
         }
@@ -222,7 +228,6 @@ class ParkourService {
                 displayName = it[ParkourTable.displayName],
                 boundingBox = it[ParkourTable.boundingBox],
                 world = it[ParkourTable.world],
-                startLocation = it[ParkourTable.startLocation],
                 respawnLocation = it[ParkourTable.respawnLocation]
             )
         }

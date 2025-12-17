@@ -25,7 +25,7 @@ import kotlin.time.Duration.Companion.hours
 
 object HeadUtil {
     private val textureCache = Caffeine.newBuilder()
-        .expireAfterWrite(1.hours)
+        .expireAfterWrite(3.hours)
         .asLoadingCache(this::getSkinTexture)
 
     private const val DEFAULT_TEXTURE =
@@ -38,6 +38,10 @@ object HeadUtil {
                 isLenient = true
             })
         }
+    }
+
+    suspend fun cachePlayerHead(uuid: UUID) {
+        textureCache.get(uuid)
     }
 
     suspend fun getPlayerHead(uuid: UUID): ItemStack = withContext(Dispatchers.IO) {
