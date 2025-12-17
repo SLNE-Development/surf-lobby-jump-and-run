@@ -52,8 +52,7 @@ class ParkourItemListener : Listener {
         if (item == inventoryItem) {
             plugin.launch {
                 val stats = parkourService.getRuns(player.uniqueId)
-                val summary = PersonalParkourSummary(player.uniqueId, stats)
-                summary.initName()
+                val summary = PersonalParkourSummary(player.uniqueId, stats, player.name)
 
                 withContext(plugin.entityDispatcher(player)) {
                     ParkourMenu(summary).open(player)

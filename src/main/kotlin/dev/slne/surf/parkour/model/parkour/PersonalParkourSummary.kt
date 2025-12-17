@@ -6,9 +6,10 @@ import java.util.*
 
 data class PersonalParkourSummary(
     val uuid: UUID,
-    val runs: ObjectList<ParkourRun>
+    val runs: ObjectList<ParkourRun>,
+    val playerName: String? = null
 ) {
-    private var _name: String? = null
+    private var _name: String? = playerName
 
     suspend fun initName() = _name ?: PlayerLookupService.getUsername(uuid).also {
         _name = it

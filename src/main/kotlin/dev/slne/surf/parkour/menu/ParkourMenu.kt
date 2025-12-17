@@ -24,6 +24,7 @@ import dev.slne.surf.surfapi.core.api.font.toSmallCaps
 import dev.slne.surf.surfapi.core.api.messages.adventure.buildText
 import dev.slne.surf.surfapi.core.api.messages.adventure.text
 import dev.slne.surf.surfapi.core.api.util.int2ObjectMapOf
+import kotlinx.coroutines.withContext
 import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.Material
 import org.bukkit.entity.Player
@@ -114,17 +115,25 @@ class ParkourMenu(override val statistics: PersonalParkourSummary) : PlayerDataH
 
     private fun InventoryClickEvent.handleStart() {
         val parkours = parkourService.getParkours()
+        plugin.launch {
+            parkourService.triggerFailure(player)
 
-        when {
-            parkours.isEmpty() -> ParkourGeneralFailureMenu(
-                statistics,
-                buildText { error("Es gibt keine verfügbaren Parkours!") }
-            ).show(whoClicked)
+            when {
+                parkours.isEmpty() -> ParkourGeneralFailureMenu(
+                    statistics,
+                    buildText { error("Es gibt keine verfügbaren Parkours!") }
+                ).show(whoClicked)
 
-            parkours.size == 1 -> plugin.launch { parkours.first().start(player.uniqueId) }
-                .also { player.closeInventory() }
 
-            else -> ParkourSelectMenu(statistics, RedirectType.START_PARKOUR).show(whoClicked)
+                parkours.size == 1 -> plugin.launch { parkours.first().start(player.uniqueId) }
+                    .also {
+                        withContext(plugin.entityDispatcher(player)) {
+                            player.closeInventory()
+                        }
+                    }
+
+                else -> ParkourSelectMenu(statistics, RedirectType.START_PARKOUR).show(whoClicked)
+            }
         }
     }
 
