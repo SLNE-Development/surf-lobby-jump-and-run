@@ -12,6 +12,5 @@ object ParkourTable : LongIdTable("parkour_parkours") {
     val displayName = varchar("display_name", 100)
     val world = world("world")
     val boundingBox = boundingBox("bounding_box")
-    val startLocation = location("start_location")
     val respawnLocation = location("respawn_location")
 }
