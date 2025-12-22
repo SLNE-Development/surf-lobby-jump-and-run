@@ -37,7 +37,7 @@ data class Parkour(
 
     suspend fun processRun(player: UUID): Int? {
         val generator = generators.find { it.associatedPlayer == player } ?: return null
-        val highscore = parkourService.getHighscore(player, this)
+        val highscore = parkourService.getRuns(player).maxByOrNull { it.jumps }
 
         parkourService.addRun(
             ParkourRun(

@@ -37,7 +37,7 @@ data class ParkourGenerator(
 
     var startTime: Long = -1L
     var currentIndex = 0
-    
+
     private val isGenerating = AtomicBoolean(false)
 
     private val jumpTypes = listOf(
@@ -74,10 +74,12 @@ data class ParkourGenerator(
 
         val firstBlock = findInitialBlock()
         val secondJump = jumpTypes.random().randomJump()
-        val secondBlock = secondJump.generate(firstBlock, firstBlock, player, boundingBox, otherPlayersBlocks)
+        val secondBlock =
+            secondJump.generate(firstBlock, firstBlock, player, boundingBox, otherPlayersBlocks)
 
         val thirdJump = jumpTypes.random().randomJump()
-        val thirdBlock = thirdJump.generate(secondBlock, firstBlock, player, boundingBox, otherPlayersBlocks)
+        val thirdBlock =
+            thirdJump.generate(secondBlock, firstBlock, player, boundingBox, otherPlayersBlocks)
 
         player.sendBlockChange(firstBlock.location, material.createBlockData())
         player.sendBlockChange(secondBlock.location, material.createBlockData())
@@ -89,26 +91,31 @@ data class ParkourGenerator(
     }
 
     suspend fun generate() = withContext(Dispatchers.IO) {
-        // Prevent concurrent generation calls (race condition from client lag)
         if (!isGenerating.compareAndSet(false, true)) {
             return@withContext
         }
-        
+
         try {
             val player = associatedPlayer.getPlayer()
             if (player == null) {
                 return@withContext
             }
-            
+
             if (!::blockLocations.isInitialized) {
                 return@withContext
             }
-            
+
             currentIndex++
 
             val otherPlayersBlocks = getOtherPlayersBlocks()
             val newJump = jumpTypes.random().randomJump()
-            val newNext = newJump.generate(blockLocations.third, blockLocations.second, player, boundingBox, otherPlayersBlocks)
+            val newNext = newJump.generate(
+                blockLocations.third,
+                blockLocations.second,
+                player,
+                boundingBox,
+                otherPlayersBlocks
+            )
 
             player.sendBlockChange(blockLocations.first.location, airData)
             player.sendBlockChange(newNext.location, material.createBlockData())
@@ -175,7 +182,13 @@ data class ParkourGenerator(
     private fun getOtherPlayersBlocks(): List<Vector> {
         return parkour.generators
             .filter { it.associatedPlayer != associatedPlayer && it.isRunning() }
-            .flatMap { listOf(it.blockLocations.first, it.blockLocations.second, it.blockLocations.third) }
+            .flatMap {
+                listOf(
+                    it.blockLocations.first,
+                    it.blockLocations.second,
+                    it.blockLocations.third
+                )
+            }
     }
 
     fun calcRotation(from: Vector, to: Vector): Pair<Float, Float> {

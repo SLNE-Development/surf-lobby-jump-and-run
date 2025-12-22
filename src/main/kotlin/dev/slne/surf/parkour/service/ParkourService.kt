@@ -25,11 +25,8 @@ import org.bukkit.Location
 import org.bukkit.World
 import org.bukkit.entity.Player
 import org.bukkit.util.BoundingBox
+import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.and
-import org.jetbrains.exposed.sql.deleteWhere
-import org.jetbrains.exposed.sql.insert
-import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -133,17 +130,23 @@ class ParkourService {
 
     suspend fun getHighscore(player: UUID, parkour: Parkour) =
         newSuspendedTransaction(Dispatchers.IO) {
-            ParkourRunsTable.selectAll().where(
-                (ParkourRunsTable.parkourUuid eq parkour.uuid) and
-                        (ParkourRunsTable.playerUuid eq player)
-            ).orderBy(ParkourRunsTable.runTime).limit(1).firstNotNullOfOrNull {
-                ParkourRun(
-                    playerUuid = player,
-                    parkour = parkour,
-                    jumps = it[ParkourRunsTable.runJumps],
-                    time = it[ParkourRunsTable.runTime]
+            ParkourRunsTable
+                .selectAll()
+                .where(
+                    (ParkourRunsTable.parkourUuid eq parkour.uuid) and
+                            (ParkourRunsTable.playerUuid eq player)
                 )
-            }
+                .orderBy(ParkourRunsTable.runJumps to SortOrder.ASC)
+                .limit(1)
+                .firstOrNull()
+                ?.let {
+                    ParkourRun(
+                        playerUuid = player,
+                        parkour = parkour,
+                        jumps = it[ParkourRunsTable.runJumps],
+                        time = it[ParkourRunsTable.runTime]
+                    )
+                }
         }
 
     suspend fun registerParkour(serverUuid: UUID, parkour: Parkour) =

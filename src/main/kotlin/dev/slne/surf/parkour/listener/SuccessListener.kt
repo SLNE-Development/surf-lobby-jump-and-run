@@ -15,7 +15,10 @@ class SuccessListener : Listener {
     fun onMove(event: PlayerMoveEvent) {
         val player = event.player
 
-        // TODO: Test performance. Optimize if needed.
+
+        if (!event.hasChangedBlock()) {
+            return
+        }
 
         plugin.launch(plugin.entityDispatcher(event.player)) {
             val parkour = parkourService.getParkour(player) ?: return@launch
