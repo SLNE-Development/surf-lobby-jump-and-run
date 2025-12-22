@@ -7,6 +7,8 @@ import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.World
 import org.bukkit.entity.Player
+import org.bukkit.potion.PotionEffect
+import org.bukkit.potion.PotionEffectType
 import org.bukkit.util.BoundingBox
 import java.util.*
 
@@ -26,6 +28,10 @@ data class Parkour(
 
         players.add(player)
         generators.add(generator)
+
+        Bukkit.getPlayer(player)?.addPotionEffect(
+            PotionEffect(PotionEffectType.INVISIBILITY, Int.MAX_VALUE, 0, false, false)
+        )
 
         generator.start()
     }
@@ -62,6 +68,8 @@ data class Parkour(
         generators.remove(generator)
 
         val player = Bukkit.getPlayer(player) ?: return
+        
+        player.removePotionEffect(PotionEffectType.INVISIBILITY)      
         player.teleportAsync(respawnLocation)
     }
 
