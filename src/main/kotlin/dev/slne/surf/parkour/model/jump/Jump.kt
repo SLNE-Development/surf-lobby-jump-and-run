@@ -42,10 +42,27 @@ data class Jump(
             }
         } while (tries < 10)
         
-        // If we couldn't find a valid position after 10 tries, return a fallback position
-        // that's at least 2 blocks away from previous block to avoid immediate collision
-        return previous.clone().add(forwardVec.clone().multiply(3.0)).apply {
-            y += 0.0
+        // If we couldn't find a valid position after 10 tries, try a simple forward position
+        // Try different forward distances to find a collision-free fallback
+        for (fallbackDistance in 3..6) {
+            val fallback = previous.clone().add(forwardVec.clone().multiply(fallbackDistance.toDouble())).apply {
+                x = x.coerceIn(area.minX, area.maxX)
+                y = y.coerceIn(area.minY, area.maxY)
+                z = z.coerceIn(area.minZ, area.maxZ)
+            }
+            
+            val hasCollision = previous.distance(fallback) < 2.0 ||
+                    (fallback.blockX == previous.blockX && fallback.blockZ == previous.blockZ) ||
+                    (fallback.blockX == current.blockX && fallback.blockZ == current.blockZ) ||
+                    otherPlayersBlocks.any { it.blockX == fallback.blockX && it.blockZ == fallback.blockZ }
+            
+            if (!hasCollision) {
+                return fallback
+            }
+        }
+        
+        // Last resort: return position that's at least different from previous/current
+        return previous.clone().add(forwardVec.clone().multiply(4.0)).apply {
             x = x.coerceIn(area.minX, area.maxX)
             y = y.coerceIn(area.minY, area.maxY)
             z = z.coerceIn(area.minZ, area.maxZ)
