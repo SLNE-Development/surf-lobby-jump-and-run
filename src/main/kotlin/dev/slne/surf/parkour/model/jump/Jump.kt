@@ -35,7 +35,7 @@ data class Jump(
             (
                     previous.distance(target) < 2.0 ||
                             (target.blockX == previous.blockX && target.blockZ == previous.blockZ) ||
-                            (target.blockX == current.blockX && target.blockZ == current.blockZ && target.blockY == current.blockY) ||
+                            (target.blockX == current.blockX && target.blockZ == current.blockZ) ||
                             otherPlayersBlocks.any { it.blockX == target.blockX && it.blockZ == target.blockZ }
                     ) && tries < 10
         )
