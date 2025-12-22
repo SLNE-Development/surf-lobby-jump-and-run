@@ -49,6 +49,7 @@ data class ParkourGenerator(
         startTime = System.currentTimeMillis()
 
         generateInitial()
+        player.velocity = Vector(0, 0, 0)
 
         val rotation = calcRotation(blockLocations.first, blockLocations.second)
         val toTeleport = blockLocations.first.location.block.getRelative(BlockFace.UP).location
