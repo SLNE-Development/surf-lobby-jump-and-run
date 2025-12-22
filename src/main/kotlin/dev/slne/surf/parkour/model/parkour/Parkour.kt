@@ -29,7 +29,6 @@ data class Parkour(
         players.add(player)
         generators.add(generator)
 
-        // Add invisibility effect to player
         Bukkit.getPlayer(player)?.addPotionEffect(
             PotionEffect(PotionEffectType.INVISIBILITY, Int.MAX_VALUE, 0, false, false)
         )
@@ -70,9 +69,7 @@ data class Parkour(
 
         val player = Bukkit.getPlayer(player) ?: return
         
-        // Remove invisibility effect from player
-        player.removePotionEffect(PotionEffectType.INVISIBILITY)
-        
+        player.removePotionEffect(PotionEffectType.INVISIBILITY)      
         player.teleportAsync(respawnLocation)
     }
 
