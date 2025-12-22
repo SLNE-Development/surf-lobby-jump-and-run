@@ -9,7 +9,7 @@ data class Jump(
     val lateral: Int,
     val vertical: Int
 ) {
-    fun generate(previous: Vector, player: Player, area: BoundingBox): Vector {
+    fun generate(previous: Vector, current: Vector, player: Player, area: BoundingBox): Vector {
         val yawRad = Math.toRadians(player.location.yaw.toDouble())
         val forwardVec = Vector(-kotlin.math.sin(yawRad), 0.0, kotlin.math.cos(yawRad)).normalize()
         val lateralVec = Vector(forwardVec.z, 0.0, -forwardVec.x)
@@ -34,7 +34,8 @@ data class Jump(
         } while (
             (
                     previous.distance(target) < 2.0 ||
-                            (target.x == previous.x && target.z == previous.z)
+                            (target.blockX == previous.blockX && target.blockZ == previous.blockZ) ||
+                            (target.blockX == current.blockX && target.blockZ == current.blockZ)
                     ) && tries < 10
         )
         return target

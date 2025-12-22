@@ -36,6 +36,9 @@ data class ParkourGenerator(
 
     var startTime: Long = -1L
     var currentIndex = 0
+    
+    @Volatile
+    private var isGenerating = false
 
     private val jumpTypes = listOf(
         JumpType(2..3, 2..3, -1..1)
@@ -69,10 +72,10 @@ data class ParkourGenerator(
 
         val firstBlock = findInitialBlock()
         val secondJump = jumpTypes.random().randomJump()
-        val secondBlock = secondJump.generate(firstBlock, player, boundingBox)
+        val secondBlock = secondJump.generate(firstBlock, firstBlock, player, boundingBox)
 
         val thirdJump = jumpTypes.random().randomJump()
-        val thirdBlock = thirdJump.generate(secondBlock, player, boundingBox)
+        val thirdBlock = thirdJump.generate(secondBlock, firstBlock, player, boundingBox)
 
         player.sendBlockChange(firstBlock.location, material.createBlockData())
         player.sendBlockChange(secondBlock.location, material.createBlockData())
@@ -84,27 +87,38 @@ data class ParkourGenerator(
     }
 
     suspend fun generate() = withContext(Dispatchers.IO) {
-        val player = associatedPlayer.getPlayer() ?: return@withContext
-        currentIndex++
-
-        if (!::blockLocations.isInitialized) {
-            error("ParkourGenerator not started yet.")
+        // Prevent concurrent generation calls (race condition from client lag)
+        if (isGenerating) {
+            return@withContext
         }
+        
+        isGenerating = true
+        
+        try {
+            val player = associatedPlayer.getPlayer() ?: return@withContext
+            currentIndex++
 
-        val newJump = jumpTypes.random().randomJump()
-        val newNext = newJump.generate(blockLocations.third, player, boundingBox)
+            if (!::blockLocations.isInitialized) {
+                error("ParkourGenerator not started yet.")
+            }
 
-        player.sendBlockChange(blockLocations.first.location, airData)
-        player.sendBlockChange(newNext.location, material.createBlockData())
+            val newJump = jumpTypes.random().randomJump()
+            val newNext = newJump.generate(blockLocations.third, blockLocations.second, player, boundingBox)
 
-        glowingApi.removeGlowing(blockLocations.second.location, player)
-        glowingApi.makeGlowing(blockLocations.third.location, player, color)
+            player.sendBlockChange(blockLocations.first.location, airData)
+            player.sendBlockChange(newNext.location, material.createBlockData())
 
-        blockLocations = Triple(
-            blockLocations.second,
-            blockLocations.third,
-            newNext
-        )
+            glowingApi.removeGlowing(blockLocations.second.location, player)
+            glowingApi.makeGlowing(blockLocations.third.location, player, color)
+
+            blockLocations = Triple(
+                blockLocations.second,
+                blockLocations.third,
+                newNext
+            )
+        } finally {
+            isGenerating = false
+        }
     }
 
     private suspend fun findInitialBlock(): Vector = withContext(Dispatchers.IO) {
