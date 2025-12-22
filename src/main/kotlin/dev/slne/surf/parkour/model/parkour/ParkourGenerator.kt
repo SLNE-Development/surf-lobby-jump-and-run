@@ -17,6 +17,7 @@ import org.bukkit.util.BoundingBox
 import org.bukkit.util.Vector
 import java.lang.Math.toDegrees
 import java.util.*
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.math.atan2
 import kotlin.math.sqrt
 
@@ -37,8 +38,7 @@ data class ParkourGenerator(
     var startTime: Long = -1L
     var currentIndex = 0
     
-    @Volatile
-    private var isGenerating = false
+    private val isGenerating = AtomicBoolean(false)
 
     private val jumpTypes = listOf(
         JumpType(2..3, 2..3, -1..1)
@@ -88,19 +88,21 @@ data class ParkourGenerator(
 
     suspend fun generate() = withContext(Dispatchers.IO) {
         // Prevent concurrent generation calls (race condition from client lag)
-        if (isGenerating) {
+        if (!isGenerating.compareAndSet(false, true)) {
             return@withContext
         }
         
-        isGenerating = true
-        
         try {
-            val player = associatedPlayer.getPlayer() ?: return@withContext
-            currentIndex++
-
-            if (!::blockLocations.isInitialized) {
-                error("ParkourGenerator not started yet.")
+            val player = associatedPlayer.getPlayer()
+            if (player == null) {
+                return@withContext
             }
+            
+            if (!::blockLocations.isInitialized) {
+                return@withContext
+            }
+            
+            currentIndex++
 
             val newJump = jumpTypes.random().randomJump()
             val newNext = newJump.generate(blockLocations.third, blockLocations.second, player, boundingBox)
@@ -117,7 +119,7 @@ data class ParkourGenerator(
                 newNext
             )
         } finally {
-            isGenerating = false
+            isGenerating.set(false)
         }
     }
 
