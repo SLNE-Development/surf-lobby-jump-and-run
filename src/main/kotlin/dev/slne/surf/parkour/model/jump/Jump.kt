@@ -32,12 +32,7 @@ data class Jump(
 
             tries++
             
-            val hasCollision = previous.distance(target) < 2.0 ||
-                    (target.blockX == previous.blockX && target.blockZ == previous.blockZ) ||
-                    (target.blockX == current.blockX && target.blockZ == current.blockZ) ||
-                    otherPlayersBlocks.any { it.blockX == target.blockX && it.blockZ == target.blockZ }
-            
-            if (!hasCollision) {
+            if (!hasCollision(target, previous, current, otherPlayersBlocks)) {
                 return target
             }
         } while (tries < 10)
@@ -51,21 +46,39 @@ data class Jump(
                 z = z.coerceIn(area.minZ, area.maxZ)
             }
             
-            val hasCollision = previous.distance(fallback) < 2.0 ||
-                    (fallback.blockX == previous.blockX && fallback.blockZ == previous.blockZ) ||
-                    (fallback.blockX == current.blockX && fallback.blockZ == current.blockZ) ||
-                    otherPlayersBlocks.any { it.blockX == fallback.blockX && it.blockZ == fallback.blockZ }
-            
-            if (!hasCollision) {
+            if (!hasCollision(fallback, previous, current, otherPlayersBlocks)) {
                 return fallback
             }
         }
         
-        // Last resort: return position that's at least different from previous/current
+        // Last resort: try lateral offsets to avoid X-Z collision
+        for (lateralOffset in listOf(-2, 2, -1, 1)) {
+            val lastResort = previous.clone()
+                .add(forwardVec.clone().multiply(4.0))
+                .add(lateralVec.clone().multiply(lateralOffset.toDouble()))
+                .apply {
+                    x = x.coerceIn(area.minX, area.maxX)
+                    y = y.coerceIn(area.minY, area.maxY)
+                    z = z.coerceIn(area.minZ, area.maxZ)
+                }
+            
+            if (!hasCollision(lastResort, previous, current, otherPlayersBlocks)) {
+                return lastResort
+            }
+        }
+        
+        // Absolute fallback: return position forward (may collide but avoids complete failure)
         return previous.clone().add(forwardVec.clone().multiply(4.0)).apply {
             x = x.coerceIn(area.minX, area.maxX)
             y = y.coerceIn(area.minY, area.maxY)
             z = z.coerceIn(area.minZ, area.maxZ)
         }
+    }
+    
+    private fun hasCollision(target: Vector, previous: Vector, current: Vector, otherPlayersBlocks: List<Vector>): Boolean {
+        return previous.distance(target) < 2.0 ||
+                (target.blockX == previous.blockX && target.blockZ == previous.blockZ) ||
+                (target.blockX == current.blockX && target.blockZ == current.blockZ) ||
+                otherPlayersBlocks.any { it.blockX == target.blockX && it.blockZ == target.blockZ }
     }
 }
