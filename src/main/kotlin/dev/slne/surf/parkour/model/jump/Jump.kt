@@ -9,6 +9,10 @@ data class Jump(
     val lateral: Int,
     val vertical: Int
 ) {
+    companion object {
+        private const val FALLBACK_FORWARD_DISTANCE = 4.0
+    }
+    
     fun generate(previous: Vector, current: Vector, player: Player, area: BoundingBox, otherPlayersBlocks: List<Vector> = emptyList()): Vector {
         val yawRad = Math.toRadians(player.location.yaw.toDouble())
         val forwardVec = Vector(-kotlin.math.sin(yawRad), 0.0, kotlin.math.cos(yawRad)).normalize()
@@ -26,9 +30,7 @@ data class Jump(
             target.add(lateralVec.clone().multiply(l.toDouble()))
             target.y += v
 
-            target.x = target.x.coerceIn(area.minX, area.maxX)
-            target.y = target.y.coerceIn(area.minY, area.maxY)
-            target.z = target.z.coerceIn(area.minZ, area.maxZ)
+            clampToBounds(target, area)
 
             tries++
             
@@ -40,11 +42,8 @@ data class Jump(
         // If we couldn't find a valid position after 10 tries, try a simple forward position
         // Try different forward distances to find a collision-free fallback
         for (fallbackDistance in 3..6) {
-            val fallback = previous.clone().add(forwardVec.clone().multiply(fallbackDistance.toDouble())).apply {
-                x = x.coerceIn(area.minX, area.maxX)
-                y = y.coerceIn(area.minY, area.maxY)
-                z = z.coerceIn(area.minZ, area.maxZ)
-            }
+            val fallback = previous.clone().add(forwardVec.clone().multiply(fallbackDistance.toDouble()))
+            clampToBounds(fallback, area)
             
             if (!hasCollision(fallback, previous, current, otherPlayersBlocks)) {
                 return fallback
@@ -54,13 +53,9 @@ data class Jump(
         // Last resort: try lateral offsets to avoid X-Z collision
         for (lateralOffset in listOf(-2, 2, -1, 1)) {
             val lastResort = previous.clone()
-                .add(forwardVec.clone().multiply(4.0))
+                .add(forwardVec.clone().multiply(FALLBACK_FORWARD_DISTANCE))
                 .add(lateralVec.clone().multiply(lateralOffset.toDouble()))
-                .apply {
-                    x = x.coerceIn(area.minX, area.maxX)
-                    y = y.coerceIn(area.minY, area.maxY)
-                    z = z.coerceIn(area.minZ, area.maxZ)
-                }
+            clampToBounds(lastResort, area)
             
             if (!hasCollision(lastResort, previous, current, otherPlayersBlocks)) {
                 return lastResort
@@ -68,11 +63,15 @@ data class Jump(
         }
         
         // Absolute fallback: return position forward (may collide but avoids complete failure)
-        return previous.clone().add(forwardVec.clone().multiply(4.0)).apply {
-            x = x.coerceIn(area.minX, area.maxX)
-            y = y.coerceIn(area.minY, area.maxY)
-            z = z.coerceIn(area.minZ, area.maxZ)
-        }
+        val absoluteFallback = previous.clone().add(forwardVec.clone().multiply(FALLBACK_FORWARD_DISTANCE))
+        clampToBounds(absoluteFallback, area)
+        return absoluteFallback
+    }
+    
+    private fun clampToBounds(vector: Vector, area: BoundingBox) {
+        vector.x = vector.x.coerceIn(area.minX, area.maxX)
+        vector.y = vector.y.coerceIn(area.minY, area.maxY)
+        vector.z = vector.z.coerceIn(area.minZ, area.maxZ)
     }
     
     private fun hasCollision(target: Vector, previous: Vector, current: Vector, otherPlayersBlocks: List<Vector>): Boolean {
