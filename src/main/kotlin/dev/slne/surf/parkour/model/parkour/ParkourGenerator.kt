@@ -70,12 +70,14 @@ data class ParkourGenerator(
     private suspend fun generateInitial() {
         val player = associatedPlayer.getPlayer() ?: return
 
+        val otherPlayersBlocks = getOtherPlayersBlocks()
+
         val firstBlock = findInitialBlock()
         val secondJump = jumpTypes.random().randomJump()
-        val secondBlock = secondJump.generate(firstBlock, firstBlock, player, boundingBox)
+        val secondBlock = secondJump.generate(firstBlock, firstBlock, player, boundingBox, otherPlayersBlocks)
 
         val thirdJump = jumpTypes.random().randomJump()
-        val thirdBlock = thirdJump.generate(secondBlock, firstBlock, player, boundingBox)
+        val thirdBlock = thirdJump.generate(secondBlock, firstBlock, player, boundingBox, otherPlayersBlocks)
 
         player.sendBlockChange(firstBlock.location, material.createBlockData())
         player.sendBlockChange(secondBlock.location, material.createBlockData())
@@ -104,8 +106,9 @@ data class ParkourGenerator(
             
             currentIndex++
 
+            val otherPlayersBlocks = getOtherPlayersBlocks()
             val newJump = jumpTypes.random().randomJump()
-            val newNext = newJump.generate(blockLocations.third, blockLocations.second, player, boundingBox)
+            val newNext = newJump.generate(blockLocations.third, blockLocations.second, player, boundingBox, otherPlayersBlocks)
 
             player.sendBlockChange(blockLocations.first.location, airData)
             player.sendBlockChange(newNext.location, material.createBlockData())
@@ -168,6 +171,12 @@ data class ParkourGenerator(
         lateral.random(),
         vertical.random()
     )
+
+    private fun getOtherPlayersBlocks(): List<Vector> {
+        return parkour.generators
+            .filter { it.associatedPlayer != associatedPlayer && it.isRunning() }
+            .flatMap { listOf(it.blockLocations.first, it.blockLocations.second, it.blockLocations.third) }
+    }
 
     fun calcRotation(from: Vector, to: Vector): Pair<Float, Float> {
         val dir = to.clone().subtract(from)
