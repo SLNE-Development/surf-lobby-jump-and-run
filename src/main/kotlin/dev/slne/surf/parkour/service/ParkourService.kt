@@ -136,7 +136,7 @@ class ParkourService {
             ParkourRunsTable.selectAll().where(
                 (ParkourRunsTable.parkourUuid eq parkour.uuid) and
                         (ParkourRunsTable.playerUuid eq player)
-            ).orderBy(ParkourRunsTable.runTime).limit(1).firstNotNullOfOrNull {
+            ).orderBy(ParkourRunsTable.runJumps to org.jetbrains.exposed.sql.SortOrder.DESC).limit(1).firstNotNullOfOrNull {
                 ParkourRun(
                     playerUuid = player,
                     parkour = parkour,
