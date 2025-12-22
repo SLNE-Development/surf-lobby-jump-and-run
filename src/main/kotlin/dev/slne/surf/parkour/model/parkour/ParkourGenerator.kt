@@ -17,6 +17,7 @@ import org.bukkit.util.BoundingBox
 import org.bukkit.util.Vector
 import java.lang.Math.toDegrees
 import java.util.*
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.math.atan2
 import kotlin.math.sqrt
 
@@ -36,6 +37,8 @@ data class ParkourGenerator(
 
     var startTime: Long = -1L
     var currentIndex = 0
+
+    private val isGenerating = AtomicBoolean(false)
 
     private val jumpTypes = listOf(
         JumpType(2..3, 2..3, -1..1)
@@ -67,12 +70,16 @@ data class ParkourGenerator(
     private suspend fun generateInitial() {
         val player = associatedPlayer.getPlayer() ?: return
 
+        val otherPlayersBlocks = getOtherPlayersBlocks()
+
         val firstBlock = findInitialBlock()
         val secondJump = jumpTypes.random().randomJump()
-        val secondBlock = secondJump.generate(firstBlock, player, boundingBox)
+        val secondBlock =
+            secondJump.generate(firstBlock, firstBlock, player, boundingBox, otherPlayersBlocks)
 
         val thirdJump = jumpTypes.random().randomJump()
-        val thirdBlock = thirdJump.generate(secondBlock, player, boundingBox)
+        val thirdBlock =
+            thirdJump.generate(secondBlock, firstBlock, player, boundingBox, otherPlayersBlocks)
 
         player.sendBlockChange(firstBlock.location, material.createBlockData())
         player.sendBlockChange(secondBlock.location, material.createBlockData())
@@ -84,27 +91,46 @@ data class ParkourGenerator(
     }
 
     suspend fun generate() = withContext(Dispatchers.IO) {
-        val player = associatedPlayer.getPlayer() ?: return@withContext
-        currentIndex++
-
-        if (!::blockLocations.isInitialized) {
-            error("ParkourGenerator not started yet.")
+        if (!isGenerating.compareAndSet(false, true)) {
+            return@withContext
         }
 
-        val newJump = jumpTypes.random().randomJump()
-        val newNext = newJump.generate(blockLocations.third, player, boundingBox)
+        try {
+            val player = associatedPlayer.getPlayer()
+            if (player == null) {
+                return@withContext
+            }
 
-        player.sendBlockChange(blockLocations.first.location, airData)
-        player.sendBlockChange(newNext.location, material.createBlockData())
+            if (!::blockLocations.isInitialized) {
+                return@withContext
+            }
 
-        glowingApi.removeGlowing(blockLocations.second.location, player)
-        glowingApi.makeGlowing(blockLocations.third.location, player, color)
+            currentIndex++
 
-        blockLocations = Triple(
-            blockLocations.second,
-            blockLocations.third,
-            newNext
-        )
+            val otherPlayersBlocks = getOtherPlayersBlocks()
+            val newJump = jumpTypes.random().randomJump()
+            val newNext = newJump.generate(
+                blockLocations.third,
+                blockLocations.second,
+                player,
+                boundingBox,
+                otherPlayersBlocks
+            )
+
+            player.sendBlockChange(blockLocations.first.location, airData)
+            player.sendBlockChange(newNext.location, material.createBlockData())
+
+            glowingApi.removeGlowing(blockLocations.second.location, player)
+            glowingApi.makeGlowing(blockLocations.third.location, player, color)
+
+            blockLocations = Triple(
+                blockLocations.second,
+                blockLocations.third,
+                newNext
+            )
+        } finally {
+            isGenerating.set(false)
+        }
     }
 
     private suspend fun findInitialBlock(): Vector = withContext(Dispatchers.IO) {
@@ -152,6 +178,18 @@ data class ParkourGenerator(
         lateral.random(),
         vertical.random()
     )
+
+    private fun getOtherPlayersBlocks(): List<Vector> {
+        return parkour.generators
+            .filter { it.associatedPlayer != associatedPlayer && it.isRunning() }
+            .flatMap {
+                listOf(
+                    it.blockLocations.first,
+                    it.blockLocations.second,
+                    it.blockLocations.third
+                )
+            }
+    }
 
     fun calcRotation(from: Vector, to: Vector): Pair<Float, Float> {
         val dir = to.clone().subtract(from)
