@@ -31,14 +31,24 @@ data class Jump(
             target.z = target.z.coerceIn(area.minZ, area.maxZ)
 
             tries++
-        } while (
-            (
-                    previous.distance(target) < 2.0 ||
-                            (target.blockX == previous.blockX && target.blockZ == previous.blockZ) ||
-                            (target.blockX == current.blockX && target.blockZ == current.blockZ) ||
-                            otherPlayersBlocks.any { it.blockX == target.blockX && it.blockZ == target.blockZ }
-                    ) && tries < 10
-        )
-        return target
+            
+            val hasCollision = previous.distance(target) < 2.0 ||
+                    (target.blockX == previous.blockX && target.blockZ == previous.blockZ) ||
+                    (target.blockX == current.blockX && target.blockZ == current.blockZ) ||
+                    otherPlayersBlocks.any { it.blockX == target.blockX && it.blockZ == target.blockZ }
+            
+            if (!hasCollision) {
+                return target
+            }
+        } while (tries < 10)
+        
+        // If we couldn't find a valid position after 10 tries, return a fallback position
+        // that's at least 2 blocks away from previous block to avoid immediate collision
+        return previous.clone().add(forwardVec.clone().multiply(3.0)).apply {
+            y += 0.0
+            x = x.coerceIn(area.minX, area.maxX)
+            y = y.coerceIn(area.minY, area.maxY)
+            z = z.coerceIn(area.minZ, area.maxZ)
+        }
     }
 }
