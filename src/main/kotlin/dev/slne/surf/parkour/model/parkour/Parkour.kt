@@ -30,7 +30,13 @@ data class Parkour(
         generators.add(generator)
 
         Bukkit.getPlayer(player)?.addPotionEffect(
-            PotionEffect(PotionEffectType.INVISIBILITY, Int.MAX_VALUE, 0, false, false)
+            PotionEffect(
+                PotionEffectType.INVISIBILITY,
+                PotionEffect.INFINITE_DURATION,
+                0,
+                false,
+                false
+            )
         )
 
         generator.start()
@@ -68,8 +74,8 @@ data class Parkour(
         generators.remove(generator)
 
         val player = Bukkit.getPlayer(player) ?: return
-        
-        player.removePotionEffect(PotionEffectType.INVISIBILITY)      
+
+        player.removePotionEffect(PotionEffectType.INVISIBILITY)
         player.teleportAsync(respawnLocation)
     }
 
