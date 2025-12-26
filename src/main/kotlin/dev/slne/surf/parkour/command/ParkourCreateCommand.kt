@@ -35,6 +35,14 @@ fun CommandAPICommand.parkourCreateCommand() = subcommand("create") {
             return@playerExecutor
         }
 
+        if (!WorldEditHook.isEnabled()) {
+            player.sendText {
+                appendPrefix()
+                error("Es kann keine WorldEdit-Auswahl gefunden werden, da das WorldEdit-Plugin nicht installiert ist.")
+            }
+            return@playerExecutor
+        }
+
         val selection = WorldEditHook.getSelection(player)
 
         if (selection == null) {
