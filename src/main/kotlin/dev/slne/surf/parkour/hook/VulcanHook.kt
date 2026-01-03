@@ -4,6 +4,7 @@ import dev.slne.surf.parkour.plugin
 import dev.slne.surf.parkour.service.parkourService
 import dev.slne.surf.parkour.util.anyOfType
 import dev.slne.surf.parkour.util.getBlocksBelowFeet
+import dev.slne.surf.parkour.util.isSameBlock
 import dev.slne.surf.surfapi.bukkit.api.event.register
 import me.frep.vulcan.api.event.VulcanGhostBlockEvent
 import org.bukkit.Bukkit
@@ -38,9 +39,7 @@ class VulcanHook : Listener {
         return generator.blockLocations
             .anyOfType<Vector> { jumpBlock ->
                 blocksBelow.any { blockBelow ->
-                    jumpBlock.blockX == blockBelow.blockX &&
-                    jumpBlock.blockY == blockBelow.blockY &&
-                    jumpBlock.blockZ == blockBelow.blockZ
+                    jumpBlock.isSameBlock(blockBelow)
                 }
             }
     }

@@ -23,6 +23,15 @@ fun Vector.equalsVector3i(other: Vector3i): Boolean {
             this.blockZ == other.z
 }
 
+/**
+ * Checks if two vectors represent the same block position.
+ */
+fun Vector.isSameBlock(other: Vector): Boolean {
+    return this.blockX == other.blockX &&
+            this.blockY == other.blockY &&
+            this.blockZ == other.blockZ
+}
+
 val Long.formattedDuration: String
     get() {
         val totalSeconds = this / 1000
@@ -40,4 +49,3 @@ val Long.formattedDuration: String
     }
 
 fun SurfComponentBuilder.appendLinePrefix() = darkSpacer("» ")
-

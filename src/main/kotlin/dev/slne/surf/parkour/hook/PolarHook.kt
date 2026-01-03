@@ -3,6 +3,7 @@ package dev.slne.surf.parkour.hook
 import dev.slne.surf.parkour.service.parkourService
 import dev.slne.surf.parkour.util.anyOfType
 import dev.slne.surf.parkour.util.getBlocksBelowFeet
+import dev.slne.surf.parkour.util.isSameBlock
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import org.bukkit.util.Vector
@@ -50,9 +51,7 @@ class PolarHook : Consumer<MitigationEvent> {
         return generator.blockLocations
             .anyOfType<Vector> { jumpBlock ->
                 blocksBelow.any { blockBelow ->
-                    jumpBlock.blockX == blockBelow.blockX &&
-                    jumpBlock.blockY == blockBelow.blockY &&
-                    jumpBlock.blockZ == blockBelow.blockZ
+                    jumpBlock.isSameBlock(blockBelow)
                 }
             }
     }
