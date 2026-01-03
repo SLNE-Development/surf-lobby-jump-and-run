@@ -19,7 +19,7 @@ fun Player.getBlocksBelowFeet(): List<Vector> {
     val maxX = boundingBox.maxX
     val minZ = boundingBox.minZ
     val maxZ = boundingBox.maxZ
-    val footY = boundingBox.minY - 0.1 // Slightly below the feet
+    val footY = boundingBox.minY - FOOT_CHECK_OFFSET
     
     val blocks = mutableSetOf<Vector>()
     
@@ -35,3 +35,9 @@ fun Player.getBlocksBelowFeet(): List<Vector> {
 private fun Vector.toBlockLocation(): Vector {
     return Vector(blockX.toDouble(), blockY.toDouble(), blockZ.toDouble())
 }
+
+/**
+ * Offset below player's feet for block detection.
+ * A small offset ensures we check the block the player is standing on.
+ */
+private const val FOOT_CHECK_OFFSET = 0.1
