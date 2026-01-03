@@ -2,6 +2,7 @@ package dev.slne.surf.parkour.hook
 
 import dev.slne.surf.parkour.service.parkourService
 import dev.slne.surf.parkour.util.anyOfType
+import dev.slne.surf.parkour.util.getBlocksBelowFeet
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import org.bukkit.util.Vector
@@ -44,7 +45,7 @@ class PolarHook : Consumer<MitigationEvent> {
         val generator = playerParkour.generators[player.uniqueId] ?: return false
 
         // Get the blocks below the player's feet (checking corners to handle edge cases)
-        val blocksBelow = getBlocksBelowPlayer(player)
+        val blocksBelow = player.getBlocksBelowFeet()
         
         return generator.blockLocations
             .anyOfType<Vector> { jumpBlock ->
@@ -54,31 +55,5 @@ class PolarHook : Consumer<MitigationEvent> {
                     jumpBlock.blockZ == blockBelow.blockZ
                 }
             }
-    }
-
-    private fun getBlocksBelowPlayer(player: Player): List<Vector> {
-        val location = player.location
-        val boundingBox = player.boundingBox
-        
-        // Check the 4 corners of the player's bounding box at foot level
-        val minX = boundingBox.minX
-        val maxX = boundingBox.maxX
-        val minZ = boundingBox.minZ
-        val maxZ = boundingBox.maxZ
-        val footY = boundingBox.minY - 0.1 // Slightly below the feet
-        
-        val blocks = mutableSetOf<Vector>()
-        
-        // Check all 4 corners
-        blocks.add(Vector(minX, footY, minZ).toBlockLocation())
-        blocks.add(Vector(maxX, footY, minZ).toBlockLocation())
-        blocks.add(Vector(minX, footY, maxZ).toBlockLocation())
-        blocks.add(Vector(maxX, footY, maxZ).toBlockLocation())
-        
-        return blocks.toList()
-    }
-
-    private fun Vector.toBlockLocation(): Vector {
-        return Vector(blockX.toDouble(), blockY.toDouble(), blockZ.toDouble())
     }
 }
