@@ -4,6 +4,7 @@ import com.github.shynixn.mccoroutine.folia.entityDispatcher
 import com.github.shynixn.mccoroutine.folia.launch
 import dev.slne.surf.parkour.plugin
 import dev.slne.surf.parkour.service.parkourService
+import dev.slne.surf.parkour.util.isSameBlock
 import org.bukkit.block.BlockFace
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -28,15 +29,9 @@ class SuccessListener : Listener {
                 return@launch
             }
 
-            if (generator.blockLocations.second.equalsBlock(event.to.block.getRelative(BlockFace.DOWN).location.toVector())) {
+            if (generator.blockLocations.second.isSameBlock(event.to.block.getRelative(BlockFace.DOWN).location.toVector())) {
                 parkourService.triggerSuccess(player)
             }
         }
-    }
-
-    private fun Vector.equalsBlock(other: Vector): Boolean {
-        return this.blockX == other.blockX &&
-                this.blockY == other.blockY &&
-                this.blockZ == other.blockZ
     }
 }
