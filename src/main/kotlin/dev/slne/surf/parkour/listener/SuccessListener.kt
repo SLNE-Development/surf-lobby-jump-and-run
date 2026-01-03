@@ -4,7 +4,7 @@ import com.github.shynixn.mccoroutine.folia.entityDispatcher
 import com.github.shynixn.mccoroutine.folia.launch
 import dev.slne.surf.parkour.plugin
 import dev.slne.surf.parkour.service.parkourService
-import dev.slne.surf.parkour.util.getBlocksBelowFeet
+import dev.slne.surf.parkour.util.getBlocksBelowLocation
 import dev.slne.surf.parkour.util.isSameBlock
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -28,8 +28,9 @@ class SuccessListener : Listener {
                 return@launch
             }
 
-            // Check if any block below the player's feet matches the target jump block
-            val blocksBelow = player.getBlocksBelowFeet()
+            // Check if any block below the destination location matches the target jump block
+            // This accounts for landing on block edges
+            val blocksBelow = getBlocksBelowLocation(event.to)
             val targetBlock = generator.blockLocations.second
             
             if (blocksBelow.any { it.isSameBlock(targetBlock) }) {
