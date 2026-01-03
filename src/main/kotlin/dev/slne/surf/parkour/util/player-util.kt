@@ -10,6 +10,9 @@ fun UUID.getPlayer() = Bukkit.getPlayer(this)
 /**
  * Gets all blocks below the player's feet by checking the 4 corners of their bounding box.
  * This is useful for detecting when a player is standing on the edge of a block.
+ * 
+ * The function checks slightly below the player's feet (minY - FOOT_CHECK_OFFSET) to ensure
+ * we detect the blocks the player is actually standing on.
  */
 fun Player.getBlocksBelowFeet(): List<Vector> {
     val boundingBox = this.boundingBox

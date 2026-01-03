@@ -25,6 +25,8 @@ fun Vector.equalsVector3i(other: Vector3i): Boolean {
 
 /**
  * Checks if two vectors represent the same block position.
+ * Note: This function compares Bukkit Vector with Bukkit Vector.
+ * For comparing with PacketEvents Vector3i, use equalsVector3i() instead.
  */
 fun Vector.isSameBlock(other: Vector): Boolean {
     return this.blockX == other.blockX &&
