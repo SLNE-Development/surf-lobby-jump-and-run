@@ -9,11 +9,12 @@ import java.util.*
 fun UUID.getPlayer() = Bukkit.getPlayer(this)
 
 /**
- * Gets all blocks below the player's feet by checking the 4 corners of their bounding box.
+ * Gets all blocks below the player's feet by checking their bounding box.
  * This is useful for detecting when a player is standing on the edge of a block.
  * 
  * The function checks slightly below the player's feet (minY - FOOT_CHECK_OFFSET) to ensure
- * we detect the blocks the player is actually standing on.
+ * we detect the blocks the player is actually standing on. It returns all blocks that overlap
+ * with the player's bounding box, including corners, edges, and center blocks.
  */
 fun Player.getBlocksBelowFeet(): List<Vector> {
     val boundingBox = this.boundingBox
@@ -30,7 +31,8 @@ fun Player.getBlocksBelowFeet(): List<Vector> {
 
 /**
  * Gets all blocks that could be below a specific location, accounting for being on block edges.
- * This checks the 4 corners of a player-sized bounding box centered at the given location.
+ * This checks all blocks within a player-sized bounding box centered at the given location,
+ * including corners, edges, and center blocks.
  * 
  * @param location The location to check below
  * @return List of block vectors that could be below the given location
@@ -50,15 +52,25 @@ fun getBlocksBelowLocation(location: Location): List<Vector> {
 }
 
 /**
- * Helper function to get unique blocks at the 4 corners of a rectangular area.
+ * Helper function to get all unique blocks within a rectangular area at foot level.
+ * This checks all blocks that overlap with the bounding box, not just the corners.
  */
 private fun getBlocksAtCorners(minX: Double, maxX: Double, minZ: Double, maxZ: Double, y: Double): List<Vector> {
     val blocks = mutableSetOf<Vector>()
     
-    blocks.add(Vector(minX, y, minZ).toBlockLocation())
-    blocks.add(Vector(maxX, y, minZ).toBlockLocation())
-    blocks.add(Vector(minX, y, maxZ).toBlockLocation())
-    blocks.add(Vector(maxX, y, maxZ).toBlockLocation())
+    // Get the block coordinates for the bounds
+    val minBlockX = kotlin.math.floor(minX).toInt()
+    val maxBlockX = kotlin.math.floor(maxX).toInt()
+    val minBlockZ = kotlin.math.floor(minZ).toInt()
+    val maxBlockZ = kotlin.math.floor(maxZ).toInt()
+    val blockY = kotlin.math.floor(y).toInt()
+    
+    // Check all blocks within the bounding box range
+    for (x in minBlockX..maxBlockX) {
+        for (z in minBlockZ..maxBlockZ) {
+            blocks.add(Vector(x.toDouble(), blockY.toDouble(), z.toDouble()))
+        }
+    }
     
     return blocks.toList()
 }
