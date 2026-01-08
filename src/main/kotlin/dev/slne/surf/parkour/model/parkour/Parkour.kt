@@ -7,8 +7,6 @@ import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.World
 import org.bukkit.entity.Player
-import org.bukkit.potion.PotionEffect
-import org.bukkit.potion.PotionEffectType
 import org.bukkit.util.BoundingBox
 import java.util.*
 
@@ -36,7 +34,7 @@ data class Parkour(
 
     private val playerMaterials = mapOf(
         UUID.fromString("1c779cb1-3860-4e23-9cac-7f160b2acc61") to Material.RED_CONCRETE, // TheBjoRedCraft
-        UUID.fromString("3094f2ed-fe51-46fd-a1dc-d76e846548e5") to Material.FLOWERING_AZALEA // Floweryalina
+        UUID.fromString("3094f2ed-fe51-46fd-a1dc-d76e846548e5") to Material.FLOWERING_AZALEA_LEAVES // Floweryalina
     )
 
     fun getBlockMaterial(player: UUID) = playerMaterials[player] ?: concretes.random()
@@ -46,16 +44,6 @@ data class Parkour(
 
         players.add(player)
         generators.add(generator)
-
-        Bukkit.getPlayer(player)?.addPotionEffect(
-            PotionEffect(
-                PotionEffectType.INVISIBILITY,
-                PotionEffect.INFINITE_DURATION,
-                0,
-                false,
-                false
-            )
-        )
 
         generator.start()
     }
@@ -93,7 +81,6 @@ data class Parkour(
 
         val player = Bukkit.getPlayer(player) ?: return
 
-        player.removePotionEffect(PotionEffectType.INVISIBILITY)
         player.teleportAsync(respawnLocation)
     }
 

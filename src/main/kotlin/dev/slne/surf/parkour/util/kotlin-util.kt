@@ -3,7 +3,6 @@ package dev.slne.surf.parkour.util
 import com.github.retrooper.packetevents.util.Vector3i
 import dev.slne.surf.surfapi.bukkit.api.util.forEachPlayer
 import dev.slne.surf.surfapi.core.api.messages.builder.SurfComponentBuilder
-import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Server
 import org.bukkit.block.data.BlockData
@@ -62,5 +61,5 @@ fun Server.sendBlockChange(location: Location, blockData: BlockData) = forEachPl
 }
 
 fun sendGlobalBlockChange(location: Location, blockData: BlockData) {
-    Bukkit.getServer().sendBlockChange(location, blockData)
+    location.world.setBlockData(location, blockData)
 }
