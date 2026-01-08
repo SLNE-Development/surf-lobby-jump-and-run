@@ -5,6 +5,7 @@ import dev.slne.surf.parkour.model.jump.Jump
 import dev.slne.surf.parkour.model.jump.JumpType
 import dev.slne.surf.parkour.plugin
 import dev.slne.surf.parkour.util.getPlayer
+import dev.slne.surf.parkour.util.sendGlobalBlockChange
 import dev.slne.surf.surfapi.bukkit.api.glow.glowingApi
 import dev.slne.surf.surfapi.core.api.util.random
 import kotlinx.coroutines.Dispatchers
@@ -62,9 +63,9 @@ data class ParkourGenerator(
         val player = associatedPlayer.getPlayer() ?: return@withContext
         glowingApi.removeGlowing(blockLocations.second.location, player)
 
-        player.sendBlockChange(blockLocations.first.location, airData)
-        player.sendBlockChange(blockLocations.second.location, airData)
-        player.sendBlockChange(blockLocations.third.location, airData)
+        sendGlobalBlockChange(blockLocations.first.location, airData)
+        sendGlobalBlockChange(blockLocations.second.location, airData)
+        sendGlobalBlockChange(blockLocations.third.location, airData)
 
     }
 
@@ -82,9 +83,9 @@ data class ParkourGenerator(
         val thirdBlock =
             thirdJump.generate(secondBlock, firstBlock, player, boundingBox, otherPlayersBlocks)
 
-        player.sendBlockChange(firstBlock.location, material.createBlockData())
-        player.sendBlockChange(secondBlock.location, material.createBlockData())
-        player.sendBlockChange(thirdBlock.location, material.createBlockData())
+        sendGlobalBlockChange(firstBlock.location, material.createBlockData())
+        sendGlobalBlockChange(secondBlock.location, material.createBlockData())
+        sendGlobalBlockChange(thirdBlock.location, material.createBlockData())
 
 
         blockLocations = Triple(firstBlock, secondBlock, thirdBlock)
@@ -97,10 +98,7 @@ data class ParkourGenerator(
         }
 
         try {
-            val player = associatedPlayer.getPlayer()
-            if (player == null) {
-                return@withContext
-            }
+            val player = associatedPlayer.getPlayer() ?: return@withContext
 
             if (!::blockLocations.isInitialized) {
                 return@withContext
@@ -118,8 +116,8 @@ data class ParkourGenerator(
                 otherPlayersBlocks
             )
 
-            player.sendBlockChange(blockLocations.first.location, airData)
-            player.sendBlockChange(newNext.location, material.createBlockData())
+            sendGlobalBlockChange(blockLocations.first.location, airData)
+            sendGlobalBlockChange(newNext.location, material.createBlockData())
 
             glowingApi.removeGlowing(blockLocations.second.location, player)
             glowingApi.makeGlowing(blockLocations.third.location, player, color)

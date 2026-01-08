@@ -1,7 +1,12 @@
 package dev.slne.surf.parkour.util
 
 import com.github.retrooper.packetevents.util.Vector3i
+import dev.slne.surf.surfapi.bukkit.api.util.forEachPlayer
 import dev.slne.surf.surfapi.core.api.messages.builder.SurfComponentBuilder
+import org.bukkit.Bukkit
+import org.bukkit.Location
+import org.bukkit.Server
+import org.bukkit.block.data.BlockData
 import org.bukkit.util.Vector
 
 inline fun <reified T> Triple<*, *, *>.anyOfType(predicate: (T) -> Boolean): Boolean {
@@ -51,3 +56,11 @@ val Long.formattedDuration: String
     }
 
 fun SurfComponentBuilder.appendLinePrefix() = darkSpacer("» ")
+
+fun Server.sendBlockChange(location: Location, blockData: BlockData) = forEachPlayer {
+    it.sendBlockChange(location, blockData)
+}
+
+fun sendGlobalBlockChange(location: Location, blockData: BlockData) {
+    Bukkit.getServer().sendBlockChange(location, blockData)
+}

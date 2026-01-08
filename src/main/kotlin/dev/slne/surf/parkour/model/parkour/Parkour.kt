@@ -23,8 +23,26 @@ data class Parkour(
     val generators = mutableObjectSetOf<ParkourGenerator>()
     val players = mutableObjectSetOf<UUID>()
 
+    private val concretes = listOf(
+        Material.RED_CONCRETE,
+        Material.BLUE_CONCRETE,
+        Material.GREEN_CONCRETE,
+        Material.YELLOW_CONCRETE,
+        Material.ORANGE_CONCRETE,
+        Material.PURPLE_CONCRETE,
+        Material.CYAN_CONCRETE,
+        Material.MAGENTA_CONCRETE
+    )
+
+    private val playerMaterials = mapOf(
+        UUID.fromString("1c779cb1-3860-4e23-9cac-7f160b2acc61") to Material.RED_CONCRETE, // TheBjoRedCraft
+        UUID.fromString("3094f2ed-fe51-46fd-a1dc-d76e846548e5") to Material.FLOWERING_AZALEA // Floweryalina
+    )
+
+    fun getBlockMaterial(player: UUID) = playerMaterials[player] ?: concretes.random()
+
     suspend fun start(player: UUID) {
-        val generator = ParkourGenerator(player, this, Material.RED_CONCRETE)
+        val generator = ParkourGenerator(player, this, getBlockMaterial(player))
 
         players.add(player)
         generators.add(generator)
