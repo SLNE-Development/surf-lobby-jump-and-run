@@ -32,7 +32,7 @@ class SuccessListener : Listener {
             // This accounts for landing on block edges
             val blocksBelow = getBlocksBelowLocation(event.to)
             val targetBlock = generator.blockLocations.second
-            
+
             if (blocksBelow.any { it.isSameBlock(targetBlock) }) {
                 parkourService.triggerSuccess(player)
             }

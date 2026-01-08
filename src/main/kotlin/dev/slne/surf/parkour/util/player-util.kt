@@ -18,14 +18,14 @@ fun UUID.getPlayer() = Bukkit.getPlayer(this)
  */
 fun Player.getBlocksBelowFeet(): List<Vector> {
     val boundingBox = this.boundingBox
-    
+
     // Check the 4 corners of the player's bounding box at foot level
     val minX = boundingBox.minX
     val maxX = boundingBox.maxX
     val minZ = boundingBox.minZ
     val maxZ = boundingBox.maxZ
     val footY = boundingBox.minY - FOOT_CHECK_OFFSET
-    
+
     return getBlocksAtCorners(minX, maxX, minZ, maxZ, footY)
 }
 
@@ -37,42 +37,50 @@ fun Player.getBlocksBelowFeet(): List<Vector> {
  * @param location The location to check below
  * @return List of block vectors that could be below the given location
  */
-fun getBlocksBelowLocation(location: Location): List<Vector> {
+fun getBlocksBelowLocation(location: Location): MutableList<Vector> {
     val centerX = location.x
     val centerZ = location.z
     val footY = location.y - FOOT_CHECK_OFFSET
-    
+
     // Calculate corners of a player-sized bounding box
     val minX = centerX - PLAYER_HALF_WIDTH
     val maxX = centerX + PLAYER_HALF_WIDTH
     val minZ = centerZ - PLAYER_HALF_WIDTH
     val maxZ = centerZ + PLAYER_HALF_WIDTH
-    
-    return getBlocksAtCorners(minX, maxX, minZ, maxZ, footY)
+
+    return getBlocksAtCorners(minX, maxX, minZ, maxZ, footY).apply {
+        add(location.clone().subtract(0.0, 1.0, 0.0).toVector())
+    }
 }
 
 /**
  * Helper function to get all unique blocks within a rectangular area at foot level.
  * This checks all blocks that overlap with the bounding box, not just the corners.
  */
-private fun getBlocksAtCorners(minX: Double, maxX: Double, minZ: Double, maxZ: Double, y: Double): List<Vector> {
+private fun getBlocksAtCorners(
+    minX: Double,
+    maxX: Double,
+    minZ: Double,
+    maxZ: Double,
+    y: Double
+): MutableList<Vector> {
     val blocks = mutableSetOf<Vector>()
-    
+
     // Get the block coordinates for the bounds
     val minBlockX = kotlin.math.floor(minX).toInt()
     val maxBlockX = kotlin.math.floor(maxX).toInt()
     val minBlockZ = kotlin.math.floor(minZ).toInt()
     val maxBlockZ = kotlin.math.floor(maxZ).toInt()
     val blockY = kotlin.math.floor(y).toInt()
-    
+
     // Check all blocks within the bounding box range
     for (x in minBlockX..maxBlockX) {
         for (z in minBlockZ..maxBlockZ) {
             blocks.add(Vector(x.toDouble(), blockY.toDouble(), z.toDouble()))
         }
     }
-    
-    return blocks.toList()
+
+    return blocks.toMutableList()
 }
 
 private fun Vector.toBlockLocation(): Vector {

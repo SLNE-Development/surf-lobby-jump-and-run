@@ -1,61 +1,57 @@
 package dev.slne.surf.parkour.util
 
-import dev.slne.surf.parkour.config
-import dev.slne.surf.surfapi.bukkit.api.builder.buildItem
 import dev.slne.surf.surfapi.bukkit.api.builder.buildLore
 import dev.slne.surf.surfapi.bukkit.api.builder.displayName
 import dev.slne.surf.surfapi.core.api.font.toSmallCaps
 import dev.slne.surf.surfapi.core.api.messages.builder.SurfComponentBuilder
 import net.kyori.adventure.text.format.NamedTextColor
+import net.kyori.adventure.text.format.TextColor
 import net.kyori.adventure.text.format.TextDecoration
-import org.bukkit.Material
-import org.bukkit.inventory.ItemFlag
+import org.bukkit.Color
+import org.bukkit.inventory.ItemType
+import org.bukkit.inventory.meta.ColorableArmorMeta
 
 fun SurfComponentBuilder.white(text: String) = text(text, NamedTextColor.WHITE)
 
 val inventoryItem
-    get() = buildItem(Material.FIREWORK_ROCKET) {
-        displayName {
-            primary("Jump'n Run", TextDecoration.BOLD)
-            if (config.betaMode) {
-                error(" Beta".toSmallCaps())
-            }
+    get() = ItemType.LEATHER_BOOTS.createItemStack().apply {
+        editMeta(ColorableArmorMeta::class.java) {
+            it.setColor(Color.fromRGB(3, 252, 198))
         }
 
-        addItemFlags(ItemFlag.HIDE_ADDITIONAL_TOOLTIP, ItemFlag.HIDE_ATTRIBUTES)
+        displayName {
+            localColored("Parkour")
+        }
 
         buildLore {
             emptyLine()
             line {
-                white("Endlich ist er da! ")
+                variableValue("Beschreibung:".toSmallCaps())
             }
             line {
-                variableValue("Der Lobby Parkour.")
+                spacer("-")
+                appendSpace()
+                localColored("Starte den Lobby Parkour")
             }
+
             line {
-                white("Keine Langeweile beim Warten mehr!")
+                spacer("-")
+                appendSpace()
+                localColored("Siehe Statistiken an")
+            }
+
+            line {
+                spacer("-")
+                appendSpace()
+                localColored("Stelle neue Rekorde auf")
             }
             emptyLine()
+
             line {
-                white("Springe so weit wie möglich und stelle neue Rekorde auf!")
-            }
-            line {
-                white("Klicke mit diesem Item, um ein Menu zu öffnen. Dort")
-            }
-            line {
-                white("kannst du den Parkour starten, deine Statistiken ansehen")
-            }
-            line {
-                white("und vieles mehr!")
-            }
-            if (config.betaMode) {
-                emptyLine()
-                line {
-                    spacer(
-                        "Bitte beachte, das der Parkour noch in der Beta-Phase ist.",
-                        TextDecoration.ITALIC
-                    )
-                }
+                spacer("» Klicke, um dein Profil zu öffnen")
             }
         }
     }
+
+private fun SurfComponentBuilder.localColored(text: Any, vararg decoration: TextDecoration) =
+    text(text.toString(), TextColor.fromHexString("#03fcc6"), *decoration)
