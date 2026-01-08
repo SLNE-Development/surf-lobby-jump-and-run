@@ -48,7 +48,7 @@ val inventoryItem
             emptyLine()
 
             line {
-                spacer("» Klicke, um dein Profil zu öffnen")
+                spacer("» Klicke, um das Parkour Menu zu öffnen")
             }
         }
     }
