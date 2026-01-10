@@ -5,8 +5,6 @@ import dev.jorel.commandapi.kotlindsl.anyExecutor
 import dev.jorel.commandapi.kotlindsl.subcommand
 import dev.slne.surf.parkour.paper.permission.ParkourPermissionRegistry
 import dev.slne.surf.parkour.paper.plugin
-import dev.slne.surf.parkour.paper.util.inventoryItem
-import dev.slne.surf.surfapi.bukkit.api.util.forEachPlayer
 import dev.slne.surf.surfapi.core.api.messages.adventure.sendText
 
 fun CommandAPICommand.parkourReloadCommand() = subcommand("reload") {
@@ -17,15 +15,7 @@ fun CommandAPICommand.parkourReloadCommand() = subcommand("reload") {
             info("Das Plugin wird neu geladen...")
         }
 
-        forEachPlayer {
-            it.inventory.remove(inventoryItem)
-        }
-
         plugin.parkourConfig.reload()
-
-        forEachPlayer {
-            it.inventory.setItem(6, inventoryItem)
-        }
 
         executor.sendText {
             appendPrefix()

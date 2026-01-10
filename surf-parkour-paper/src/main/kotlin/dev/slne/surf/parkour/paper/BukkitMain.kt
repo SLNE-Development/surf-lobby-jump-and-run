@@ -10,7 +10,6 @@ import dev.slne.surf.parkour.paper.database.ParkourTable
 import dev.slne.surf.parkour.paper.hook.PolarHook
 import dev.slne.surf.parkour.paper.hook.VulcanHook
 import dev.slne.surf.parkour.paper.listener.FailureListener
-import dev.slne.surf.parkour.paper.listener.ParkourItemListener
 import dev.slne.surf.parkour.paper.listener.PlayerPacketListener
 import dev.slne.surf.parkour.paper.listener.SuccessListener
 import dev.slne.surf.parkour.paper.service.ParkourService
@@ -26,7 +25,6 @@ class BukkitMain : SuspendingJavaPlugin() {
     override fun onEnable() {
         FailureListener().register()
         SuccessListener().register()
-        ParkourItemListener().register()
 
         PolarHook().register()
         VulcanHook().register()

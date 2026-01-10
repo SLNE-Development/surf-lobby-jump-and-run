@@ -28,8 +28,6 @@ class SuccessListener : Listener {
                 return@launch
             }
 
-            // Check if any block below the destination location matches the target jump block
-            // This accounts for landing on block edges
             val blocksBelow = getBlocksBelowLocation(event.to)
             val targetBlock = generator.blockLocations.second
 
