@@ -8,6 +8,7 @@ import dev.slne.surf.parkour.paper.util.allOfType
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerMoveEvent
+import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.util.Vector
 
 class FailureListener : Listener {
@@ -38,6 +39,25 @@ class FailureListener : Listener {
                 if (it) {
                     parkourService.triggerFailure(player)
                 }
+            }
+        }
+    }
+
+    @EventHandler
+    fun onDisconnect(event: PlayerQuitEvent) {
+        val player = event.player
+
+        plugin.launch(plugin.entityDispatcher(player)) {
+            val parkour = parkourService.getParkour(player) ?: run {
+                return@launch
+            }
+
+            val generator = parkour.getGenerator(player) ?: run {
+                return@launch
+            }
+
+            if (generator.isRunning()) {
+                parkourService.triggerFailure(player)
             }
         }
     }
