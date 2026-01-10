@@ -61,8 +61,10 @@ data class ParkourGenerator(
     }
 
     suspend fun stop() = withContext(Dispatchers.IO) {
-        val player = associatedPlayer.getPlayer() ?: return@withContext
-        glowingApi.removeGlowing(blockLocations.second.location, player)
+        associatedPlayer.getPlayer()?.let {
+            glowingApi.removeGlowing(blockLocations.second.location, it)
+        }
+
 
         sendGlobalBlockChange(blockLocations.first.location, airData)
         sendGlobalBlockChange(blockLocations.second.location, airData)
