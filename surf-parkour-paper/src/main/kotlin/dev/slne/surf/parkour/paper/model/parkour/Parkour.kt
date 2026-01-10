@@ -2,6 +2,8 @@ package dev.slne.surf.parkour.paper.model.parkour
 
 import dev.slne.surf.parkour.paper.service.parkourService
 import dev.slne.surf.surfapi.core.api.util.mutableObjectSetOf
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Material
@@ -39,8 +41,8 @@ data class Parkour(
 
     fun getBlockMaterial(player: UUID) = playerMaterials[player] ?: concretes.random()
 
-    suspend fun start(player: UUID) {
-        val generator = ParkourGenerator(player, this, getBlockMaterial(player))
+    suspend fun start(player: UUID) = withContext(Dispatchers.IO) {
+        val generator = ParkourGenerator(player, this@Parkour, getBlockMaterial(player))
 
         players.add(player)
         generators.add(generator)

@@ -1,10 +1,10 @@
 package dev.slne.surf.parkour.paper.database.type
 
+import dev.slne.surf.database.libs.org.jetbrains.exposed.v1.core.Column
+import dev.slne.surf.database.libs.org.jetbrains.exposed.v1.core.ColumnType
+import dev.slne.surf.database.libs.org.jetbrains.exposed.v1.core.Table
 import org.bukkit.Bukkit
 import org.bukkit.Location
-import org.jetbrains.exposed.sql.Column
-import org.jetbrains.exposed.sql.ColumnType
-import org.jetbrains.exposed.sql.Table
 import java.sql.Clob
 
 class LocationColumnType : ColumnType<Location>() {

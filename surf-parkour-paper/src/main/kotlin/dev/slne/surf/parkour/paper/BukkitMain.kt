@@ -2,9 +2,12 @@ package dev.slne.surf.parkour.paper
 
 import com.github.retrooper.packetevents.PacketEvents
 import com.github.shynixn.mccoroutine.folia.SuspendingJavaPlugin
-import dev.slne.surf.database.DatabaseManager
+import dev.slne.surf.database.DatabaseApi
+import dev.slne.surf.database.libs.org.jetbrains.exposed.v1.r2dbc.SchemaUtils
+import dev.slne.surf.database.libs.org.jetbrains.exposed.v1.r2dbc.transactions.suspendTransaction
 import dev.slne.surf.parkour.paper.command.parkourCommand
 import dev.slne.surf.parkour.paper.config.ParkourConfiguration
+import dev.slne.surf.parkour.paper.database.ParkourPlayerTexturesTable
 import dev.slne.surf.parkour.paper.database.ParkourRunsTable
 import dev.slne.surf.parkour.paper.database.ParkourTable
 import dev.slne.surf.parkour.paper.hook.PolarHook
@@ -15,9 +18,8 @@ import dev.slne.surf.parkour.paper.listener.SuccessListener
 import dev.slne.surf.parkour.paper.service.ParkourService
 import dev.slne.surf.parkour.paper.service.parkourService
 import dev.slne.surf.surfapi.bukkit.api.event.register
+import kotlinx.coroutines.runBlocking
 import org.bukkit.plugin.java.JavaPlugin
-import org.jetbrains.exposed.sql.SchemaUtils
-import org.jetbrains.exposed.sql.transactions.transaction
 
 val plugin get() = JavaPlugin.getPlugin(BukkitMain::class.java)
 
@@ -43,10 +45,12 @@ class BukkitMain : SuspendingJavaPlugin() {
     }
 
     private fun establishDatabaseConnection() {
-        DatabaseManager(plugin.dataPath, plugin.dataPath).databaseProvider.connect()
+        DatabaseApi.create(plugin.dataPath)
 
-        transaction {
-            SchemaUtils.create(ParkourTable, ParkourRunsTable)
+        runBlocking {
+            suspendTransaction {
+                SchemaUtils.create(ParkourTable, ParkourRunsTable, ParkourPlayerTexturesTable)
+            }
         }
     }
 

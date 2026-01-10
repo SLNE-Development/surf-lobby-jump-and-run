@@ -114,25 +114,29 @@ class ParkourMenu(override val statistics: PersonalParkourSummary) : PlayerDataH
     }
 
     private fun InventoryClickEvent.handleStart() {
-        val parkours = parkourService.getParkours()
         plugin.launch {
+            val parkours = parkourService.getParkours()
             parkourService.triggerFailure(player)
 
             when {
-                parkours.isEmpty() -> ParkourGeneralFailureMenu(
-                    statistics,
-                    buildText { error("Es gibt keine verfügbaren Parkours!") }
-                ).show(whoClicked)
+                parkours.isEmpty() -> withContext(plugin.entityDispatcher(player)) {
+                    ParkourGeneralFailureMenu(
+                        statistics,
+                        buildText { error("Es gibt keine verfügbaren Parkours!") }
+                    ).show(whoClicked)
+                }
 
 
-                parkours.size == 1 -> plugin.launch { parkours.first().start(player.uniqueId) }
+                parkours.size == 1 -> parkours.first().start(player.uniqueId)
                     .also {
                         withContext(plugin.entityDispatcher(player)) {
                             player.closeInventory()
                         }
                     }
 
-                else -> ParkourSelectMenu(statistics, RedirectType.START_PARKOUR).show(whoClicked)
+                else -> withContext(plugin.entityDispatcher(player)) {
+                    ParkourSelectMenu(statistics, RedirectType.START_PARKOUR).show(whoClicked)
+                }
             }
         }
     }

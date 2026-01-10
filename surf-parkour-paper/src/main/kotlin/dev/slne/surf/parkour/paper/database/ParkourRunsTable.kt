@@ -1,6 +1,6 @@
 package dev.slne.surf.parkour.paper.database
 
-import org.jetbrains.exposed.dao.id.LongIdTable
+import dev.slne.surf.database.libs.org.jetbrains.exposed.v1.core.dao.id.LongIdTable
 
 object ParkourRunsTable : LongIdTable("parkour_runs") {
     val parkourUuid = uuid("parkour_uuid").references(ParkourTable.parkourUuid)

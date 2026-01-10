@@ -23,7 +23,7 @@ dependencies {
     compileOnly(libs.polar.api)
     compileOnly(files("libs/vulcan-api-v1.jar"))
 
-    api(libs.surf.database)
+    api("dev.slne.surf:surf-database-r2dbc:1.0.0-SNAPSHOT")
     api(project(":surf-parkour-api"))
 
     compileOnly(libs.worldedit.core) { isTransitive = false }

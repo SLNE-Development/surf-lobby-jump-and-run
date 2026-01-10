@@ -3,6 +3,13 @@ package dev.slne.surf.parkour.paper.service
 import com.github.benmanes.caffeine.cache.Caffeine
 import com.github.shynixn.mccoroutine.folia.launch
 import com.sksamuel.aedile.core.expireAfterWrite
+import dev.slne.surf.database.libs.org.jetbrains.exposed.v1.core.SortOrder
+import dev.slne.surf.database.libs.org.jetbrains.exposed.v1.core.and
+import dev.slne.surf.database.libs.org.jetbrains.exposed.v1.core.eq
+import dev.slne.surf.database.libs.org.jetbrains.exposed.v1.r2dbc.deleteWhere
+import dev.slne.surf.database.libs.org.jetbrains.exposed.v1.r2dbc.insert
+import dev.slne.surf.database.libs.org.jetbrains.exposed.v1.r2dbc.selectAll
+import dev.slne.surf.database.libs.org.jetbrains.exposed.v1.r2dbc.transactions.suspendTransaction
 import dev.slne.surf.parkour.paper.config
 import dev.slne.surf.parkour.paper.database.ParkourRunsTable
 import dev.slne.surf.parkour.paper.database.ParkourTable
@@ -19,15 +26,15 @@ import dev.slne.surf.surfapi.core.api.util.mutableObjectSetOf
 import dev.slne.surf.surfapi.core.api.util.toMutableObjectList
 import dev.slne.surf.surfapi.core.api.util.toObjectList
 import io.papermc.paper.threadedregions.scheduler.ScheduledTask
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.flow.toList
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.World
 import org.bukkit.entity.Player
 import org.bukkit.util.BoundingBox
-import org.jetbrains.exposed.sql.*
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.time.Duration.Companion.minutes
@@ -71,7 +78,6 @@ class ParkourService {
         val parkour = getParkour(player) ?: return
 
         parkour.preExit(player.uniqueId)
-        soundService.playFailure(player)
 
         parkour.processRun(player.uniqueId)?.let {
             player.sendText {
@@ -82,6 +88,7 @@ class ParkourService {
             }
         }
         parkour.exit(player.uniqueId)
+        soundService.playFailure(player)
 
         player.sendText {
             appendPrefix()
@@ -105,7 +112,7 @@ class ParkourService {
     fun getParkour(uuid: UUID) = _parkours.find { it.uuid == uuid }
     fun exists(identifier: String) = _parkours.any { it.identifier == identifier }
 
-    suspend fun addRun(run: ParkourRun) = newSuspendedTransaction(Dispatchers.IO) {
+    suspend fun addRun(run: ParkourRun) = suspendTransaction {
         ParkourRunsTable.insert {
             it[parkourUuid] = run.parkour.uuid
             it[playerUuid] = run.playerUuid
@@ -115,7 +122,7 @@ class ParkourService {
     }
 
     suspend fun getRuns(player: UUID) =
-        newSuspendedTransaction(Dispatchers.IO) {
+        suspendTransaction {
             ParkourRunsTable.selectAll().where(
                 (ParkourRunsTable.playerUuid eq player)
             ).mapNotNull { row ->
@@ -127,11 +134,11 @@ class ParkourService {
                     jumps = row[ParkourRunsTable.runJumps],
                     time = row[ParkourRunsTable.runTime]
                 )
-            }.toObjectList()
+            }.toList().toObjectList()
         }
 
     suspend fun getHighscore(player: UUID, parkour: Parkour) =
-        newSuspendedTransaction(Dispatchers.IO) {
+        suspendTransaction {
             ParkourRunsTable
                 .selectAll()
                 .where(
@@ -152,7 +159,7 @@ class ParkourService {
         }
 
     suspend fun registerParkour(serverUuid: UUID, parkour: Parkour) =
-        newSuspendedTransaction(Dispatchers.IO) {
+        suspendTransaction {
             ParkourTable.insert {
                 it[parkourUuid] = parkour.uuid
                 it[this.serverUuid] = serverUuid
@@ -165,13 +172,13 @@ class ParkourService {
         }
 
     suspend fun unregisterParkour(serverUuid: UUID, parkour: Parkour) =
-        newSuspendedTransaction(Dispatchers.IO) {
+        suspendTransaction {
             ParkourTable.deleteWhere {
                 (parkourUuid eq parkour.uuid) and (this.serverUuid eq serverUuid)
             }
         }
 
-    suspend fun getParkours(serverUUid: UUID) = newSuspendedTransaction(Dispatchers.IO) {
+    suspend fun getParkours(serverUUid: UUID) = suspendTransaction {
         ParkourTable.selectAll().where(
             (ParkourTable.serverUuid eq serverUUid)
         ).map {
@@ -183,7 +190,7 @@ class ParkourService {
                 world = it[ParkourTable.world],
                 respawnLocation = it[ParkourTable.respawnLocation]
             )
-        }
+        }.toList()
     }
 
     fun loadParkours() {
@@ -233,7 +240,7 @@ class ParkourService {
         sorting: LeaderboardSortingType,
         page: Int,
         pageSize: Int
-    ): List<PersonalParkourSummary> = newSuspendedTransaction(Dispatchers.IO) {
+    ): List<PersonalParkourSummary> = suspendTransaction {
         val offset = page * pageSize
         val stats = ParkourRunsTable
             .selectAll()

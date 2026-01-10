@@ -4,6 +4,11 @@ import com.destroystokyo.paper.profile.ProfileProperty
 import com.github.benmanes.caffeine.cache.Caffeine
 import com.sksamuel.aedile.core.asLoadingCache
 import com.sksamuel.aedile.core.expireAfterWrite
+import dev.slne.surf.database.libs.org.jetbrains.exposed.v1.core.eq
+import dev.slne.surf.database.libs.org.jetbrains.exposed.v1.r2dbc.selectAll
+import dev.slne.surf.database.libs.org.jetbrains.exposed.v1.r2dbc.transactions.suspendTransaction
+import dev.slne.surf.database.libs.org.jetbrains.exposed.v1.r2dbc.upsert
+import dev.slne.surf.parkour.paper.database.ParkourPlayerTexturesTable
 import dev.slne.surf.surfapi.bukkit.api.builder.buildItem
 import dev.slne.surf.surfapi.bukkit.api.builder.meta
 import io.ktor.client.*
@@ -13,6 +18,7 @@ import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -40,10 +46,6 @@ object HeadUtil {
         }
     }
 
-    suspend fun cachePlayerHead(uuid: UUID) {
-        textureCache.get(uuid)
-    }
-
     suspend fun getPlayerHead(uuid: UUID): ItemStack = withContext(Dispatchers.IO) {
         buildItem(Material.PLAYER_HEAD) {
             meta<SkullMeta> {
@@ -55,11 +57,34 @@ object HeadUtil {
         }
     }
 
-    private suspend fun getSkinTexture(uuid: UUID): String = runCatching {
-        client.get("https://sessionserver.mojang.com/session/minecraft/profile/$uuid?unsigned=false")
-            .body<TextureResponse>()
-            .properties.find { it.name == "textures" }?.value ?: DEFAULT_TEXTURE
-    }.getOrDefault(DEFAULT_TEXTURE)
+    private suspend fun getSkinTexture(uuid: UUID): String =
+        loadTextureFromDatabase(uuid) ?: loadFromSessionServerAndSaveToDatabase(uuid)
+        ?: DEFAULT_TEXTURE
+
+    private suspend fun loadFromSessionServerAndSaveToDatabase(uuid: UUID) = runCatching {
+        val response =
+            client.get("https://sessionserver.mojang.com/session/minecraft/profile/$uuid?unsigned=false")
+                .body<TextureResponse>()
+                .properties.find { it.name == "textures" }?.value
+
+        if (response != null) {
+            suspendTransaction {
+                ParkourPlayerTexturesTable.upsert {
+                    it[playerUuid] = uuid
+                    it[texture] = response
+                }
+            }
+        }
+
+        response
+    }.getOrNull()
+
+    private suspend fun loadTextureFromDatabase(uuid: UUID) = suspendTransaction {
+        ParkourPlayerTexturesTable.selectAll().where(ParkourPlayerTexturesTable.playerUuid eq uuid)
+            .firstOrNull()?.let {
+                it[ParkourPlayerTexturesTable.texture]
+            }
+    }
 
     @Serializable
     data class TextureResponse(val name: String, val properties: List<Property>) {
