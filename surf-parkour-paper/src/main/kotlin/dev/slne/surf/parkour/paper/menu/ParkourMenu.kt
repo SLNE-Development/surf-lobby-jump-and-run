@@ -22,6 +22,7 @@ import dev.slne.surf.surfapi.bukkit.api.builder.displayName
 import dev.slne.surf.surfapi.bukkit.api.builder.lore
 import dev.slne.surf.surfapi.core.api.font.toSmallCaps
 import dev.slne.surf.surfapi.core.api.messages.adventure.buildText
+import dev.slne.surf.surfapi.core.api.messages.adventure.sendText
 import dev.slne.surf.surfapi.core.api.messages.adventure.text
 import dev.slne.surf.surfapi.core.api.util.int2ObjectMapOf
 import kotlinx.coroutines.withContext
@@ -116,7 +117,18 @@ class ParkourMenu(override val statistics: PersonalParkourSummary) : PlayerDataH
     private fun InventoryClickEvent.handleStart() {
         plugin.launch {
             val parkours = parkourService.getParkours()
-            parkourService.triggerFailure(player)
+
+            if (parkourService.isInParkour(player.uniqueId)) {
+                withContext(plugin.entityDispatcher(player)) {
+                    player.closeInventory()
+                }
+
+                player.sendText {
+                    appendPrefix()
+                    error("Du bist bereits in einem Parkour!")
+                }
+                return@launch
+            }
 
             when {
                 parkours.isEmpty() -> withContext(plugin.entityDispatcher(player)) {

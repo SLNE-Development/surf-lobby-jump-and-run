@@ -80,14 +80,13 @@ data class Parkour(
 
         generator.stop()
         generators.remove(generator)
-
-        val player = Bukkit.getPlayer(player) ?: return
-
-        player.teleportAsync(respawnLocation)
     }
 
-    fun preExit(player: UUID) {
-        players.remove(player)
+    fun preExit(playerUuid: UUID) {
+        val player = Bukkit.getPlayer(playerUuid) ?: return
+
+        players.remove(playerUuid)
+        player.teleportAsync(respawnLocation)
     }
 
     companion object {

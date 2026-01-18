@@ -79,6 +79,12 @@ class ParkourService {
 
         parkour.preExit(player.uniqueId)
 
+        player.sendText {
+            appendPrefix()
+            info("Du bist runtergefallen...")
+        }
+        soundService.playFailure(player)
+
         parkour.processRun(player.uniqueId)?.let {
             player.sendText {
                 appendPrefix()
@@ -88,12 +94,6 @@ class ParkourService {
             }
         }
         parkour.exit(player.uniqueId)
-        soundService.playFailure(player)
-
-        player.sendText {
-            appendPrefix()
-            info("Du bist runtergefallen...")
-        }
     }
 
     suspend fun triggerSuccess(player: Player) {
