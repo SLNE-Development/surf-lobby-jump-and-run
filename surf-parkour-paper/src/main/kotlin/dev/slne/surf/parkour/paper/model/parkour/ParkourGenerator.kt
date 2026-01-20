@@ -46,8 +46,8 @@ data class ParkourGenerator(
         JumpType(2..3, -3..-2, -1..1)
     )
 
-    suspend fun start() = withContext(Dispatchers.IO) {
-        val player = associatedPlayer.getPlayer() ?: return@withContext
+    suspend fun start() {
+        val player = associatedPlayer.getPlayer() ?: return
         startTime = System.currentTimeMillis()
 
         generateInitial()
@@ -60,7 +60,7 @@ data class ParkourGenerator(
         player.teleportAsync(toTeleport)
     }
 
-    suspend fun stop() = withContext(Dispatchers.IO) {
+    suspend fun stop() {
         associatedPlayer.getPlayer()?.let {
             glowingApi.removeGlowing(blockLocations.second.location, it)
         }
@@ -69,7 +69,6 @@ data class ParkourGenerator(
         sendGlobalBlockChange(blockLocations.first.location, airData)
         sendGlobalBlockChange(blockLocations.second.location, airData)
         sendGlobalBlockChange(blockLocations.third.location, airData)
-
     }
 
     private suspend fun generateInitial() {
@@ -95,16 +94,16 @@ data class ParkourGenerator(
         glowingApi.makeGlowing(secondBlock.location, player, color)
     }
 
-    suspend fun generate() = withContext(Dispatchers.IO) {
+    suspend fun generate() {
         if (!isGenerating.compareAndSet(false, true)) {
-            return@withContext
+            return
         }
 
         try {
-            val player = associatedPlayer.getPlayer() ?: return@withContext
+            val player = associatedPlayer.getPlayer() ?: return
 
             if (!::blockLocations.isInitialized) {
-                return@withContext
+                return
             }
 
             currentIndex++

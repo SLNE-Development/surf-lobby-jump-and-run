@@ -29,12 +29,15 @@ fun CommandAPICommand.parkourPlayCommand() = subcommand("play") {
                 return@launch
             }
 
-            parkour.start(player.uniqueId)
-            player.sendText {
-                appendPrefix()
-                success("Du hast den Parkour ")
-                variableValue(parkour.displayName)
-                success(" gestartet.")
+            val success = parkour.start(player.uniqueId)
+
+            if (success) {
+                player.sendText {
+                    appendPrefix()
+                    success("Du hast den Parkour ")
+                    variableValue(parkour.displayName)
+                    success(" gestartet.")
+                }
             }
         }
     }

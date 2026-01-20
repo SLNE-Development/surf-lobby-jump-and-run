@@ -1,9 +1,8 @@
 package dev.slne.surf.parkour.paper.model.parkour
 
 import dev.slne.surf.parkour.paper.service.parkourService
+import dev.slne.surf.surfapi.core.api.messages.adventure.sendText
 import dev.slne.surf.surfapi.core.api.util.mutableObjectSetOf
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Material
@@ -22,6 +21,7 @@ data class Parkour(
 ) {
     val generators = mutableObjectSetOf<ParkourGenerator>()
     val players = mutableObjectSetOf<UUID>()
+    val waitPlease = mutableObjectSetOf<UUID>()
 
     private val concretes = listOf(
         Material.RED_CONCRETE,
@@ -41,13 +41,25 @@ data class Parkour(
 
     fun getBlockMaterial(player: UUID) = playerMaterials[player] ?: concretes.random()
 
-    suspend fun start(player: UUID) = withContext(Dispatchers.IO) {
+    suspend fun start(player: UUID): Boolean {
         val generator = ParkourGenerator(player, this@Parkour, getBlockMaterial(player))
+
+        if (waitPlease.contains(player)) {
+            Bukkit.getPlayer(player)?.let {
+                it.sendText {
+                    appendPrefix()
+                    error("Bitte warte einen Moment, bevor du den Parkour erneut betrittst.")
+                }
+            }
+            return false
+        }
 
         players.add(player)
         generators.add(generator)
 
         generator.start()
+
+        return true
     }
 
     fun getGenerator(player: UUID) = generators.find { it.associatedPlayer == player }
@@ -80,12 +92,14 @@ data class Parkour(
 
         generator.stop()
         generators.remove(generator)
+        waitPlease.remove(player)
     }
 
     fun preExit(playerUuid: UUID) {
-        val player = Bukkit.getPlayer(playerUuid) ?: return
-
         players.remove(playerUuid)
+        waitPlease.add(playerUuid)
+
+        val player = Bukkit.getPlayer(playerUuid) ?: return
         player.teleportAsync(respawnLocation)
     }
 
