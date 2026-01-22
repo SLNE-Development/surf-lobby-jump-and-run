@@ -65,7 +65,6 @@ data class ParkourGenerator(
             glowingApi.removeGlowing(blockLocations.second.location, it)
         }
 
-
         sendGlobalBlockChange(blockLocations.first.location, airData)
         sendGlobalBlockChange(blockLocations.second.location, airData)
         sendGlobalBlockChange(blockLocations.third.location, airData)

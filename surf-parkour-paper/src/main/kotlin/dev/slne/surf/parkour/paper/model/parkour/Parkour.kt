@@ -47,7 +47,7 @@ data class Parkour(
         if (waitPlease.contains(player)) {
             Bukkit.getPlayer(player)?.let {
                 it.sendText {
-                    appendPrefix()
+                    appendErrorPrefix()
                     error("Bitte warte einen Moment, bevor du den Parkour erneut betrittst.")
                 }
             }

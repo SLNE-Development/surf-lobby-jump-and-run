@@ -124,7 +124,7 @@ class ParkourMenu(override val statistics: PersonalParkourSummary) : PlayerDataH
                 }
 
                 player.sendText {
-                    appendPrefix()
+                    appendErrorPrefix()
                     error("Du bist bereits in einem Parkour!")
                 }
                 return@launch

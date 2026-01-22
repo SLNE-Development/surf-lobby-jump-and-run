@@ -21,7 +21,7 @@ fun CommandAPICommand.parkourPlayCommand() = subcommand("play") {
         plugin.launch {
             parkourService.getParkour(player)?.let {
                 player.sendText {
-                    appendPrefix()
+                    appendErrorPrefix()
                     error("Du bist bereits in dem Parkour ")
                     variableValue(it.displayName)
                     error(".")
@@ -33,7 +33,7 @@ fun CommandAPICommand.parkourPlayCommand() = subcommand("play") {
 
             if (success) {
                 player.sendText {
-                    appendPrefix()
+                    appendSuccessPrefix()
                     success("Du hast den Parkour ")
                     variableValue(parkour.displayName)
                     success(" gestartet.")

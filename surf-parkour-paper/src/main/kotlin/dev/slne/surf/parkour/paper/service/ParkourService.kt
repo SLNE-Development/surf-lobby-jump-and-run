@@ -80,14 +80,14 @@ class ParkourService {
         parkour.preExit(player.uniqueId)
 
         player.sendText {
-            appendPrefix()
+            appendInfoPrefix()
             info("Du bist runtergefallen...")
         }
         soundService.playFailure(player)
 
         parkour.processRun(player.uniqueId)?.let {
             player.sendText {
-                appendPrefix()
+                appendSuccessPrefix()
                 success("Du hast mit ")
                 variableValue(it)
                 success(" Sprüngen einen neuen Highscore aufgestellt.")
