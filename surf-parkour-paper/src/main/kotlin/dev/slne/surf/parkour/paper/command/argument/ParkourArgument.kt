@@ -15,7 +15,7 @@ class ParkourArgument(nodeName: String) : CustomArgument<Parkour, String>(
         parkourService.getParkour(info.input)
             ?: throw CustomArgumentException.fromAdventureComponent {
                 buildText {
-                    appendPrefix()
+                    appendErrorPrefix()
                     error("Der Parkour ")
                     variableValue(info.input)
                     error(" wurde nicht gefunden.")

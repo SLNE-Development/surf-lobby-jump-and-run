@@ -14,7 +14,6 @@ import dev.slne.surf.surfapi.bukkit.api.builder.lore
 import dev.slne.surf.surfapi.core.api.font.toSmallCaps
 import dev.slne.surf.surfapi.core.api.messages.adventure.buildText
 import dev.slne.surf.surfapi.core.api.messages.adventure.text
-import dev.slne.surf.surfapi.core.api.util.mutableObjectListOf
 import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.entity.Player
 
@@ -38,7 +37,7 @@ class ParkourActivePlayersMenu(
         val continueButton = gui.nextButton(pages)
 
         val activePlayers = parkour.players
-        val playerList = activePlayers.mapTo(mutableObjectListOf(activePlayers.size)) {
+        val playerList = activePlayers.map {
             GuiItem(HeadUtil.getPlayerHead(it).apply {
                 displayName(text(it.name()))
                 lore {

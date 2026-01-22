@@ -1,8 +1,11 @@
 package dev.slne.surf.parkour.paper.util
 
 import com.github.retrooper.packetevents.util.Vector3i
+import com.github.shynixn.mccoroutine.folia.regionDispatcher
+import dev.slne.surf.parkour.paper.plugin
 import dev.slne.surf.surfapi.bukkit.api.util.forEachPlayer
 import dev.slne.surf.surfapi.core.api.messages.builder.SurfComponentBuilder
+import kotlinx.coroutines.withContext
 import org.bukkit.Location
 import org.bukkit.Server
 import org.bukkit.block.data.BlockData
@@ -60,6 +63,7 @@ fun Server.sendBlockChange(location: Location, blockData: BlockData) = forEachPl
     it.sendBlockChange(location, blockData)
 }
 
-fun sendGlobalBlockChange(location: Location, blockData: BlockData) {
-    location.world.setBlockData(location, blockData)
-}
+suspend fun sendGlobalBlockChange(location: Location, blockData: BlockData) =
+    withContext(plugin.regionDispatcher(location)) {
+        location.world.setBlockData(location, blockData)
+    }

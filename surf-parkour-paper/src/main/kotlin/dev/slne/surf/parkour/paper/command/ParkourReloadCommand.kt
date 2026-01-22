@@ -11,14 +11,14 @@ fun CommandAPICommand.parkourReloadCommand() = subcommand("reload") {
     withPermission(ParkourPermissionRegistry.COMMAND_PARKOUR_RELOAD)
     anyExecutor { executor, _ ->
         executor.sendText {
-            appendPrefix()
+            appendInfoPrefix()
             info("Das Plugin wird neu geladen...")
         }
 
         plugin.parkourConfig.reload()
 
         executor.sendText {
-            appendPrefix()
+            appendSuccessPrefix()
             success("Das Plugin wurde neu geladen.")
         }
     }

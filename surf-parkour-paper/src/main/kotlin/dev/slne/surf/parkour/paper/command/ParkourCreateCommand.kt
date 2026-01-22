@@ -21,7 +21,7 @@ fun CommandAPICommand.parkourCreateCommand() = subcommand("create") {
 
         if (identifier.contains(" ")) {
             player.sendText {
-                appendPrefix()
+                appendErrorPrefix()
                 error("Die Kennung darf keine Leerzeichen enthalten.")
             }
             return@playerExecutor
@@ -29,7 +29,7 @@ fun CommandAPICommand.parkourCreateCommand() = subcommand("create") {
 
         if (parkourService.exists(identifier)) {
             player.sendText {
-                appendPrefix()
+                appendErrorPrefix()
                 error("Ein Parkour mit dieser Kennung existiert bereits.")
             }
             return@playerExecutor
@@ -37,7 +37,7 @@ fun CommandAPICommand.parkourCreateCommand() = subcommand("create") {
 
         if (!WorldEditHook.isEnabled()) {
             player.sendText {
-                appendPrefix()
+                appendErrorPrefix()
                 error("Es kann keine WorldEdit-Auswahl gefunden werden, da das WorldEdit-Plugin nicht installiert ist.")
             }
             return@playerExecutor
@@ -47,7 +47,7 @@ fun CommandAPICommand.parkourCreateCommand() = subcommand("create") {
 
         if (selection == null) {
             player.sendText {
-                appendPrefix()
+                appendErrorPrefix()
                 error("Es wurde keine WorldEdit-Auswahl gefunden. Bitte wähle einen Bereich aus und versuche es erneut.")
             }
             return@playerExecutor
@@ -63,7 +63,7 @@ fun CommandAPICommand.parkourCreateCommand() = subcommand("create") {
         )
 
         player.sendText {
-            appendPrefix()
+            appendSuccessPrefix()
             success("Der Parkour ")
             variableValue(displayname)
             success(" wurde erstellt.")

@@ -23,7 +23,7 @@ fun CommandAPICommand.parkourListCommand() = subcommand("list") {
 
         if (parkours.isEmpty()) {
             executor.sendText {
-                appendPrefix()
+                appendErrorPrefix()
                 error("Es wurde kein Parkour gefunden.")
             }
             return@anyExecutor

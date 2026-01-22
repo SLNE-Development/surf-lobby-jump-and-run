@@ -79,21 +79,21 @@ class ParkourService {
 
         parkour.preExit(player.uniqueId)
 
+        player.sendText {
+            appendInfoPrefix()
+            info("Du bist runtergefallen...")
+        }
+        soundService.playFailure(player)
+
         parkour.processRun(player.uniqueId)?.let {
             player.sendText {
-                appendPrefix()
+                appendSuccessPrefix()
                 success("Du hast mit ")
                 variableValue(it)
                 success(" Sprüngen einen neuen Highscore aufgestellt.")
             }
         }
         parkour.exit(player.uniqueId)
-        soundService.playFailure(player)
-
-        player.sendText {
-            appendPrefix()
-            info("Du bist runtergefallen...")
-        }
     }
 
     suspend fun triggerSuccess(player: Player) {
