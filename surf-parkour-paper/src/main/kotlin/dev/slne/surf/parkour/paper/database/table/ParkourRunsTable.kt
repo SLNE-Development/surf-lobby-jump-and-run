@@ -5,6 +5,7 @@ import dev.slne.surf.database.libs.org.jetbrains.exposed.v1.core.dao.id.LongIdTa
 object ParkourRunsTable : LongIdTable("parkour_runs") {
     val parkourUuid = uuid("parkour_uuid").references(ParkourTable.parkourUuid)
     val playerUuid = uuid("player_uuid").index()
+    val playerName = varchar("player_name", 16)
 
     val runJumps = integer("run_jumps").default(0)
     val runTime = long("run_time").default(0L)

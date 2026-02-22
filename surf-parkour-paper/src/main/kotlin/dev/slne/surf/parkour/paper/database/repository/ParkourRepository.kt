@@ -30,6 +30,7 @@ class ParkourRepository {
         ParkourRunsTable
             .select(
                 ParkourRunsTable.playerUuid,
+                ParkourRunsTable.playerName,
                 totalRuns,
                 totalJumps,
                 highscore,
@@ -39,6 +40,7 @@ class ParkourRepository {
             .map { row ->
                 ParkourStats(
                     playerUuid = row[ParkourRunsTable.playerUuid],
+                    playerName = row[ParkourRunsTable.playerName],
                     totalRuns = row[totalRuns].toInt(),
                     totalJumps = row[totalJumps] ?: 0,
                     highscore = row[highscore] ?: 0,
@@ -53,6 +55,7 @@ class ParkourRepository {
         ParkourRunsTable.insert {
             it[parkourUuid] = parkourRun.parkour.uuid
             it[playerUuid] = parkourRun.playerUuid
+            it[playerName] = parkourRun.playerName
             it[runJumps] = parkourRun.jumps
             it[runTime] = parkourRun.time
         }
@@ -67,6 +70,7 @@ class ParkourRepository {
         ParkourRunsTable
             .select(
                 ParkourRunsTable.playerUuid,
+                ParkourRunsTable.playerName,
                 totalRuns,
                 totalJumps,
                 highscore,
@@ -77,6 +81,7 @@ class ParkourRepository {
             .map { row ->
                 ParkourStats(
                     playerUuid = row[ParkourRunsTable.playerUuid],
+                    playerName = row[ParkourRunsTable.playerName],
                     totalRuns = row[totalRuns].toInt(),
                     totalJumps = row[totalJumps] ?: 0,
                     highscore = row[highscore] ?: 0,
