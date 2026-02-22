@@ -54,7 +54,9 @@ object ParkourOverviewView : View() {
                 parkour.start(context.player.uniqueId)
             }
         }
-        render.layoutSlot('A', activeItem)
+        render.layoutSlot('A', activeItem).onClick { context ->
+            
+        }
         render.layoutSlot('M', ownItem(render))
     }
 }
