@@ -11,7 +11,7 @@ import org.bukkit.event.player.PlayerMoveEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.util.Vector
 
-class FailureListener : Listener {
+object FailureListener : Listener {
     @EventHandler
     fun onMove(event: PlayerMoveEvent) {
         if (!event.hasChangedBlock()) {

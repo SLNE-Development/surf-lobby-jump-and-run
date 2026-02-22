@@ -8,7 +8,6 @@ import dev.slne.surf.parkour.paper.menu.ParkourMenu
 import dev.slne.surf.parkour.paper.model.parkour.PersonalParkourSummary
 import dev.slne.surf.parkour.paper.permission.ParkourPermissionRegistry
 import dev.slne.surf.parkour.paper.plugin
-import dev.slne.surf.parkour.paper.service.parkourService
 import kotlinx.coroutines.withContext
 
 fun parkourCommand() = commandAPICommand("parkour") {
@@ -21,7 +20,7 @@ fun parkourCommand() = commandAPICommand("parkour") {
 
     playerExecutor { player, _ ->
         plugin.launch {
-            val stats = parkourService.getRuns(player.uniqueId)
+//            val stats = parkourService.getRuns(player.uniqueId)
             val summary = PersonalParkourSummary(player.uniqueId, stats)
             summary.initName()
 

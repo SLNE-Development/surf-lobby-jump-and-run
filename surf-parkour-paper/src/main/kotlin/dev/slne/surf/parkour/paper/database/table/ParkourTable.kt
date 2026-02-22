@@ -1,9 +1,9 @@
-package dev.slne.surf.parkour.paper.database
+package dev.slne.surf.parkour.paper.database.table
 
 import dev.slne.surf.database.libs.org.jetbrains.exposed.v1.core.dao.id.LongIdTable
-import dev.slne.surf.parkour.paper.database.type.boundingBox
-import dev.slne.surf.parkour.paper.database.type.location
-import dev.slne.surf.parkour.paper.database.type.world
+import dev.slne.surf.parkour.paper.database.table.column.boundingBox
+import dev.slne.surf.parkour.paper.database.table.column.location
+import dev.slne.surf.parkour.paper.database.table.column.world
 
 object ParkourTable : LongIdTable("parkour_parkours") {
     val parkourUuid = uuid("uuid").uniqueIndex()

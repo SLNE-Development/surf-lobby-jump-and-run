@@ -14,7 +14,7 @@ import org.bukkit.entity.Player
 @AutoService(SurfParkourApi::class)
 class SurfParkourApiImpl : SurfParkourApi, Services.Fallback {
     override suspend fun showGui(player: Player) {
-        val stats = parkourService.getRuns(player.uniqueId)
+//        val stats = parkourService.getRuns(player.uniqueId)
         val summary = PersonalParkourSummary(player.uniqueId, stats, player.name)
 
         withContext(plugin.entityDispatcher(player)) {
