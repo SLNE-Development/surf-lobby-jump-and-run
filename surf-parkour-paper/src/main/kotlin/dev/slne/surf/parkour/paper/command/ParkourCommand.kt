@@ -1,14 +1,10 @@
 package dev.slne.surf.parkour.paper.command
 
-import com.github.shynixn.mccoroutine.folia.entityDispatcher
-import com.github.shynixn.mccoroutine.folia.launch
 import dev.jorel.commandapi.kotlindsl.commandAPICommand
 import dev.jorel.commandapi.kotlindsl.playerExecutor
-import dev.slne.surf.parkour.paper.menu.ParkourMenu
-import dev.slne.surf.parkour.paper.model.parkour.PersonalParkourSummary
+import dev.slne.surf.parkour.paper.newmenu.view.ParkourOverviewView
 import dev.slne.surf.parkour.paper.permission.ParkourPermissionRegistry
-import dev.slne.surf.parkour.paper.plugin
-import kotlinx.coroutines.withContext
+import dev.slne.surf.surfapi.bukkit.api.inventory.framework.viewFrame
 
 fun parkourCommand() = commandAPICommand("parkour") {
     withPermission(ParkourPermissionRegistry.COMMAND_PARKOUR)
@@ -19,14 +15,6 @@ fun parkourCommand() = commandAPICommand("parkour") {
     parkourStatsCommand()
 
     playerExecutor { player, _ ->
-        plugin.launch {
-//            val stats = parkourService.getRuns(player.uniqueId)
-            val summary = PersonalParkourSummary(player.uniqueId, stats)
-            summary.initName()
-
-            withContext(plugin.entityDispatcher(player)) {
-                ParkourMenu(summary).open(player)
-            }
-        }
+        viewFrame.open(ParkourOverviewView::class.java, player)
     }
 }

@@ -31,8 +31,12 @@ object ParkourOverviewView : View() {
 
     override fun onFirstRender(render: RenderContext) {
         render.layoutSlot('O', outlineItem)
-        render.layoutSlot('C', closeItem)
-        render.layoutSlot('L', leaderBoardItem)
+        render.layoutSlot('C', closeItem).onClick { context ->
+            context.closeForPlayer()
+        }
+        render.layoutSlot('L', leaderBoardItem).onClick { context ->
+            context.openForPlayer(ParkourLeaderboardView::class.java)
+        }
         render.layoutSlot('S', startItem)
         render.layoutSlot('A', activeItem)
         render.layoutSlot('M', ownItem(render))
