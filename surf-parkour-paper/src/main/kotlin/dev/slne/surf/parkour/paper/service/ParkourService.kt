@@ -6,6 +6,7 @@ import dev.slne.surf.parkour.api.data.ParkourStats
 import dev.slne.surf.parkour.paper.config
 import dev.slne.surf.parkour.paper.database.repository.parkourRepository
 import dev.slne.surf.parkour.paper.model.parkour.Parkour
+import dev.slne.surf.parkour.paper.model.parkour.ParkourRun
 import dev.slne.surf.parkour.paper.plugin
 import dev.slne.surf.parkour.paper.util.formattedDuration
 import dev.slne.surf.surfapi.core.api.messages.adventure.buildText
@@ -100,6 +101,25 @@ class ParkourService {
         _parkours.addAll(parkours)
 
         plugin.logger.info("Loaded ${parkours.size} parkours!")
+    }
+
+    suspend fun saveRun(run: ParkourRun) {
+        statsCache.put(run.playerUuid, statsCache.getIfPresent(run.playerUuid)?.let {
+            it.copy(
+                totalRuns = it.totalRuns + 1,
+                totalJumps = it.totalJumps + run.jumps,
+                highscore = maxOf(it.highscore, run.jumps),
+                averageTime = ((it.averageTime * it.totalRuns) + run.time) / (it.totalRuns + 1)
+            )
+        } ?: ParkourStats(
+            playerUuid = run.playerUuid,
+            totalRuns = 1,
+            totalJumps = run.jumps,
+            highscore = run.jumps,
+            averageTime = run.time
+        ))
+
+        parkourRepository.saveRun(run)
     }
 
     fun getStats(playerUuid: UUID) = statsCache.getIfPresent(playerUuid) ?: ParkourStats.empty()

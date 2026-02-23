@@ -87,6 +87,19 @@ private fun Vector.toBlockLocation(): Vector {
     return Vector(blockX.toDouble(), blockY.toDouble(), blockZ.toDouble())
 }
 
+fun formatMillis(time: Long): String {
+    val totalSeconds = time / 1000
+    val hours = totalSeconds / 3600
+    val minutes = (totalSeconds % 3600) / 60
+    val seconds = totalSeconds % 60
+
+    return when {
+        hours > 0 -> "%02d:%02d:%02d".format(hours, minutes, seconds)
+        minutes > 0 -> "%02d:%02d".format(minutes, seconds)
+        else -> "%02d".format(seconds)
+    }
+}
+
 /**
  * Offset below player's feet for block detection.
  * A small offset ensures we check the block the player is standing on.

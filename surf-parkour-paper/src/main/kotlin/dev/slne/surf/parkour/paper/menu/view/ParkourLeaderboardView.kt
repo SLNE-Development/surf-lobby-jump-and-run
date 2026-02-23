@@ -5,6 +5,7 @@ import dev.slne.surf.parkour.paper.menu.dialog.searchParkourStatsDialog
 import dev.slne.surf.parkour.paper.menu.sort.ParkourLeaderboardSortType
 import dev.slne.surf.parkour.paper.menu.util.*
 import dev.slne.surf.parkour.paper.service.parkourService
+import dev.slne.surf.parkour.paper.util.formatMillis
 import dev.slne.surf.surfapi.bukkit.api.builder.buildItem
 import dev.slne.surf.surfapi.bukkit.api.builder.buildLore
 import dev.slne.surf.surfapi.bukkit.api.builder.displayName
@@ -244,10 +245,9 @@ fun createStatsItem(stats: ParkourStats, viewer: UUID) = buildItem(Material.PLAY
         line {
             spacer("-")
             appendSpace()
-            parkourColored("Durschnittliche Zeit: ")
-            variableValue(stats.averageTime) // TODO: Format
+            parkourColored("Durchschnittliche Zeit: ")
+            variableValue(formatMillis(stats.averageTime))
         }
-
     }
 }
 

@@ -7,6 +7,7 @@ import dev.slne.surf.parkour.paper.menu.util.parkourColored
 import dev.slne.surf.parkour.paper.menu.util.playGeneralClickSound
 import dev.slne.surf.parkour.paper.plugin
 import dev.slne.surf.parkour.paper.service.parkourService
+import dev.slne.surf.parkour.paper.util.formatMillis
 import dev.slne.surf.surfapi.bukkit.api.builder.buildItem
 import dev.slne.surf.surfapi.bukkit.api.builder.buildLore
 import dev.slne.surf.surfapi.bukkit.api.builder.displayName
@@ -55,6 +56,8 @@ object ParkourOverviewView : View() {
                 }
                 return@onClick
             }
+
+            context.closeForPlayer()
 
             plugin.launch {
                 parkour.start(context.player.uniqueId)
@@ -106,7 +109,7 @@ private fun ownItem(render: RenderContext) = buildItem(Material.PLAYER_HEAD) {
             spacer("-")
             appendSpace()
             parkourColored("Durchschnittliche Zeit: ")
-            variableValue(stats.averageTime) // TODO: Format
+            variableValue(formatMillis(stats.averageTime))
         }
 
     }
