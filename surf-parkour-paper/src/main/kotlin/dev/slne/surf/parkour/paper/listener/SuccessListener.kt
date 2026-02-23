@@ -27,9 +27,7 @@ object SuccessListener : Listener {
             }
 
             val target = generator.blockLocations.second
-            val playerPos = event.to.toVector().apply {
-                y -= 1
-            }
+            val playerPos = event.to.toVector()
 
             if (isWithinBoundingBox(playerPos, target)) {
                 parkourService.triggerSuccess(player)
@@ -41,10 +39,13 @@ object SuccessListener : Listener {
         val halfBlock = 0.5
         val minX = target.x - halfBlock
         val maxX = target.x + halfBlock
+        val minY = target.y
+        val maxY = target.y + 1.0
         val minZ = target.z - halfBlock
         val maxZ = target.z + halfBlock
 
         return playerPos.x in minX..maxX &&
+                playerPos.y in minY..maxY &&
                 playerPos.z in minZ..maxZ
     }
 }
