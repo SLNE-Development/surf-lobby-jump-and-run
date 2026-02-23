@@ -33,15 +33,15 @@ fun SlotClickContext.playNewPageSound() {
 
 val previousItem = MenuHeads.ARROW_LEFT.clone().apply {
     displayName {
-        auctionColored("Vorherige Seite")
+        parkourColored("Vorherige Seite")
     }
 }
 
 val nextItem = MenuHeads.ARROW_RIGHT.clone().apply {
     displayName {
-        auctionColored("Nächste Seite")
+        parkourColored("Nächste Seite")
     }
 }
 
-fun SurfComponentBuilder.auctionColored(text: Any, vararg decoration: TextDecoration) =
+fun SurfComponentBuilder.parkourColored(text: Any, vararg decoration: TextDecoration) =
     coloredComponent(text.toString(), TextColor.color(59, 245, 239), *decoration)

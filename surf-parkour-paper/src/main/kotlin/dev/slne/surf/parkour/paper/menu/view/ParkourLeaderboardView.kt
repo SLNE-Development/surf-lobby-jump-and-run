@@ -3,9 +3,9 @@ package dev.slne.surf.parkour.paper.menu.view
 import dev.slne.surf.parkour.api.data.ParkourStats
 import dev.slne.surf.parkour.paper.menu.dialog.searchParkourStatsDialog
 import dev.slne.surf.parkour.paper.menu.sort.ParkourLeaderboardSortType
-import dev.slne.surf.parkour.paper.menu.util.auctionColored
 import dev.slne.surf.parkour.paper.menu.util.nextItem
 import dev.slne.surf.parkour.paper.menu.util.outlineItem
+import dev.slne.surf.parkour.paper.menu.util.parkourColored
 import dev.slne.surf.parkour.paper.menu.util.previousItem
 import dev.slne.surf.parkour.paper.service.parkourService
 import dev.slne.surf.surfapi.bukkit.api.builder.buildItem
@@ -31,25 +31,25 @@ object ParkourLeaderboardView : View() {
 
     private val searchItem = buildItem(Material.BRUSH) {
         displayName {
-            auctionColored("Suchen")
+            parkourColored("Suchen")
         }
     }
 
     private fun sortItem(state: ParkourLeaderboardSortType) = buildItem(Material.COMPARATOR) {
         displayName {
-            auctionColored("Sortieren")
+            parkourColored("Sortieren")
         }
 
         buildLore {
             emptyLine()
-            line { auctionColored("Sortierung".toSmallCaps(), TextDecoration.BOLD) }
+            line { parkourColored("Sortierung".toSmallCaps(), TextDecoration.BOLD) }
 
             line {
                 if (state == ParkourLeaderboardSortType.HIGHSCORE) {
                     appendSpace()
                     spacer("-")
                     appendSpace()
-                    auctionColored("Highscore")
+                    parkourColored("Highscore")
                 } else {
                     spacer("-")
                     appendSpace()
@@ -62,7 +62,7 @@ object ParkourLeaderboardView : View() {
                     appendSpace()
                     spacer("-")
                     appendSpace()
-                    auctionColored("Meiste Gesamtsprünge")
+                    parkourColored("Meiste Gesamtsprünge")
                 } else {
                     spacer("-")
                     appendSpace()
@@ -75,7 +75,7 @@ object ParkourLeaderboardView : View() {
                     appendSpace()
                     spacer("-")
                     appendSpace()
-                    auctionColored("Wenigste Gesamtsprünge")
+                    parkourColored("Wenigste Gesamtsprünge")
                 } else {
                     spacer("-")
                     appendSpace()
@@ -88,7 +88,7 @@ object ParkourLeaderboardView : View() {
                     appendSpace()
                     spacer("-")
                     appendSpace()
-                    auctionColored("Meiste Versuche")
+                    parkourColored("Meiste Versuche")
                 } else {
                     spacer("-")
                     appendSpace()
@@ -101,7 +101,7 @@ object ParkourLeaderboardView : View() {
                     appendSpace()
                     spacer("-")
                     appendSpace()
-                    auctionColored("Wenigste Versuche")
+                    parkourColored("Wenigste Versuche")
                 } else {
                     spacer("-")
                     appendSpace()
@@ -125,7 +125,7 @@ object ParkourLeaderboardView : View() {
     override fun onInit(config: ViewConfigBuilder) {
         config
             .titleBuilder {
-                auctionColored("Parkourstatistiken".toSmallCaps(), TextDecoration.BOLD)
+                parkourColored("Parkourstatistiken".toSmallCaps(), TextDecoration.BOLD)
             }
             .size(6)
             .layout(
@@ -210,33 +210,37 @@ fun createStatsItem(stats: ParkourStats, viewer: UUID) = buildItem(Material.PLAY
         // TODO: Player Skin
     }
 
+    displayName {
+        parkourColored(stats.playerName)
+    }
+
     buildLore {
         emptyLine()
         line {
-            auctionColored("Parkourstatistiken".toSmallCaps(), TextDecoration.BOLD)
+            parkourColored("Parkourstatistiken".toSmallCaps(), TextDecoration.BOLD)
         }
         line {
             spacer("-")
             appendSpace()
-            auctionColored("Highscore: ")
+            parkourColored("Highscore: ")
             variableValue(stats.highscore)
         }
         line {
             spacer("-")
             appendSpace()
-            auctionColored("Versuche: ")
+            parkourColored("Versuche: ")
             variableValue(stats.totalRuns)
         }
         line {
             spacer("-")
             appendSpace()
-            auctionColored("Gesamtsprünge: ")
+            parkourColored("Gesamtsprünge: ")
             variableValue(stats.totalJumps)
         }
         line {
             spacer("-")
             appendSpace()
-            auctionColored("Durschnittliche Zeit: ")
+            parkourColored("Durschnittliche Zeit: ")
             variableValue(stats.averageTime) // TODO: Format
         }
 

@@ -2,8 +2,8 @@ package dev.slne.surf.parkour.paper.menu.view
 
 import com.github.shynixn.mccoroutine.folia.launch
 import dev.slne.surf.parkour.paper.menu.util.MenuHeads
-import dev.slne.surf.parkour.paper.menu.util.auctionColored
 import dev.slne.surf.parkour.paper.menu.util.outlineItem
+import dev.slne.surf.parkour.paper.menu.util.parkourColored
 import dev.slne.surf.parkour.paper.menu.util.playGeneralClickSound
 import dev.slne.surf.parkour.paper.plugin
 import dev.slne.surf.parkour.paper.service.parkourService
@@ -24,14 +24,14 @@ object ParkourOverviewView : View() {
     override fun onInit(config: ViewConfigBuilder) {
         config
             .titleBuilder {
-                auctionColored("Parkour".toSmallCaps(), TextDecoration.BOLD)
+                parkourColored("Parkour".toSmallCaps(), TextDecoration.BOLD)
             }
             .size(5)
             .layout(
                 "OOOOOOOOO",
-                "ORRRMRRRO",
-                "ORRRRRRRO",
-                "ORLRSRARO",
+                "O   M   O",
+                "O       O",
+                "O L S A O",
                 "OOOOCOOOO"
             )
             .cancelInteractions()
@@ -82,30 +82,30 @@ private fun ownItem(render: RenderContext) = buildItem(Material.PLAYER_HEAD) {
     buildLore {
         emptyLine()
         line {
-            auctionColored("Parkourstatistiken".toSmallCaps(), TextDecoration.BOLD)
+            parkourColored("Parkourstatistiken".toSmallCaps(), TextDecoration.BOLD)
         }
         line {
             spacer("-")
             appendSpace()
-            auctionColored("Highscore: ")
+            parkourColored("Highscore: ")
             variableValue(stats.highscore)
         }
         line {
             spacer("-")
             appendSpace()
-            auctionColored("Versuche: ")
+            parkourColored("Versuche: ")
             variableValue(stats.totalRuns)
         }
         line {
             spacer("-")
             appendSpace()
-            auctionColored("Gesamtsprünge: ")
+            parkourColored("Gesamtsprünge: ")
             variableValue(stats.totalJumps)
         }
         line {
             spacer("-")
             appendSpace()
-            auctionColored("Durschnittliche Zeit: ")
+            parkourColored("Durchschnittliche Zeit: ")
             variableValue(stats.averageTime) // TODO: Format
         }
 

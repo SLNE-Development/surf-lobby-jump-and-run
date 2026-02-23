@@ -11,6 +11,7 @@ import dev.slne.surf.parkour.paper.database.table.ParkourRunsTable
 import dev.slne.surf.parkour.paper.database.table.ParkourTable
 import dev.slne.surf.parkour.paper.model.parkour.Parkour
 import dev.slne.surf.parkour.paper.model.parkour.ParkourRun
+import dev.slne.surf.parkour.paper.plugin
 import dev.slne.surf.surfapi.core.api.util.toObjectSet
 import it.unimi.dsi.fastutil.objects.ObjectSet
 import kotlinx.coroutines.flow.map
@@ -30,7 +31,6 @@ class ParkourRepository {
         ParkourRunsTable
             .select(
                 ParkourRunsTable.playerUuid,
-                ParkourRunsTable.playerName,
                 totalRuns,
                 totalJumps,
                 highscore,
@@ -40,7 +40,6 @@ class ParkourRepository {
             .map { row ->
                 ParkourStats(
                     playerUuid = row[ParkourRunsTable.playerUuid],
-                    playerName = row[ParkourRunsTable.playerName],
                     totalRuns = row[totalRuns].toInt(),
                     totalJumps = row[totalJumps] ?: 0,
                     highscore = row[highscore] ?: 0,
@@ -55,7 +54,6 @@ class ParkourRepository {
         ParkourRunsTable.insert {
             it[parkourUuid] = parkourRun.parkour.uuid
             it[playerUuid] = parkourRun.playerUuid
-            it[playerName] = parkourRun.playerName
             it[runJumps] = parkourRun.jumps
             it[runTime] = parkourRun.time
         }
@@ -70,7 +68,6 @@ class ParkourRepository {
         ParkourRunsTable
             .select(
                 ParkourRunsTable.playerUuid,
-                ParkourRunsTable.playerName,
                 totalRuns,
                 totalJumps,
                 highscore,
@@ -81,7 +78,6 @@ class ParkourRepository {
             .map { row ->
                 ParkourStats(
                     playerUuid = row[ParkourRunsTable.playerUuid],
-                    playerName = row[ParkourRunsTable.playerName],
                     totalRuns = row[totalRuns].toInt(),
                     totalJumps = row[totalJumps] ?: 0,
                     highscore = row[highscore] ?: 0,
@@ -104,6 +100,7 @@ class ParkourRepository {
         }
 
     suspend fun loadParkours(serverUUid: UUID) = suspendTransaction {
+        plugin.logger.info("Loading parkours for server $serverUUid")
         ParkourTable.selectAll().where(
             (ParkourTable.serverUuid eq serverUUid)
         ).map {

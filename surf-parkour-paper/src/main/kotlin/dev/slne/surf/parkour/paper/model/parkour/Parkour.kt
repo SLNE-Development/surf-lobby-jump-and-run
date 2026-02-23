@@ -68,7 +68,7 @@ data class Parkour(
 
     fun getCurrentIndex(player: UUID) = getGenerator(player)?.currentIndex ?: 0
 
-    suspend fun processRun(player: UUID, playerName: String): Int? {
+    suspend fun processRun(player: UUID): Int? {
         val generator = generators.find { it.associatedPlayer == player } ?: return null
         val highscore = parkourService.getStats(player).highscore
 
@@ -76,7 +76,6 @@ data class Parkour(
             ParkourRun(
                 this,
                 player,
-                playerName,
                 generator.currentIndex,
                 System.currentTimeMillis() - generator.startTime
             )

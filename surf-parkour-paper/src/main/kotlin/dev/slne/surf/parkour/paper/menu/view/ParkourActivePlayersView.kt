@@ -1,8 +1,8 @@
 package dev.slne.surf.parkour.paper.menu.view
 
-import dev.slne.surf.parkour.paper.menu.util.auctionColored
 import dev.slne.surf.parkour.paper.menu.util.nextItem
 import dev.slne.surf.parkour.paper.menu.util.outlineItem
+import dev.slne.surf.parkour.paper.menu.util.parkourColored
 import dev.slne.surf.parkour.paper.menu.util.previousItem
 import dev.slne.surf.parkour.paper.service.parkourService
 import dev.slne.surf.surfapi.bukkit.api.builder.buildItem
@@ -31,7 +31,7 @@ object ParkourActivePlayersView : View() {
     override fun onInit(config: ViewConfigBuilder) {
         config
             .titleBuilder {
-                auctionColored("Parkourstatistiken".toSmallCaps(), TextDecoration.BOLD)
+                parkourColored("Parkourstatistiken".toSmallCaps(), TextDecoration.BOLD)
             }
             .size(6)
             .layout(
@@ -94,12 +94,12 @@ fun createActivePlayerItem(currentJumps: Int, playerUuid: UUID) = buildItem(Mate
     buildLore {
         emptyLine()
         line {
-            auctionColored("Aktueller Lauf".toSmallCaps(), TextDecoration.BOLD)
+            parkourColored("Aktueller Lauf".toSmallCaps(), TextDecoration.BOLD)
         }
         line {
             spacer("-")
             appendSpace()
-            auctionColored("Sprünge: ")
+            parkourColored("Sprünge: ")
             variableValue(currentJumps)
         }
     }

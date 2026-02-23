@@ -64,7 +64,7 @@ class ParkourService {
         }
         soundService.playFailure(player)
 
-        parkour.processRun(player.uniqueId, player.name)?.let {
+        parkour.processRun(player.uniqueId)?.let {
             player.sendText {
                 appendSuccessPrefix()
                 success("Du hast mit ")
@@ -93,10 +93,13 @@ class ParkourService {
 
     suspend fun loadParkours() {
         val serverUuid = config.serverUuid
+        plugin.logger.info("Loading parkours for server $serverUuid, this should not take too long...")
         val parkours = parkourRepository.loadParkours(serverUuid)
 
         _parkours.clear()
         _parkours.addAll(parkours)
+
+        plugin.logger.info("Loaded ${parkours.size} parkours!")
     }
 
     fun getStats(playerUuid: UUID) = statsCache.getIfPresent(playerUuid) ?: ParkourStats.empty()
