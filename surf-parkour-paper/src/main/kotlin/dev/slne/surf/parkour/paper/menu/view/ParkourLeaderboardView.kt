@@ -11,6 +11,7 @@ import dev.slne.surf.surfapi.bukkit.api.builder.displayName
 import dev.slne.surf.surfapi.bukkit.api.inventory.framework.titleBuilder
 import dev.slne.surf.surfapi.core.api.font.toSmallCaps
 import dev.slne.surf.surfapi.core.api.messages.adventure.playSound
+import dev.slne.surf.surfapi.core.api.messages.adventure.sendText
 import me.devnatan.inventoryframework.View
 import me.devnatan.inventoryframework.ViewConfigBuilder
 import me.devnatan.inventoryframework.context.Context
@@ -118,8 +119,13 @@ object ParkourLeaderboardView : View() {
             context.playGeneralClickSound()
         }
     }.layoutTarget('R')
-        .onPageSwitch { context, _ ->
+        .onPageSwitch { context, pagination ->
             context.playNewPageSound()
+            context.update()
+
+            context.player.sendText {
+                info(pagination.currentPageIndex())
+            }
         }
         .build()
 
@@ -173,15 +179,25 @@ object ParkourLeaderboardView : View() {
             context.player.showDialog(searchParkourStatsDialog())
         }
         render
-            .layoutSlot('P', previousItem)
+            .layoutSlot('P')
             .updateOnStateChange(paginationState)
-            .displayIf(pagination::canBack)
+            .displayIf { _ ->
+                pagination.currentPageIndex() != 0
+            }
+            .onRender { slotRender ->
+                slotRender.item = previousItem
+            }
             .onClick(pagination::back)
 
         render
-            .layoutSlot('N', nextItem)
+            .layoutSlot('N')
             .updateOnStateChange(paginationState)
-            .displayIf(pagination::canAdvance)
+            .displayIf { _ ->
+                pagination.currentPageIndex() < pagination.lastPageIndex()
+            }
+            .onRender { slotRender ->
+                slotRender.item = nextItem
+            }
             .onClick(pagination::advance)
     }
 
