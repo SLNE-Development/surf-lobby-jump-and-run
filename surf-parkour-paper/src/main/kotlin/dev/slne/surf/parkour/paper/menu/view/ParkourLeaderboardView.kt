@@ -14,9 +14,11 @@ import dev.slne.surf.surfapi.core.api.messages.adventure.playSound
 import dev.slne.surf.surfapi.core.api.messages.adventure.sendText
 import me.devnatan.inventoryframework.View
 import me.devnatan.inventoryframework.ViewConfigBuilder
+import me.devnatan.inventoryframework.component.Pagination
 import me.devnatan.inventoryframework.context.Context
 import me.devnatan.inventoryframework.context.RenderContext
 import me.devnatan.inventoryframework.context.SlotClickContext
+import me.devnatan.inventoryframework.state.State
 import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.Material
 import org.bukkit.Sound
@@ -109,25 +111,26 @@ object ParkourLeaderboardView : View() {
         }
     }
 
-    private val paginationState = buildComputedPaginationState<ParkourStats> { context ->
-        getParkourStatsSortedAndFiltered(
-            ParkourLeaderboardSortType.sortingByPlayer(context.player.uniqueId),
-            ParkourLeaderboardSortType.searchByPlayer(context.player.uniqueId)
-        ).toMutableList()
-    }.elementFactory { context, builder, _, auction ->
-        builder.withItem(createStatsItem(auction, context.player.uniqueId)).onClick { context ->
-            context.playGeneralClickSound()
-        }
-    }.layoutTarget('R')
-        .onPageSwitch { context, pagination ->
-            context.playNewPageSound()
-            context.update()
-
-            context.player.sendText {
-                info(pagination.currentPageIndex())
+    private val paginationState: State<Pagination> =
+        buildComputedPaginationState<ParkourStats> { context ->
+            getParkourStatsSortedAndFiltered(
+                ParkourLeaderboardSortType.sortingByPlayer(context.player.uniqueId),
+                ParkourLeaderboardSortType.searchByPlayer(context.player.uniqueId)
+            ).toMutableList()
+        }.elementFactory { context, builder, _, auction ->
+            builder.withItem(createStatsItem(auction, context.player.uniqueId)).onClick { context ->
+                context.playGeneralClickSound()
             }
-        }
-        .build()
+        }.layoutTarget('R')
+            .onPageSwitch { context, pagination ->
+                context.playNewPageSound()
+                context.update()
+
+                context.player.sendText {
+                    info(pagination.currentPageIndex())
+                }
+            }
+            .build()
 
     override fun onInit(config: ViewConfigBuilder) {
         config
