@@ -170,6 +170,7 @@ object ParkourLeaderboardView : View() {
             context.player.closeInventory()
             context.player.showDialog(searchParkourStatsDialog())
         }
+
         render
             .layoutSlot('P')
             .updateOnStateChange(paginationState)
@@ -177,7 +178,11 @@ object ParkourLeaderboardView : View() {
                 pagination.canBack()
             }
             .onRender { slotRender ->
-                slotRender.item = previousItem
+                if (pagination.canBack()) {
+                    slotRender.item = previousItem
+                } else {
+                    slotRender.item = outlineItem
+                }
             }
             .onClick { _ ->
                 pagination.back()
@@ -191,7 +196,11 @@ object ParkourLeaderboardView : View() {
                 pagination.canAdvance()
             }
             .onRender { slotRender ->
-                slotRender.item = nextItem
+                if (pagination.canBack()) {
+                    slotRender.item = nextItem
+                } else {
+                    slotRender.item = outlineItem
+                }
             }
             .onClick { _ ->
                 pagination.advance()
@@ -269,7 +278,7 @@ private fun getParkourStatsSortedAndFiltered(
     }
 
     return when (sortType) {
-        ParkourLeaderboardSortType.HIGHSCORE -> filtered.sortedBy { it.highscore }
+        ParkourLeaderboardSortType.HIGHSCORE -> filtered.sortedByDescending { it.highscore }
         ParkourLeaderboardSortType.MOST_JUMPS -> filtered.sortedByDescending { it.totalJumps }
         ParkourLeaderboardSortType.LEAST_JUMPS -> filtered.sortedBy { it.totalJumps }
         ParkourLeaderboardSortType.MOST_TRIES -> filtered.sortedByDescending { it.totalRuns }
