@@ -196,7 +196,7 @@ object ParkourLeaderboardView : View() {
                 pagination.canAdvance()
             }
             .onRender { slotRender ->
-                if (pagination.canBack()) {
+                if (pagination.canAdvance()) {
                     slotRender.item = nextItem
                 } else {
                     slotRender.item = outlineItem
