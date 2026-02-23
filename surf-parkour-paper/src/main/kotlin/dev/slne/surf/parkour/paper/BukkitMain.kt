@@ -15,6 +15,7 @@ import dev.slne.surf.parkour.paper.hook.VulcanHook
 import dev.slne.surf.parkour.paper.listener.FailureListener
 import dev.slne.surf.parkour.paper.listener.PlayerPacketListener
 import dev.slne.surf.parkour.paper.listener.SuccessListener
+import dev.slne.surf.parkour.paper.newmenu.view.ParkourActivePlayersView
 import dev.slne.surf.parkour.paper.newmenu.view.ParkourLeaderboardView
 import dev.slne.surf.parkour.paper.newmenu.view.ParkourOverviewView
 import dev.slne.surf.parkour.paper.service.ParkourService
@@ -45,6 +46,7 @@ class BukkitMain : SuspendingJavaPlugin() {
 
         viewFrame.with(ParkourLeaderboardView)
         viewFrame.with(ParkourOverviewView)
+        viewFrame.with(ParkourActivePlayersView)
         viewFrame.register()
     }
 

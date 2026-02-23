@@ -2,8 +2,14 @@ package dev.slne.surf.parkour.paper.newmenu.util
 
 import dev.slne.surf.surfapi.bukkit.api.builder.buildItem
 import dev.slne.surf.surfapi.bukkit.api.builder.displayName
+import dev.slne.surf.surfapi.core.api.messages.adventure.playSound
+import dev.slne.surf.surfapi.core.api.messages.builder.SurfComponentBuilder
 import me.devnatan.inventoryframework.View
+import me.devnatan.inventoryframework.context.SlotClickContext
+import net.kyori.adventure.text.format.TextColor
+import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.Material
+import org.bukkit.Sound
 import org.bukkit.inventory.ItemStack
 
 val View.outlineItem: ItemStack
@@ -12,3 +18,30 @@ val View.outlineItem: ItemStack
             spacer("")
         }
     }
+
+fun SlotClickContext.playGeneralClickSound() {
+    player.playSound(true) {
+        type(Sound.UI_BUTTON_CLICK)
+    }
+}
+
+fun SlotClickContext.playNewPageSound() {
+    player.playSound(true) {
+        type(Sound.ENTITY_CHICKEN_EGG)
+    }
+}
+
+val previousItem = MenuHeads.ARROW_LEFT.clone().apply {
+    displayName {
+        auctionColored("Vorherige Seite")
+    }
+}
+
+val nextItem = MenuHeads.ARROW_RIGHT.clone().apply {
+    displayName {
+        auctionColored("Nächste Seite")
+    }
+}
+
+fun SurfComponentBuilder.auctionColored(text: Any, vararg decoration: TextDecoration) =
+    coloredComponent(text.toString(), TextColor.color(59, 245, 239), *decoration)

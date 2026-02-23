@@ -2,10 +2,12 @@ package dev.slne.surf.parkour.paper.newmenu.view
 
 import com.github.shynixn.mccoroutine.folia.launch
 import dev.slne.surf.parkour.paper.newmenu.util.MenuHeads
+import dev.slne.surf.parkour.paper.newmenu.util.auctionColored
 import dev.slne.surf.parkour.paper.newmenu.util.outlineItem
 import dev.slne.surf.parkour.paper.plugin
 import dev.slne.surf.parkour.paper.service.parkourService
 import dev.slne.surf.surfapi.bukkit.api.builder.buildItem
+import dev.slne.surf.surfapi.bukkit.api.builder.buildLore
 import dev.slne.surf.surfapi.bukkit.api.builder.displayName
 import dev.slne.surf.surfapi.bukkit.api.inventory.framework.titleBuilder
 import dev.slne.surf.surfapi.core.api.font.toSmallCaps
@@ -15,6 +17,7 @@ import me.devnatan.inventoryframework.ViewConfigBuilder
 import me.devnatan.inventoryframework.context.RenderContext
 import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.Material
+import org.bukkit.inventory.meta.SkullMeta
 
 object ParkourOverviewView : View() {
     override fun onInit(config: ViewConfigBuilder) {
@@ -55,7 +58,7 @@ object ParkourOverviewView : View() {
             }
         }
         render.layoutSlot('A', activeItem).onClick { context ->
-            
+
         }
         render.layoutSlot('M', ownItem(render))
     }
@@ -63,7 +66,23 @@ object ParkourOverviewView : View() {
 
 private fun ownItem(render: RenderContext) = buildItem(Material.PLAYER_HEAD) {
     displayName {
-        primary("Dein Statistiken".toSmallCaps(), TextDecoration.BOLD)
+        primary("Deine Statistiken".toSmallCaps(), TextDecoration.BOLD)
+    }
+
+    editMeta(SkullMeta::class.java) {
+        it.owningPlayer = render.player
+    }
+
+    val stats = parkourService.getStats(render.player.uniqueId)
+
+    buildLore {
+        emptyLine()
+        line {
+            spacer("-")
+            appendSpace()
+            auctionColored("Sprünge: ")
+            variableValue(parkourService.getStats(render.player.uniqueId))
+        }
     }
 }
 

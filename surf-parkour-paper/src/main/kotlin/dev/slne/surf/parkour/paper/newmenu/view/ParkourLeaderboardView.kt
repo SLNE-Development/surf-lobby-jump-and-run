@@ -3,8 +3,10 @@ package dev.slne.surf.parkour.paper.newmenu.view
 import dev.slne.surf.parkour.api.data.ParkourStats
 import dev.slne.surf.parkour.paper.newmenu.dialog.searchParkourStatsDialog
 import dev.slne.surf.parkour.paper.newmenu.sort.ParkourLeaderboardSortType
-import dev.slne.surf.parkour.paper.newmenu.util.MenuHeads
+import dev.slne.surf.parkour.paper.newmenu.util.auctionColored
+import dev.slne.surf.parkour.paper.newmenu.util.nextItem
 import dev.slne.surf.parkour.paper.newmenu.util.outlineItem
+import dev.slne.surf.parkour.paper.newmenu.util.previousItem
 import dev.slne.surf.parkour.paper.service.parkourService
 import dev.slne.surf.surfapi.bukkit.api.builder.buildItem
 import dev.slne.surf.surfapi.bukkit.api.builder.buildLore
@@ -12,13 +14,11 @@ import dev.slne.surf.surfapi.bukkit.api.builder.displayName
 import dev.slne.surf.surfapi.bukkit.api.inventory.framework.titleBuilder
 import dev.slne.surf.surfapi.core.api.font.toSmallCaps
 import dev.slne.surf.surfapi.core.api.messages.adventure.playSound
-import dev.slne.surf.surfapi.core.api.messages.builder.SurfComponentBuilder
 import me.devnatan.inventoryframework.View
 import me.devnatan.inventoryframework.ViewConfigBuilder
 import me.devnatan.inventoryframework.context.Context
 import me.devnatan.inventoryframework.context.RenderContext
 import me.devnatan.inventoryframework.context.SlotClickContext
-import net.kyori.adventure.text.format.TextColor
 import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.Material
 import org.bukkit.Sound
@@ -28,18 +28,6 @@ import java.util.*
 @Suppress("UnstableApiUsage")
 object ParkourLeaderboardView : View() {
     private val selectedSort = mutableState(ParkourLeaderboardSortType.HIGHSCORE)
-
-    private val previousItem = MenuHeads.ARROW_LEFT.clone().apply {
-        displayName {
-            auctionColored("Vorherige Seite")
-        }
-    }
-
-    private val nextItem = MenuHeads.ARROW_RIGHT.clone().apply {
-        displayName {
-            auctionColored("Nächste Seite")
-        }
-    }
 
     private val searchItem = buildItem(Material.BRUSH) {
         displayName {
@@ -289,7 +277,3 @@ private fun getParkourStatsSortedAndFiltered(
         ParkourLeaderboardSortType.LEAST_TRIES -> filtered.sortedBy { it.totalRuns }
     }
 }
-
-
-fun SurfComponentBuilder.auctionColored(text: Any, vararg decoration: TextDecoration) =
-    coloredComponent(text.toString(), TextColor.color(59, 245, 239), *decoration)
