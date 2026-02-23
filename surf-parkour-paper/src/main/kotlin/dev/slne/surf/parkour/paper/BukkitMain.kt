@@ -28,6 +28,13 @@ import org.bukkit.plugin.java.JavaPlugin
 val plugin get() = JavaPlugin.getPlugin(BukkitMain::class.java)
 
 class BukkitMain : SuspendingJavaPlugin() {
+
+    override suspend fun onLoadAsync() {
+        viewFrame.with(ParkourLeaderboardView)
+        viewFrame.with(ParkourOverviewView)
+        viewFrame.with(ParkourActivePlayersView)
+    }
+
     override suspend fun onEnableAsync() {
         FailureListener.register()
         SuccessListener.register()
@@ -43,11 +50,6 @@ class BukkitMain : SuspendingJavaPlugin() {
         parkourService.loadParkours()
         parkourService.loadStats()
         ParkourService.startUpdating()
-
-        viewFrame.with(ParkourLeaderboardView)
-        viewFrame.with(ParkourOverviewView)
-        viewFrame.with(ParkourActivePlayersView)
-        viewFrame.register()
     }
 
     override fun onDisable() {
