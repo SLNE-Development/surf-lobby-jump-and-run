@@ -117,7 +117,11 @@ object ParkourLeaderboardView : View() {
         builder.withItem(createStatsItem(auction, context.player.uniqueId)).onClick { context ->
             context.playGeneralClickSound()
         }
-    }.layoutTarget('R').build()
+    }.layoutTarget('R')
+        .onPageSwitch { context, _ ->
+            context.playNewPageSound()
+        }
+        .build()
 
     override fun onInit(config: ViewConfigBuilder) {
         config
@@ -137,6 +141,7 @@ object ParkourLeaderboardView : View() {
     }
 
     override fun onFirstRender(render: RenderContext) {
+        val pagination = paginationState.get(render)
         selectedSort.set(ParkourLeaderboardSortType.sortingByPlayer(render.player.uniqueId), render)
 
         render.layoutSlot('B', backItem).onClick { context ->
@@ -168,41 +173,20 @@ object ParkourLeaderboardView : View() {
             context.player.showDialog(searchParkourStatsDialog())
         }
         render
-            .layoutSlot('P')
-            .renderWith {
-                previousItem
-            }
-            .watch(paginationState)
-            .displayIf { context -> paginationState.get(context).canBack() }
-            .onClick { context ->
-                context.playNewPageSound()
-                paginationState.get(render).back()
-            }
+            .layoutSlot('P', previousItem)
+            .updateOnStateChange(paginationState)
+            .displayIf(pagination::canBack)
+            .onClick(pagination::back)
 
         render
-            .layoutSlot('N')
-            .renderWith {
-                nextItem
-            }
-            .watch(paginationState)
-            .displayIf { context -> paginationState.get(context).canAdvance() }
-            .onClick { context ->
-                context.playNewPageSound()
-                paginationState.get(render).advance()
-            }
-    }
-
-    override fun onUpdate(update: Context) {
-        updatePagination(update)
+            .layoutSlot('N', nextItem)
+            .updateOnStateChange(paginationState)
+            .displayIf(pagination::canAdvance)
+            .onClick(pagination::advance)
     }
 
     override fun onResume(origin: Context, target: Context) {
         target.update()
-    }
-
-    private fun updatePagination(context: Context) {
-        val pagination = paginationState.get(context)
-        pagination.switchTo(pagination.currentPageIndex())
     }
 }
 

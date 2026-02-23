@@ -6,7 +6,7 @@ import dev.slne.surf.surfapi.core.api.font.toSmallCaps
 import dev.slne.surf.surfapi.core.api.messages.adventure.playSound
 import dev.slne.surf.surfapi.core.api.messages.builder.SurfComponentBuilder
 import me.devnatan.inventoryframework.View
-import me.devnatan.inventoryframework.context.SlotClickContext
+import me.devnatan.inventoryframework.context.Context
 import net.kyori.adventure.text.format.TextColor
 import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.Material
@@ -20,13 +20,13 @@ val View.outlineItem: ItemStack
         }
     }
 
-fun SlotClickContext.playGeneralClickSound() {
+fun Context.playGeneralClickSound() {
     player.playSound(true) {
         type(Sound.UI_BUTTON_CLICK)
     }
 }
 
-fun SlotClickContext.playNewPageSound() {
+fun Context.playNewPageSound() {
     player.playSound(true) {
         type(Sound.ENTITY_CHICKEN_EGG)
     }
@@ -51,4 +51,4 @@ val backItem = MenuHeads.CROSS.apply {
 }
 
 fun SurfComponentBuilder.parkourColored(text: Any, vararg decoration: TextDecoration) =
-    coloredComponent(text.toString(), TextColor.color(59, 245, 239), *decoration)
+    coloredComponent(text.toString(), TextColor.color(235, 177, 52), *decoration)

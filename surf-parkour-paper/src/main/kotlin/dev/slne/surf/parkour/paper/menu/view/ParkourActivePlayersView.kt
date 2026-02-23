@@ -43,6 +43,8 @@ object ParkourActivePlayersView : View() {
     }
 
     override fun onFirstRender(render: RenderContext) {
+        val pagination = paginationState.get(render)
+
         render.layoutSlot('O', outlineItem)
         render.layoutSlot('B', backItem).onClick { context ->
             context.openForPlayer(ParkourOverviewView::class.java)
