@@ -51,4 +51,4 @@ val backItem = MenuHeads.CROSS.apply {
 }
 
 fun SurfComponentBuilder.parkourColored(text: Any, vararg decoration: TextDecoration) =
-    coloredComponent(text.toString(), TextColor.color(235, 177, 52), *decoration)
+    coloredComponent(text.toString(), TextColor.color(76, 161, 127), *decoration)
