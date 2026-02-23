@@ -5,6 +5,7 @@ import com.github.shynixn.mccoroutine.folia.launch
 import dev.slne.surf.parkour.paper.plugin
 import dev.slne.surf.parkour.paper.service.parkourService
 import org.bukkit.block.Block
+import org.bukkit.block.BlockFace
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerMoveEvent
@@ -28,7 +29,7 @@ object SuccessListener : Listener {
                 return@launch
             }
 
-            val possibleBlocks = getBlocksAround(event.to.block)
+            val possibleBlocks = getBlocksAround(event.to.block.getRelative(BlockFace.DOWN))
             val targetBlock = generator.blockLocations.second
 
             if (possibleBlocks.any { it.isSameBlock(targetBlock) }) {
@@ -42,6 +43,7 @@ object SuccessListener : Listener {
     }
 
     private fun getBlocksAround(block: Block) = listOf(
+        block,
         block.getRelative(1, 0, 0),
         block.getRelative(-1, 0, 0),
         block.getRelative(0, 0, 1),
