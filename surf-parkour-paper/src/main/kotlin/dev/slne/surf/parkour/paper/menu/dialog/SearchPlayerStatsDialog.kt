@@ -1,8 +1,8 @@
-package dev.slne.surf.parkour.paper.newmenu.dialog
+package dev.slne.surf.parkour.paper.menu.dialog
 
-import dev.slne.surf.parkour.paper.newmenu.sort.ParkourLeaderboardSortType
-import dev.slne.surf.parkour.paper.newmenu.view.ParkourLeaderboardView
-import dev.slne.surf.parkour.paper.newmenu.view.auctionColored
+import dev.slne.surf.parkour.paper.menu.sort.ParkourLeaderboardSortType
+import dev.slne.surf.parkour.paper.menu.util.auctionColored
+import dev.slne.surf.parkour.paper.menu.view.ParkourLeaderboardView
 import dev.slne.surf.surfapi.bukkit.api.dialog.search.searchDialog
 import dev.slne.surf.surfapi.bukkit.api.inventory.framework.viewFrame
 

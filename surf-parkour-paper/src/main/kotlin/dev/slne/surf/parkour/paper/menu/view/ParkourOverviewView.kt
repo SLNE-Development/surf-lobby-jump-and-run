@@ -1,9 +1,10 @@
-package dev.slne.surf.parkour.paper.newmenu.view
+package dev.slne.surf.parkour.paper.menu.view
 
 import com.github.shynixn.mccoroutine.folia.launch
-import dev.slne.surf.parkour.paper.newmenu.util.MenuHeads
-import dev.slne.surf.parkour.paper.newmenu.util.auctionColored
-import dev.slne.surf.parkour.paper.newmenu.util.outlineItem
+import dev.slne.surf.parkour.paper.menu.util.MenuHeads
+import dev.slne.surf.parkour.paper.menu.util.auctionColored
+import dev.slne.surf.parkour.paper.menu.util.outlineItem
+import dev.slne.surf.parkour.paper.menu.util.playGeneralClickSound
 import dev.slne.surf.parkour.paper.plugin
 import dev.slne.surf.parkour.paper.service.parkourService
 import dev.slne.surf.surfapi.bukkit.api.builder.buildItem
@@ -39,9 +40,11 @@ object ParkourOverviewView : View() {
     override fun onFirstRender(render: RenderContext) {
         render.layoutSlot('O', outlineItem)
         render.layoutSlot('C', closeItem).onClick { context ->
+            context.playGeneralClickSound()
             context.closeForPlayer()
         }
         render.layoutSlot('L', leaderBoardItem).onClick { context ->
+            context.playGeneralClickSound()
             context.openForPlayer(ParkourLeaderboardView::class.java)
         }
         render.layoutSlot('S', startItem).onClick { context ->
@@ -58,7 +61,8 @@ object ParkourOverviewView : View() {
             }
         }
         render.layoutSlot('A', activeItem).onClick { context ->
-
+            context.playGeneralClickSound()
+            context.openForPlayer(ParkourActivePlayersView::class.java)
         }
         render.layoutSlot('M', ownItem(render))
     }
@@ -78,11 +82,33 @@ private fun ownItem(render: RenderContext) = buildItem(Material.PLAYER_HEAD) {
     buildLore {
         emptyLine()
         line {
+            auctionColored("Parkourstatistiken".toSmallCaps(), TextDecoration.BOLD)
+        }
+        line {
             spacer("-")
             appendSpace()
-            auctionColored("Sprünge: ")
-            variableValue(parkourService.getStats(render.player.uniqueId))
+            auctionColored("Highscore: ")
+            variableValue(stats.highscore)
         }
+        line {
+            spacer("-")
+            appendSpace()
+            auctionColored("Versuche: ")
+            variableValue(stats.totalRuns)
+        }
+        line {
+            spacer("-")
+            appendSpace()
+            auctionColored("Gesamtsprünge: ")
+            variableValue(stats.totalJumps)
+        }
+        line {
+            spacer("-")
+            appendSpace()
+            auctionColored("Durschnittliche Zeit: ")
+            variableValue(stats.averageTime) // TODO: Format
+        }
+
     }
 }
 

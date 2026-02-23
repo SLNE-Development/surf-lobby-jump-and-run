@@ -1,4 +1,4 @@
-package dev.slne.surf.parkour.paper.newmenu.sort
+package dev.slne.surf.parkour.paper.menu.sort
 
 import dev.slne.surf.surfapi.core.api.util.mutableObject2ObjectMapOf
 import java.util.*

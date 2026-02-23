@@ -2,7 +2,7 @@ package dev.slne.surf.parkour.paper.command
 
 import dev.jorel.commandapi.kotlindsl.commandAPICommand
 import dev.jorel.commandapi.kotlindsl.playerExecutor
-import dev.slne.surf.parkour.paper.newmenu.view.ParkourOverviewView
+import dev.slne.surf.parkour.paper.menu.view.ParkourOverviewView
 import dev.slne.surf.parkour.paper.permission.ParkourPermissionRegistry
 import dev.slne.surf.surfapi.bukkit.api.inventory.framework.viewFrame
 

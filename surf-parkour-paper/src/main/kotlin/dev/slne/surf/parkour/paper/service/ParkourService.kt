@@ -64,7 +64,7 @@ class ParkourService {
         }
         soundService.playFailure(player)
 
-        parkour.processRun(player.uniqueId)?.let {
+        parkour.processRun(player.uniqueId, player.name)?.let {
             player.sendText {
                 appendSuccessPrefix()
                 success("Du hast mit ")

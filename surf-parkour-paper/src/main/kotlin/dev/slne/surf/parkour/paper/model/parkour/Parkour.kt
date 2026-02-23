@@ -1,5 +1,6 @@
 package dev.slne.surf.parkour.paper.model.parkour
 
+import dev.slne.surf.parkour.paper.database.repository.parkourRepository
 import dev.slne.surf.parkour.paper.service.parkourService
 import dev.slne.surf.surfapi.core.api.messages.adventure.sendText
 import dev.slne.surf.surfapi.core.api.util.mutableObjectSetOf
@@ -67,20 +68,21 @@ data class Parkour(
 
     fun getCurrentIndex(player: UUID) = getGenerator(player)?.currentIndex ?: 0
 
-    suspend fun processRun(player: UUID): Int? {
+    suspend fun processRun(player: UUID, playerName: String): Int? {
         val generator = generators.find { it.associatedPlayer == player } ?: return null
-        val highscore = parkourService.getRuns(player).maxByOrNull { it.jumps }
+        val highscore = parkourService.getStats(player).highscore
 
-        parkourService.addRun(
+        parkourRepository.saveRun(
             ParkourRun(
                 this,
                 player,
+                playerName,
                 generator.currentIndex,
                 System.currentTimeMillis() - generator.startTime
             )
         )
 
-        if (highscore != null && highscore.jumps < generator.currentIndex) {
+        if (highscore < generator.currentIndex) {
             return generator.currentIndex
         }
 

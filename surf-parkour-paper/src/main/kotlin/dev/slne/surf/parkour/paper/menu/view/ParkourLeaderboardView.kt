@@ -1,12 +1,12 @@
-package dev.slne.surf.parkour.paper.newmenu.view
+package dev.slne.surf.parkour.paper.menu.view
 
 import dev.slne.surf.parkour.api.data.ParkourStats
-import dev.slne.surf.parkour.paper.newmenu.dialog.searchParkourStatsDialog
-import dev.slne.surf.parkour.paper.newmenu.sort.ParkourLeaderboardSortType
-import dev.slne.surf.parkour.paper.newmenu.util.auctionColored
-import dev.slne.surf.parkour.paper.newmenu.util.nextItem
-import dev.slne.surf.parkour.paper.newmenu.util.outlineItem
-import dev.slne.surf.parkour.paper.newmenu.util.previousItem
+import dev.slne.surf.parkour.paper.menu.dialog.searchParkourStatsDialog
+import dev.slne.surf.parkour.paper.menu.sort.ParkourLeaderboardSortType
+import dev.slne.surf.parkour.paper.menu.util.auctionColored
+import dev.slne.surf.parkour.paper.menu.util.nextItem
+import dev.slne.surf.parkour.paper.menu.util.outlineItem
+import dev.slne.surf.parkour.paper.menu.util.previousItem
 import dev.slne.surf.parkour.paper.service.parkourService
 import dev.slne.surf.surfapi.bukkit.api.builder.buildItem
 import dev.slne.surf.surfapi.bukkit.api.builder.buildLore
@@ -172,7 +172,7 @@ object ParkourLeaderboardView : View() {
                 previousItem
             }
             .watch(paginationState)
-            .displayIf { _ -> paginationState.get(render).canBack() }
+            .displayIf { context -> paginationState.get(context).canBack() }
             .onClick { context ->
                 context.playNewPageSound()
                 paginationState.get(render).back()
@@ -184,7 +184,7 @@ object ParkourLeaderboardView : View() {
                 nextItem
             }
             .watch(paginationState)
-            .displayIf { _ -> paginationState.get(render).canAdvance() }
+            .displayIf { context -> paginationState.get(context).canAdvance() }
             .onClick { context ->
                 context.playNewPageSound()
                 paginationState.get(render).advance()

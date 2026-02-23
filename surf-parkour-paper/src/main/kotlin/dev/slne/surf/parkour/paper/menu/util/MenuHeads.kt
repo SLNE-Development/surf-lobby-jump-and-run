@@ -1,4 +1,4 @@
-package dev.slne.surf.parkour.paper.newmenu.util
+package dev.slne.surf.parkour.paper.menu.util
 
 import com.destroystokyo.paper.profile.ProfileProperty
 import dev.slne.surf.surfapi.bukkit.api.builder.buildItem

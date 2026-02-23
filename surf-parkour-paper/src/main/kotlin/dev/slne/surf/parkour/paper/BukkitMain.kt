@@ -15,9 +15,9 @@ import dev.slne.surf.parkour.paper.hook.VulcanHook
 import dev.slne.surf.parkour.paper.listener.FailureListener
 import dev.slne.surf.parkour.paper.listener.PlayerPacketListener
 import dev.slne.surf.parkour.paper.listener.SuccessListener
-import dev.slne.surf.parkour.paper.newmenu.view.ParkourActivePlayersView
-import dev.slne.surf.parkour.paper.newmenu.view.ParkourLeaderboardView
-import dev.slne.surf.parkour.paper.newmenu.view.ParkourOverviewView
+import dev.slne.surf.parkour.paper.menu.view.ParkourActivePlayersView
+import dev.slne.surf.parkour.paper.menu.view.ParkourLeaderboardView
+import dev.slne.surf.parkour.paper.menu.view.ParkourOverviewView
 import dev.slne.surf.parkour.paper.service.ParkourService
 import dev.slne.surf.parkour.paper.service.parkourService
 import dev.slne.surf.surfapi.bukkit.api.event.register
