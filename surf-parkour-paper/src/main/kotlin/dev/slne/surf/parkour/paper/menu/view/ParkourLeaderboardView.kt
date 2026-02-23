@@ -190,7 +190,10 @@ object ParkourLeaderboardView : View() {
             .onRender { slotRender ->
                 slotRender.item = previousItem
             }
-            .onClick(pagination::back)
+            .onClick { _ ->
+                pagination.back()
+                pagination.update()
+            }
 
         render
             .layoutSlot('N')
@@ -201,7 +204,10 @@ object ParkourLeaderboardView : View() {
             .onRender { slotRender ->
                 slotRender.item = nextItem
             }
-            .onClick(pagination::advance)
+            .onClick { _ ->
+                pagination.advance()
+                pagination.update()
+            }
     }
 
     override fun onResume(origin: Context, target: Context) {
