@@ -4,8 +4,6 @@ import com.github.shynixn.mccoroutine.folia.entityDispatcher
 import com.github.shynixn.mccoroutine.folia.launch
 import dev.slne.surf.parkour.paper.plugin
 import dev.slne.surf.parkour.paper.service.parkourService
-import org.bukkit.block.Block
-import org.bukkit.block.BlockFace
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerMoveEvent
@@ -15,7 +13,6 @@ object SuccessListener : Listener {
     @EventHandler
     fun onMove(event: PlayerMoveEvent) {
         val player = event.player
-
 
         if (!event.hasChangedBlock()) {
             return
@@ -29,28 +26,26 @@ object SuccessListener : Listener {
                 return@launch
             }
 
-            val possibleBlocks = getBlocksAround(event.to.block.getRelative(BlockFace.DOWN))
-            val targetBlock = generator.blockLocations.second
+            val target = generator.blockLocations.second
+            val playerPos = event.to.toVector()
 
-            if (possibleBlocks.any { it.isSameBlock(targetBlock) }) {
+            if (isWithinBoundingBox(playerPos, target)) {
                 parkourService.triggerSuccess(player)
             }
         }
     }
 
-    private fun Block.isSameBlock(other: Vector): Boolean {
-        return this.x == other.blockX && this.y == other.blockY && this.z == other.blockZ
-    }
+    private fun isWithinBoundingBox(playerPos: Vector, target: Vector): Boolean {
+        val halfBlock = 0.5
+        val minX = target.x - halfBlock
+        val maxX = target.x + halfBlock
+        val minY = target.y
+        val maxY = target.y + 1.0
+        val minZ = target.z - halfBlock
+        val maxZ = target.z + halfBlock
 
-    private fun getBlocksAround(block: Block) = listOf(
-        block,
-        block.getRelative(1, 0, 0),
-        block.getRelative(-1, 0, 0),
-        block.getRelative(0, 0, 1),
-        block.getRelative(0, 0, -1),
-        block.getRelative(1, 0, 1),
-        block.getRelative(1, 0, -1),
-        block.getRelative(-1, 0, 1),
-        block.getRelative(-1, 0, -1)
-    )
+        return playerPos.x in minX..maxX &&
+                playerPos.y in minY..maxY &&
+                playerPos.z in minZ..maxZ
+    }
 }
