@@ -1,9 +1,6 @@
 package dev.slne.surf.parkour.paper.menu.view
 
-import dev.slne.surf.parkour.paper.menu.util.nextItem
-import dev.slne.surf.parkour.paper.menu.util.outlineItem
-import dev.slne.surf.parkour.paper.menu.util.parkourColored
-import dev.slne.surf.parkour.paper.menu.util.previousItem
+import dev.slne.surf.parkour.paper.menu.util.*
 import dev.slne.surf.parkour.paper.service.parkourService
 import dev.slne.surf.surfapi.bukkit.api.builder.buildItem
 import dev.slne.surf.surfapi.bukkit.api.builder.buildLore
@@ -40,13 +37,16 @@ object ParkourActivePlayersView : View() {
                 "ORRRRRRRO",
                 "ORRRRRRRO",
                 "ORRRRRRRO",
-                "OOOPONOOO"
+                "OOOPBNOOO"
             )
             .cancelInteractions()
     }
 
     override fun onFirstRender(render: RenderContext) {
         render.layoutSlot('O', outlineItem)
+        render.layoutSlot('B', backItem).onClick { context ->
+            context.openForPlayer(ParkourOverviewView::class.java)
+        }
         render
             .layoutSlot('P')
             .renderWith {

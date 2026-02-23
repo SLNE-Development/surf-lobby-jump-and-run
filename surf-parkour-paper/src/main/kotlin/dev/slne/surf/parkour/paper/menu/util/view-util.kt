@@ -2,6 +2,7 @@ package dev.slne.surf.parkour.paper.menu.util
 
 import dev.slne.surf.surfapi.bukkit.api.builder.buildItem
 import dev.slne.surf.surfapi.bukkit.api.builder.displayName
+import dev.slne.surf.surfapi.core.api.font.toSmallCaps
 import dev.slne.surf.surfapi.core.api.messages.adventure.playSound
 import dev.slne.surf.surfapi.core.api.messages.builder.SurfComponentBuilder
 import me.devnatan.inventoryframework.View
@@ -40,6 +41,12 @@ val previousItem = MenuHeads.ARROW_LEFT.clone().apply {
 val nextItem = MenuHeads.ARROW_RIGHT.clone().apply {
     displayName {
         parkourColored("Nächste Seite")
+    }
+}
+
+val backItem = MenuHeads.CROSS.apply {
+    displayName {
+        primary("Zurück".toSmallCaps(), TextDecoration.BOLD)
     }
 }
 
