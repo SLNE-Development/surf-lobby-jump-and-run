@@ -11,11 +11,9 @@ import dev.slne.surf.surfapi.bukkit.api.builder.displayName
 import dev.slne.surf.surfapi.bukkit.api.inventory.framework.titleBuilder
 import dev.slne.surf.surfapi.core.api.font.toSmallCaps
 import dev.slne.surf.surfapi.core.api.messages.adventure.playSound
-import dev.slne.surf.surfapi.core.api.messages.adventure.sendText
 import me.devnatan.inventoryframework.View
 import me.devnatan.inventoryframework.ViewConfigBuilder
 import me.devnatan.inventoryframework.component.Pagination
-import me.devnatan.inventoryframework.context.Context
 import me.devnatan.inventoryframework.context.RenderContext
 import me.devnatan.inventoryframework.context.SlotClickContext
 import me.devnatan.inventoryframework.state.State
@@ -112,7 +110,7 @@ object ParkourLeaderboardView : View() {
     }
 
     private val paginationState: State<Pagination> =
-        buildComputedPaginationState<ParkourStats> { context ->
+        buildLazyPaginationState<ParkourStats> { context ->
             getParkourStatsSortedAndFiltered(
                 ParkourLeaderboardSortType.sortingByPlayer(context.player.uniqueId),
                 ParkourLeaderboardSortType.searchByPlayer(context.player.uniqueId)
@@ -121,16 +119,7 @@ object ParkourLeaderboardView : View() {
             builder.withItem(createStatsItem(auction, context.player.uniqueId)).onClick { context ->
                 context.playGeneralClickSound()
             }
-        }.layoutTarget('R')
-            .onPageSwitch { context, pagination ->
-                context.playNewPageSound()
-                context.update()
-
-                context.player.sendText {
-                    info(pagination.currentPageIndex())
-                }
-            }
-            .build()
+        }.layoutTarget('R').build()
 
     override fun onInit(config: ViewConfigBuilder) {
         config
@@ -185,7 +174,7 @@ object ParkourLeaderboardView : View() {
             .layoutSlot('P')
             .updateOnStateChange(paginationState)
             .displayIf { _ ->
-                pagination.currentPageIndex() != 0
+                pagination.canBack()
             }
             .onRender { slotRender ->
                 slotRender.item = previousItem
@@ -199,7 +188,7 @@ object ParkourLeaderboardView : View() {
             .layoutSlot('N')
             .updateOnStateChange(paginationState)
             .displayIf { _ ->
-                pagination.currentPageIndex() < pagination.lastPageIndex()
+                pagination.canAdvance()
             }
             .onRender { slotRender ->
                 slotRender.item = nextItem
@@ -208,10 +197,6 @@ object ParkourLeaderboardView : View() {
                 pagination.advance()
                 pagination.update()
             }
-    }
-
-    override fun onResume(origin: Context, target: Context) {
-        target.update()
     }
 }
 
