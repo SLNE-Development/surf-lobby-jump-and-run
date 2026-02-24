@@ -1,7 +1,12 @@
 package dev.slne.surf.parkour.paper.util
 
+import com.destroystokyo.paper.profile.ProfileProperty
+import dev.slne.surf.surfapi.bukkit.api.builder.buildItem
+import io.papermc.paper.datacomponent.DataComponentTypes
+import io.papermc.paper.datacomponent.item.ResolvableProfile
+import io.papermc.paper.datacomponent.item.TooltipDisplay
 import org.bukkit.Bukkit
-import org.bukkit.Location
+import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.util.Vector
 import java.util.*
@@ -27,30 +32,6 @@ fun Player.getBlocksBelowFeet(): List<Vector> {
     val footY = boundingBox.minY - FOOT_CHECK_OFFSET
 
     return getBlocksAtCorners(minX, maxX, minZ, maxZ, footY)
-}
-
-/**
- * Gets all blocks that could be below a specific location, accounting for being on block edges.
- * This checks all blocks within a player-sized bounding box centered at the given location,
- * including corners, edges, and center blocks.
- * 
- * @param location The location to check below
- * @return List of block vectors that could be below the given location
- */
-fun getBlocksBelowLocation(location: Location): MutableList<Vector> {
-    val centerX = location.x
-    val centerZ = location.z
-    val footY = location.y - FOOT_CHECK_OFFSET
-
-    // Calculate corners of a player-sized bounding box
-    val minX = centerX - PLAYER_HALF_WIDTH
-    val maxX = centerX + PLAYER_HALF_WIDTH
-    val minZ = centerZ - PLAYER_HALF_WIDTH
-    val maxZ = centerZ + PLAYER_HALF_WIDTH
-
-    return getBlocksAtCorners(minX, maxX, minZ, maxZ, footY).apply {
-        add(location.clone().subtract(0.0, 1.0, 0.0).toVector())
-    }
 }
 
 /**
@@ -83,10 +64,6 @@ private fun getBlocksAtCorners(
     return blocks.toMutableList()
 }
 
-private fun Vector.toBlockLocation(): Vector {
-    return Vector(blockX.toDouble(), blockY.toDouble(), blockZ.toDouble())
-}
-
 fun formatMillis(time: Long): String {
     val totalSeconds = time / 1000
     val hours = totalSeconds / 3600
@@ -106,8 +83,16 @@ fun formatMillis(time: Long): String {
  */
 private const val FOOT_CHECK_OFFSET = 0.1
 
-/**
- * Half-width of a player's bounding box.
- * Player bounding box is 0.6 blocks wide total (0.3 in each direction from center).
- */
-private const val PLAYER_HALF_WIDTH = 0.3
+
+@Suppress("UnstableApiUsage")
+fun UUID.playerHead() = buildItem(Material.PLAYER_HEAD) {
+    setData(
+        DataComponentTypes.PROFILE, ResolvableProfile.resolvableProfile().addProperty(
+            ProfileProperty("textures", textures)
+        ).build()
+    )
+    setData(
+        DataComponentTypes.TOOLTIP_DISPLAY,
+        TooltipDisplay.tooltipDisplay().addHiddenComponents(DataComponentTypes.PROFILE).build()
+    )
+}

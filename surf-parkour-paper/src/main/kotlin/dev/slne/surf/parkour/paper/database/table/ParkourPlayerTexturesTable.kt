@@ -4,5 +4,6 @@ import dev.slne.surf.database.libs.org.jetbrains.exposed.v1.core.dao.id.LongIdTa
 
 object ParkourPlayerTexturesTable : LongIdTable("parkour_textures") {
     val playerUuid = uuid("player_uuid").uniqueIndex()
-    val texture = text("texture")
+    val playerName = varchar("player_name", 16)
+    val headTexture = binary("texture")
 }
