@@ -4,6 +4,7 @@ import dev.slne.surf.parkour.paper.menu.util.*
 import dev.slne.surf.parkour.paper.service.parkourService
 import dev.slne.surf.surfapi.bukkit.api.builder.buildItem
 import dev.slne.surf.surfapi.bukkit.api.builder.buildLore
+import dev.slne.surf.surfapi.bukkit.api.builder.displayName
 import dev.slne.surf.surfapi.bukkit.api.inventory.framework.titleBuilder
 import dev.slne.surf.surfapi.core.api.font.toSmallCaps
 import me.devnatan.inventoryframework.View
@@ -78,6 +79,10 @@ object ParkourActivePlayersView : View() {
 fun createActivePlayerItem(currentJumps: Int, playerUuid: UUID) = buildItem(Material.PLAYER_HEAD) {
     editMeta(SkullMeta::class.java) {
         it.owningPlayer = Bukkit.getPlayer(playerUuid)
+    }
+
+    displayName {
+        parkourColored(Bukkit.getPlayer(playerUuid)?.name ?: "#Unbekannt", TextDecoration.BOLD)
     }
 
     buildLore {

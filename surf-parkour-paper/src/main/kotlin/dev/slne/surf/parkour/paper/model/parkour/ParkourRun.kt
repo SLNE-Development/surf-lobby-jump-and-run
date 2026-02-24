@@ -1,7 +1,6 @@
 package dev.slne.surf.parkour.paper.model.parkour
 
 import dev.slne.surf.parkour.api.data.ParkourStats
-import org.bukkit.Bukkit
 import java.util.*
 
 data class ParkourRun(
@@ -10,9 +9,6 @@ data class ParkourRun(
     var jumps: Int,
     var time: Long
 ) {
-    val playerName by lazy {
-        Bukkit.getOfflinePlayer(playerUuid).name ?: "#Unknown"
-    }
 
     fun addTo(stats: ParkourStats) = stats.copy(
         totalRuns = stats.totalRuns + 1,
