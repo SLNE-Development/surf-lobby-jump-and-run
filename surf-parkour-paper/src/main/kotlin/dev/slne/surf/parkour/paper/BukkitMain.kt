@@ -6,6 +6,7 @@ import dev.slne.surf.database.DatabaseApi
 import dev.slne.surf.database.libs.org.jetbrains.exposed.v1.r2dbc.SchemaUtils
 import dev.slne.surf.database.libs.org.jetbrains.exposed.v1.r2dbc.transactions.suspendTransaction
 import dev.slne.surf.parkour.paper.command.parkourCommand
+import dev.slne.surf.parkour.paper.command.parkourDebugDatabaseCommand
 import dev.slne.surf.parkour.paper.config.ParkourConfiguration
 import dev.slne.surf.parkour.paper.database.table.ParkourPlayerTexturesTable
 import dev.slne.surf.parkour.paper.database.table.ParkourRunsTable
@@ -46,6 +47,7 @@ class BukkitMain : SuspendingJavaPlugin() {
         PacketEvents.getAPI().eventManager.registerListener(PlayerPacketListener())
 
         parkourCommand()
+        parkourDebugDatabaseCommand()
 
         establishDatabaseConnection()
         parkourService.loadParkours()
