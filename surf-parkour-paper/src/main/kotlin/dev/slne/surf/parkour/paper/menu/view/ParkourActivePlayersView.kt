@@ -8,16 +8,16 @@ import dev.slne.surf.surfapi.bukkit.api.inventory.framework.titleBuilder
 import dev.slne.surf.surfapi.core.api.font.toSmallCaps
 import me.devnatan.inventoryframework.View
 import me.devnatan.inventoryframework.ViewConfigBuilder
-import me.devnatan.inventoryframework.context.Context
 import me.devnatan.inventoryframework.context.RenderContext
 import net.kyori.adventure.text.format.TextDecoration
+import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.inventory.meta.SkullMeta
 import java.util.*
 
 @Suppress("UnstableApiUsage")
 object ParkourActivePlayersView : View() {
-    private val paginationState = buildComputedPaginationState<Pair<Int, UUID>> { _ ->
+    private val paginationState = buildLazyPaginationState<Pair<Int, UUID>> { _ ->
         getActivePlayerStats().toMutableList()
     }.elementFactory { _, builder, _, pair ->
         builder.withItem(createActivePlayerItem(pair.first, pair.second)).onClick { context ->
@@ -55,10 +55,10 @@ object ParkourActivePlayersView : View() {
                 previousItem
             }
             .watch(paginationState)
-            .displayIf { context -> paginationState.get(context).canBack() }
+            .displayIf { _ -> pagination.canBack() }
             .onClick { context ->
                 context.playNewPageSound()
-                paginationState.get(context).back()
+                pagination.back()
             }
 
         render
@@ -67,30 +67,17 @@ object ParkourActivePlayersView : View() {
                 nextItem
             }
             .watch(paginationState)
-            .displayIf { context -> paginationState.get(context).canAdvance() }
+            .displayIf { _ -> pagination.canAdvance() }
             .onClick { context ->
                 context.playNewPageSound()
-                paginationState.get(context).advance()
+                pagination.advance()
             }
-    }
-
-    override fun onUpdate(update: Context) {
-        updatePagination(update)
-    }
-
-    override fun onResume(origin: Context, target: Context) {
-        target.update()
-    }
-
-    private fun updatePagination(context: Context) {
-        val pagination = paginationState.get(context)
-        pagination.switchTo(pagination.currentPageIndex())
     }
 }
 
 fun createActivePlayerItem(currentJumps: Int, playerUuid: UUID) = buildItem(Material.PLAYER_HEAD) {
     editMeta(SkullMeta::class.java) {
-        // TODO: Player Skin
+        it.owningPlayer = Bukkit.getPlayer(playerUuid)
     }
 
     buildLore {

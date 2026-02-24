@@ -5,7 +5,10 @@ import dev.slne.surf.parkour.paper.menu.dialog.searchParkourStatsDialog
 import dev.slne.surf.parkour.paper.menu.sort.ParkourLeaderboardSortType
 import dev.slne.surf.parkour.paper.menu.util.*
 import dev.slne.surf.parkour.paper.service.parkourService
+import dev.slne.surf.parkour.paper.service.playerTextureService
 import dev.slne.surf.parkour.paper.util.formatMillis
+import dev.slne.surf.parkour.paper.util.playerHead
+import dev.slne.surf.parkour.paper.util.playerName
 import dev.slne.surf.surfapi.bukkit.api.builder.buildItem
 import dev.slne.surf.surfapi.bukkit.api.builder.buildLore
 import dev.slne.surf.surfapi.bukkit.api.builder.displayName
@@ -21,8 +24,6 @@ import me.devnatan.inventoryframework.state.State
 import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.Material
 import org.bukkit.Sound
-import org.bukkit.inventory.meta.SkullMeta
-import java.util.*
 
 @Suppress("UnstableApiUsage")
 object ParkourLeaderboardView : View() {
@@ -116,8 +117,8 @@ object ParkourLeaderboardView : View() {
                 ParkourLeaderboardSortType.sortingByPlayer(context.player.uniqueId),
                 ParkourLeaderboardSortType.searchByPlayer(context.player.uniqueId)
             ).toMutableList()
-        }.elementFactory { context, builder, _, auction ->
-            builder.withItem(createStatsItem(auction, context.player.uniqueId)).onClick { context ->
+        }.elementFactory { _, builder, _, stats ->
+            builder.withItem(createStatsItem(stats)).onClick { context ->
                 context.playGeneralClickSound()
             }
         }.layoutTarget('R').build()
@@ -185,9 +186,10 @@ object ParkourLeaderboardView : View() {
                     slotRender.item = outlineItem
                 }
             }
-            .onClick { _ ->
+            .onClick { context ->
                 pagination.back()
                 pagination.update()
+                context.playNewPageSound()
             }
 
         render
@@ -203,20 +205,17 @@ object ParkourLeaderboardView : View() {
                     slotRender.item = outlineItem
                 }
             }
-            .onClick { _ ->
+            .onClick { context ->
                 pagination.advance()
                 pagination.update()
+                context.playNewPageSound()
             }
     }
 }
 
-fun createStatsItem(stats: ParkourStats, viewer: UUID) = buildItem(Material.PLAYER_HEAD) {
-    editMeta(SkullMeta::class.java) {
-        // TODO: Player Skin
-    }
-
+fun createStatsItem(stats: ParkourStats) = stats.playerUuid.playerHead().apply {
     displayName {
-        parkourColored(stats.playerName)
+        parkourColored(playerTextureService.getTexture(stats.playerUuid).playerName)
     }
 
     buildLore {

@@ -80,6 +80,7 @@ data class Parkour(
             )
         )
 
+
         if (highscore < generator.currentIndex) {
             return generator.currentIndex
         }

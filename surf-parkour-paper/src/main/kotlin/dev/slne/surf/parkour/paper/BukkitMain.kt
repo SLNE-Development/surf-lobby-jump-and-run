@@ -20,6 +20,7 @@ import dev.slne.surf.parkour.paper.menu.view.ParkourLeaderboardView
 import dev.slne.surf.parkour.paper.menu.view.ParkourOverviewView
 import dev.slne.surf.parkour.paper.service.ParkourService
 import dev.slne.surf.parkour.paper.service.parkourService
+import dev.slne.surf.parkour.paper.service.playerTextureService
 import dev.slne.surf.surfapi.bukkit.api.event.register
 import dev.slne.surf.surfapi.bukkit.api.inventory.framework.viewFrame
 import kotlinx.coroutines.runBlocking
@@ -49,6 +50,7 @@ class BukkitMain : SuspendingJavaPlugin() {
         establishDatabaseConnection()
         parkourService.loadParkours()
         parkourService.loadStats()
+        playerTextureService.loadTextures()
         ParkourService.startUpdating()
     }
 

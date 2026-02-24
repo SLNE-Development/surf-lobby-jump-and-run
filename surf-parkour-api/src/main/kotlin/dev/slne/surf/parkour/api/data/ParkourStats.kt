@@ -1,6 +1,5 @@
 package dev.slne.surf.parkour.api.data
 
-import org.bukkit.Bukkit
 import java.util.*
 
 data class ParkourStats(
@@ -18,9 +17,5 @@ data class ParkourStats(
             highscore = -1,
             averageTime = -1L
         )
-    }
-
-    val playerName by lazy {
-        Bukkit.getOfflinePlayer(playerUuid).name ?: "#Unknown"
     }
 }

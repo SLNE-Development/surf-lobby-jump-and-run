@@ -3,6 +3,7 @@ package dev.slne.surf.parkour.paper.service
 import com.github.benmanes.caffeine.cache.Caffeine
 import com.github.shynixn.mccoroutine.folia.launch
 import dev.slne.surf.parkour.api.data.ParkourStats
+import dev.slne.surf.parkour.api.data.PlayerTextures
 import dev.slne.surf.parkour.paper.config
 import dev.slne.surf.parkour.paper.database.repository.parkourRepository
 import dev.slne.surf.parkour.paper.model.parkour.Parkour
@@ -74,6 +75,14 @@ class ParkourService {
             }
         }
         parkour.exit(player.uniqueId)
+
+        playerTextureService.saveTexture(
+            PlayerTextures(
+                player.uniqueId,
+                player.name,
+                player.playerProfile.properties.find { it.name == "textures" }?.value ?: ""
+            )
+        )
     }
 
     suspend fun triggerSuccess(player: Player) {
@@ -134,7 +143,6 @@ class ParkourService {
 
         plugin.logger.info("Loaded stats for ${statsCache.asMap().size} players in ${ms}ms!")
     }
-
 
     companion object {
         val INSTANCE = ParkourService()
