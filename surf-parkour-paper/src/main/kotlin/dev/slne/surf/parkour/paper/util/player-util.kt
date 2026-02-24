@@ -72,8 +72,8 @@ fun formatMillis(time: Long): String {
     val seconds = totalSeconds % 60
 
     return when {
-        hours > 0 -> "%02dh:%02dm:%02ds".format(hours, minutes, seconds)
-        minutes > 0 -> "%02dm:%02ds".format(minutes, seconds)
+        hours > 0 -> "%02dh %02dm %02ds".format(hours, minutes, seconds)
+        minutes > 0 -> "%02dm %02ds".format(minutes, seconds)
         else -> "%02ds".format(seconds)
     }
 }
