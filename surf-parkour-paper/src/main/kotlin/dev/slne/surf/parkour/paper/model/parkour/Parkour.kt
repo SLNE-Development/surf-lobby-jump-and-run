@@ -44,6 +44,16 @@ data class Parkour(
     suspend fun start(player: UUID): Boolean {
         val generator = ParkourGenerator(player, this@Parkour, getBlockMaterial(player))
 
+        if (parkourService.isInParkour(player)) {
+            Bukkit.getPlayer(player)?.let {
+                it.sendText {
+                    appendErrorPrefix()
+                    error("Du bist bereits in einem Parkour!")
+                }
+            }
+            return false
+        }
+
         if (waitPlease.contains(player)) {
             Bukkit.getPlayer(player)?.let {
                 it.sendText {
