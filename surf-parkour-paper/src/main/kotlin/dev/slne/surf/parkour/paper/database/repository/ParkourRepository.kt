@@ -11,7 +11,6 @@ import dev.slne.surf.parkour.paper.database.table.ParkourRunsTable
 import dev.slne.surf.parkour.paper.database.table.ParkourTable
 import dev.slne.surf.parkour.paper.model.parkour.Parkour
 import dev.slne.surf.parkour.paper.model.parkour.ParkourRun
-import dev.slne.surf.parkour.paper.plugin
 import dev.slne.surf.surfapi.core.api.util.toObjectSet
 import it.unimi.dsi.fastutil.objects.ObjectSet
 import kotlinx.coroutines.flow.map
@@ -100,7 +99,6 @@ class ParkourRepository {
         }
 
     suspend fun loadParkours(serverUUid: UUID) = suspendTransaction {
-        plugin.logger.info("Loading parkours for server $serverUUid")
         ParkourTable.selectAll().where(
             (ParkourTable.serverUuid eq serverUUid)
         ).map {

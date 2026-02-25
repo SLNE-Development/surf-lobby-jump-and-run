@@ -103,7 +103,7 @@ class ParkourService {
 
     suspend fun loadParkours() {
         val serverUuid = config.serverUuid
-        plugin.logger.info("Loading parkours for server $serverUuid, this should not take too long...")
+        plugin.logger.info("Loading parkours, this should not take too long...")
         val parkours = parkourRepository.loadParkours(serverUuid)
 
         _parkours.clear()
