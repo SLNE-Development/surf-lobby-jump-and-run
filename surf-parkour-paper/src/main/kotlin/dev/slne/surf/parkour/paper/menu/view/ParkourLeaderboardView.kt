@@ -165,6 +165,8 @@ object ParkourLeaderboardView : View() {
                     context.player.uniqueId,
                     selectedSort.get(render)
                 )
+
+                context.openForPlayer(ParkourLeaderboardView::class.java) // INFO: This is needed, as IF has current bugs when using computed pagination states. The author is aware of this.
             }
         render.layoutSlot('O', outlineItem)
         render.layoutSlot('A', searchItem).onClick { context ->
