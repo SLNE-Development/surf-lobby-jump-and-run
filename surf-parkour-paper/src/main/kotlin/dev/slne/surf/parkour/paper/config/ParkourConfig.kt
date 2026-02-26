@@ -14,7 +14,7 @@ data class ParkourConfig(
     val betaMode: Boolean = false,
     val parkours: MutableSet<Parkour> = mutableObjectSetOf(
         Parkour(
-            UUID.randomUUID(),
+            UUID.fromString("3f9c2e1a-7b84-4d6e-a9f2-1c5b8e73d4a1"),
             "lobby",
             "Lobby",
             BoundingBox.of(Vector(4, 324, 189), Vector(328, 215, 391)),
