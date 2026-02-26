@@ -4,6 +4,7 @@ import com.github.benmanes.caffeine.cache.Caffeine
 import dev.slne.surf.parkour.api.data.ParkourStats
 import dev.slne.surf.parkour.api.data.PlayerTextures
 import dev.slne.surf.parkour.paper.config
+import dev.slne.surf.parkour.paper.config.ParkourConfig
 import dev.slne.surf.parkour.paper.database.repository.parkourRepository
 import dev.slne.surf.parkour.paper.model.parkour.Parkour
 import dev.slne.surf.parkour.paper.model.parkour.ParkourRun
@@ -48,7 +49,7 @@ class ParkourService {
         _parkours.add(parkour)
 
         plugin.parkourConfig.edit {
-            parkours.add(parkour)
+            parkours.add(ParkourConfig.fromParkour(parkour))
         }
 
         return parkour
@@ -104,7 +105,7 @@ class ParkourService {
         plugin.logger.info("Loading parkours, this should not take too long...")
 
         _parkours.clear()
-        _parkours.addAll(config.parkours)
+        _parkours.addAll(config.parkours.map { it.toParkour() })
 
         plugin.logger.info("Loaded ${_parkours.size} parkours!")
     }
