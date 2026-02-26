@@ -1,7 +1,6 @@
 package dev.slne.surf.parkour.paper.service
 
 import com.github.benmanes.caffeine.cache.Caffeine
-import com.github.shynixn.mccoroutine.folia.launch
 import dev.slne.surf.parkour.api.data.ParkourStats
 import dev.slne.surf.parkour.api.data.PlayerTextures
 import dev.slne.surf.parkour.paper.config
@@ -48,8 +47,8 @@ class ParkourService {
 
         _parkours.add(parkour)
 
-        plugin.launch {
-            parkourRepository.registerParkour(config.serverUuid, parkour)
+        plugin.parkourConfig.edit {
+            parkours.add(parkour)
         }
 
         return parkour
@@ -102,14 +101,12 @@ class ParkourService {
     fun exists(identifier: String) = _parkours.any { it.identifier == identifier }
 
     suspend fun loadParkours() {
-        val serverUuid = config.serverUuid
         plugin.logger.info("Loading parkours, this should not take too long...")
-        val parkours = parkourRepository.loadParkours(serverUuid)
 
         _parkours.clear()
-        _parkours.addAll(parkours)
+        _parkours.addAll(config.parkours)
 
-        plugin.logger.info("Loaded ${parkours.size} parkours!")
+        plugin.logger.info("Loaded ${_parkours.size} parkours!")
     }
 
     suspend fun saveRun(run: ParkourRun) {

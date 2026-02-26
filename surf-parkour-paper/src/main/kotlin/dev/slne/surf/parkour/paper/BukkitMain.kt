@@ -10,7 +10,6 @@ import dev.slne.surf.parkour.paper.command.parkourDebugDatabaseCommand
 import dev.slne.surf.parkour.paper.config.ParkourConfiguration
 import dev.slne.surf.parkour.paper.database.table.ParkourPlayerTexturesTable
 import dev.slne.surf.parkour.paper.database.table.ParkourRunsTable
-import dev.slne.surf.parkour.paper.database.table.ParkourTable
 import dev.slne.surf.parkour.paper.hook.PolarHook
 import dev.slne.surf.parkour.paper.hook.VulcanHook
 import dev.slne.surf.parkour.paper.listener.FailureListener
@@ -65,7 +64,7 @@ class BukkitMain : SuspendingJavaPlugin() {
 
         runBlocking {
             suspendTransaction {
-                SchemaUtils.create(ParkourTable, ParkourRunsTable, ParkourPlayerTexturesTable)
+                SchemaUtils.create(ParkourRunsTable, ParkourPlayerTexturesTable)
             }
         }
     }
