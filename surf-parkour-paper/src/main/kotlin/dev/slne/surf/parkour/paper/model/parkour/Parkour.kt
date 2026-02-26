@@ -9,8 +9,10 @@ import org.bukkit.Material
 import org.bukkit.World
 import org.bukkit.entity.Player
 import org.bukkit.util.BoundingBox
+import org.spongepowered.configurate.objectmapping.ConfigSerializable
 import java.util.*
 
+@ConfigSerializable
 data class Parkour(
     val uuid: UUID,
     val identifier: String,
