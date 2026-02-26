@@ -100,7 +100,7 @@ class ParkourService {
     fun getParkour(uuid: UUID) = _parkours.find { it.uuid == uuid }
     fun exists(identifier: String) = _parkours.any { it.identifier == identifier }
 
-    suspend fun loadParkours() {
+    fun loadParkours() {
         plugin.logger.info("Loading parkours, this should not take too long...")
 
         _parkours.clear()
