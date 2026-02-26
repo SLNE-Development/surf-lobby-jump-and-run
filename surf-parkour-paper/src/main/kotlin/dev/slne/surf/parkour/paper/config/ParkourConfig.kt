@@ -19,17 +19,18 @@ data class ParkourConfig(
             "Lobby",
             serializeBoundingBox(BoundingBox.of(Vector(4, 324, 189), Vector(328, 215, 391))),
             Bukkit.getWorlds().first().name,
-            Location(Bukkit.getWorlds().first(), 111.5, 149.0, 315.5, 90f, 0f)
+            serializeLocation(Location(Bukkit.getWorlds().first(), 111.5, 149.0, 315.5, 90f, 0f))
         )
     )
 ) {
+    @ConfigSerializable
     data class ConfigParkour(
         val uuid: UUID,
         val identifier: String,
         val displayName: String,
         val boundingBox: String,
         val world: String,
-        val respawnLocation: Location
+        val respawnLocation: String
     ) {
         fun toParkour() = Parkour(
             uuid = uuid,
@@ -37,7 +38,7 @@ data class ParkourConfig(
             displayName = displayName,
             boundingBox = deserializeBoundingBox(boundingBox),
             world = Bukkit.getWorld(world) ?: error("World $world not found"),
-            respawnLocation = respawnLocation
+            respawnLocation = deserializeLocation(respawnLocation)
         )
     }
 
@@ -48,7 +49,7 @@ data class ParkourConfig(
             displayName = parkour.displayName,
             boundingBox = serializeBoundingBox(parkour.boundingBox),
             world = parkour.world.name,
-            respawnLocation = parkour.respawnLocation
+            respawnLocation = serializeLocation(parkour.respawnLocation)
         )
     }
 }
@@ -72,4 +73,20 @@ fun deserializeBoundingBox(data: String): BoundingBox {
     val max = Vector(maxParts[0], maxParts[1], maxParts[2])
 
     return BoundingBox.of(min, max)
+}
+
+fun serializeLocation(loc: Location): String {
+    return "${loc.world?.name},${loc.x},${loc.y},${loc.z},${loc.yaw},${loc.pitch}"
+}
+
+fun deserializeLocation(data: String): Location {
+    val parts = data.split(",")
+    if (parts.size != 6) error("Invalid location format")
+    val world = Bukkit.getWorld(parts[0]) ?: error("World ${parts[0]} not found")
+    val x = parts[1].toDouble()
+    val y = parts[2].toDouble()
+    val z = parts[3].toDouble()
+    val yaw = parts[4].toFloat()
+    val pitch = parts[5].toFloat()
+    return Location(world, x, y, z, yaw, pitch)
 }

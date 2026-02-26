@@ -127,7 +127,7 @@ private val leaderBoardItem = buildItem(Material.NETHER_STAR) {
     }
 }
 
-private val startItem = MenuHeads.CREATE_BUTTON.apply {
+private val startItem = buildItem(Material.RECOVERY_COMPASS) {
     displayName {
         primary("Parkour starten".toSmallCaps(), TextDecoration.BOLD)
     }
