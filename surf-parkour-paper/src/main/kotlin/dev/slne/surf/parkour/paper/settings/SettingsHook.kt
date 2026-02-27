@@ -9,7 +9,7 @@ object SettingsHook {
 
     fun Player.hasSoundsEnabled(): Boolean {
         return if (isEnabled()) {
-            surfSettingsApi.getPlayerSetting(this.uniqueId, "parkour_sounds")?.getBoolean() ?: true
+            surfSettingsApi.getPlayerSetting(this.uniqueId, "lobby_parkour_sound")?.getBoolean() ?: true
         } else {
             true
         }
