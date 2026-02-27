@@ -18,6 +18,7 @@ import dev.slne.surf.parkour.paper.model.parkour.Parkour
 import dev.slne.surf.parkour.paper.model.parkour.ParkourRun
 import dev.slne.surf.parkour.paper.model.parkour.PersonalParkourSummary
 import dev.slne.surf.parkour.paper.plugin
+import dev.slne.surf.parkour.paper.settings.SettingsHook.hasSoundsEnabled
 import dev.slne.surf.parkour.paper.util.formattedDuration
 import dev.slne.surf.surfapi.core.api.messages.adventure.buildText
 import dev.slne.surf.surfapi.core.api.messages.adventure.sendText
@@ -83,7 +84,9 @@ class ParkourService {
             appendInfoPrefix()
             info("Du bist runtergefallen...")
         }
-        soundService.playFailure(player)
+        if (player.hasSoundsEnabled()) {
+            soundService.playFailure(player)
+        }
 
         parkour.processRun(player.uniqueId)?.let {
             player.sendText {
@@ -101,7 +104,9 @@ class ParkourService {
         val generator = parkour.getGenerator(player) ?: return
 
         generator.generate()
-        soundService.playSuccess(player)
+        if (player.hasSoundsEnabled()) {
+            soundService.playSuccess(player)
+        }
     }
 
     fun isInParkour(playerUuid: UUID) = _parkours.any { it.players.contains(playerUuid) }
