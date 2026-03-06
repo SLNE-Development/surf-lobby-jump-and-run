@@ -110,6 +110,12 @@ class ParkourService {
         plugin.logger.info("Loaded ${_parkours.size} parkours!")
     }
 
+    suspend fun loadAndCacheStats(playerUuid: UUID) {
+        parkourRepository.loadPlayerStats(playerUuid)?.let {
+            statsCache.put(playerUuid, it)
+        }
+    }
+
     suspend fun saveRun(run: ParkourRun) {
         statsCache.put(run.playerUuid, statsCache.getIfPresent(run.playerUuid)?.let {
             it.copy(

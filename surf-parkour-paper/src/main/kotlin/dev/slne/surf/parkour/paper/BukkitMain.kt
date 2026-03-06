@@ -11,6 +11,7 @@ import dev.slne.surf.parkour.paper.database.table.ParkourRunsTable
 import dev.slne.surf.parkour.paper.hook.PolarHook
 import dev.slne.surf.parkour.paper.hook.VulcanHook
 import dev.slne.surf.parkour.paper.listener.FailureListener
+import dev.slne.surf.parkour.paper.listener.JoinListener
 import dev.slne.surf.parkour.paper.listener.SuccessListener
 import dev.slne.surf.parkour.paper.menu.view.ParkourActivePlayersView
 import dev.slne.surf.parkour.paper.menu.view.ParkourLeaderboardView
@@ -40,6 +41,7 @@ class BukkitMain : SuspendingJavaPlugin() {
 
         FailureListener.register()
         SuccessListener.register()
+        JoinListener.register()
 
         PolarHook().register()
         VulcanHook().register()
