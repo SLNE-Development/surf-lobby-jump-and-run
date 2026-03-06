@@ -9,8 +9,10 @@ import org.bukkit.Material
 import org.bukkit.World
 import org.bukkit.entity.Player
 import org.bukkit.util.BoundingBox
+import org.spongepowered.configurate.objectmapping.ConfigSerializable
 import java.util.*
 
+@ConfigSerializable
 data class Parkour(
     val uuid: UUID,
     val identifier: String,
@@ -44,6 +46,16 @@ data class Parkour(
     suspend fun start(player: UUID): Boolean {
         val generator = ParkourGenerator(player, this@Parkour, getBlockMaterial(player))
 
+        if (parkourService.isInParkour(player)) {
+            Bukkit.getPlayer(player)?.let {
+                it.sendText {
+                    appendErrorPrefix()
+                    error("Du bist bereits in einem Parkour!")
+                }
+            }
+            return false
+        }
+
         if (waitPlease.contains(player)) {
             Bukkit.getPlayer(player)?.let {
                 it.sendText {
@@ -69,9 +81,9 @@ data class Parkour(
 
     suspend fun processRun(player: UUID): Int? {
         val generator = generators.find { it.associatedPlayer == player } ?: return null
-        val highscore = parkourService.getRuns(player).maxByOrNull { it.jumps }
+        val highscore = parkourService.getStats(player).highscore
 
-        parkourService.addRun(
+        parkourService.saveRun(
             ParkourRun(
                 this,
                 player,
@@ -80,7 +92,8 @@ data class Parkour(
             )
         )
 
-        if (highscore != null && highscore.jumps < generator.currentIndex) {
+
+        if (highscore < generator.currentIndex) {
             return generator.currentIndex
         }
 

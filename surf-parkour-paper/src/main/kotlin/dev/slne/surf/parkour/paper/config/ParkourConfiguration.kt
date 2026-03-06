@@ -5,7 +5,7 @@ import dev.slne.surf.surfapi.core.api.config.manager.SpongeConfigManager
 import dev.slne.surf.surfapi.core.api.config.surfConfigApi
 
 class ParkourConfiguration {
-    private val configManager: SpongeConfigManager<ParkourConfig>
+    val configManager: SpongeConfigManager<ParkourConfig>
 
     init {
         surfConfigApi.createSpongeYmlConfig(
@@ -16,6 +16,11 @@ class ParkourConfiguration {
         configManager =
             surfConfigApi.getSpongeConfigManagerForConfig(ParkourConfig::class.java)
         reload()
+    }
+
+    fun edit(actions: ParkourConfig.() -> Unit) {
+        configManager.config = configManager.config.apply { actions() }
+        configManager.save()
     }
 
     fun reload() {

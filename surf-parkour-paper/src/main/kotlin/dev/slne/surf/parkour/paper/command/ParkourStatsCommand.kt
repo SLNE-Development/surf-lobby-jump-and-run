@@ -8,7 +8,6 @@ import dev.slne.surf.parkour.paper.permission.ParkourPermissionRegistry
 import dev.slne.surf.parkour.paper.plugin
 import dev.slne.surf.parkour.paper.service.parkourService
 import dev.slne.surf.parkour.paper.util.appendLinePrefix
-import dev.slne.surf.parkour.paper.util.formattedDuration
 import dev.slne.surf.surfapi.core.api.font.toSmallCaps
 import dev.slne.surf.surfapi.core.api.messages.adventure.sendText
 import net.kyori.adventure.text.format.TextDecoration
@@ -17,25 +16,9 @@ fun CommandAPICommand.parkourStatsCommand() = subcommand("stats") {
     withPermission(ParkourPermissionRegistry.COMMAND_PARKOUR_STATS)
     playerExecutor { player, _ ->
         plugin.launch {
-            val stats = parkourService.getRuns(player.uniqueId)
+            val stats = parkourService.getStats(player.uniqueId)
 
-            val averageTime = if (stats.isNotEmpty()) {
-                val totalTime = stats.sumOf { it.time }
-                totalTime / stats.size
-            } else {
-                0L
-            }
-
-            val averageJumps = if (stats.isNotEmpty()) {
-                val totalJumps = stats.sumOf { it.jumps }
-                totalJumps / stats.size
-            } else {
-                0
-            }
-
-            val jumpHighscore = stats.maxByOrNull { it.jumps }?.jumps ?: 0
-            val timeHighscore = stats.maxByOrNull { it.time }?.time ?: 0L
-            val runs = stats.size
+            val averageJumps = stats.totalJumps / stats.totalRuns
 
             player.sendText {
                 appendNewline()
@@ -46,14 +29,14 @@ fun CommandAPICommand.parkourStatsCommand() = subcommand("stats") {
                     appendLinePrefix()
                     variableKey("Gesamte Läufe:")
                     appendSpace()
-                    variableValue(runs)
+                    variableValue(stats.totalRuns)
                 }
 
                 appendNewline {
                     appendLinePrefix()
-                    variableKey("Durchschnittliche Zeit:")
+                    variableKey("Gesamte Sprünge:")
                     appendSpace()
-                    variableValue(averageTime.formattedDuration)
+                    variableValue(stats.totalJumps)
                 }
 
                 appendNewline {
@@ -68,16 +51,9 @@ fun CommandAPICommand.parkourStatsCommand() = subcommand("stats") {
 
                 appendNewline {
                     appendLinePrefix()
-                    variableKey("Bestzeit:")
-                    appendSpace()
-                    variableValue(timeHighscore.formattedDuration)
-                }
-
-                appendNewline {
-                    appendLinePrefix()
                     variableKey("Höchste Sprunganzahl:")
                     appendSpace()
-                    variableValue(jumpHighscore)
+                    variableValue(stats.highscore)
                     spacer(" Sprünge")
                 }
             }
