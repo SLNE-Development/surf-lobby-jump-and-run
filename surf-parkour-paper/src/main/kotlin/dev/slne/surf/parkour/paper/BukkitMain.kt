@@ -1,6 +1,5 @@
 package dev.slne.surf.parkour.paper
 
-import com.github.retrooper.packetevents.PacketEvents
 import com.github.shynixn.mccoroutine.folia.SuspendingJavaPlugin
 import dev.slne.surf.database.DatabaseApi
 import dev.slne.surf.database.libs.org.jetbrains.exposed.v1.r2dbc.SchemaUtils
@@ -13,7 +12,6 @@ import dev.slne.surf.parkour.paper.database.table.ParkourRunsTable
 import dev.slne.surf.parkour.paper.hook.PolarHook
 import dev.slne.surf.parkour.paper.hook.VulcanHook
 import dev.slne.surf.parkour.paper.listener.FailureListener
-import dev.slne.surf.parkour.paper.listener.PlayerPacketListener
 import dev.slne.surf.parkour.paper.listener.SuccessListener
 import dev.slne.surf.parkour.paper.menu.view.ParkourActivePlayersView
 import dev.slne.surf.parkour.paper.menu.view.ParkourLeaderboardView
@@ -46,8 +44,6 @@ class BukkitMain : SuspendingJavaPlugin() {
 
         PolarHook().register()
         VulcanHook().register()
-
-        PacketEvents.getAPI().eventManager.registerListener(PlayerPacketListener())
 
         parkourCommand()
         parkourDebugDatabaseCommand()
