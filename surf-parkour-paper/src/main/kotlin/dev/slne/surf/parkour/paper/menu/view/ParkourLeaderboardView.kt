@@ -82,9 +82,10 @@ object ParkourLeaderboardView : View() {
             ).toMutableList()
         }.elementFactory { context, builder, _, rankedData ->
             val currentSort = selectedSort.get(context)
-            builder.withItem(createStatsItem(rankedData.stats, rankedData.rank, currentSort)).onClick { clickContext ->
-                clickContext.playGeneralClickSound()
-            }
+            builder.withItem(createStatsItem(rankedData.stats, rankedData.rank, currentSort))
+                .onClick { clickContext ->
+                    clickContext.playGeneralClickSound()
+                }
         }.layoutTarget('R').build()
 
     override fun onInit(config: ViewConfigBuilder) {
@@ -196,23 +197,25 @@ fun createStatsItem(stats: ParkourStats, rank: Int, sortType: ParkourLeaderboard
                 appendSpace()
                 when (sortType) {
                     ParkourLeaderboardSortType.HIGHSCORE -> {
-                        spacer("(Highscore)", TextDecoration.BOLD)
+                        spacer("(Highscore)")
                     }
 
                     ParkourLeaderboardSortType.MOST_JUMPS -> {
-                        spacer("(Meiste Gesamtsprünge)", TextDecoration.BOLD)
+                        spacer(
+                            "(Meiste Gesamtsprünge)"
+                        )
                     }
 
                     ParkourLeaderboardSortType.LEAST_JUMPS -> {
-                        spacer("(Wenigste Gesamtsprünge)", TextDecoration.BOLD)
+                        spacer("(Wenigste Gesamtsprünge)")
                     }
 
                     ParkourLeaderboardSortType.MOST_TRIES -> {
-                        spacer("(Meiste Versuche)", TextDecoration.BOLD)
+                        spacer("(Meiste Versuche)")
                     }
 
                     ParkourLeaderboardSortType.LEAST_TRIES -> {
-                        spacer("(Wenigste Versuche)", TextDecoration.BOLD)
+                        spacer("(Wenigste Versuche)")
                     }
                 }
             }
