@@ -117,9 +117,11 @@ object ParkourLeaderboardView : View() {
                 ParkourLeaderboardSortType.sortingByPlayer(context.player.uniqueId),
                 ParkourLeaderboardSortType.searchByPlayer(context.player.uniqueId)
             ).toMutableList()
-        }.elementFactory { _, builder, _, stats ->
-            builder.withItem(createStatsItem(stats)).onClick { context ->
-                context.playGeneralClickSound()
+        }.elementFactory { context, builder, index, stats ->
+            val currentSort = selectedSort.get(context)
+
+            builder.withItem(createStatsItem(stats, index + 1, currentSort)).onClick { clickContext ->
+                clickContext.playGeneralClickSound()
             }
         }.layoutTarget('R').build()
 
@@ -215,13 +217,45 @@ object ParkourLeaderboardView : View() {
     }
 }
 
-fun createStatsItem(stats: ParkourStats) = stats.playerUuid.playerHead().apply {
+fun createStatsItem(stats: ParkourStats, rank: Int, sortType: ParkourLeaderboardSortType) = stats.playerUuid.playerHead().apply {
     displayName {
         parkourColored(playerTextureService.getTexture(stats.playerUuid).playerName)
     }
 
     buildLore {
         emptyLine()
+        line {
+            parkourColored("Platzierung".toSmallCaps(), TextDecoration.BOLD)
+            appendSpace()
+            when (sortType) {
+                ParkourLeaderboardSortType.HIGHSCORE -> {
+                    spacer("(Highscore)", TextDecoration.BOLD)
+                }
+
+                ParkourLeaderboardSortType.MOST_JUMPS -> {
+                    spacer("(Meiste Gesamtsprünge)", TextDecoration.BOLD)
+                }
+
+                ParkourLeaderboardSortType.LEAST_JUMPS -> {
+                    spacer("(Wenigste Gesamtsprünge)", TextDecoration.BOLD)
+                }
+
+                ParkourLeaderboardSortType.MOST_TRIES -> {
+                    spacer("(Meiste Versuche)", TextDecoration.BOLD)
+                }
+
+                ParkourLeaderboardSortType.LEAST_TRIES -> {
+                    spacer("(Wenigste Versuche)", TextDecoration.BOLD)
+                }
+            }
+        }
+        line {
+            spacer("-")
+            appendSpace()
+            parkourColored("Rang: ")
+            variableValue(rank)
+        }
+
         line {
             parkourColored("Parkourstatistiken".toSmallCaps(), TextDecoration.BOLD)
         }
