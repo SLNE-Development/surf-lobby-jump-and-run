@@ -14,10 +14,6 @@ class PlayerTextureService {
     val textures get() = textureCache.asMap().values
 
     suspend fun saveTexture(texture: PlayerTextures) {
-        if (textureCache.getIfPresent(texture.playerUuid) != null) {
-            return
-        }
-
         textureCache.put(texture.playerUuid, texture)
         playerTextureRepository.saveTexture(texture)
     }
