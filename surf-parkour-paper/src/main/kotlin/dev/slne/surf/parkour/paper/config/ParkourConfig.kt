@@ -17,7 +17,7 @@ data class ParkourConfig(
             UUID.fromString("3f9c2e1a-7b84-4d6e-a9f2-1c5b8e73d4a1"),
             "lobby",
             "Lobby",
-            serializeBoundingBox(BoundingBox.of(Vector(4, 320, 189), Vector(328, 215, 391))),
+            serializeBoundingBox(BoundingBox.of(Vector(4, 315, 189), Vector(328, 215, 391))),
             Bukkit.getWorlds().first().name,
             serializeLocation(Location(Bukkit.getWorlds().first(), 111.5, 149.0, 315.5, 90f, 0f))
         )
