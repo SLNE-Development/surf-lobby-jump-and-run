@@ -25,6 +25,11 @@ import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.Material
 import org.bukkit.Sound
 
+data class RankedParkourStats(
+    val stats: ParkourStats,
+    val rank: Int
+)
+
 @Suppress("UnstableApiUsage")
 object ParkourLeaderboardView : View() {
     private val selectedSort = mutableState(ParkourLeaderboardSortType.HIGHSCORE)
@@ -44,83 +49,43 @@ object ParkourLeaderboardView : View() {
             emptyLine()
             line { parkourColored("Sortierung".toSmallCaps(), TextDecoration.BOLD) }
 
-            line {
-                if (state == ParkourLeaderboardSortType.HIGHSCORE) {
-                    appendSpace()
-                    spacer("-")
-                    appendSpace()
-                    parkourColored("Highscore")
-                } else {
-                    spacer("-")
-                    appendSpace()
-                    white("Highscore")
-                }
-            }
+            val types = listOf(
+                ParkourLeaderboardSortType.HIGHSCORE to "Highscore",
+                ParkourLeaderboardSortType.MOST_JUMPS to "Meiste Gesamtsprünge",
+                ParkourLeaderboardSortType.LEAST_JUMPS to "Wenigste Gesamtsprünge",
+                ParkourLeaderboardSortType.MOST_TRIES to "Meiste Versuche",
+                ParkourLeaderboardSortType.LEAST_TRIES to "Wenigste Versuche"
+            )
 
-            line {
-                if (state == ParkourLeaderboardSortType.MOST_JUMPS) {
-                    appendSpace()
-                    spacer("-")
-                    appendSpace()
-                    parkourColored("Meiste Gesamtsprünge")
-                } else {
-                    spacer("-")
-                    appendSpace()
-                    white("Meiste Gesamtsprünge")
-                }
-            }
-
-            line {
-                if (state == ParkourLeaderboardSortType.LEAST_JUMPS) {
-                    appendSpace()
-                    spacer("-")
-                    appendSpace()
-                    parkourColored("Wenigste Gesamtsprünge")
-                } else {
-                    spacer("-")
-                    appendSpace()
-                    white("Wenigste Gesamtsprünge")
-                }
-            }
-
-            line {
-                if (state == ParkourLeaderboardSortType.MOST_TRIES) {
-                    appendSpace()
-                    spacer("-")
-                    appendSpace()
-                    parkourColored("Meiste Versuche")
-                } else {
-                    spacer("-")
-                    appendSpace()
-                    white("Meiste Versuche")
-                }
-            }
-
-            line {
-                if (state == ParkourLeaderboardSortType.LEAST_TRIES) {
-                    appendSpace()
-                    spacer("-")
-                    appendSpace()
-                    parkourColored("Wenigste Versuche")
-                } else {
-                    spacer("-")
-                    appendSpace()
-                    white("Wenigste Versuche")
+            types.forEach { (type, label) ->
+                line {
+                    if (state == type) {
+                        appendSpace()
+                        spacer("-")
+                        appendSpace()
+                        parkourColored(label)
+                    } else {
+                        spacer("-")
+                        appendSpace()
+                        white(label)
+                    }
                 }
             }
         }
     }
 
     private val paginationState: State<Pagination> =
-        buildLazyPaginationState<ParkourStats> { context ->
+        buildLazyPaginationState<RankedParkourStats> { context ->
             getParkourStatsSortedAndFiltered(
                 ParkourLeaderboardSortType.sortingByPlayer(context.player.uniqueId),
                 ParkourLeaderboardSortType.searchByPlayer(context.player.uniqueId)
             ).toMutableList()
-        }.elementFactory { _, builder, _, stats ->
-            builder.withItem(createStatsItem(stats)).onClick { context ->
-                context.playGeneralClickSound()
-            }
+        }.elementFactory { context, builder, _, rankedData ->
+            val currentSort = selectedSort.get(context)
+            builder.withItem(createStatsItem(rankedData.stats, rankedData.rank, currentSort))
+                .onClick { clickContext ->
+                    clickContext.playGeneralClickSound()
+                }
         }.layoutTarget('R').build()
 
     override fun onInit(config: ViewConfigBuilder) {
@@ -155,11 +120,13 @@ object ParkourLeaderboardView : View() {
             .onClick { context ->
                 context.playGeneralClickSound()
 
-                if (context.isRightClick) {
-                    selectedSort.set(selectedSort.get(render).previous(), render)
-                } else {
-                    selectedSort.set(selectedSort.get(render).next(), render)
-                }
+                val nextSort =
+                    if (context.isRightClick) {
+                        selectedSort.get(render).previous()
+                    } else {
+                        selectedSort.get(render).next()
+                    }
+                selectedSort.set(nextSort, render)
 
                 ParkourLeaderboardSortType.setSorting(
                     context.player.uniqueId,
@@ -215,74 +182,112 @@ object ParkourLeaderboardView : View() {
     }
 }
 
-fun createStatsItem(stats: ParkourStats) = stats.playerUuid.playerHead().apply {
-    displayName {
-        parkourColored(playerTextureService.getTexture(stats.playerUuid).playerName)
-    }
+fun createStatsItem(stats: ParkourStats, rank: Int, sortType: ParkourLeaderboardSortType) =
+    stats.playerUuid.playerHead().apply {
+        val texture = playerTextureService.getTexture(stats.playerUuid)
 
-    buildLore {
-        emptyLine()
-        line {
-            parkourColored("Parkourstatistiken".toSmallCaps(), TextDecoration.BOLD)
+        displayName {
+            parkourColored(texture.playerName)
         }
-        line {
-            spacer("-")
-            appendSpace()
-            parkourColored("Highscore: ")
-            variableValue(stats.highscore)
-        }
-        line {
-            spacer("-")
-            appendSpace()
-            parkourColored("Versuche: ")
-            variableValue(stats.totalRuns)
-        }
-        line {
-            spacer("-")
-            appendSpace()
-            parkourColored("Gesamtsprünge: ")
-            variableValue(stats.totalJumps)
-        }
-        line {
-            spacer("-")
-            appendSpace()
-            parkourColored("Durchschnittliche Zeit: ")
-            variableValue(formatMillis(stats.averageTime))
+
+        buildLore {
+            emptyLine()
+            line {
+                parkourColored("Platzierung".toSmallCaps(), TextDecoration.BOLD)
+                appendSpace()
+                when (sortType) {
+                    ParkourLeaderboardSortType.HIGHSCORE -> {
+                        spacer("(Highscore)")
+                    }
+
+                    ParkourLeaderboardSortType.MOST_JUMPS -> {
+                        spacer(
+                            "(Meiste Gesamtsprünge)"
+                        )
+                    }
+
+                    ParkourLeaderboardSortType.LEAST_JUMPS -> {
+                        spacer("(Wenigste Gesamtsprünge)")
+                    }
+
+                    ParkourLeaderboardSortType.MOST_TRIES -> {
+                        spacer("(Meiste Versuche)")
+                    }
+
+                    ParkourLeaderboardSortType.LEAST_TRIES -> {
+                        spacer("(Wenigste Versuche)")
+                    }
+                }
+            }
+            line {
+                spacer("-")
+                appendSpace()
+                parkourColored("Rang: ")
+                variableValue("#$rank")
+            }
+            emptyLine()
+            line {
+                parkourColored("Parkourstatistiken".toSmallCaps(), TextDecoration.BOLD)
+            }
+            line {
+                spacer("-")
+                appendSpace()
+                parkourColored("Highscore: ")
+                variableValue(stats.highscore)
+            }
+            line {
+                spacer("-")
+                appendSpace()
+                parkourColored("Versuche: ")
+                variableValue(stats.totalRuns)
+            }
+            line {
+                spacer("-")
+                appendSpace()
+                parkourColored("Gesamtsprünge: ")
+                variableValue(stats.totalJumps)
+            }
+            line {
+                spacer("-")
+                appendSpace()
+                parkourColored("Durchschnittliche Zeit: ")
+                variableValue(formatMillis(stats.averageTime))
+            }
         }
     }
-}
 
 fun SlotClickContext.playGeneralClickSound() {
-    player.playSound(true) {
-        type(Sound.UI_BUTTON_CLICK)
-    }
+    player.playSound(true) { type(Sound.UI_BUTTON_CLICK) }
 }
 
 fun SlotClickContext.playNewPageSound() {
-    player.playSound(true) {
-        type(Sound.ENTITY_CHICKEN_EGG)
-    }
+    player.playSound(true) { type(Sound.ENTITY_CHICKEN_EGG) }
 }
 
 private fun getParkourStatsSortedAndFiltered(
     sortType: ParkourLeaderboardSortType,
     search: String?
-): List<ParkourStats> {
+): List<RankedParkourStats> {
     val base = parkourService.stats
 
-    val filtered = if (search.isNullOrBlank()) {
-        base
-    } else {
-        base.filter { stats ->
-            stats.playerName.lowercase().contains(search.lowercase())
-        }
+    val sortedGlobal = when (sortType) {
+        ParkourLeaderboardSortType.HIGHSCORE -> base.sortedByDescending { it.highscore }
+        ParkourLeaderboardSortType.MOST_JUMPS -> base.sortedByDescending { it.totalJumps }
+        ParkourLeaderboardSortType.LEAST_JUMPS -> base.sortedBy { it.totalJumps }
+        ParkourLeaderboardSortType.MOST_TRIES -> base.sortedByDescending { it.totalRuns }
+        ParkourLeaderboardSortType.LEAST_TRIES -> base.sortedBy { it.totalRuns }
     }
 
-    return when (sortType) {
-        ParkourLeaderboardSortType.HIGHSCORE -> filtered.sortedByDescending { it.highscore }
-        ParkourLeaderboardSortType.MOST_JUMPS -> filtered.sortedByDescending { it.totalJumps }
-        ParkourLeaderboardSortType.LEAST_JUMPS -> filtered.sortedBy { it.totalJumps }
-        ParkourLeaderboardSortType.MOST_TRIES -> filtered.sortedByDescending { it.totalRuns }
-        ParkourLeaderboardSortType.LEAST_TRIES -> filtered.sortedBy { it.totalRuns }
+    val rankedList = sortedGlobal.mapIndexed { index, stats ->
+        RankedParkourStats(stats, index + 1)
+    }
+
+    return if (search.isNullOrBlank()) {
+        rankedList
+    } else {
+        val query = search.lowercase()
+        rankedList.filter {
+            it.stats.playerName.lowercase().contains(query)
+        }
     }
 }

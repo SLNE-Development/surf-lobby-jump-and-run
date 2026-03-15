@@ -9,6 +9,7 @@ import dev.slne.surf.parkour.paper.database.table.ParkourRunsTable
 import dev.slne.surf.parkour.paper.model.parkour.ParkourRun
 import dev.slne.surf.surfapi.core.api.util.toObjectSet
 import it.unimi.dsi.fastutil.objects.ObjectSet
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toSet
 import java.util.*
@@ -77,6 +78,6 @@ class ParkourRepository {
                     highscore = row[highscore] ?: 0,
                     averageTime = (row[averageTime] ?: 0.0).toLong()
                 )
-            }
+            }.firstOrNull()
     }
 }

@@ -1,8 +1,8 @@
 package dev.slne.surf.parkour.paper.database.repository
 
-import dev.slne.surf.database.libs.org.jetbrains.exposed.v1.r2dbc.insert
 import dev.slne.surf.database.libs.org.jetbrains.exposed.v1.r2dbc.selectAll
 import dev.slne.surf.database.libs.org.jetbrains.exposed.v1.r2dbc.transactions.suspendTransaction
+import dev.slne.surf.database.libs.org.jetbrains.exposed.v1.r2dbc.upsert
 import dev.slne.surf.parkour.api.data.PlayerTextures
 import dev.slne.surf.parkour.paper.database.table.ParkourPlayerTexturesTable
 import dev.slne.surf.parkour.paper.plugin
@@ -31,7 +31,7 @@ class PlayerTextureRepository {
     }
 
     suspend fun saveTexture(playerTextures: PlayerTextures) = suspendTransaction {
-        ParkourPlayerTexturesTable.insert {
+        ParkourPlayerTexturesTable.upsert {
             it[playerUuid] = playerTextures.playerUuid
             it[playerName] = playerTextures.playerName
             it[texture] = playerTextures.texture

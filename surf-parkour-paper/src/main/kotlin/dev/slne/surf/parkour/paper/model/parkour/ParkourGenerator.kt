@@ -57,7 +57,7 @@ data class ParkourGenerator(
         val toTeleport = blockLocations.first.location.block.getRelative(BlockFace.UP).location
 
         toTeleport.setRotation(rotation.first, rotation.second)
-        player.teleportAsync(toTeleport)
+        player.teleportAsync(toTeleport.toCenterLocation())
     }
 
     suspend fun stop() {

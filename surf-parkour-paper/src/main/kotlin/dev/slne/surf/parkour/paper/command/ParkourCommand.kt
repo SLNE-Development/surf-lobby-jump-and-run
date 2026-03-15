@@ -14,6 +14,7 @@ fun parkourCommand() = commandAPICommand("parkour") {
     parkourReloadCommand()
     parkourCreateCommand()
     parkourStatsCommand()
+    parkourCreateNamesCommand()
 
     playerExecutor { player, _ ->
         ParkourLeaderboardSortType.setSearch(player.uniqueId, null)
