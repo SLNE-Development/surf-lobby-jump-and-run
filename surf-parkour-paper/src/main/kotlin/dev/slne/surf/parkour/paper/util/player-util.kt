@@ -84,7 +84,6 @@ fun formatMillis(time: Long): String {
  */
 private const val FOOT_CHECK_OFFSET = 0.1
 
-
 @Suppress("UnstableApiUsage")
 fun UUID.playerHead() = buildItem(Material.PLAYER_HEAD) {
     setData(
