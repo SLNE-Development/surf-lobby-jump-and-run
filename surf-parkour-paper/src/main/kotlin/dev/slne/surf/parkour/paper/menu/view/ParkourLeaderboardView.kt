@@ -1,11 +1,11 @@
 package dev.slne.surf.parkour.paper.menu.view
 
 import dev.slne.surf.parkour.api.data.ParkourStats
+import dev.slne.surf.parkour.core.common.service.parkourRunsService
+import dev.slne.surf.parkour.core.common.service.playerTextureService
 import dev.slne.surf.parkour.paper.menu.dialog.searchParkourStatsDialog
 import dev.slne.surf.parkour.paper.menu.sort.ParkourLeaderboardSortType
 import dev.slne.surf.parkour.paper.menu.util.*
-import dev.slne.surf.parkour.paper.service.parkourService
-import dev.slne.surf.parkour.paper.service.playerTextureService
 import dev.slne.surf.parkour.paper.util.formatMillis
 import dev.slne.surf.parkour.paper.util.playerHead
 import dev.slne.surf.parkour.paper.util.playerName
@@ -268,7 +268,7 @@ private fun getParkourStatsSortedAndFiltered(
     sortType: ParkourLeaderboardSortType,
     search: String?
 ): List<RankedParkourStats> {
-    val base = parkourService.stats
+    val base = parkourRunsService.stats
 
     val sortedGlobal = when (sortType) {
         ParkourLeaderboardSortType.HIGHSCORE -> base.sortedByDescending { it.highscore }

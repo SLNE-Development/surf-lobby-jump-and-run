@@ -1,7 +1,7 @@
 package dev.slne.surf.parkour.paper.util
 
 import com.destroystokyo.paper.profile.ProfileProperty
-import dev.slne.surf.parkour.paper.service.playerTextureService
+import dev.slne.surf.parkour.core.common.service.playerTextureService
 import dev.slne.surf.surfapi.bukkit.api.builder.buildItem
 import io.papermc.paper.datacomponent.DataComponentTypes
 import io.papermc.paper.datacomponent.item.ResolvableProfile

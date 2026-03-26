@@ -3,9 +3,9 @@ package dev.slne.surf.parkour.paper.command
 import dev.jorel.commandapi.CommandAPICommand
 import dev.jorel.commandapi.kotlindsl.subcommand
 import dev.slne.surf.parkour.api.data.PlayerTextures
+import dev.slne.surf.parkour.core.common.service.parkourRunsService
+import dev.slne.surf.parkour.core.common.service.playerTextureService
 import dev.slne.surf.parkour.paper.permission.ParkourPermissionRegistry
-import dev.slne.surf.parkour.paper.service.parkourService
-import dev.slne.surf.parkour.paper.service.playerTextureService
 import dev.slne.surf.surfapi.bukkit.api.command.executors.anyExecutorSuspend
 import dev.slne.surf.surfapi.core.api.service.PlayerLookupService
 import kotlin.time.DurationUnit
@@ -19,7 +19,7 @@ fun CommandAPICommand.parkourCreateNamesCommand() = subcommand("reCreateNames") 
         val textureUuids = playerTextureService.textures.map { it.playerUuid }.toSet()
 
         val missingNames =
-            parkourService.stats
+            parkourRunsService.stats
                 .map { it.playerUuid }
                 .filter { it !in textureUuids }
 

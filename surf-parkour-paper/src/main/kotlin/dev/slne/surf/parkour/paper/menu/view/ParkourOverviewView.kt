@@ -1,6 +1,7 @@
 package dev.slne.surf.parkour.paper.menu.view
 
 import com.github.shynixn.mccoroutine.folia.launch
+import dev.slne.surf.parkour.core.common.service.parkourRunsService
 import dev.slne.surf.parkour.paper.menu.util.MenuHeads
 import dev.slne.surf.parkour.paper.menu.util.outlineItem
 import dev.slne.surf.parkour.paper.menu.util.parkourColored
@@ -80,7 +81,7 @@ private fun ownItem(render: RenderContext) = buildItem(Material.PLAYER_HEAD) {
         it.owningPlayer = render.player
     }
 
-    val stats = parkourService.getStats(render.player.uniqueId)
+    val stats = parkourRunsService.getStats(render.player.uniqueId)
 
     buildLore {
         emptyLine()
