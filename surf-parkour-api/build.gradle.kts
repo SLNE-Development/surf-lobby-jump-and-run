@@ -1,3 +1,3 @@
 plugins {
-    id("dev.slne.surf.surfapi.gradle.paper-raw")
+    id("dev.slne.surf.surfapi.gradle.core")
 }

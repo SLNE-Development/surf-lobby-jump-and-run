@@ -1,4 +1,4 @@
-package dev.slne.surf.parkour.paper.database.table
+package dev.slne.surf.parkour.microservice.table
 
 import dev.slne.surf.database.columns.nativeUuid
 import dev.slne.surf.database.libs.org.jetbrains.exposed.v1.core.dao.id.LongIdTable

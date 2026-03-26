@@ -1,5 +1,7 @@
 package dev.slne.surf.parkour.paper.model.parkour
 
+import dev.slne.surf.parkour.api.data.ParkourRun
+import dev.slne.surf.parkour.core.common.service.parkourRunsService
 import dev.slne.surf.parkour.paper.service.parkourService
 import dev.slne.surf.surfapi.core.api.messages.adventure.sendText
 import dev.slne.surf.surfapi.core.api.util.mutableObjectSetOf
@@ -81,11 +83,11 @@ data class Parkour(
 
     suspend fun processRun(player: UUID): Int? {
         val generator = generators.find { it.associatedPlayer == player } ?: return null
-        val highscore = parkourService.getStats(player).highscore
+        val highscore = parkourRunsService.getStats(player).highscore
 
-        parkourService.saveRun(
+        parkourRunsService.saveRun(
             ParkourRun(
-                this,
+                this.uuid,
                 player,
                 generator.currentIndex,
                 System.currentTimeMillis() - generator.startTime

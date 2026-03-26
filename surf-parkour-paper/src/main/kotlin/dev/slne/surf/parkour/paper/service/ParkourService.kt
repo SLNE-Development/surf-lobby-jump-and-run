@@ -1,13 +1,10 @@
 package dev.slne.surf.parkour.paper.service
 
-import com.github.benmanes.caffeine.cache.Caffeine
-import dev.slne.surf.parkour.api.data.ParkourStats
 import dev.slne.surf.parkour.api.data.PlayerTextures
+import dev.slne.surf.parkour.core.common.service.playerTextureService
 import dev.slne.surf.parkour.paper.config
 import dev.slne.surf.parkour.paper.config.ParkourConfig
-import dev.slne.surf.parkour.paper.database.repository.parkourRepository
 import dev.slne.surf.parkour.paper.model.parkour.Parkour
-import dev.slne.surf.parkour.paper.model.parkour.ParkourRun
 import dev.slne.surf.parkour.paper.plugin
 import dev.slne.surf.parkour.paper.util.formattedDuration
 import dev.slne.surf.surfapi.core.api.messages.adventure.buildText
@@ -21,13 +18,9 @@ import org.bukkit.entity.Player
 import org.bukkit.util.BoundingBox
 import java.util.*
 import java.util.concurrent.TimeUnit
-import kotlin.system.measureTimeMillis
 
 class ParkourService {
     private val _parkours = mutableObjectSetOf<Parkour>()
-    private val statsCache = Caffeine.newBuilder().build<UUID, ParkourStats>()
-
-    val stats get() = statsCache.asMap().values
 
     fun createParkour(
         uuid: UUID,
@@ -108,44 +101,6 @@ class ParkourService {
         _parkours.addAll(config.parkours.map { it.toParkour() })
 
         plugin.logger.info("Loaded ${_parkours.size} parkours!")
-    }
-
-    suspend fun loadAndCacheStats(playerUuid: UUID) {
-        parkourRepository.loadPlayerStats(playerUuid)?.let {
-            statsCache.put(playerUuid, it)
-        }
-    }
-
-    suspend fun saveRun(run: ParkourRun) {
-        statsCache.put(run.playerUuid, statsCache.getIfPresent(run.playerUuid)?.let {
-            it.copy(
-                totalRuns = it.totalRuns + 1,
-                totalJumps = it.totalJumps + run.jumps,
-                highscore = maxOf(it.highscore, run.jumps),
-                averageTime = ((it.averageTime * it.totalRuns) + run.time) / (it.totalRuns + 1)
-            )
-        } ?: ParkourStats(
-            playerUuid = run.playerUuid,
-            totalRuns = 1,
-            totalJumps = run.jumps,
-            highscore = run.jumps,
-            averageTime = run.time
-        ))
-
-        parkourRepository.saveRun(run)
-    }
-
-    fun getStats(playerUuid: UUID) = statsCache.getIfPresent(playerUuid) ?: ParkourStats.empty()
-
-    suspend fun loadStats() {
-        plugin.logger.info("Loading parkour stats, this may take a while...")
-
-        val ms = measureTimeMillis {
-            val stats = parkourRepository.fetchAllStats()
-            stats.forEach { statsCache.put(it.playerUuid, it) }
-        }
-
-        plugin.logger.info("Loaded stats for ${statsCache.asMap().size} players in ${ms}ms!")
     }
 
     companion object {

@@ -7,14 +7,17 @@ import dev.slne.surf.parkour.paper.menu.view.ParkourOverviewView
 import dev.slne.surf.parkour.paper.service.parkourService
 import dev.slne.surf.surfapi.bukkit.api.inventory.framework.viewFrame
 import net.kyori.adventure.util.Services
-import org.bukkit.entity.Player
+import org.bukkit.Bukkit
+import java.util.*
 
 @AutoService(SurfParkourApi::class)
 class SurfParkourApiImpl : SurfParkourApi, Services.Fallback {
-    override suspend fun showGui(player: Player) {
-        ParkourLeaderboardSortType.setSearch(player.uniqueId, null)
-        viewFrame.open(ParkourOverviewView::class.java, player)
+    override suspend fun showGui(playerUuid: UUID) {
+        ParkourLeaderboardSortType.setSearch(playerUuid, null)
+        Bukkit.getPlayer(playerUuid)?.let {
+            viewFrame.open(ParkourOverviewView::class.java, it)
+        }
     }
 
-    override fun isInParkour(player: Player): Boolean = parkourService.isInParkour(player.uniqueId)
+    override fun isInParkour(playerUuid: UUID): Boolean = parkourService.isInParkour(playerUuid)
 }

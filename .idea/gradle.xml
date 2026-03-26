@@ -10,6 +10,10 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/surf-parkour-api" />
+            <option value="$PROJECT_DIR$/surf-parkour-core" />
+            <option value="$PROJECT_DIR$/surf-parkour-core/surf-parkour-core-common" />
+            <option value="$PROJECT_DIR$/surf-parkour-core/surf-parkour-core-paper" />
+            <option value="$PROJECT_DIR$/surf-parkour-microservice" />
             <option value="$PROJECT_DIR$/surf-parkour-paper" />
           </set>
         </option>

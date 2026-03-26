@@ -1,23 +1,19 @@
-package dev.slne.surf.parkour.paper.database.repository
+package dev.slne.surf.parkour.microservice.repository
 
 import dev.slne.surf.database.libs.org.jetbrains.exposed.v1.core.*
 import dev.slne.surf.database.libs.org.jetbrains.exposed.v1.r2dbc.insert
 import dev.slne.surf.database.libs.org.jetbrains.exposed.v1.r2dbc.select
 import dev.slne.surf.database.libs.org.jetbrains.exposed.v1.r2dbc.transactions.suspendTransaction
+import dev.slne.surf.parkour.api.data.ParkourRun
 import dev.slne.surf.parkour.api.data.ParkourStats
-import dev.slne.surf.parkour.paper.database.table.ParkourRunsTable
-import dev.slne.surf.parkour.paper.model.parkour.ParkourRun
-import dev.slne.surf.surfapi.core.api.util.toObjectSet
-import it.unimi.dsi.fastutil.objects.ObjectSet
+import dev.slne.surf.parkour.microservice.table.ParkourRunsTable
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.toSet
+import kotlinx.coroutines.flow.toList
 import java.util.*
 
-val parkourRepository = ParkourRepository()
-
-class ParkourRepository {
-    suspend fun fetchAllStats(): ObjectSet<ParkourStats> = suspendTransaction {
+object ParkourStatsRepository {
+    suspend fun fetchAllStats(): List<ParkourStats> = suspendTransaction {
         val totalRuns = ParkourRunsTable.id.count()
         val totalJumps = ParkourRunsTable.runJumps.sum()
         val highscore = ParkourRunsTable.runJumps.max()
@@ -40,14 +36,12 @@ class ParkourRepository {
                     highscore = row[highscore] ?: 0,
                     averageTime = (row[averageTime] ?: 0.0).toLong()
                 )
-            }
-            .toSet()
-            .toObjectSet()
+            }.toList()
     }
 
     suspend fun saveRun(parkourRun: ParkourRun) = suspendTransaction {
         ParkourRunsTable.insert {
-            it[parkourUuid] = parkourRun.parkour.uuid
+            it[parkourUuid] = parkourRun.parkourUuid
             it[playerUuid] = parkourRun.playerUuid
             it[runJumps] = parkourRun.jumps
             it[runTime] = parkourRun.time

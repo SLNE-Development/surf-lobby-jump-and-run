@@ -1,15 +1,15 @@
-package dev.slne.surf.parkour.paper.model.parkour
+package dev.slne.surf.parkour.api.data
 
-import dev.slne.surf.parkour.api.data.ParkourStats
-import java.util.*
+import dev.slne.surf.surfapi.core.api.serializer.java.uuid.SerializableUUID
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class ParkourRun(
-    val parkour: Parkour,
-    val playerUuid: UUID,
+    val parkourUuid: SerializableUUID,
+    val playerUuid: SerializableUUID,
     var jumps: Int,
     var time: Long
 ) {
-
     fun addTo(stats: ParkourStats) = stats.copy(
         totalRuns = stats.totalRuns + 1,
         totalJumps = stats.totalJumps + jumps,

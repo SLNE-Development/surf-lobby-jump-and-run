@@ -1,9 +1,12 @@
 package dev.slne.surf.parkour.api.data
 
+import dev.slne.surf.surfapi.core.api.serializer.java.uuid.SerializableUUID
+import kotlinx.serialization.Serializable
 import java.util.*
 
+@Serializable
 data class PlayerTextures(
-    val playerUuid: UUID,
+    val playerUuid: SerializableUUID,
     val playerName: String,
     val texture: String
 ) {

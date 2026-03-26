@@ -1,5 +1,6 @@
 package dev.slne.surf.parkour.paper.model.parkour
 
+import dev.slne.surf.parkour.api.data.ParkourRun
 import dev.slne.surf.surfapi.core.api.service.PlayerLookupService
 import it.unimi.dsi.fastutil.objects.ObjectList
 import java.util.*

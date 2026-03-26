@@ -1,12 +1,12 @@
 package dev.slne.surf.parkour.api
 
 import dev.slne.surf.surfapi.core.api.util.requiredService
-import org.bukkit.entity.Player
+import java.util.*
 
 val surfParkourApi = requiredService<SurfParkourApi>()
 
 interface SurfParkourApi {
-    suspend fun showGui(player: Player)
+    suspend fun showGui(playerUuid: UUID)
 
-    fun isInParkour(player: Player): Boolean
+    fun isInParkour(playerUuid: UUID): Boolean
 }
