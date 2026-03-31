@@ -49,7 +49,7 @@ class ParkourRunsServiceImpl : ParkourRunsService, Services.Fallback {
 
     override suspend fun loadStats() = measureTimeMillis {
         val stats =
-            PaperParkourInstance.rabbitApi.sendRequest(LoadAllParkourStatsRequestPacket).stats
+            PaperParkourInstance.rabbitApi.sendRequest(LoadAllParkourStatsRequestPacket()).stats
         stats.forEach { _cachedStats.put(it.playerUuid, it) }
     }
 }

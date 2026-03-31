@@ -26,7 +26,7 @@ class ParkourTexturesServiceImpl : ParkourTexturesService, Services.Fallback {
 
     override suspend fun loadTextures() = measureTimeMillis {
         val textures =
-            PaperParkourInstance.rabbitApi.sendRequest(LoadAllPlayerTexturesRequestPacket).playerTextures
+            PaperParkourInstance.rabbitApi.sendRequest(LoadAllPlayerTexturesRequestPacket()).playerTextures
         textures.forEach { textureCache.put(it.playerUuid, it) }
     }
 }
