@@ -247,6 +247,11 @@ fun createStatsItem(stats: ParkourStats, rank: Int, sortType: ParkourLeaderboard
                 parkourColored("Durchschnittliche Zeit: ")
                 variableValue(formatMillis(stats.averageTime))
             }
+
+            emptyLine()
+            line {
+                error("Derzeit werden Spieler-Skins nicht geladen. ")
+            }
         }
     }
 
