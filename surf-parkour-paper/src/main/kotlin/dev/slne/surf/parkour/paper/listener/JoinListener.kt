@@ -1,7 +1,7 @@
 package dev.slne.surf.parkour.paper.listener
 
 import com.github.shynixn.mccoroutine.folia.launch
-import dev.slne.surf.parkour.core.common.service.parkourRunsService
+import dev.slne.surf.parkour.core.paper.service.ParkourRunsService
 import dev.slne.surf.parkour.paper.plugin
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -11,7 +11,7 @@ object JoinListener : Listener {
     @EventHandler
     fun onJoin(event: PlayerJoinEvent) {
         plugin.launch {
-            parkourRunsService.loadAndCacheStats(event.player.uniqueId)
+            ParkourRunsService.loadAndCacheStats(event.player.uniqueId)
         }
     }
 }

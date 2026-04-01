@@ -7,17 +7,18 @@ import dev.slne.surf.parkour.api.data.ParkourStats
 import dev.slne.surf.parkour.core.common.rabbit.packet.request.LoadAllParkourStatsRequestPacket
 import dev.slne.surf.parkour.core.common.rabbit.packet.request.LoadPlayerStatsRequestPacket
 import dev.slne.surf.parkour.core.common.rabbit.packet.request.SaveRunRequestPacket
-import dev.slne.surf.parkour.core.common.service.ParkourRunsService
 import dev.slne.surf.parkour.core.paper.PaperParkourInstance
+import dev.slne.surf.surfapi.core.api.util.toObjectList
 import net.kyori.adventure.util.Services
 import java.util.*
 import kotlin.system.measureTimeMillis
 
 @AutoService(ParkourRunsService::class)
 class ParkourRunsServiceImpl : ParkourRunsService, Services.Fallback {
-    private val _cachedStats = Caffeine.newBuilder().build<UUID, ParkourStats>()
+    private val _cachedStats = Caffeine.newBuilder()
+        .build<UUID, ParkourStats>()
 
-    override val stats: List<ParkourStats> get() = _cachedStats.asMap().values.toList()
+    override val stats get() = _cachedStats.asMap().values.toObjectList()
 
     override suspend fun loadAndCacheStats(playerUuid: UUID) {
         PaperParkourInstance.rabbitApi.sendRequest(LoadPlayerStatsRequestPacket(playerUuid)).stat?.let {
@@ -48,8 +49,9 @@ class ParkourRunsServiceImpl : ParkourRunsService, Services.Fallback {
         _cachedStats.getIfPresent(playerUuid) ?: ParkourStats.empty()
 
     override suspend fun loadStats() = measureTimeMillis {
-        val stats =
-            PaperParkourInstance.rabbitApi.sendRequest(LoadAllParkourStatsRequestPacket()).stats
-        stats.forEach { _cachedStats.put(it.playerUuid, it) }
+        val stats = PaperParkourInstance.rabbitApi
+            .sendRequest(LoadAllParkourStatsRequestPacket()).stats.associateBy { it.playerUuid }
+
+        _cachedStats.putAll(stats)
     }
 }

@@ -1,7 +1,7 @@
 package dev.slne.surf.parkour.paper.util
 
 import com.destroystokyo.paper.profile.ProfileProperty
-import dev.slne.surf.parkour.core.common.service.playerTextureService
+import dev.slne.surf.parkour.core.paper.service.ParkourTexturesService
 import dev.slne.surf.surfapi.bukkit.api.builder.buildItem
 import io.papermc.paper.datacomponent.DataComponentTypes
 import io.papermc.paper.datacomponent.item.ResolvableProfile
@@ -88,7 +88,7 @@ private const val FOOT_CHECK_OFFSET = 0.1
 fun UUID.playerHead() = buildItem(Material.PLAYER_HEAD) {
     setData(
         DataComponentTypes.PROFILE, ResolvableProfile.resolvableProfile().addProperty(
-            ProfileProperty("textures", playerTextureService.getTexture(this@playerHead).texture)
+            ProfileProperty("textures", ParkourTexturesService.getTexture(this@playerHead).texture)
         ).build()
     )
     setData(

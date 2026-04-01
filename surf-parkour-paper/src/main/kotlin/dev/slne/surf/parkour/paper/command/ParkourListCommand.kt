@@ -6,7 +6,7 @@ import dev.jorel.commandapi.kotlindsl.integerArgument
 import dev.jorel.commandapi.kotlindsl.subcommand
 import dev.slne.surf.parkour.paper.model.parkour.Parkour
 import dev.slne.surf.parkour.paper.permission.ParkourPermissionRegistry
-import dev.slne.surf.parkour.paper.service.parkourService
+import dev.slne.surf.parkour.paper.service.ParkourService
 import dev.slne.surf.surfapi.core.api.font.toSmallCaps
 import dev.slne.surf.surfapi.core.api.messages.CommonComponents
 import dev.slne.surf.surfapi.core.api.messages.adventure.buildText
@@ -19,7 +19,7 @@ fun CommandAPICommand.parkourListCommand() = subcommand("list") {
     integerArgument("page", 1, Int.MAX_VALUE, optional = true)
     anyExecutor { executor, args ->
         val page = args.getOrDefaultUnchecked("page", 1)
-        val parkours = parkourService.getParkours()
+        val parkours = ParkourService.parkours
 
         if (parkours.isEmpty()) {
             executor.sendText {

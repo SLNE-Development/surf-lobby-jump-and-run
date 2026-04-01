@@ -12,18 +12,23 @@ import kotlinx.coroutines.launch
 
 object ParkourRunsHandler {
     @RabbitHandler
-    fun handleLoadAllParkourStatsRequestPacket(packet: LoadAllParkourStatsRequestPacket) =
-        packet.launch {
-            packet.respond(ManyParkourStatsResponsePacket(ParkourStatsRepository.fetchAllStats()))
-        }
+    fun handleLoadAllParkourStatsRequestPacket(
+        packet: LoadAllParkourStatsRequestPacket
+    ) = packet.launch {
+        packet.respond(ManyParkourStatsResponsePacket(ParkourStatsRepository.fetchAllStats()))
+    }
 
     @RabbitHandler
-    fun handleLoadPlayerStatsRequestPacket(packet: LoadPlayerStatsRequestPacket) = packet.launch {
+    fun handleLoadPlayerStatsRequestPacket(
+        packet: LoadPlayerStatsRequestPacket
+    ) = packet.launch {
         packet.respond(SingleParkourStatResponsePacket(ParkourStatsRepository.loadPlayerStats(packet.playerUuid)))
     }
 
     @RabbitHandler
-    fun handleSavePlayerStatsRequestPacket(packet: SaveRunRequestPacket) = packet.launch {
+    fun handleSavePlayerStatsRequestPacket(
+        packet: SaveRunRequestPacket
+    ) = packet.launch {
         packet.respond(PrimitiveResponse.BooleanResponsePacket(ParkourStatsRepository.saveRun(packet.run).insertedCount > 0))
     }
 }

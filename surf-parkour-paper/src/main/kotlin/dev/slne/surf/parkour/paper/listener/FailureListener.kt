@@ -1,9 +1,6 @@
 package dev.slne.surf.parkour.paper.listener
 
-import com.github.shynixn.mccoroutine.folia.entityDispatcher
-import com.github.shynixn.mccoroutine.folia.launch
-import dev.slne.surf.parkour.paper.plugin
-import dev.slne.surf.parkour.paper.service.parkourService
+import dev.slne.surf.parkour.paper.service.ParkourService
 import dev.slne.surf.parkour.paper.util.allOfType
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -19,26 +16,18 @@ object FailureListener : Listener {
         }
 
         val player = event.player
+        val parkour = ParkourService.getParkour(player) ?: return
+        val generator = parkour.getGenerator(player) ?: return
 
-        plugin.launch(plugin.entityDispatcher(player)) {
-            val parkour = parkourService.getParkour(player) ?: run {
-                return@launch
-            }
+        if (!generator.isRunning()) {
+            return
+        }
 
-            val generator = parkour.getGenerator(player) ?: run {
-                return@launch
-            }
-
-            if (!generator.isRunning()) {
-                return@launch
-            }
-
-            generator.blockLocations.allOfType<Vector> {
-                it.y > event.to.y
-            }.also {
-                if (it) {
-                    parkourService.triggerFailure(player)
-                }
+        generator.blockLocations.allOfType<Vector> {
+            it.y > event.to.y
+        }.also {
+            if (it) {
+                ParkourService.triggerFailure(player)
             }
         }
     }
@@ -47,18 +36,11 @@ object FailureListener : Listener {
     fun onDisconnect(event: PlayerQuitEvent) {
         val player = event.player
 
-        plugin.launch(plugin.entityDispatcher(player)) {
-            val parkour = parkourService.getParkour(player) ?: run {
-                return@launch
-            }
+        val parkour = ParkourService.getParkour(player) ?: return
+        val generator = parkour.getGenerator(player) ?: return
 
-            val generator = parkour.getGenerator(player) ?: run {
-                return@launch
-            }
-
-            if (generator.isRunning()) {
-                parkourService.triggerFailure(player)
-            }
+        if (generator.isRunning()) {
+            ParkourService.triggerFailure(player)
         }
     }
 }

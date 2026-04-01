@@ -5,7 +5,7 @@ import org.bukkit.entity.Player
 import net.kyori.adventure.sound.Sound as AdventureSound
 import org.bukkit.Sound as BukkitSound
 
-class SoundService {
+object SoundService {
     fun playSuccess(player: Player) {
         player.playSound(true) {
             type(BukkitSound.ENTITY_CHICKEN_EGG)
@@ -37,10 +37,4 @@ class SoundService {
             pitch(1.0f)
         }
     }
-
-    companion object {
-        val INSTANCE = SoundService()
-    }
 }
-
-val soundService get() = SoundService.INSTANCE

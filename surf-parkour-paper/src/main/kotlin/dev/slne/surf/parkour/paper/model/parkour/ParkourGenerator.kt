@@ -159,6 +159,7 @@ data class ParkourGenerator(
             val block = Location(_world, x, y, z).getContextBlock()
             val above = block.getRelative(BlockFace.UP)
             val above2 = above.getRelative(BlockFace.UP)
+            
             if (above.isEmpty && above2.isEmpty) {
                 return@withContext block.location.toVector()
             }

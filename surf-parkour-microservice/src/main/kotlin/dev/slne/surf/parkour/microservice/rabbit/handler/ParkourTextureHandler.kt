@@ -10,20 +10,22 @@ import kotlinx.coroutines.launch
 
 object ParkourTextureHandler {
     @RabbitHandler
-    fun handleLoadAllPlayerTexturesRequestPacket(packet: LoadAllPlayerTexturesRequestPacket) =
-        packet.launch {
-            packet.respond(ManyPlayerTexturesResponsePacket(PlayerTextureRepository.fetchTextures()))
-        }
+    fun handleLoadAllPlayerTexturesRequestPacket(
+        packet: LoadAllPlayerTexturesRequestPacket
+    ) = packet.launch {
+        packet.respond(ManyPlayerTexturesResponsePacket(PlayerTextureRepository.fetchTextures()))
+    }
 
     @RabbitHandler
-    fun handleSavePlayerTexturesRequestPacket(packet: SavePlayerTexturesRequestPacket) =
-        packet.launch {
-            packet.respond(
-                PrimitiveResponse.BooleanResponsePacket(
-                    PlayerTextureRepository.saveTexture(
-                        packet.playerTextures
-                    ).insertedCount > 0
-                )
+    fun handleSavePlayerTexturesRequestPacket(
+        packet: SavePlayerTexturesRequestPacket
+    ) = packet.launch {
+        packet.respond(
+            PrimitiveResponse.BooleanResponsePacket(
+                PlayerTextureRepository.saveTexture(
+                    packet.playerTextures
+                ).insertedCount > 0
             )
-        }
+        )
+    }
 }

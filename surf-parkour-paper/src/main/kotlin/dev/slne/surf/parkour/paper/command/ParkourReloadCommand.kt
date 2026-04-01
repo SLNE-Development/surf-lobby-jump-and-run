@@ -3,8 +3,8 @@ package dev.slne.surf.parkour.paper.command
 import dev.jorel.commandapi.CommandAPICommand
 import dev.jorel.commandapi.kotlindsl.anyExecutor
 import dev.jorel.commandapi.kotlindsl.subcommand
+import dev.slne.surf.parkour.paper.config.ParkourConfiguration
 import dev.slne.surf.parkour.paper.permission.ParkourPermissionRegistry
-import dev.slne.surf.parkour.paper.plugin
 import dev.slne.surf.surfapi.core.api.messages.adventure.sendText
 
 fun CommandAPICommand.parkourReloadCommand() = subcommand("reload") {
@@ -15,7 +15,7 @@ fun CommandAPICommand.parkourReloadCommand() = subcommand("reload") {
             info("Das Plugin wird neu geladen...")
         }
 
-        plugin.parkourConfig.reload()
+        ParkourConfiguration.reload()
 
         executor.sendText {
             appendSuccessPrefix()

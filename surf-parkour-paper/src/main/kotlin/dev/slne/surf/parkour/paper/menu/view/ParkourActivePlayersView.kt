@@ -1,7 +1,7 @@
 package dev.slne.surf.parkour.paper.menu.view
 
 import dev.slne.surf.parkour.paper.menu.util.*
-import dev.slne.surf.parkour.paper.service.parkourService
+import dev.slne.surf.parkour.paper.service.ParkourService
 import dev.slne.surf.surfapi.bukkit.api.builder.buildItem
 import dev.slne.surf.surfapi.bukkit.api.builder.buildLore
 import dev.slne.surf.surfapi.bukkit.api.builder.displayName
@@ -100,7 +100,8 @@ fun createActivePlayerItem(currentJumps: Int, playerUuid: UUID) = buildItem(Mate
 }
 
 private fun getActivePlayerStats(): List<Pair<Int, UUID>> {
-    val parkour = parkourService.getParkours().firstOrNull() ?: return emptyList()
+    val parkour = ParkourService.parkours.firstOrNull() ?: return emptyList()
+    
     return parkour.players.map {
         Pair(parkour.getCurrentIndex(it), it)
     }

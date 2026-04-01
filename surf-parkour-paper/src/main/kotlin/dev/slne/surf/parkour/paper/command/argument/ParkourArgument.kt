@@ -6,13 +6,13 @@ import dev.jorel.commandapi.arguments.ArgumentSuggestions
 import dev.jorel.commandapi.arguments.CustomArgument
 import dev.jorel.commandapi.arguments.StringArgument
 import dev.slne.surf.parkour.paper.model.parkour.Parkour
-import dev.slne.surf.parkour.paper.service.parkourService
+import dev.slne.surf.parkour.paper.service.ParkourService
 import dev.slne.surf.surfapi.core.api.messages.adventure.buildText
 
 class ParkourArgument(nodeName: String) : CustomArgument<Parkour, String>(
     StringArgument(nodeName),
     CustomArgumentInfoParser { info ->
-        parkourService.getParkour(info.input)
+        ParkourService.getParkour(info.input)
             ?: throw CustomArgumentException.fromAdventureComponent {
                 buildText {
                     appendErrorPrefix()
@@ -24,7 +24,7 @@ class ParkourArgument(nodeName: String) : CustomArgument<Parkour, String>(
     }) {
     init {
         replaceSuggestions(ArgumentSuggestions.stringCollection {
-            parkourService.getParkours().map { it.identifier }
+            ParkourService.parkours.map { it.identifier }
         })
     }
 }

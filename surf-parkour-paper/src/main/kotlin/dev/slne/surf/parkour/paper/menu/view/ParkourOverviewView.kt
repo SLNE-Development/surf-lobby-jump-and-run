@@ -1,13 +1,13 @@
 package dev.slne.surf.parkour.paper.menu.view
 
 import com.github.shynixn.mccoroutine.folia.launch
-import dev.slne.surf.parkour.core.common.service.parkourRunsService
+import dev.slne.surf.parkour.core.paper.service.ParkourRunsService
 import dev.slne.surf.parkour.paper.menu.util.MenuHeads
 import dev.slne.surf.parkour.paper.menu.util.outlineItem
 import dev.slne.surf.parkour.paper.menu.util.parkourColored
 import dev.slne.surf.parkour.paper.menu.util.playGeneralClickSound
 import dev.slne.surf.parkour.paper.plugin
-import dev.slne.surf.parkour.paper.service.parkourService
+import dev.slne.surf.parkour.paper.service.ParkourService
 import dev.slne.surf.parkour.paper.util.formatMillis
 import dev.slne.surf.surfapi.bukkit.api.builder.buildItem
 import dev.slne.surf.surfapi.bukkit.api.builder.buildLore
@@ -50,7 +50,7 @@ object ParkourOverviewView : View() {
             context.openForPlayer(ParkourLeaderboardView::class.java)
         }
         render.layoutSlot('S', startItem).onClick { context ->
-            val parkour = parkourService.getParkours().firstOrNull() ?: run {
+            val parkour = ParkourService.parkours.firstOrNull() ?: run {
                 context.player.sendText {
                     appendErrorPrefix()
                     error("Es sind derzeit keine Parkours verfügbar.")
@@ -81,7 +81,7 @@ private fun ownItem(render: RenderContext) = buildItem(Material.PLAYER_HEAD) {
         it.owningPlayer = render.player
     }
 
-    val stats = parkourRunsService.getStats(render.player.uniqueId)
+    val stats = ParkourRunsService.getStats(render.player.uniqueId)
 
     buildLore {
         emptyLine()

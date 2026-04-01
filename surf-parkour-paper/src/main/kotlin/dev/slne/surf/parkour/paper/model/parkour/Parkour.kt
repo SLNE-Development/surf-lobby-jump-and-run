@@ -1,8 +1,10 @@
 package dev.slne.surf.parkour.paper.model.parkour
 
+import com.github.shynixn.mccoroutine.folia.launch
 import dev.slne.surf.parkour.api.data.ParkourRun
-import dev.slne.surf.parkour.core.common.service.parkourRunsService
-import dev.slne.surf.parkour.paper.service.parkourService
+import dev.slne.surf.parkour.core.paper.service.ParkourRunsService
+import dev.slne.surf.parkour.paper.plugin
+import dev.slne.surf.parkour.paper.service.ParkourService
 import dev.slne.surf.surfapi.core.api.messages.adventure.sendText
 import dev.slne.surf.surfapi.core.api.util.mutableObjectSetOf
 import org.bukkit.Bukkit
@@ -48,7 +50,7 @@ data class Parkour(
     suspend fun start(player: UUID): Boolean {
         val generator = ParkourGenerator(player, this@Parkour, getBlockMaterial(player))
 
-        if (parkourService.isInParkour(player)) {
+        if (ParkourService.isInParkour(player)) {
             Bukkit.getPlayer(player)?.let {
                 it.sendText {
                     appendErrorPrefix()
@@ -81,19 +83,20 @@ data class Parkour(
 
     fun getCurrentIndex(player: UUID) = getGenerator(player)?.currentIndex ?: 0
 
-    suspend fun processRun(player: UUID): Int? {
+    fun processRun(player: UUID): Int? {
         val generator = generators.find { it.associatedPlayer == player } ?: return null
-        val highscore = parkourRunsService.getStats(player).highscore
+        val highscore = ParkourRunsService.getStats(player).highscore
 
-        parkourRunsService.saveRun(
-            ParkourRun(
-                this.uuid,
-                player,
-                generator.currentIndex,
-                System.currentTimeMillis() - generator.startTime
+        plugin.launch {
+            ParkourRunsService.saveRun(
+                ParkourRun(
+                    this@Parkour.uuid,
+                    player,
+                    generator.currentIndex,
+                    System.currentTimeMillis() - generator.startTime
+                )
             )
-        )
-
+        }
 
         if (highscore < generator.currentIndex) {
             return generator.currentIndex
@@ -116,9 +119,5 @@ data class Parkour(
 
         val player = Bukkit.getPlayer(playerUuid) ?: return
         player.teleportAsync(respawnLocation)
-    }
-
-    companion object {
-        fun all() = parkourService.getParkours()
     }
 }

@@ -3,8 +3,8 @@ package dev.slne.surf.parkour.paper.command
 import dev.jorel.commandapi.CommandAPICommand
 import dev.jorel.commandapi.kotlindsl.subcommand
 import dev.slne.surf.parkour.api.data.PlayerTextures
-import dev.slne.surf.parkour.core.common.service.parkourRunsService
-import dev.slne.surf.parkour.core.common.service.playerTextureService
+import dev.slne.surf.parkour.core.paper.service.ParkourRunsService
+import dev.slne.surf.parkour.core.paper.service.ParkourTexturesService
 import dev.slne.surf.parkour.paper.permission.ParkourPermissionRegistry
 import dev.slne.surf.surfapi.bukkit.api.command.executors.anyExecutorSuspend
 import dev.slne.surf.surfapi.core.api.service.PlayerLookupService
@@ -16,12 +16,10 @@ fun CommandAPICommand.parkourCreateNamesCommand() = subcommand("reCreateNames") 
     anyExecutorSuspend { sender, _ ->
         val start = System.currentTimeMillis()
 
-        val textureUuids = playerTextureService.textures.map { it.playerUuid }.toSet()
-
-        val missingNames =
-            parkourRunsService.stats
-                .map { it.playerUuid }
-                .filter { it !in textureUuids }
+        val textureUuids = ParkourTexturesService.textures.map { it.playerUuid }.toSet()
+        val missingNames = ParkourRunsService.stats
+            .map { it.playerUuid }
+            .filter { it !in textureUuids }
 
         val total = missingNames.size
         sender.sendMessage("Starting recreation for $total players")
@@ -31,12 +29,8 @@ fun CommandAPICommand.parkourCreateNamesCommand() = subcommand("reCreateNames") 
         missingNames.forEach { uuid ->
             val name = PlayerLookupService.getUsername(uuid) ?: return@forEach
 
-            playerTextureService.saveTexture(
-                PlayerTextures(
-                    uuid,
-                    name,
-                    ""
-                )
+            ParkourTexturesService.saveTexture(
+                PlayerTextures(uuid, name, "")
             )
 
             processed++

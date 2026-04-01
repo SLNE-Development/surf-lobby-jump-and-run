@@ -9,7 +9,7 @@ import dev.slne.surf.parkour.paper.command.argument.parkourArgument
 import dev.slne.surf.parkour.paper.model.parkour.Parkour
 import dev.slne.surf.parkour.paper.permission.ParkourPermissionRegistry
 import dev.slne.surf.parkour.paper.plugin
-import dev.slne.surf.parkour.paper.service.parkourService
+import dev.slne.surf.parkour.paper.service.ParkourService
 import dev.slne.surf.surfapi.core.api.messages.adventure.sendText
 
 fun CommandAPICommand.parkourPlayCommand() = subcommand("play") {
@@ -19,7 +19,7 @@ fun CommandAPICommand.parkourPlayCommand() = subcommand("play") {
         val parkour: Parkour by args
 
         plugin.launch {
-            parkourService.getParkour(player)?.let {
+            ParkourService.getParkour(player)?.let {
                 player.sendText {
                     appendErrorPrefix()
                     error("Du bist bereits in dem Parkour ")

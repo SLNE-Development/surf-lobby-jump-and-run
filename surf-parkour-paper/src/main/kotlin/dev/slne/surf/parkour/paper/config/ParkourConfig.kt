@@ -1,6 +1,8 @@
 package dev.slne.surf.parkour.paper.config
 
 import dev.slne.surf.parkour.paper.model.parkour.Parkour
+import dev.slne.surf.parkour.paper.plugin
+import dev.slne.surf.surfapi.core.api.config.SpongeYmlConfigClass
 import dev.slne.surf.surfapi.core.api.util.mutableObjectSetOf
 import org.bukkit.Bukkit
 import org.bukkit.Location
@@ -42,7 +44,11 @@ data class ParkourConfig(
         )
     }
 
-    companion object {
+    companion object : SpongeYmlConfigClass<ParkourConfig>(
+        ParkourConfig::class.java,
+        plugin.dataPath,
+        "config.yml"
+    ) {
         fun fromParkour(parkour: Parkour) = ConfigParkour(
             uuid = parkour.uuid,
             identifier = parkour.identifier,

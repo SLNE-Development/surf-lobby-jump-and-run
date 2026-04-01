@@ -4,7 +4,7 @@ import dev.jorel.commandapi.CommandAPICommand
 import dev.jorel.commandapi.kotlindsl.*
 import dev.slne.surf.parkour.paper.hook.WorldEditHook
 import dev.slne.surf.parkour.paper.permission.ParkourPermissionRegistry
-import dev.slne.surf.parkour.paper.service.parkourService
+import dev.slne.surf.parkour.paper.service.ParkourService
 import dev.slne.surf.surfapi.core.api.messages.adventure.sendText
 import org.bukkit.Location
 import java.util.*
@@ -27,7 +27,7 @@ fun CommandAPICommand.parkourCreateCommand() = subcommand("create") {
             return@playerExecutor
         }
 
-        if (parkourService.exists(identifier)) {
+        if (ParkourService.exists(identifier)) {
             player.sendText {
                 appendErrorPrefix()
                 error("Ein Parkour mit dieser Kennung existiert bereits.")
@@ -53,7 +53,7 @@ fun CommandAPICommand.parkourCreateCommand() = subcommand("create") {
             return@playerExecutor
         }
 
-        parkourService.createParkour(
+        ParkourService.createParkour(
             UUID.randomUUID(),
             identifier,
             displayname,
