@@ -101,7 +101,7 @@ object ParkourServiceImpl : ParkourService {
         _parkours.find { it.players.contains(player.uniqueId) }
 
     override fun getParkour(identifier: String) = _parkours.find { it.identifier == identifier }
-    override fun getParkour(uuid: UUID) = _parkours.find { it.uuid == uuid }
+    override fun getParkour(playerUuid: UUID) = _parkours.find { it.uuid == playerUuid }
     override fun exists(identifier: String) = _parkours.any { it.identifier == identifier }
 
     override fun loadParkours() {
