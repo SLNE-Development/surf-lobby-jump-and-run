@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - 'version/*'
+      - 'feat/microservice'
   workflow_dispatch:
 
 env:
@@ -11,7 +12,7 @@ env:
   SLNE_SNAPSHOTS_REPO_PASSWORD: ${{ secrets.SLNE_SNAPSHOTS_REPO_PASSWORD }}
   SLNE_RELEASES_REPO_USERNAME: ${{ secrets.SLNE_RELEASES_REPO_USERNAME }}
   SLNE_RELEASES_REPO_PASSWORD: ${{ secrets.SLNE_RELEASES_REPO_PASSWORD }}
-  MODULE_REGEX: "surf-parkour-api.*-all\\.jar$|surf-parkour-paper.*-all\\.jar$"
+  MODULE_REGEX: "surf-parkour-paper.*-all\\.jar$|surf-parkour-microservice.*-all\\.jar$"
   DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
 
 jobs:
@@ -66,17 +67,24 @@ jobs:
       - name: Determine release flags
         run: |
           CURRENT_BRANCH=${GITHUB_REF#refs/heads/}
-          # prerelease only for snapshots
           if [ "${SNAPSHOT_FLAG}" = "true" ]; then
             echo "PRERELEASE=true" >> $GITHUB_ENV
           else
             echo "PRERELEASE=false" >> $GITHUB_ENV
           fi
-          # make_latest false for snapshots or non-default branches
           if [ "${SNAPSHOT_FLAG}" = "true" ] || [ "${CURRENT_BRANCH}" != "${DEFAULT_BRANCH}" ]; then
             echo "MAKE_LATEST=false" >> $GITHUB_ENV
           else
             echo "MAKE_LATEST=true" >> $GITHUB_ENV
+          fi
+
+      - name: Set release title suffix
+        run: |
+          CURRENT_BRANCH=${GITHUB_REF#refs/heads/}
+          if [ "$CURRENT_BRANCH" = "feat/microservice" ]; then
+            echo "RELEASE_SUFFIX= (Microservice Based)" >> $GITHUB_ENV
+          else
+            echo "RELEASE_SUFFIX=" >> $GITHUB_ENV
           fi
 
       - name: Find and filter JAR files
@@ -92,7 +100,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ env.VERSION }}
-          name: Release ${{ env.VERSION }}
+          name: Release ${{ env.VERSION }}${{ env.RELEASE_SUFFIX }}
           draft: false
           prerelease: ${{ env.PRERELEASE }}
           make_latest: ${{ env.MAKE_LATEST }}
