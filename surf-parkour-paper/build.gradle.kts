@@ -1,3 +1,4 @@
+import dev.slne.surf.surfapi.gradle.util.registerRequired
 import dev.slne.surf.surfapi.gradle.util.registerSoft
 
 plugins {
@@ -12,6 +13,7 @@ surfPaperPluginApi {
 
     serverDependencies {
         registerSoft("WorldEdit")
+        registerRequired("surf-rabbitmq-paper")
     }
 }
 
