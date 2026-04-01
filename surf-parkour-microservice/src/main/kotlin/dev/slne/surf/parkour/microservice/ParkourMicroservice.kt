@@ -6,6 +6,7 @@ import dev.slne.surf.database.libs.org.jetbrains.exposed.v1.r2dbc.SchemaUtils
 import dev.slne.surf.database.libs.org.jetbrains.exposed.v1.r2dbc.transactions.suspendTransaction
 import dev.slne.surf.microservice.api.microservice.Microservice
 import dev.slne.surf.parkour.microservice.rabbit.handler.ParkourRunsHandler
+import dev.slne.surf.parkour.microservice.rabbit.handler.ParkourTextureHandler
 import dev.slne.surf.parkour.microservice.table.ParkourPlayerTexturesTable
 import dev.slne.surf.parkour.microservice.table.ParkourRunsTable
 import dev.slne.surf.rabbitmq.api.ServerRabbitMQApi
@@ -26,7 +27,7 @@ class ParkourMicroservice : Microservice() {
         }
 
         rabbitApi.registerRequestHandler(ParkourRunsHandler)
-        rabbitApi.registerRequestHandler(ParkourPlayerTexturesTable)
+        rabbitApi.registerRequestHandler(ParkourTextureHandler)
         rabbitApi.freezeAndConnect()
     }
 
