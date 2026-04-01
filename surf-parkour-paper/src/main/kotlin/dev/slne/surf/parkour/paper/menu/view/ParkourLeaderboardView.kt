@@ -145,9 +145,6 @@ object ParkourLeaderboardView : View() {
         render
             .layoutSlot('P')
             .updateOnStateChange(paginationState)
-            .displayIf { _ ->
-                pagination.canBack()
-            }
             .onRender { slotRender ->
                 if (pagination.canBack()) {
                     slotRender.item = previousItem
@@ -164,9 +161,6 @@ object ParkourLeaderboardView : View() {
         render
             .layoutSlot('N')
             .updateOnStateChange(paginationState)
-            .displayIf { _ ->
-                pagination.canAdvance()
-            }
             .onRender { slotRender ->
                 if (pagination.canAdvance()) {
                     slotRender.item = nextItem

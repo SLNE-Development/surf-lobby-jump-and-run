@@ -56,7 +56,6 @@ object ParkourActivePlayersView : View() {
                 previousItem
             }
             .watch(paginationState)
-            .displayIf { _ -> pagination.canBack() }
             .onClick { context ->
                 context.playNewPageSound()
                 pagination.back()
@@ -68,7 +67,6 @@ object ParkourActivePlayersView : View() {
                 nextItem
             }
             .watch(paginationState)
-            .displayIf { _ -> pagination.canAdvance() }
             .onClick { context ->
                 context.playNewPageSound()
                 pagination.advance()
@@ -101,7 +99,7 @@ fun createActivePlayerItem(currentJumps: Int, playerUuid: UUID) = buildItem(Mate
 
 private fun getActivePlayerStats(): List<Pair<Int, UUID>> {
     val parkour = ParkourService.parkours.firstOrNull() ?: return emptyList()
-    
+
     return parkour.players.map {
         Pair(parkour.getCurrentIndex(it), it)
     }
