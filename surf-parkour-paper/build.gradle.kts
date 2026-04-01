@@ -5,7 +5,7 @@ plugins {
 }
 
 surfPaperPluginApi {
-    mainClass("dev.slne.surf.parkour.paper.BukkitMain")
+    mainClass("dev.slne.surf.parkour.paper.PaperMain")
     generateLibraryLoader(false)
 
     authors.add("red")
