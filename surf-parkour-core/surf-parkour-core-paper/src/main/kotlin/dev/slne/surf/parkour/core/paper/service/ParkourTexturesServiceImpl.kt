@@ -28,7 +28,11 @@ class ParkourTexturesServiceImpl : ParkourTexturesService, Services.Fallback {
 
     override suspend fun loadTextures() = measureTimeMillis {
         val textures = PaperParkourInstance.rabbitApi
-            .sendRequest(LoadAllPlayerTexturesRequestPacket()).playerTextures.associateBy { it.playerUuid }
+            .sendRequest(LoadAllPlayerTexturesRequestPacket()).playerTextures.map {
+                it.copy(
+                    texture = "ewogICJ0aW1lc3RhbXAiIDogMTc3NTA2MjI5NTk2NiwKICAicHJvZmlsZUlkIiA6ICI4NmRhMzAzYjBmOTA0M2JhYWU3ZmJkMjNjZGJmYjBiYiIsCiAgInByb2ZpbGVOYW1lIiA6ICJKaW56YXJ1IiwKICAic2lnbmF0dXJlUmVxdWlyZWQiIDogdHJ1ZSwKICAidGV4dHVyZXMiIDogewogICAgIlNLSU4iIDogewogICAgICAidXJsIiA6ICJodHRwOi8vdGV4dHVyZXMubWluZWNyYWZ0Lm5ldC90ZXh0dXJlL2Y4NWVkMzg2ZDZmOWFmYmI1MjJkMWQ1ZGJmNDI3YTA5YWFhZTM5YjUxYmI5MWY0MWI2NjQ4NDZjMWRlYjExYzUiCiAgICB9LAogICAgIkNBUEUiIDogewogICAgICAidXJsIiA6ICJodHRwOi8vdGV4dHVyZXMubWluZWNyYWZ0Lm5ldC90ZXh0dXJlLzI4ZGU0YTgxNjg4YWQxOGI0OWU3MzVhMjczZTA4NmMxOGYxZTM5NjY5NTYxMjNjY2I1NzQwMzRjMDZmNWQzMzYiCiAgICB9CiAgfQp9"
+                )
+            }.associateBy { it.playerUuid }
 
         textureCache.putAll(textures)
     }
