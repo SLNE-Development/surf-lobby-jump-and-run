@@ -126,6 +126,13 @@ private val leaderBoardItem = buildItem(Material.NETHER_STAR) {
     displayName {
         primary("Bestenliste".toSmallCaps(), TextDecoration.BOLD)
     }
+
+    buildLore {
+        emptyLine()
+        line {
+            error("Derzeit werden Spieler-Skins nicht geladen. ")
+        }
+    }
 }
 
 private val startItem = buildItem(Material.RECOVERY_COMPASS) {
