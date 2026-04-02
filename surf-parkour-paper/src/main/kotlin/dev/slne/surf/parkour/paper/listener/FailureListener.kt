@@ -7,6 +7,7 @@ import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerMoveEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.util.Vector
+import kotlin.time.Duration.Companion.seconds
 
 object FailureListener : Listener {
     @EventHandler
@@ -20,6 +21,10 @@ object FailureListener : Listener {
         val generator = parkour.getGenerator(player) ?: return
 
         if (!generator.isRunning()) {
+            return
+        }
+
+        if (System.currentTimeMillis() - generator.startTime < 1.seconds.inWholeMilliseconds) {
             return
         }
 

@@ -15,6 +15,7 @@ import org.bukkit.entity.Player
 import org.bukkit.util.BoundingBox
 import org.spongepowered.configurate.objectmapping.ConfigSerializable
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 
 @ConfigSerializable
 data class Parkour(
@@ -25,7 +26,8 @@ data class Parkour(
     val world: World,
     val respawnLocation: Location
 ) {
-    val generators = mutableObjectSetOf<ParkourGenerator>()
+    val generators: ConcurrentHashMap.KeySetView<ParkourGenerator, Boolean> =
+        ConcurrentHashMap.newKeySet()
     val players = mutableObjectSetOf<UUID>()
     val waitPlease = mutableObjectSetOf<UUID>()
 
