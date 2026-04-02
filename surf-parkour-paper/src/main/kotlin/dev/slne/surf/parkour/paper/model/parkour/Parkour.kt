@@ -110,6 +110,7 @@ data class Parkour(
 
         generator.stop()
         generators.remove(generator)
+
         waitPlease.remove(player)
     }
 

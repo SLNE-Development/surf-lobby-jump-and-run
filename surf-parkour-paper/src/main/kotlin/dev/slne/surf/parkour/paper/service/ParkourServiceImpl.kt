@@ -87,6 +87,12 @@ object ParkourServiceImpl : ParkourService {
     override fun triggerSuccess(player: Player) {
         val parkour = getParkour(player) ?: return
         val generator = parkour.getGenerator(player) ?: return
+        
+        if (generator.advanced) {
+            return
+        }
+
+        generator.advanced = true
 
         plugin.launch {
             SoundService.playSuccess(player)

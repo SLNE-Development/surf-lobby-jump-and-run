@@ -29,6 +29,8 @@ data class ParkourGenerator(
 ) {
     lateinit var blockLocations: Triple<Vector, Vector, Vector>
 
+    var advanced: Boolean = false
+
     private val boundingBox: BoundingBox = parkour.boundingBox
     private val _world = parkour.world
     private val color = NamedTextColor.WHITE
@@ -128,6 +130,7 @@ data class ParkourGenerator(
                 blockLocations.third,
                 newNext
             )
+            advanced = false
         } finally {
             isGenerating.set(false)
         }
@@ -159,7 +162,7 @@ data class ParkourGenerator(
             val block = Location(_world, x, y, z).getContextBlock()
             val above = block.getRelative(BlockFace.UP)
             val above2 = above.getRelative(BlockFace.UP)
-            
+
             if (above.isEmpty && above2.isEmpty) {
                 return@withContext block.location.toVector()
             }
