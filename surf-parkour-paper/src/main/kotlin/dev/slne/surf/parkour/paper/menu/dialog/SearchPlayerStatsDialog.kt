@@ -1,10 +1,10 @@
 package dev.slne.surf.parkour.paper.menu.dialog
 
+import dev.slne.surf.api.paper.dialog.search.searchDialog
+import dev.slne.surf.api.paper.inventory.framework.viewFrame
 import dev.slne.surf.parkour.paper.menu.sort.ParkourLeaderboardSortType
 import dev.slne.surf.parkour.paper.menu.util.parkourColored
 import dev.slne.surf.parkour.paper.menu.view.ParkourLeaderboardView
-import dev.slne.surf.surfapi.bukkit.api.dialog.search.searchDialog
-import dev.slne.surf.surfapi.bukkit.api.inventory.framework.viewFrame
 
 @Suppress("UnstableApiUsage")
 fun searchParkourStatsDialog() = searchDialog(

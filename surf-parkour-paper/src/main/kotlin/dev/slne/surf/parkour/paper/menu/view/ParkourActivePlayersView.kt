@@ -1,12 +1,12 @@
 package dev.slne.surf.parkour.paper.menu.view
 
+import dev.slne.surf.api.core.font.toSmallCaps
+import dev.slne.surf.api.paper.builder.buildItem
+import dev.slne.surf.api.paper.builder.buildLore
+import dev.slne.surf.api.paper.builder.displayName
+import dev.slne.surf.api.paper.inventory.framework.titleBuilder
 import dev.slne.surf.parkour.paper.menu.util.*
 import dev.slne.surf.parkour.paper.service.ParkourService
-import dev.slne.surf.surfapi.bukkit.api.builder.buildItem
-import dev.slne.surf.surfapi.bukkit.api.builder.buildLore
-import dev.slne.surf.surfapi.bukkit.api.builder.displayName
-import dev.slne.surf.surfapi.bukkit.api.inventory.framework.titleBuilder
-import dev.slne.surf.surfapi.core.api.font.toSmallCaps
 import me.devnatan.inventoryframework.View
 import me.devnatan.inventoryframework.ViewConfigBuilder
 import me.devnatan.inventoryframework.context.RenderContext

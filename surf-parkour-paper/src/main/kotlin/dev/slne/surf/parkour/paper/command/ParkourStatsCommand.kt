@@ -4,12 +4,12 @@ import com.github.shynixn.mccoroutine.folia.launch
 import dev.jorel.commandapi.CommandAPICommand
 import dev.jorel.commandapi.kotlindsl.playerExecutor
 import dev.jorel.commandapi.kotlindsl.subcommand
+import dev.slne.surf.api.core.font.toSmallCaps
+import dev.slne.surf.api.core.messages.adventure.sendText
 import dev.slne.surf.parkour.core.paper.service.ParkourRunsService
 import dev.slne.surf.parkour.paper.permission.ParkourPermissionRegistry
 import dev.slne.surf.parkour.paper.plugin
 import dev.slne.surf.parkour.paper.util.appendLinePrefix
-import dev.slne.surf.surfapi.core.api.font.toSmallCaps
-import dev.slne.surf.surfapi.core.api.messages.adventure.sendText
 import net.kyori.adventure.text.format.TextDecoration
 
 fun CommandAPICommand.parkourStatsCommand() = subcommand("stats") {

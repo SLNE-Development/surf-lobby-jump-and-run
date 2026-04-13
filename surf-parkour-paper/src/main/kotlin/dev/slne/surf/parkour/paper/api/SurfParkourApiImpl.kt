@@ -1,11 +1,11 @@
 package dev.slne.surf.parkour.paper.api
 
 import com.google.auto.service.AutoService
+import dev.slne.surf.api.paper.inventory.framework.viewFrame
 import dev.slne.surf.parkour.api.SurfParkourApi
 import dev.slne.surf.parkour.paper.menu.sort.ParkourLeaderboardSortType
 import dev.slne.surf.parkour.paper.menu.view.ParkourOverviewView
 import dev.slne.surf.parkour.paper.service.ParkourService
-import dev.slne.surf.surfapi.bukkit.api.inventory.framework.viewFrame
 import net.kyori.adventure.util.Services
 import org.bukkit.Bukkit
 import java.util.*

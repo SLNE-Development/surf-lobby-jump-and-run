@@ -1,6 +1,8 @@
 package dev.slne.surf.parkour.paper
 
 import com.github.shynixn.mccoroutine.folia.SuspendingJavaPlugin
+import dev.slne.surf.api.paper.event.register
+import dev.slne.surf.api.paper.inventory.framework.viewFrame
 import dev.slne.surf.parkour.core.paper.PaperParkourInstance
 import dev.slne.surf.parkour.core.paper.service.ParkourRunsService
 import dev.slne.surf.parkour.core.paper.service.ParkourTexturesService
@@ -13,8 +15,6 @@ import dev.slne.surf.parkour.paper.menu.view.ParkourLeaderboardView
 import dev.slne.surf.parkour.paper.menu.view.ParkourOverviewView
 import dev.slne.surf.parkour.paper.service.ParkourService
 import dev.slne.surf.parkour.paper.service.ParkourServiceImpl
-import dev.slne.surf.surfapi.bukkit.api.event.register
-import dev.slne.surf.surfapi.bukkit.api.inventory.framework.viewFrame
 import org.bukkit.plugin.java.JavaPlugin
 
 val plugin get() = JavaPlugin.getPlugin(PaperMain::class.java)

@@ -1,5 +1,11 @@
 package dev.slne.surf.parkour.paper.menu.view
 
+import dev.slne.surf.api.core.font.toSmallCaps
+import dev.slne.surf.api.core.messages.adventure.playSound
+import dev.slne.surf.api.paper.builder.buildItem
+import dev.slne.surf.api.paper.builder.buildLore
+import dev.slne.surf.api.paper.builder.displayName
+import dev.slne.surf.api.paper.inventory.framework.titleBuilder
 import dev.slne.surf.parkour.api.data.ParkourStats
 import dev.slne.surf.parkour.core.paper.service.ParkourRunsService
 import dev.slne.surf.parkour.core.paper.service.ParkourTexturesService
@@ -9,12 +15,6 @@ import dev.slne.surf.parkour.paper.menu.util.*
 import dev.slne.surf.parkour.paper.util.formatMillis
 import dev.slne.surf.parkour.paper.util.playerHead
 import dev.slne.surf.parkour.paper.util.playerName
-import dev.slne.surf.surfapi.bukkit.api.builder.buildItem
-import dev.slne.surf.surfapi.bukkit.api.builder.buildLore
-import dev.slne.surf.surfapi.bukkit.api.builder.displayName
-import dev.slne.surf.surfapi.bukkit.api.inventory.framework.titleBuilder
-import dev.slne.surf.surfapi.core.api.font.toSmallCaps
-import dev.slne.surf.surfapi.core.api.messages.adventure.playSound
 import me.devnatan.inventoryframework.View
 import me.devnatan.inventoryframework.ViewConfigBuilder
 import me.devnatan.inventoryframework.component.Pagination

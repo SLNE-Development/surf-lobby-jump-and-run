@@ -1,6 +1,10 @@
 package dev.slne.surf.parkour.paper.service
 
 import com.github.shynixn.mccoroutine.folia.launch
+import dev.slne.surf.api.core.messages.adventure.buildText
+import dev.slne.surf.api.core.messages.adventure.sendText
+import dev.slne.surf.api.core.util.freeze
+import dev.slne.surf.api.core.util.mutableObjectSetOf
 import dev.slne.surf.parkour.api.data.PlayerTextures
 import dev.slne.surf.parkour.core.paper.service.ParkourTexturesService
 import dev.slne.surf.parkour.paper.config.ParkourConfig
@@ -8,10 +12,6 @@ import dev.slne.surf.parkour.paper.config.ParkourConfiguration
 import dev.slne.surf.parkour.paper.model.parkour.Parkour
 import dev.slne.surf.parkour.paper.plugin
 import dev.slne.surf.parkour.paper.util.formattedDuration
-import dev.slne.surf.surfapi.core.api.messages.adventure.buildText
-import dev.slne.surf.surfapi.core.api.messages.adventure.sendText
-import dev.slne.surf.surfapi.core.api.util.freeze
-import dev.slne.surf.surfapi.core.api.util.mutableObjectSetOf
 import io.papermc.paper.threadedregions.scheduler.ScheduledTask
 import org.bukkit.Bukkit
 import org.bukkit.Location
@@ -87,7 +87,7 @@ object ParkourServiceImpl : ParkourService {
     override fun triggerSuccess(player: Player) {
         val parkour = getParkour(player) ?: return
         val generator = parkour.getGenerator(player) ?: return
-        
+
         if (generator.advanced) {
             return
         }

@@ -1,10 +1,6 @@
 [versions]
-polar-api = "2.2.0"
-surf-database = "2.0.4-SNAPSHOT"
 worldedit = "7.4.0-SNAPSHOT"
 
 [libraries]
-polar-api = { module = "top.polar:api", version.ref = "polar-api" }
 worldedit-core = { module = "com.sk89q.worldedit:worldedit-core", version.ref = "worldedit" }
 worldedit-bukkit = { module = "com.sk89q.worldedit:worldedit-bukkit", version.ref = "worldedit" }
-surf-database = { module = "dev.slne.surf:surf-database", version.ref = "surf-database" }

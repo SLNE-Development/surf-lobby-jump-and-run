@@ -1,9 +1,9 @@
 package dev.slne.surf.parkour.paper.config
 
+import dev.slne.surf.api.core.config.SpongeYmlConfigClass
+import dev.slne.surf.api.core.util.mutableObjectSetOf
 import dev.slne.surf.parkour.paper.model.parkour.Parkour
 import dev.slne.surf.parkour.paper.plugin
-import dev.slne.surf.surfapi.core.api.config.SpongeYmlConfigClass
-import dev.slne.surf.surfapi.core.api.util.mutableObjectSetOf
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.util.BoundingBox

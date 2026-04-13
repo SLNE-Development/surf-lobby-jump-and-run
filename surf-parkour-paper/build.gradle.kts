@@ -1,8 +1,8 @@
-import dev.slne.surf.surfapi.gradle.util.registerRequired
-import dev.slne.surf.surfapi.gradle.util.registerSoft
+import dev.slne.surf.api.gradle.util.registerRequired
+import dev.slne.surf.api.gradle.util.registerSoft
 
 plugins {
-    id("dev.slne.surf.surfapi.gradle.paper-plugin")
+    id("dev.slne.surf.api.gradle.paper-plugin")
 }
 
 surfPaperPluginApi {
@@ -23,9 +23,7 @@ repositories {
 
 dependencies {
     api(projects.surfParkourCore.surfParkourCorePaper)
-    compileOnly(libs.polar.api)
-    compileOnly(files("libs/vulcan-api-v1.jar"))
-    api(project(":surf-parkour-api"))
+    api(projects.surfParkourApi)
 
     compileOnly(libs.worldedit.core) { isTransitive = false }
     compileOnly(libs.worldedit.bukkit) { isTransitive = false }

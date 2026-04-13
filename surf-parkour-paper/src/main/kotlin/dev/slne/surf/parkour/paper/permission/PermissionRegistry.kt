@@ -1,6 +1,6 @@
 package dev.slne.surf.parkour.paper.permission
 
-import dev.slne.surf.surfapi.bukkit.api.permission.PermissionRegistry
+import dev.slne.surf.api.paper.permission.PermissionRegistry
 
 object ParkourPermissionRegistry : PermissionRegistry() {
     const val PREFIX = "surf.parkour"

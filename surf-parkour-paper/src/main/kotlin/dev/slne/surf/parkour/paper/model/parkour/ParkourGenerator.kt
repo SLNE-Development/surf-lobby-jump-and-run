@@ -1,13 +1,13 @@
 package dev.slne.surf.parkour.paper.model.parkour
 
 import com.github.shynixn.mccoroutine.folia.regionDispatcher
+import dev.slne.surf.api.core.util.random
+import dev.slne.surf.api.paper.glow.SurfGlowingApi
 import dev.slne.surf.parkour.paper.model.jump.Jump
 import dev.slne.surf.parkour.paper.model.jump.JumpType
 import dev.slne.surf.parkour.paper.plugin
 import dev.slne.surf.parkour.paper.util.getPlayer
 import dev.slne.surf.parkour.paper.util.sendGlobalBlockChange
-import dev.slne.surf.surfapi.bukkit.api.glow.glowingApi
-import dev.slne.surf.surfapi.core.api.util.random
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import net.kyori.adventure.text.format.NamedTextColor
@@ -64,7 +64,7 @@ data class ParkourGenerator(
 
     suspend fun stop() {
         associatedPlayer.getPlayer()?.let {
-            glowingApi.removeGlowing(blockLocations.second.location, it)
+            SurfGlowingApi.removeGlowing(blockLocations.second.location, it)
         }
 
         sendGlobalBlockChange(blockLocations.first.location, airData)
@@ -92,7 +92,7 @@ data class ParkourGenerator(
 
 
         blockLocations = Triple(firstBlock, secondBlock, thirdBlock)
-        glowingApi.makeGlowing(secondBlock.location, player, color)
+        SurfGlowingApi.makeGlowing(secondBlock.location, player, color)
     }
 
     suspend fun generate() {
@@ -122,8 +122,8 @@ data class ParkourGenerator(
             sendGlobalBlockChange(blockLocations.first.location, airData)
             sendGlobalBlockChange(newNext.location, material.createBlockData())
 
-            glowingApi.removeGlowing(blockLocations.second.location, player)
-            glowingApi.makeGlowing(blockLocations.third.location, player, color)
+            SurfGlowingApi.removeGlowing(blockLocations.second.location, player)
+            SurfGlowingApi.makeGlowing(blockLocations.third.location, player, color)
 
             blockLocations = Triple(
                 blockLocations.second,

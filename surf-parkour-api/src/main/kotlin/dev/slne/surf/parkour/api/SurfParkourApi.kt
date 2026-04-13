@@ -1,6 +1,6 @@
 package dev.slne.surf.parkour.api
 
-import dev.slne.surf.surfapi.core.api.util.requiredService
+import dev.slne.surf.api.core.util.requiredService
 import java.util.*
 
 @Deprecated("This API is deprecated and will be removed in future versions. Please use companion object instead.")

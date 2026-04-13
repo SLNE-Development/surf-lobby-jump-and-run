@@ -5,12 +5,12 @@ import dev.jorel.commandapi.CommandAPICommand
 import dev.jorel.commandapi.kotlindsl.getValue
 import dev.jorel.commandapi.kotlindsl.playerExecutor
 import dev.jorel.commandapi.kotlindsl.subcommand
+import dev.slne.surf.api.core.messages.adventure.sendText
 import dev.slne.surf.parkour.paper.command.argument.parkourArgument
 import dev.slne.surf.parkour.paper.model.parkour.Parkour
 import dev.slne.surf.parkour.paper.permission.ParkourPermissionRegistry
 import dev.slne.surf.parkour.paper.plugin
 import dev.slne.surf.parkour.paper.service.ParkourService
-import dev.slne.surf.surfapi.core.api.messages.adventure.sendText
 
 fun CommandAPICommand.parkourPlayCommand() = subcommand("play") {
     withPermission(ParkourPermissionRegistry.COMMAND_PARKOUR_PLAY)

@@ -2,11 +2,11 @@ package dev.slne.surf.parkour.core.paper.service
 
 import com.github.benmanes.caffeine.cache.Caffeine
 import com.google.auto.service.AutoService
+import dev.slne.surf.api.core.util.toObjectList
 import dev.slne.surf.parkour.api.data.PlayerTextures
 import dev.slne.surf.parkour.core.common.rabbit.packet.request.LoadAllPlayerTexturesRequestPacket
 import dev.slne.surf.parkour.core.common.rabbit.packet.request.SavePlayerTexturesRequestPacket
 import dev.slne.surf.parkour.core.paper.PaperParkourInstance
-import dev.slne.surf.surfapi.core.api.util.toObjectList
 import net.kyori.adventure.util.Services
 import java.util.*
 import kotlin.system.measureTimeMillis

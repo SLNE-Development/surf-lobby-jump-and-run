@@ -2,12 +2,12 @@ package dev.slne.surf.parkour.paper.command
 
 import dev.jorel.commandapi.CommandAPICommand
 import dev.jorel.commandapi.kotlindsl.subcommand
+import dev.slne.surf.api.core.service.PlayerLookupService
+import dev.slne.surf.api.paper.command.executors.anyExecutorSuspend
 import dev.slne.surf.parkour.api.data.PlayerTextures
 import dev.slne.surf.parkour.core.paper.service.ParkourRunsService
 import dev.slne.surf.parkour.core.paper.service.ParkourTexturesService
 import dev.slne.surf.parkour.paper.permission.ParkourPermissionRegistry
-import dev.slne.surf.surfapi.bukkit.api.command.executors.anyExecutorSuspend
-import dev.slne.surf.surfapi.core.api.service.PlayerLookupService
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 

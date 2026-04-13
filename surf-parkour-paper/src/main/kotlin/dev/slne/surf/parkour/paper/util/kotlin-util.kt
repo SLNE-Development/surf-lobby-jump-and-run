@@ -2,13 +2,13 @@ package dev.slne.surf.parkour.paper.util
 
 import com.github.retrooper.packetevents.util.Vector3i
 import com.github.shynixn.mccoroutine.folia.regionDispatcher
+import dev.slne.surf.api.core.messages.builder.SurfComponentBuilder
+import dev.slne.surf.api.paper.util.forEachPlayer
 import dev.slne.surf.parkour.api.data.ParkourRun
 import dev.slne.surf.parkour.api.data.ParkourStats
 import dev.slne.surf.parkour.core.paper.service.ParkourTexturesService
 import dev.slne.surf.parkour.paper.plugin
 import dev.slne.surf.parkour.paper.service.ParkourService
-import dev.slne.surf.surfapi.bukkit.api.util.forEachPlayer
-import dev.slne.surf.surfapi.core.api.messages.builder.SurfComponentBuilder
 import kotlinx.coroutines.withContext
 import org.bukkit.Location
 import org.bukkit.Server

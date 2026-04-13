@@ -1,6 +1,6 @@
 package dev.slne.surf.parkour.paper.menu.sort
 
-import dev.slne.surf.surfapi.core.api.util.mutableObject2ObjectMapOf
+import dev.slne.surf.api.core.util.mutableObject2ObjectMapOf
 import java.util.*
 
 enum class ParkourLeaderboardSortType {

@@ -1,12 +1,12 @@
 package dev.slne.surf.parkour.paper.model.parkour
 
 import com.github.shynixn.mccoroutine.folia.launch
+import dev.slne.surf.api.core.messages.adventure.sendText
+import dev.slne.surf.api.core.util.mutableObjectSetOf
 import dev.slne.surf.parkour.api.data.ParkourRun
 import dev.slne.surf.parkour.core.paper.service.ParkourRunsService
 import dev.slne.surf.parkour.paper.plugin
 import dev.slne.surf.parkour.paper.service.ParkourService
-import dev.slne.surf.surfapi.core.api.messages.adventure.sendText
-import dev.slne.surf.surfapi.core.api.util.mutableObjectSetOf
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Material

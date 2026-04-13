@@ -2,10 +2,10 @@ package dev.slne.surf.parkour.paper.command
 
 import dev.jorel.commandapi.CommandAPICommand
 import dev.jorel.commandapi.kotlindsl.*
+import dev.slne.surf.api.core.messages.adventure.sendText
 import dev.slne.surf.parkour.paper.hook.WorldEditHook
 import dev.slne.surf.parkour.paper.permission.ParkourPermissionRegistry
 import dev.slne.surf.parkour.paper.service.ParkourService
-import dev.slne.surf.surfapi.core.api.messages.adventure.sendText
 import org.bukkit.Location
 import java.util.*
 

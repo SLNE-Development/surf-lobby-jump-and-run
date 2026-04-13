@@ -1,8 +1,8 @@
 package dev.slne.surf.parkour.core.paper.service
 
+import dev.slne.surf.api.core.util.requiredService
 import dev.slne.surf.parkour.api.data.ParkourRun
 import dev.slne.surf.parkour.api.data.ParkourStats
-import dev.slne.surf.surfapi.core.api.util.requiredService
 import it.unimi.dsi.fastutil.objects.ObjectList
 import org.jetbrains.annotations.UnmodifiableView
 import java.util.*
