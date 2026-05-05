@@ -27,7 +27,7 @@ dependencies {
     api("dev.slne.surf:surf-database-r2dbc:1.0.0-SNAPSHOT")
     api(project(":surf-parkour-api"))
 
-    compileOnly("dev.slne.surf.settings:surf-settings-api:1.21.11-2.0.0-SNAPSHOT")
+    compileOnlyApi("dev.slne.surf.settings:surf-settings-api:+")
 
     compileOnly(libs.worldedit.core) { isTransitive = false }
     compileOnly(libs.worldedit.bukkit) { isTransitive = false }
