@@ -1,15 +1,11 @@
 package dev.slne.surf.parkour.paper.command
 
-import com.github.shynixn.mccoroutine.folia.entityDispatcher
-import com.github.shynixn.mccoroutine.folia.launch
 import dev.jorel.commandapi.kotlindsl.commandAPICommand
 import dev.jorel.commandapi.kotlindsl.playerExecutor
-import dev.slne.surf.parkour.paper.menu.ParkourMenu
-import dev.slne.surf.parkour.paper.model.parkour.PersonalParkourSummary
+import dev.slne.surf.parkour.paper.menu.sort.ParkourLeaderboardSortType
+import dev.slne.surf.parkour.paper.menu.view.ParkourOverviewView
 import dev.slne.surf.parkour.paper.permission.ParkourPermissionRegistry
-import dev.slne.surf.parkour.paper.plugin
-import dev.slne.surf.parkour.paper.service.parkourService
-import kotlinx.coroutines.withContext
+import dev.slne.surf.surfapi.bukkit.api.inventory.framework.viewFrame
 
 fun parkourCommand() = commandAPICommand("parkour") {
     withPermission(ParkourPermissionRegistry.COMMAND_PARKOUR)
@@ -18,16 +14,10 @@ fun parkourCommand() = commandAPICommand("parkour") {
     parkourReloadCommand()
     parkourCreateCommand()
     parkourStatsCommand()
+    parkourCreateNamesCommand()
 
     playerExecutor { player, _ ->
-        plugin.launch {
-            val stats = parkourService.getRuns(player.uniqueId)
-            val summary = PersonalParkourSummary(player.uniqueId, stats)
-            summary.initName()
-
-            withContext(plugin.entityDispatcher(player)) {
-                ParkourMenu(summary).open(player)
-            }
-        }
+        ParkourLeaderboardSortType.setSearch(player.uniqueId, null)
+        viewFrame.open(ParkourOverviewView::class.java, player)
     }
 }
