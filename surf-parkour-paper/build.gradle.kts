@@ -10,6 +10,8 @@ surfPaperPluginApi {
 
     authors.add("red")
 
+    withSurfDatabaseR2dbc("1.3.0", "dev.slne.surf.parkour.paper.database")
+
     serverDependencies {
         registerSoft("WorldEdit")
         registerSoft("surf-settings-paper")
@@ -23,8 +25,6 @@ repositories {
 dependencies {
     compileOnly(libs.polar.api)
     compileOnly(files("libs/vulcan-api-v1.jar"))
-
-    api("dev.slne.surf:surf-database-r2dbc:1.0.0-SNAPSHOT")
     api(project(":surf-parkour-api"))
 
     compileOnlyApi("dev.slne.surf.settings:surf-settings-api:+")

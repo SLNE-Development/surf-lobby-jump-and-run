@@ -1,4 +1,4 @@
-package dev.slne.surf.parkour.paper.database.type
+package dev.slne.surf.parkour.paper.database.table.column
 
 import dev.slne.surf.database.libs.org.jetbrains.exposed.v1.core.Column
 import dev.slne.surf.database.libs.org.jetbrains.exposed.v1.core.ColumnType

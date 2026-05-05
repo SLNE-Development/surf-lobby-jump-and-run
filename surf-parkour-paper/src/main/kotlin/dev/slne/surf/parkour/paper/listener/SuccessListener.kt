@@ -4,13 +4,14 @@ import com.github.shynixn.mccoroutine.folia.entityDispatcher
 import com.github.shynixn.mccoroutine.folia.launch
 import dev.slne.surf.parkour.paper.plugin
 import dev.slne.surf.parkour.paper.service.parkourService
-import dev.slne.surf.parkour.paper.util.getBlocksBelowLocation
-import dev.slne.surf.parkour.paper.util.isSameBlock
+import org.bukkit.block.Block
+import org.bukkit.block.BlockFace
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerMoveEvent
+import org.bukkit.util.Vector
 
-class SuccessListener : Listener {
+object SuccessListener : Listener {
     @EventHandler
     fun onMove(event: PlayerMoveEvent) {
         val player = event.player
@@ -28,12 +29,28 @@ class SuccessListener : Listener {
                 return@launch
             }
 
-            val blocksBelow = getBlocksBelowLocation(event.to)
+            val possibleBlocks = getBlocksAround(event.to.block.getRelative(BlockFace.DOWN))
             val targetBlock = generator.blockLocations.second
 
-            if (blocksBelow.any { it.isSameBlock(targetBlock) }) {
+            if (possibleBlocks.any { it.isSameBlock(targetBlock) }) {
                 parkourService.triggerSuccess(player)
             }
         }
     }
+
+    private fun Block.isSameBlock(other: Vector): Boolean {
+        return this.x == other.blockX && this.y == other.blockY && this.z == other.blockZ
+    }
+
+    private fun getBlocksAround(block: Block) = listOf(
+        block,
+        block.getRelative(1, 0, 0),
+        block.getRelative(-1, 0, 0),
+        block.getRelative(0, 0, 1),
+        block.getRelative(0, 0, -1),
+        block.getRelative(1, 0, 1),
+        block.getRelative(1, 0, -1),
+        block.getRelative(-1, 0, 1),
+        block.getRelative(-1, 0, -1)
+    )
 }

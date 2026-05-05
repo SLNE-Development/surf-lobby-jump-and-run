@@ -2,7 +2,9 @@ package dev.slne.surf.parkour.paper.util
 
 import com.github.retrooper.packetevents.util.Vector3i
 import com.github.shynixn.mccoroutine.folia.regionDispatcher
+import dev.slne.surf.parkour.api.data.ParkourStats
 import dev.slne.surf.parkour.paper.plugin
+import dev.slne.surf.parkour.paper.service.playerTextureService
 import dev.slne.surf.surfapi.bukkit.api.util.forEachPlayer
 import dev.slne.surf.surfapi.core.api.messages.builder.SurfComponentBuilder
 import kotlinx.coroutines.withContext
@@ -67,3 +69,5 @@ suspend fun sendGlobalBlockChange(location: Location, blockData: BlockData) =
     withContext(plugin.regionDispatcher(location)) {
         location.world.setBlockData(location, blockData)
     }
+
+val ParkourStats.playerName: String get() = playerTextureService.getTexture(playerUuid).playerName

@@ -57,7 +57,7 @@ data class ParkourGenerator(
         val toTeleport = blockLocations.first.location.block.getRelative(BlockFace.UP).location
 
         toTeleport.setRotation(rotation.first, rotation.second)
-        player.teleportAsync(toTeleport)
+        player.teleportAsync(toTeleport.toCenterLocation())
     }
 
     suspend fun stop() {
@@ -138,20 +138,20 @@ data class ParkourGenerator(
         val midY = (boundingBox.minY + boundingBox.maxY) / 2
         val midZ = (boundingBox.minZ + boundingBox.maxZ) / 2
 
-        val quarterX = ((boundingBox.maxX - boundingBox.minX) * 0.25 * 0.5).toInt()
-        val quarterY = ((boundingBox.maxY - boundingBox.minY) * 0.25 * 0.5).toInt()
-        val quarterZ = ((boundingBox.maxZ - boundingBox.minZ) * 0.25 * 0.5).toInt()
+        val halfX = ((boundingBox.maxX - boundingBox.minX) * 0.5).toInt()
+        val halfY = ((boundingBox.maxY - boundingBox.minY) * 0.5).toInt()
+        val halfZ = ((boundingBox.maxZ - boundingBox.minZ) * 0.5).toInt()
 
         repeat(100) {
-            val x = (midX + random.nextInt(-quarterX, quarterX + 1)).coerceIn(
+            val x = (midX + random.nextInt(-halfX, halfX + 1)).coerceIn(
                 boundingBox.minX,
                 boundingBox.maxX
             )
-            val y = (midY + random.nextInt(-quarterY, quarterY + 1)).coerceIn(
+            val y = (midY + random.nextInt(-halfY, halfY + 1)).coerceIn(
                 boundingBox.minY,
                 boundingBox.maxY
             )
-            val z = (midZ + random.nextInt(-quarterZ, quarterZ + 1)).coerceIn(
+            val z = (midZ + random.nextInt(-halfZ, halfZ + 1)).coerceIn(
                 boundingBox.minZ,
                 boundingBox.maxZ
             )
