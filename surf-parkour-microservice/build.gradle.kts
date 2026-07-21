@@ -10,7 +10,7 @@ dependencies {
 }
 
 surfStandaloneApi {
-    withSurfDatabaseR2dbc("1.3.0", "dev.slne.surf.parkour.libs.database")
+    withSurfDatabaseR2dbc("2.3.1", "dev.slne.surf.parkour.libs.database")
 }
 
 surfMicroservice {
