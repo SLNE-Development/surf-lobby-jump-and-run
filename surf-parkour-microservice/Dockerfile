@@ -4,10 +4,15 @@ FROM eclipse-temurin:25-jdk AS build
 WORKDIR /workspace
 COPY . .
 RUN chmod +x gradlew && ./gradlew :surf-parkour-microservice:prepareMicroserviceDockerArtifact --no-daemon
+FROM golang:1.26-alpine AS command-client-build
+WORKDIR /src
+COPY --from=build /workspace/surf-parkour-microservice/build/generated/microservicectl/main.go /src/main.go
+RUN mkdir -p /out && CGO_ENABLED=0 go build -buildvcs=false -trimpath -ldflags='-s -w' -o /out/microservicectl /src/main.go
 FROM eclipse-temurin:25-jre
 RUN groupadd --system --gid 10001 app && useradd --system --uid 10001 --gid app --home-dir /app --create-home app
 WORKDIR /app
 COPY --from=build --chown=app:app /workspace/surf-parkour-microservice/build/docker/app.jar /app/app.jar
+COPY --from=command-client-build /out/microservicectl /usr/local/bin/microservicectl
 ENV JAVA_OPTS=""
 ENV SURF_MICROSERVICE_COMMAND_SOCKET=/app/run/microservice.sock
 #
@@ -43,10 +48,5 @@ ENV SURF_MICROSERVICE_COMMAND_SOCKET=/app/run/microservice.sock
 # - SURF_DATABASE_POOL_MAX_VALIDATION_TIME_MILLIS: maximum validation time in milliseconds
 # - SURF_DATABASE_POOL_MAX_IDLE_TIME_MILLIS: maximum idle time in milliseconds
 # - SURF_DATABASE_POOL_MAX_LIFE_TIME_MILLIS: maximum connection lifetime in milliseconds
-RUN printf '%s\n' \
-'#!/bin/sh' \
-'exec java -Xms8m -Xmx64m -XX:+ExitOnOutOfMemoryError -jar /app/app.jar __surf-command "$@"' \
-> /usr/local/bin/microservicectl \
-&& chmod 0555 /usr/local/bin/microservicectl
 USER app
 ENTRYPOINT ["sh", "-c", "exec java -XX:MaxRAMPercentage=75.0 -XX:+ExitOnOutOfMemoryError $JAVA_OPTS -jar /app/app.jar \"$@\"", "--"]
