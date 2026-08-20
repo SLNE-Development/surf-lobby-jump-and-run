@@ -2,8 +2,9 @@ rootProject.name = "surf-parkour"
 
 include("surf-parkour-api")
 include("surf-parkour-core:surf-parkour-core-common")
-include("surf-parkour-core:surf-parkour-core-paper")
+include("surf-parkour-core:surf-parkour-core-client")
 include("surf-parkour-paper")
+include("surf-parkour-minestom")
 include("surf-parkour-microservice")
 
 pluginManagement {

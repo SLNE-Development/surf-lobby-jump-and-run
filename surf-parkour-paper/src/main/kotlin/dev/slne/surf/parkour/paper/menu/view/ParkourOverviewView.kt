@@ -1,20 +1,22 @@
 package dev.slne.surf.parkour.paper.menu.view
 
-import com.github.shynixn.mccoroutine.folia.launch
 import dev.slne.surf.api.core.font.toSmallCaps
 import dev.slne.surf.api.core.messages.adventure.sendText
+import dev.slne.surf.parkour.core.client.command.appendNoParkoursAvailable
 import dev.slne.surf.api.paper.builder.buildItem
-import dev.slne.surf.api.paper.builder.buildLore
 import dev.slne.surf.api.paper.builder.displayName
+import dev.slne.surf.api.paper.builder.lore
 import dev.slne.surf.api.paper.inventory.framework.titleBuilder
-import dev.slne.surf.parkour.core.paper.service.ParkourRunsService
-import dev.slne.surf.parkour.paper.menu.util.MenuHeads
+import dev.slne.surf.parkour.core.client.menu.ParkourMenuContent
+import dev.slne.surf.parkour.core.client.menu.ParkourMenuTitles
+import dev.slne.surf.parkour.core.client.menu.ParkourMenuTextures
+import dev.slne.surf.parkour.core.client.message.parkourColored
+import dev.slne.surf.parkour.core.client.platform.ParkourPlatform
+import dev.slne.surf.parkour.core.client.service.ParkourRunsService
+import dev.slne.surf.parkour.core.client.service.ParkourService
 import dev.slne.surf.parkour.paper.menu.util.outlineItem
-import dev.slne.surf.parkour.paper.menu.util.parkourColored
 import dev.slne.surf.parkour.paper.menu.util.playGeneralClickSound
-import dev.slne.surf.parkour.paper.plugin
-import dev.slne.surf.parkour.paper.service.ParkourService
-import dev.slne.surf.parkour.paper.util.formatMillis
+import dev.slne.surf.parkour.paper.util.playerHeadOf
 import me.devnatan.inventoryframework.View
 import me.devnatan.inventoryframework.ViewConfigBuilder
 import me.devnatan.inventoryframework.context.RenderContext
@@ -26,7 +28,7 @@ object ParkourOverviewView : View() {
     override fun onInit(config: ViewConfigBuilder) {
         config
             .titleBuilder {
-                parkourColored("Parkour".toSmallCaps(), TextDecoration.BOLD)
+                parkourColored(ParkourMenuTitles.OVERVIEW.toSmallCaps(), TextDecoration.BOLD)
             }
             .size(5)
             .layout(
@@ -51,16 +53,13 @@ object ParkourOverviewView : View() {
         }
         render.layoutSlot('S', startItem).onClick { context ->
             val parkour = ParkourService.parkours.firstOrNull() ?: run {
-                context.player.sendText {
-                    appendErrorPrefix()
-                    error("Es sind derzeit keine Parkours verfügbar.")
-                }
+                context.player.sendText { appendNoParkoursAvailable() }
                 return@onClick
             }
 
             context.closeForPlayer()
 
-            plugin.launch {
+            ParkourPlatform.launch {
                 parkour.start(context.player.uniqueId)
             }
         }
@@ -73,76 +72,28 @@ object ParkourOverviewView : View() {
 }
 
 private fun ownItem(render: RenderContext) = buildItem(Material.PLAYER_HEAD) {
-    displayName {
-        primary("Deine Statistiken".toSmallCaps(), TextDecoration.BOLD)
-    }
+    displayName(ParkourMenuContent.ownStatsName)
 
     editMeta(SkullMeta::class.java) {
         it.owningPlayer = render.player
     }
 
-    val stats = ParkourRunsService.getStats(render.player.uniqueId)
-
-    buildLore {
-        emptyLine()
-        line {
-            parkourColored("Parkourstatistiken".toSmallCaps(), TextDecoration.BOLD)
-        }
-        line {
-            spacer("-")
-            appendSpace()
-            parkourColored("Highscore: ")
-            variableValue(stats.highscore)
-        }
-        line {
-            spacer("-")
-            appendSpace()
-            parkourColored("Versuche: ")
-            variableValue(stats.totalRuns)
-        }
-        line {
-            spacer("-")
-            appendSpace()
-            parkourColored("Gesamtsprünge: ")
-            variableValue(stats.totalJumps)
-        }
-        line {
-            spacer("-")
-            appendSpace()
-            parkourColored("Durchschnittliche Zeit: ")
-            variableValue(formatMillis(stats.averageTime))
-        }
-
-    }
+    lore(*ParkourMenuContent.ownStatsLore(ParkourRunsService.getStats(render.player.uniqueId)).toTypedArray())
 }
 
-private val closeItem = MenuHeads.CROSS.apply {
-    displayName {
-        primary("Schließen".toSmallCaps(), TextDecoration.BOLD)
-    }
+private val closeItem = playerHeadOf(ParkourMenuTextures.CROSS).apply {
+    displayName(ParkourMenuContent.closeName)
 }
 
 private val leaderBoardItem = buildItem(Material.NETHER_STAR) {
-    displayName {
-        primary("Bestenliste".toSmallCaps(), TextDecoration.BOLD)
-    }
-
-    buildLore {
-        emptyLine()
-        line {
-            error("Derzeit werden Spieler-Skins nicht geladen. ")
-        }
-    }
+    displayName(ParkourMenuContent.leaderboardName)
+    lore(*ParkourMenuContent.leaderboardLore.toTypedArray())
 }
 
 private val startItem = buildItem(Material.RECOVERY_COMPASS) {
-    displayName {
-        primary("Parkour starten".toSmallCaps(), TextDecoration.BOLD)
-    }
+    displayName(ParkourMenuContent.startName)
 }
 
 private val activeItem = buildItem(Material.WRITABLE_BOOK) {
-    displayName {
-        primary("Aktive Spieler".toSmallCaps(), TextDecoration.BOLD)
-    }
+    displayName(ParkourMenuContent.activePlayersName)
 }

@@ -11,18 +11,6 @@ buildscript {
     }
 }
 
-subprojects {
-    afterEvaluate {
-        plugins.withType<PublishingPlugin> {
-            configure<PublishingExtension> {
-                repositories {
-                    slneReleases()
-                }
-            }
-        }
-    }
-}
-
 allprojects {
     version = findProperty("version") as String
     group = "dev.slne.surf.parkour"

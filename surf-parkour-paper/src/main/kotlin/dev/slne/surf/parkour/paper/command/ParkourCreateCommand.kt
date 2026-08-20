@@ -3,9 +3,14 @@ package dev.slne.surf.parkour.paper.command
 import dev.jorel.commandapi.CommandAPICommand
 import dev.jorel.commandapi.kotlindsl.*
 import dev.slne.surf.api.core.messages.adventure.sendText
+import dev.slne.surf.parkour.core.client.command.appendIdentifierContainsSpaces
+import dev.slne.surf.parkour.core.client.command.appendIdentifierTaken
+import dev.slne.surf.parkour.core.client.command.appendParkourCreated
+import dev.slne.surf.parkour.core.client.service.ParkourService
 import dev.slne.surf.parkour.paper.hook.WorldEditHook
 import dev.slne.surf.parkour.paper.permission.ParkourPermissionRegistry
-import dev.slne.surf.parkour.paper.service.ParkourService
+import dev.slne.surf.parkour.paper.util.toParkourLocation
+import dev.slne.surf.parkour.paper.util.toParkourRegion
 import org.bukkit.Location
 import java.util.*
 
@@ -20,18 +25,12 @@ fun CommandAPICommand.parkourCreateCommand() = subcommand("create") {
         val respawnStanding: Location by args
 
         if (identifier.contains(" ")) {
-            player.sendText {
-                appendErrorPrefix()
-                error("Die Kennung darf keine Leerzeichen enthalten.")
-            }
+            player.sendText { appendIdentifierContainsSpaces() }
             return@playerExecutor
         }
 
         if (ParkourService.exists(identifier)) {
-            player.sendText {
-                appendErrorPrefix()
-                error("Ein Parkour mit dieser Kennung existiert bereits.")
-            }
+            player.sendText { appendIdentifierTaken() }
             return@playerExecutor
         }
 
@@ -57,16 +56,11 @@ fun CommandAPICommand.parkourCreateCommand() = subcommand("create") {
             UUID.randomUUID(),
             identifier,
             displayname,
-            selection,
-            player.world,
-            respawnStanding
+            selection.toParkourRegion(),
+            player.world.name,
+            respawnStanding.toParkourLocation()
         )
 
-        player.sendText {
-            appendSuccessPrefix()
-            success("Der Parkour ")
-            variableValue(displayname)
-            success(" wurde erstellt.")
-        }
+        player.sendText { appendParkourCreated(displayname) }
     }
 }

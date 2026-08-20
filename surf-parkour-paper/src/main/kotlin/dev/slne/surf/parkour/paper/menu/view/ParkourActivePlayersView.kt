@@ -2,11 +2,20 @@ package dev.slne.surf.parkour.paper.menu.view
 
 import dev.slne.surf.api.core.font.toSmallCaps
 import dev.slne.surf.api.paper.builder.buildItem
-import dev.slne.surf.api.paper.builder.buildLore
 import dev.slne.surf.api.paper.builder.displayName
+import dev.slne.surf.api.paper.builder.lore
 import dev.slne.surf.api.paper.inventory.framework.titleBuilder
-import dev.slne.surf.parkour.paper.menu.util.*
-import dev.slne.surf.parkour.paper.service.ParkourService
+import dev.slne.surf.parkour.core.client.menu.ParkourMenuContent
+import dev.slne.surf.parkour.core.client.menu.ParkourMenuTitles
+import dev.slne.surf.parkour.core.client.message.parkourColored
+import dev.slne.surf.parkour.core.client.platform.ParkourPlatform
+import dev.slne.surf.parkour.core.client.service.ParkourService
+import dev.slne.surf.parkour.paper.menu.util.backItem
+import dev.slne.surf.parkour.paper.menu.util.nextItem
+import dev.slne.surf.parkour.paper.menu.util.outlineItem
+import dev.slne.surf.parkour.paper.menu.util.playGeneralClickSound
+import dev.slne.surf.parkour.paper.menu.util.playNewPageSound
+import dev.slne.surf.parkour.paper.menu.util.previousItem
 import me.devnatan.inventoryframework.View
 import me.devnatan.inventoryframework.ViewConfigBuilder
 import me.devnatan.inventoryframework.context.RenderContext
@@ -29,7 +38,7 @@ object ParkourActivePlayersView : View() {
     override fun onInit(config: ViewConfigBuilder) {
         config
             .titleBuilder {
-                parkourColored("Parkourstatistiken".toSmallCaps(), TextDecoration.BOLD)
+                parkourColored(ParkourMenuTitles.STATISTICS.toSmallCaps(), TextDecoration.BOLD)
             }
             .size(6)
             .layout(
@@ -79,22 +88,9 @@ fun createActivePlayerItem(currentJumps: Int, playerUuid: UUID) = buildItem(Mate
         it.owningPlayer = Bukkit.getPlayer(playerUuid)
     }
 
-    displayName {
-        parkourColored(Bukkit.getPlayer(playerUuid)?.name ?: "#Unbekannt", TextDecoration.BOLD)
-    }
+    displayName(ParkourMenuContent.activePlayerName(ParkourPlatform.playerName(playerUuid)))
 
-    buildLore {
-        emptyLine()
-        line {
-            parkourColored("Aktueller Lauf".toSmallCaps(), TextDecoration.BOLD)
-        }
-        line {
-            spacer("-")
-            appendSpace()
-            parkourColored("Sprünge: ")
-            variableValue(currentJumps)
-        }
-    }
+    lore(*ParkourMenuContent.activePlayerLore(currentJumps).toTypedArray())
 }
 
 private fun getActivePlayerStats(): List<Pair<Int, UUID>> {

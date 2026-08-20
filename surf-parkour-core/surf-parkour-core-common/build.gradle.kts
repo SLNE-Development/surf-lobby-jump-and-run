@@ -1,3 +1,4 @@
+import dev.slne.surf.api.gradle.util.slneReleases
 import dev.slne.surf.microservice.gradle.plugin.rabbit.RabbitModule
 
 plugins {
@@ -11,4 +12,10 @@ surfMicroservice {
 
 dependencies {
     api(projects.surfParkourApi)
+}
+
+publishing {
+    repositories {
+        slneReleases()
+    }
 }

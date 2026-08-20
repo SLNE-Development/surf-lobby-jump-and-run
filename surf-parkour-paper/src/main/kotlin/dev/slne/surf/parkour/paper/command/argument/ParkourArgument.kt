@@ -6,20 +6,16 @@ import dev.jorel.commandapi.arguments.ArgumentSuggestions
 import dev.jorel.commandapi.arguments.CustomArgument
 import dev.jorel.commandapi.arguments.StringArgument
 import dev.slne.surf.api.core.messages.adventure.buildText
-import dev.slne.surf.parkour.paper.model.parkour.Parkour
-import dev.slne.surf.parkour.paper.service.ParkourService
+import dev.slne.surf.parkour.core.client.command.appendUnknownParkour
+import dev.slne.surf.parkour.core.client.model.parkour.Parkour
+import dev.slne.surf.parkour.core.client.service.ParkourService
 
 class ParkourArgument(nodeName: String) : CustomArgument<Parkour, String>(
     StringArgument(nodeName),
     CustomArgumentInfoParser { info ->
         ParkourService.getParkour(info.input)
             ?: throw CustomArgumentException.fromAdventureComponent {
-                buildText {
-                    appendErrorPrefix()
-                    error("Der Parkour ")
-                    variableValue(info.input)
-                    error(" wurde nicht gefunden.")
-                }
+                buildText { appendUnknownParkour(info.input) }
             }
     }) {
     init {

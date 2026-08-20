@@ -4,15 +4,11 @@ import dev.jorel.commandapi.CommandAPICommand
 import dev.jorel.commandapi.kotlindsl.anyExecutor
 import dev.jorel.commandapi.kotlindsl.integerArgument
 import dev.jorel.commandapi.kotlindsl.subcommand
-import dev.slne.surf.api.core.font.toSmallCaps
-import dev.slne.surf.api.core.messages.CommonComponents
-import dev.slne.surf.api.core.messages.adventure.buildText
 import dev.slne.surf.api.core.messages.adventure.sendText
-import dev.slne.surf.api.core.messages.pagination.Pagination
-import dev.slne.surf.parkour.paper.model.parkour.Parkour
+import dev.slne.surf.parkour.core.client.command.appendNoParkourFound
+import dev.slne.surf.parkour.core.client.command.renderParkourList
+import dev.slne.surf.parkour.core.client.service.ParkourService
 import dev.slne.surf.parkour.paper.permission.ParkourPermissionRegistry
-import dev.slne.surf.parkour.paper.service.ParkourService
-import net.kyori.adventure.text.format.TextDecoration
 
 fun CommandAPICommand.parkourListCommand() = subcommand("list") {
     withPermission(ParkourPermissionRegistry.COMMAND_PARKOUR_LIST)
@@ -22,48 +18,12 @@ fun CommandAPICommand.parkourListCommand() = subcommand("list") {
         val parkours = ParkourService.parkours
 
         if (parkours.isEmpty()) {
-            executor.sendText {
-                appendErrorPrefix()
-                error("Es wurde kein Parkour gefunden.")
-            }
+            executor.sendText { appendNoParkourFound() }
             return@anyExecutor
         }
 
-        val pagination = Pagination<Parkour> {
-            title {
-                primary("Parkour Liste".toSmallCaps(), TextDecoration.BOLD)
-            }
-
-            rowRenderer { parkour, _ ->
-                listOf(
-                    buildText {
-                        append(CommonComponents.EM_DASH)
-                        appendSpace()
-                        variableKey(parkour.displayName)
-                        appendSpace()
-                        spacer("(")
-                        variableValue(parkour.players.size)
-                        spacer(" Spieler)")
-                        hoverEvent(buildText {
-                            append(CommonComponents.EM_DASH)
-                            appendSpace()
-                            variableKey("Identifier:")
-                            appendSpace()
-                            variableValue(parkour.identifier)
-                            appendNewline()
-                            append(CommonComponents.EM_DASH)
-                            appendSpace()
-                            variableKey("Welt:")
-                            appendSpace()
-                            variableValue(parkour.world.name)
-                        })
-                    }
-                )
-            }
-        }
-
         executor.sendText {
-            append(pagination.renderComponent(parkours, page))
+            append(renderParkourList(parkours, page))
         }
     }
 }

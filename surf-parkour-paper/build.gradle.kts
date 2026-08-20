@@ -22,7 +22,7 @@ repositories {
 }
 
 dependencies {
-    api(projects.surfParkourCore.surfParkourCorePaper)
+    api(projects.surfParkourCore.surfParkourCoreClient)
     api(projects.surfParkourApi)
 
     compileOnly(libs.worldedit.core) { isTransitive = false }

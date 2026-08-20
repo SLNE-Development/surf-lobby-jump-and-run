@@ -3,25 +3,23 @@ package dev.slne.surf.parkour.paper
 import com.github.shynixn.mccoroutine.folia.SuspendingJavaPlugin
 import dev.slne.surf.api.paper.event.register
 import dev.slne.surf.api.paper.inventory.framework.viewFrame
-import dev.slne.surf.parkour.core.paper.PaperParkourInstance
-import dev.slne.surf.parkour.core.paper.service.ParkourRunsService
-import dev.slne.surf.parkour.core.paper.service.ParkourTexturesService
+import dev.slne.surf.parkour.core.client.ClientParkourInstance
+import dev.slne.surf.parkour.core.client.service.ParkourRunsService
+import dev.slne.surf.parkour.core.client.service.ParkourService
+import dev.slne.surf.parkour.core.client.service.ParkourTexturesService
 import dev.slne.surf.parkour.paper.command.parkourCommand
-import dev.slne.surf.parkour.paper.listener.FailureListener
-import dev.slne.surf.parkour.paper.listener.JoinListener
-import dev.slne.surf.parkour.paper.listener.SuccessListener
+import dev.slne.surf.parkour.paper.listener.ParkourListener
 import dev.slne.surf.parkour.paper.menu.view.ParkourActivePlayersView
 import dev.slne.surf.parkour.paper.menu.view.ParkourLeaderboardView
 import dev.slne.surf.parkour.paper.menu.view.ParkourOverviewView
-import dev.slne.surf.parkour.paper.service.ParkourService
-import dev.slne.surf.parkour.paper.service.ParkourServiceImpl
+import dev.slne.surf.parkour.paper.service.ParkourActionBarTask
 import org.bukkit.plugin.java.JavaPlugin
 
 val plugin get() = JavaPlugin.getPlugin(PaperMain::class.java)
 
 class PaperMain : SuspendingJavaPlugin() {
     override suspend fun onLoadAsync() {
-        PaperParkourInstance.paperLoader.onLoad()
+        ClientParkourInstance.clientLoader.onLoad()
 
         viewFrame.with(ParkourLeaderboardView)
         viewFrame.with(ParkourOverviewView)
@@ -29,24 +27,20 @@ class PaperMain : SuspendingJavaPlugin() {
     }
 
     override suspend fun onEnableAsync() {
-        PaperParkourInstance.paperLoader.onEnable()
+        ClientParkourInstance.clientLoader.onEnable()
 
-        FailureListener.register()
-        SuccessListener.register()
-        JoinListener.register()
+        ParkourListener.register()
 
         parkourCommand()
 
         ParkourService.loadParkours()
         ParkourRunsService.loadStats()
         ParkourTexturesService.loadTextures()
-        ParkourServiceImpl.startUpdating()
+        ParkourActionBarTask.startUpdating()
     }
 
     override suspend fun onDisableAsync() {
-        ParkourServiceImpl.stopUpdating()
-        PaperParkourInstance.paperLoader.onDisable()
+        ParkourActionBarTask.stopUpdating()
+        ClientParkourInstance.clientLoader.onDisable()
     }
 }
-
-
