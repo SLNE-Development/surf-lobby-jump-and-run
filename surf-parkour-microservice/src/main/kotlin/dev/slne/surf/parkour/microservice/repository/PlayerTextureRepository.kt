@@ -23,7 +23,7 @@ object PlayerTextureRepository {
     }
 
     suspend fun saveTexture(playerTextures: PlayerTextures) = suspendTransaction {
-        ParkourPlayerTexturesTable.upsert {
+        ParkourPlayerTexturesTable.upsert(ParkourPlayerTexturesTable.playerUuid) {
             it[playerUuid] = playerTextures.playerUuid
             it[playerName] = playerTextures.playerName
             it[texture] = playerTextures.texture
