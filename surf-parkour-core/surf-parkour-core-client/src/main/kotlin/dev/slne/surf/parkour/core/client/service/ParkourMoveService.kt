@@ -22,36 +22,18 @@ object ParkourMoveService {
      * Reacts to the player identified by [playerUuid] having moved to the given position.
      */
     fun processMove(playerUuid: UUID, x: Double, y: Double, z: Double) {
-        processFailure(playerUuid, y)
-        processSuccess(playerUuid, x, y, z)
-    }
-
-    private fun processFailure(playerUuid: UUID, y: Double) {
         val parkour = ParkourService.getParkourByPlayer(playerUuid) ?: return
         val generator = parkour.getGenerator(playerUuid) ?: return
+        val blockLocations = generator.blockLocations ?: return
 
-        if (!generator.isRunning()) {
-            return
-        }
-
-        if (System.currentTimeMillis() - generator.startTime < startGrace) {
-            return
-        }
-
-        if (hasFallenBelow(generator.blockLocations, y)) {
+        if (hasFallenBelow(blockLocations, y) &&
+            System.currentTimeMillis() - generator.startTime >= startGrace
+        ) {
             ParkourService.triggerFailure(playerUuid)
-        }
-    }
-
-    private fun processSuccess(playerUuid: UUID, x: Double, y: Double, z: Double) {
-        val parkour = ParkourService.getParkourByPlayer(playerUuid) ?: return
-        val generator = parkour.getGenerator(playerUuid) ?: return
-
-        if (!generator.isRunning()) {
             return
         }
 
-        if (isOnTargetBlock(x, y - 1.0, z, generator.blockLocations.second)) {
+        if (isOnTargetBlock(x, y - 1.0, z, blockLocations.second)) {
             ParkourService.triggerSuccess(playerUuid)
         }
     }
@@ -63,7 +45,9 @@ object ParkourMoveService {
     fun hasFallenBelow(
         blockLocations: Triple<ParkourVector, ParkourVector, ParkourVector>,
         y: Double
-    ) = blockLocations.toList().all { it.y > y }
+    ) = blockLocations.first.y > y &&
+            blockLocations.second.y > y &&
+            blockLocations.third.y > y
 
     /**
      * Returns whether a player standing at the given position is on top of [target].

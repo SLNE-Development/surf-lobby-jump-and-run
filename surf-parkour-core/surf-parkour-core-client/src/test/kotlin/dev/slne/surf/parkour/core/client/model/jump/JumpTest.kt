@@ -2,6 +2,9 @@ package dev.slne.surf.parkour.core.client.model.jump
 
 import dev.slne.surf.parkour.core.client.model.geometry.ParkourRegion
 import dev.slne.surf.parkour.core.client.model.geometry.ParkourVector
+import dev.slne.surf.parkour.core.client.model.geometry.blockColumn
+import it.unimi.dsi.fastutil.longs.LongOpenHashSet
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -42,6 +45,17 @@ class JumpTest {
         val target = Jump(3, 0, 0).generate(origin, origin, SOUTH, area, listOf(blocked))
 
         assertNotEquals(blocked.blockX to blocked.blockZ, target.blockX to target.blockZ)
+    }
+
+    @Test
+    fun `reads a list of blocked blocks the same way as their packed columns`() {
+        val blocked = Jump(3, 0, 0).generate(origin, origin, SOUTH, area)
+
+        val fromList = Jump(3, 0, 0).generate(origin, origin, SOUTH, area, listOf(blocked))
+        val fromColumns = Jump(3, 0, 0)
+            .generate(origin, origin, SOUTH, area, LongOpenHashSet.of(blocked.blockColumn))
+
+        assertEquals(fromList, fromColumns)
     }
 
     @Test

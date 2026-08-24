@@ -27,4 +27,12 @@ object ParkourLeaderboardPreferences {
             searches[playerUuid] = filterValue
         }
     }
+
+    /**
+     * Drops what is remembered about the player identified by [playerUuid].
+     */
+    fun forget(playerUuid: UUID) {
+        sorts.remove(playerUuid)
+        searches.remove(playerUuid)
+    }
 }

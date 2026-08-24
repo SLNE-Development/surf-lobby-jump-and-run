@@ -12,14 +12,28 @@ val Long.formattedDuration: String
         val minutes = (totalSeconds % 3600) / 60
         val seconds = totalSeconds % 60
 
-        val parts = mutableListOf<String>()
+        val text = StringBuilder(12)
 
-        if (hours > 0) parts += "${hours}h"
-        if (minutes > 0) parts += "${minutes}m"
-        if (seconds > 0 || parts.isEmpty()) parts += "${seconds}s"
+        if (hours > 0) {
+            text.append(hours).append('h')
+        }
 
-        return parts.joinToString(" ")
+        if (minutes > 0) {
+            text.appendUnitSeparator().append(minutes).append('m')
+        }
+
+        if (seconds > 0 || text.isEmpty()) {
+            text.appendUnitSeparator().append(seconds).append('s')
+        }
+
+        return text.toString()
     }
+
+private fun StringBuilder.appendUnitSeparator() = apply {
+    if (isNotEmpty()) {
+        append(' ')
+    }
+}
 
 /**
  * Writes [time] milliseconds with a fixed two digits per unit, e.g. `01h 02m 03s`.

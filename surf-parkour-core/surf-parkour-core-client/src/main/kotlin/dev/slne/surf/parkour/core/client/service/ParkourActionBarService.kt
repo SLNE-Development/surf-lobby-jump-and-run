@@ -21,8 +21,10 @@ object ParkourActionBarService {
      * Writes one action bar per player currently running a parkour.
      */
     fun sendUpdates() {
+        val now = System.currentTimeMillis()
+
         ParkourService.parkours.forEach { parkour ->
-            parkour.generators.forEach { generator ->
+            parkour.generators.values.forEach { generator ->
                 val audience = ParkourPlatform.audience(generator.associatedPlayer)
                     ?: return@forEach
 
@@ -37,7 +39,7 @@ object ParkourActionBarService {
                     appendSpace()
                     variableKey("Zeit:")
                     appendSpace()
-                    variableValue((System.currentTimeMillis() - generator.startTime).formattedDuration)
+                    variableValue((now - generator.startTime).formattedDuration)
                     appendSpace()
                     darkSpacer("«")
                 })

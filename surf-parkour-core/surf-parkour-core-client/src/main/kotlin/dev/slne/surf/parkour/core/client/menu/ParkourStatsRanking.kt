@@ -3,7 +3,9 @@ package dev.slne.surf.parkour.core.client.menu
 import dev.slne.surf.parkour.api.data.ParkourStats
 import dev.slne.surf.parkour.core.client.service.ParkourRunsService
 import dev.slne.surf.parkour.core.client.service.ParkourTexturesService
+import it.unimi.dsi.fastutil.objects.ObjectArrayList
 import java.util.*
+import java.util.Comparator.comparingInt
 
 /**
  * A player's stats together with the place they take in the leaderboard.
@@ -63,24 +65,42 @@ fun rankParkourStats(
     search: String?,
     nameOf: (ParkourStats) -> String
 ): List<RankedParkourStats> {
-    val sortedGlobal = when (sortType) {
-        ParkourLeaderboardSortType.HIGHSCORE -> stats.sortedByDescending { it.highscore }
-        ParkourLeaderboardSortType.MOST_JUMPS -> stats.sortedByDescending { it.totalJumps }
-        ParkourLeaderboardSortType.LEAST_JUMPS -> stats.sortedBy { it.totalJumps }
-        ParkourLeaderboardSortType.MOST_TRIES -> stats.sortedByDescending { it.totalRuns }
-        ParkourLeaderboardSortType.LEAST_TRIES -> stats.sortedBy { it.totalRuns }
-    }
+    val sortedGlobal = stats.sortedWith(sortType.comparator)
 
-    val rankedList = sortedGlobal.mapIndexed { index, entry ->
-        RankedParkourStats(entry, index + 1)
-    }
-
-    return if (search.isNullOrBlank()) {
-        rankedList
-    } else {
-        val query = search.lowercase()
-        rankedList.filter {
-            nameOf(it.stats).lowercase().contains(query)
+    if (search.isNullOrBlank()) {
+        return sortedGlobal.mapIndexed { index, entry ->
+            RankedParkourStats(entry, index + 1)
         }
     }
+
+    val matches = ObjectArrayList<RankedParkourStats>()
+
+    for (index in sortedGlobal.indices) {
+        val entry = sortedGlobal[index]
+
+        if (nameOf(entry).contains(search, ignoreCase = true)) {
+            matches.add(RankedParkourStats(entry, index + 1))
+        }
+    }
+
+    return matches
 }
+
+/**
+ * The order this sorting reads the leaderboard in.
+ */
+private val ParkourLeaderboardSortType.comparator: Comparator<ParkourStats>
+    get() = when (this) {
+        ParkourLeaderboardSortType.HIGHSCORE -> HIGHSCORE_DESCENDING
+        ParkourLeaderboardSortType.MOST_JUMPS -> TOTAL_JUMPS_DESCENDING
+        ParkourLeaderboardSortType.LEAST_JUMPS -> TOTAL_JUMPS_ASCENDING
+        ParkourLeaderboardSortType.MOST_TRIES -> TOTAL_RUNS_DESCENDING
+        ParkourLeaderboardSortType.LEAST_TRIES -> TOTAL_RUNS_ASCENDING
+    }
+
+private val TOTAL_JUMPS_ASCENDING: Comparator<ParkourStats> = comparingInt { it.totalJumps }
+private val TOTAL_JUMPS_DESCENDING: Comparator<ParkourStats> = TOTAL_JUMPS_ASCENDING.reversed()
+private val TOTAL_RUNS_ASCENDING: Comparator<ParkourStats> = comparingInt { it.totalRuns }
+private val TOTAL_RUNS_DESCENDING: Comparator<ParkourStats> = TOTAL_RUNS_ASCENDING.reversed()
+private val HIGHSCORE_DESCENDING: Comparator<ParkourStats> =
+    comparingInt<ParkourStats> { it.highscore }.reversed()

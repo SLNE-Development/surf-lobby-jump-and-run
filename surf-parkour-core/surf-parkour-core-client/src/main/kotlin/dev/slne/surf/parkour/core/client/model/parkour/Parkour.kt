@@ -2,7 +2,6 @@ package dev.slne.surf.parkour.core.client.model.parkour
 
 import dev.slne.surf.api.core.generated.BlockTypeKeys
 import dev.slne.surf.api.core.messages.adventure.sendText
-import dev.slne.surf.api.core.util.mutableObjectSetOf
 import dev.slne.surf.api.core.util.object2ObjectMapOf
 import dev.slne.surf.api.core.util.objectListOf
 import dev.slne.surf.parkour.api.data.ParkourRun
@@ -14,6 +13,7 @@ import dev.slne.surf.parkour.core.client.service.ParkourService
 import net.kyori.adventure.key.Key
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.ConcurrentMap
 
 data class Parkour(
     val uuid: UUID,
@@ -23,10 +23,20 @@ data class Parkour(
     val world: String,
     val respawnLocation: ParkourLocation
 ) {
-    val generators: ConcurrentHashMap.KeySetView<ParkourGenerator, Boolean> =
-        ConcurrentHashMap.newKeySet()
-    val players = mutableObjectSetOf<UUID>()
-    val waitPlease = mutableObjectSetOf<UUID>()
+    /**
+     * The generator of everyone this parkour has built blocks for, keyed by player.
+     */
+    val generators: ConcurrentMap<UUID, ParkourGenerator> = ConcurrentHashMap()
+
+    /**
+     * Everyone currently counted as running this parkour.
+     */
+    val players: MutableSet<UUID> = ConcurrentHashMap.newKeySet()
+
+    /**
+     * Everyone who just left this parkour and may not re-enter until their blocks are cleared.
+     */
+    val waitPlease: MutableSet<UUID> = ConcurrentHashMap.newKeySet()
 
     private val concretes = objectListOf(
         BlockTypeKeys.RED_CONCRETE,
@@ -47,15 +57,8 @@ data class Parkour(
     fun getBlockMaterial(player: UUID): Key = playerMaterials[player] ?: concretes.random()
 
     suspend fun start(player: UUID): Boolean {
-        val generator = ParkourGenerator(player, this@Parkour, getBlockMaterial(player))
-
         if (ParkourService.isInParkour(player)) {
-            ParkourPlatform.audience(player)?.let {
-                it.sendText {
-                    appendErrorPrefix()
-                    error("Du bist bereits in einem Parkour!")
-                }
-            }
+            sendAlreadyInParkour(player)
             return false
         }
 
@@ -69,53 +72,87 @@ data class Parkour(
             return false
         }
 
-        players.add(player)
-        generators.add(generator)
+        val generator = ParkourGenerator(player, this@Parkour, getBlockMaterial(player))
+        if (generators.putIfAbsent(player, generator) != null) {
+            sendAlreadyInParkour(player)
+            return false
+        }
 
-        generator.start()
+        var running = false
 
-        return true
+        try {
+            generator.start()
+            running = generator.isRunning()
+        } finally {
+            if (!running) {
+                generators.remove(player, generator)
+            }
+        }
+
+        if (running) {
+            players.add(player)
+        }
+
+        return running
     }
 
-    fun getGenerator(player: UUID) = generators.find { it.associatedPlayer == player }
+    private fun sendAlreadyInParkour(player: UUID) {
+        ParkourPlatform.audience(player)?.let {
+            it.sendText {
+                appendErrorPrefix()
+                error("Du bist bereits in einem Parkour!")
+            }
+        }
+    }
+
+    fun getGenerator(player: UUID) = generators[player]
 
     fun getCurrentIndex(player: UUID) = getGenerator(player)?.currentIndex ?: 0
 
     fun processRun(player: UUID): Int? {
-        val generator = generators.find { it.associatedPlayer == player } ?: return null
+        val generator = generators[player] ?: return null
         val highscore = ParkourRunsService.getStats(player).highscore
+        val jumps = generator.currentIndex
 
         ParkourPlatform.launch {
             ParkourRunsService.saveRun(
                 ParkourRun(
                     this@Parkour.uuid,
                     player,
-                    generator.currentIndex,
+                    jumps,
                     System.currentTimeMillis() - generator.startTime
                 )
             )
         }
 
-        if (highscore < generator.currentIndex) {
-            return generator.currentIndex
+        if (highscore < jumps) {
+            return jumps
         }
 
         return null
     }
 
     suspend fun exit(player: UUID) {
-        val generator = generators.find { it.associatedPlayer == player } ?: return
+        val generator = generators[player] ?: return
 
         generator.stop()
-        generators.remove(generator)
+        generators.remove(player, generator)
 
         waitPlease.remove(player)
     }
 
-    fun preExit(playerUuid: UUID) {
-        players.remove(playerUuid)
+    /**
+     * Takes the player identified by [playerUuid] out of this parkour and back to its respawn.
+     */
+    fun preExit(playerUuid: UUID): Boolean {
+        if (!players.remove(playerUuid)) {
+            return false
+        }
+
         waitPlease.add(playerUuid)
 
         ParkourPlatform.teleport(playerUuid, respawnLocation)
+
+        return true
     }
 }

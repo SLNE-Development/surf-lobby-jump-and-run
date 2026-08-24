@@ -1,5 +1,6 @@
 package dev.slne.surf.parkour.core.client.service
 
+import dev.slne.surf.parkour.core.client.menu.ParkourLeaderboardPreferences
 import dev.slne.surf.parkour.core.client.platform.ParkourPlatform
 import java.util.*
 
@@ -19,9 +20,12 @@ object ParkourConnectionService {
     }
 
     /**
-     * Ends the run of the player identified by [playerUuid], counting it as a fall.
+     * Ends the run of the player identified by [playerUuid], counting it as a fall, and forgets the
+     * leaderboard view they left behind.
      */
     fun onQuit(playerUuid: UUID) {
+        ParkourLeaderboardPreferences.forget(playerUuid)
+
         val parkour = ParkourService.getParkourByPlayer(playerUuid) ?: return
         val generator = parkour.getGenerator(playerUuid) ?: return
 

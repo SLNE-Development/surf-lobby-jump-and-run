@@ -2,12 +2,11 @@ package dev.slne.surf.parkour.core.client.model.parkour
 
 import dev.slne.surf.api.core.generated.BlockTypeKeys
 import dev.slne.surf.api.core.util.random
-import dev.slne.surf.parkour.core.client.model.geometry.ParkourLocation
-import dev.slne.surf.parkour.core.client.model.geometry.ParkourRegion
-import dev.slne.surf.parkour.core.client.model.geometry.ParkourVector
-import dev.slne.surf.parkour.core.client.model.geometry.calcRotation
+import dev.slne.surf.parkour.core.client.model.geometry.*
 import dev.slne.surf.parkour.core.client.model.jump.JumpType
 import dev.slne.surf.parkour.core.client.platform.ParkourPlatform
+import it.unimi.dsi.fastutil.longs.LongOpenHashSet
+import it.unimi.dsi.fastutil.longs.LongSet
 import it.unimi.dsi.fastutil.objects.ObjectList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -16,28 +15,42 @@ import net.kyori.adventure.text.format.NamedTextColor
 import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 
-data class ParkourGenerator(
+/**
+ * The three blocks one player currently runs on, and how they move ahead.
+ */
+class ParkourGenerator(
     val associatedPlayer: UUID,
     private val parkour: Parkour,
     private val material: Key
 ) {
-    lateinit var blockLocations: Triple<ParkourVector, ParkourVector, ParkourVector>
+    /**
+     * The block the player came from, the one they are heading for and the one after it, or `null`
+     * while nothing has been built for them yet.
+     */
+    @Volatile
+    var blockLocations: Triple<ParkourVector, ParkourVector, ParkourVector>? = null
 
-    var advanced: Boolean = false
+    /**
+     * Whether the player has already reached their target block and the next one is on its way.
+     */
+    private val advanced = AtomicBoolean(false)
 
     private val boundingBox: ParkourRegion = parkour.boundingBox
     private val world = parkour.world
-    private val color = NamedTextColor.WHITE
 
+    @Volatile
     var startTime: Long = -1L
+
+    @Volatile
     var currentIndex = 0
 
     private val isGenerating = AtomicBoolean(false)
 
-    private val jumpTypes = ObjectList.of(
-        JumpType(2..3, 3..3, -1..1),
-        JumpType(2..3, -3..-3, -1..1)
-    )
+    /**
+     * Claims the landing on the current target block, returning whether this call is the one that
+     * may advance the run.
+     */
+    fun tryAdvance() = advanced.compareAndSet(false, true)
 
     suspend fun start() {
         ParkourPlatform.audience(associatedPlayer) ?: return
@@ -46,8 +59,9 @@ data class ParkourGenerator(
         generateInitial()
         ParkourPlatform.resetVelocity(associatedPlayer)
 
-        val rotation = calcRotation(blockLocations.first, blockLocations.second)
-        val toTeleport = blockLocations.first.let {
+        val blocks = blockLocations ?: return
+        val rotation = calcRotation(blocks.first, blocks.second)
+        val toTeleport = blocks.first.let {
             ParkourVector(it.blockX, it.blockY + 1, it.blockZ)
         }.toBlockCenter()
 
@@ -58,35 +72,37 @@ data class ParkourGenerator(
     }
 
     suspend fun stop() {
+        val blocks = blockLocations ?: return
+
         if (ParkourPlatform.audience(associatedPlayer) != null) {
-            ParkourPlatform.clearHighlight(associatedPlayer, blockLocations.second.location)
+            ParkourPlatform.clearHighlight(associatedPlayer, blocks.second.location)
         }
 
-        setBlock(blockLocations.first, BlockTypeKeys.AIR)
-        setBlock(blockLocations.second, BlockTypeKeys.AIR)
-        setBlock(blockLocations.third, BlockTypeKeys.AIR)
+        setBlock(blocks.first, BlockTypeKeys.AIR)
+        setBlock(blocks.second, BlockTypeKeys.AIR)
+        setBlock(blocks.third, BlockTypeKeys.AIR)
     }
 
     private suspend fun generateInitial() {
         val yaw = ParkourPlatform.yaw(associatedPlayer) ?: return
 
-        val otherPlayersBlocks = getOtherPlayersBlocks()
+        val occupiedColumns = collectOccupiedColumns()
 
         val firstBlock = findInitialBlock()
-        val secondJump = jumpTypes.random().randomJump()
+        val secondJump = JUMP_TYPES.random().randomJump()
         val secondBlock =
-            secondJump.generate(firstBlock, firstBlock, yaw, boundingBox, otherPlayersBlocks)
+            secondJump.generate(firstBlock, firstBlock, yaw, boundingBox, occupiedColumns)
 
-        val thirdJump = jumpTypes.random().randomJump()
+        val thirdJump = JUMP_TYPES.random().randomJump()
         val thirdBlock =
-            thirdJump.generate(secondBlock, firstBlock, yaw, boundingBox, otherPlayersBlocks)
+            thirdJump.generate(secondBlock, firstBlock, yaw, boundingBox, occupiedColumns)
 
         setBlock(firstBlock, material)
         setBlock(secondBlock, material)
         setBlock(thirdBlock, material)
 
         blockLocations = Triple(firstBlock, secondBlock, thirdBlock)
-        ParkourPlatform.highlightBlock(associatedPlayer, secondBlock.location, color)
+        ParkourPlatform.highlightBlock(associatedPlayer, secondBlock.location, COLOR)
     }
 
     suspend fun generate() {
@@ -96,35 +112,32 @@ data class ParkourGenerator(
 
         try {
             val yaw = ParkourPlatform.yaw(associatedPlayer) ?: return
-
-            if (!::blockLocations.isInitialized) {
-                return
-            }
+            val blocks = blockLocations ?: return
 
             currentIndex++
 
-            val otherPlayersBlocks = getOtherPlayersBlocks()
-            val newJump = jumpTypes.random().randomJump()
+            val occupiedColumns = collectOccupiedColumns()
+            val newJump = JUMP_TYPES.random().randomJump()
             val newNext = newJump.generate(
-                blockLocations.third,
-                blockLocations.second,
+                blocks.third,
+                blocks.second,
                 yaw,
                 boundingBox,
-                otherPlayersBlocks
+                occupiedColumns
             )
 
-            setBlock(blockLocations.first, BlockTypeKeys.AIR)
+            setBlock(blocks.first, BlockTypeKeys.AIR)
             setBlock(newNext, material)
 
-            ParkourPlatform.clearHighlight(associatedPlayer, blockLocations.second.location)
-            ParkourPlatform.highlightBlock(associatedPlayer, blockLocations.third.location, color)
+            ParkourPlatform.clearHighlight(associatedPlayer, blocks.second.location)
+            ParkourPlatform.highlightBlock(associatedPlayer, blocks.third.location, COLOR)
 
             blockLocations = Triple(
-                blockLocations.second,
-                blockLocations.third,
+                blocks.second,
+                blocks.third,
                 newNext
             )
-            advanced = false
+            advanced.set(false)
         } finally {
             isGenerating.set(false)
         }
@@ -168,24 +181,44 @@ data class ParkourGenerator(
 
     private val ParkourVector.location: ParkourLocation get() = toLocation(world)
 
-    private fun getOtherPlayersBlocks(): List<ParkourVector> {
-        return parkour.generators
-            .filter { it.associatedPlayer != associatedPlayer && it.isRunning() }
-            .flatMap {
-                listOf(
-                    it.blockLocations.first,
-                    it.blockLocations.second,
-                    it.blockLocations.third
-                )
+    /**
+     * The columns the blocks of every other running player in this parkour occupy.
+     */
+    private fun collectOccupiedColumns(): LongSet {
+        val generators = parkour.generators
+        val columns = LongOpenHashSet(generators.size * 3)
+
+        for (generator in generators.values) {
+            if (generator.associatedPlayer == associatedPlayer) {
+                continue
             }
+
+            val blocks = generator.blockLocations ?: continue
+
+            columns.add(blocks.first.blockColumn)
+            columns.add(blocks.second.blockColumn)
+            columns.add(blocks.third.blockColumn)
+        }
+
+        return columns
     }
 
-    fun isRunning() = ::blockLocations.isInitialized
+    fun isRunning() = blockLocations != null
 
     companion object {
         /**
          * How many blocks above a spot have to be free for a player to stand on it.
          */
         private const val FREE_SPACE_ABOVE = 2
+
+        private val COLOR = NamedTextColor.WHITE
+
+        /**
+         * The kinds of step a parkour is built from.
+         */
+        private val JUMP_TYPES: ObjectList<JumpType> = ObjectList.of(
+            JumpType(2..3, 3..3, -1..1),
+            JumpType(2..3, -3..-3, -1..1)
+        )
     }
 }

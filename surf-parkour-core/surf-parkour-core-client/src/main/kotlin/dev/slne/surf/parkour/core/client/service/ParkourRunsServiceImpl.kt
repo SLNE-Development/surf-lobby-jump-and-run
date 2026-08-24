@@ -27,20 +27,21 @@ class ParkourRunsServiceImpl : ParkourRunsService, Services.Fallback {
     }
 
     override suspend fun saveRun(run: ParkourRun) {
-        _cachedStats.put(run.playerUuid, _cachedStats.getIfPresent(run.playerUuid)?.let {
-            it.copy(
-                totalRuns = it.totalRuns + 1,
-                totalJumps = it.totalJumps + run.jumps,
-                highscore = maxOf(it.highscore, run.jumps),
-                averageTime = ((it.averageTime * it.totalRuns) + run.time) / (it.totalRuns + 1)
+        _cachedStats.asMap().compute(run.playerUuid) { _, cached ->
+            cached?.copy(
+                totalRuns = cached.totalRuns + 1,
+                totalJumps = cached.totalJumps + run.jumps,
+                highscore = maxOf(cached.highscore, run.jumps),
+                averageTime = ((cached.averageTime * cached.totalRuns) + run.time) /
+                        (cached.totalRuns + 1)
+            ) ?: ParkourStats(
+                playerUuid = run.playerUuid,
+                totalRuns = 1,
+                totalJumps = run.jumps,
+                highscore = run.jumps,
+                averageTime = run.time
             )
-        } ?: ParkourStats(
-            playerUuid = run.playerUuid,
-            totalRuns = 1,
-            totalJumps = run.jumps,
-            highscore = run.jumps,
-            averageTime = run.time
-        ))
+        }
 
         ClientParkourInstance.rabbitApi.sendRequest(SaveRunRequestPacket(run))
     }

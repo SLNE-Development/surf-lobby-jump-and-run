@@ -16,7 +16,7 @@ class ParkourTexturesServiceImpl : ParkourTexturesService, Services.Fallback {
     private val textureCache = Caffeine.newBuilder()
         .build<UUID, PlayerTextures>()
 
-    override val textures = textureCache.asMap().values.toObjectList()
+    override val textures get() = textureCache.asMap().values.toObjectList()
 
     override suspend fun saveTexture(texture: PlayerTextures) {
         textureCache.put(texture.playerUuid, texture)

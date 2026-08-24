@@ -38,6 +38,20 @@ class ParkourStatsRankingTest {
     }
 
     @Test
+    fun `ranks the most jumps first`() {
+        val ranked = rank(ParkourLeaderboardSortType.MOST_JUMPS)
+
+        assertEquals(listOf("Carol", "Alice", "Bob"), ranked.map { names.getValue(it.stats.playerUuid) })
+    }
+
+    @Test
+    fun `ranks the fewest tries first when asked for the least`() {
+        val ranked = rank(ParkourLeaderboardSortType.LEAST_TRIES)
+
+        assertEquals(listOf("Carol", "Alice", "Bob"), ranked.map { names.getValue(it.stats.playerUuid) })
+    }
+
+    @Test
     fun `keeps the place a filtered entry holds in the full leaderboard`() {
         val ranked = rank(ParkourLeaderboardSortType.HIGHSCORE, search = "alice")
 
